@@ -1,15 +1,21 @@
 {
   "schemaVersion": 1,
   "phase": 1,
-  "status": "READY_FOR_PUBLICATION",
+  "status": "COMPLETED",
   "generatedAt": "2026-07-18T20:20:00+08:00",
   "branch": "feature/single-sdar-chat-entry-v0.1",
   "headBeforePhaseCommit": "7f43d4c9476503897673a856716d1b5391fb983b",
-  "phaseCommit": null,
+  "phaseCommit": "a28b8826251cb0a71c7953a0c551df0a4c66d5c9",
   "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
   "dependencies": {
-    "fastify": { "version": "5.10.0", "license": "MIT" },
-    "tsx": { "version": "4.23.0", "scope": "development" }
+    "fastify": {
+      "version": "5.10.0",
+      "license": "MIT"
+    },
+    "tsx": {
+      "version": "4.23.0",
+      "scope": "development"
+    }
   },
   "delivered": {
     "models": true,
@@ -23,9 +29,21 @@
     "sdarOperations": false
   },
   "tests": {
-    "unit": { "suites": 3, "passed": 5, "failed": 0 },
-    "contract": { "suites": 1, "passed": 8, "failed": 0 },
-    "integration": { "suites": 1, "passed": 1, "failed": 0 },
+    "unit": {
+      "suites": 3,
+      "passed": 5,
+      "failed": 0
+    },
+    "contract": {
+      "suites": 1,
+      "passed": 8,
+      "failed": 0
+    },
+    "integration": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 0
+    },
     "build": "PASSED",
     "compiledHttpSmoke": "PASSED"
   },
@@ -44,9 +62,9 @@
     "implementsTaskRouting": false
   },
   "publication": {
-    "committed": false,
-    "pushed": false,
-    "draftPullRequestUpdated": false
+    "committed": true,
+    "pushed": true,
+    "draftPullRequestUpdated": true
   },
   "blockers": []
 }

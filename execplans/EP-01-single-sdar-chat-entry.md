@@ -46,7 +46,7 @@ Open WebUI
 - [x] 2026-07-18: Verify exact SDAR source and a live Agent Card; record hash.
 - [x] 2026-07-18: Confirm pip Open WebUI 0.10.2 is healthy on loopback 8080.
 - [x] 2026-07-18: Phase 0 verified, committed as `03423e9`, pushed, and published as Draft PR #1.
-- [ ] Phase 1 publication pending: implementation, 14 tests, build, and compiled HTTP smoke passed.
+- [x] 2026-07-18: Phase 1 verified, committed as `a28b882`, pushed, and recorded on Draft PR #1.
 - [ ] Phase 2: thin LangGraph state machine and guarded classification.
 - [ ] Phase 3: isolated official A2A SDAR client adapter.
 - [ ] Phase 4: PostgreSQL checkpoints, bindings, events, and idempotency.
@@ -135,4 +135,4 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
 Phase 0 has a reproducible scaffold and verified upstream evidence. Publication
 evidence will be appended after the phase commit, push, and Draft PR exist. The
 Phase 1 now provides authenticated OpenAI-compatible HTTP/SSE contracts without
-SDAR behavior. Its publication is pending; Phase 2 remains the next code boundary.
+SDAR behavior. It is published; Phase 2 is the next code boundary.
