@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "phase": 0,
+  "status": "READY_FOR_PUBLICATION",
+  "generatedAt": "2026-07-18T19:36:16+08:00",
+  "repository": "zhouwen-giser/single-agent-chat-server",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "mainSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
+  "phaseCommit": null,
+  "pullRequest": null,
+  "template": {
+    "cli": "create-langgraph@1.1.5",
+    "id": "new-langgraph-project-js",
+    "repository": "langchain-ai/new-langgraphjs-project",
+    "commit": "4e5f3cd20895663f43d77b91074fbab9d7d05476",
+    "unmodifiedBaseline": {
+      "unitTests": { "passed": 1, "failed": 0 },
+      "build": "PASSED",
+      "lint": "PASSED_WITH_UPSTREAM_DEPRECATION_WARNINGS",
+      "langgraphConfig": "PASSED"
+    }
+  },
+  "toolchain": { "node": "22.14.0", "pnpm": "11.13.1" },
+  "sdar": {
+    "commit": "667146a3639eefdfed9b89c2417c08e1ac50e9a9",
+    "tree": "8c65d182ce8beeecd92b382e6722a8535a1683df",
+    "specPatch": "1.0.1",
+    "wireVersion": "1.0",
+    "binding": "HTTP+JSON",
+    "sdk": "@a2a-js/sdk@1.0.0-beta.0",
+    "authentication": "none",
+    "agentCard": {
+      "url": "http://127.0.0.1:9999/.well-known/agent-card.json",
+      "httpStatus": 200,
+      "bytes": 506,
+      "sha256": "9c5227962711fb1defbf5bc1f438315d46749fd0164487b3c46b8986b9a9d99c",
+      "selectedInterfaceUrl": "http://127.0.0.1:9999/a2a",
+      "streaming": true,
+      "pushNotifications": false
+    },
+    "temporaryRuntimeCleaned": true
+  },
+  "openWebUi": {
+    "installation": "pip",
+    "version": "0.10.2",
+    "healthUrl": "http://127.0.0.1:8080/health",
+    "healthStatus": 200,
+    "connectedToChatServer": false
+  },
+  "productionFunctionalityImplemented": false,
+  "blockers": [],
+  "publication": {
+    "repositoryVerification": "PASSED",
+    "committed": false,
+    "pushed": false,
+    "draftPullRequestCreated": false
+  }
+}

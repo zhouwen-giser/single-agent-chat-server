@@ -1,0 +1,20 @@
+.tmp/
+node_modules/
+dist/
+coverage/
+
+# Preserve the imported R2 task package byte-for-byte.
+AGENTS.md
+CODEX_GOAL_PROMPT.md
+DESIGN_BASELINE.md
+OPENWEBUI_CONNECTION_GUIDE.md
+R2_CHANGELOG.md
+README.md
+SDAR_A2A_COMPATIBILITY_BASELINE.md
+SHA256SUMS.txt
+SINGLE_AGENT_CHAT_SERVER_CODEX_GOAL_TASK_PACKAGE_CN.md
+acceptance-matrix.json
+phase-manifest.json
+sync-state.template.json
+LICENSE
+

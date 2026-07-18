@@ -14,4 +14,3 @@ details that enable exploitation.
 The current SDAR A2A endpoint has no authentication. Deploy it and this chat
 server only on a trusted isolated network. Never expose SDAR port 9999 directly
 to the public internet.
-

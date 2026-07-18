@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 2,
+  "goal": "Build single-agent-chat-server v0.1.0",
+  "status": "IN_PROGRESS",
+  "repository": "zhouwen-giser/single-agent-chat-server",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "headSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
+  "mainSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
+  "pullRequest": null,
+  "lastCompletedPhase": null,
+  "nextPhase": 0,
+  "upstreams": {
+    "langgraphTemplate": {
+      "source": "langchain-ai/new-langgraphjs-project",
+      "version": "4e5f3cd20895663f43d77b91074fbab9d7d05476",
+      "cli": "create-langgraph@1.1.5",
+      "validated": true
+    },
+    "a2aSdk": {
+      "version": "@a2a-js/sdk@1.0.0-beta.0",
+      "protocolRevision": "1.0",
+      "specPatch": "1.0.1",
+      "binding": "HTTP+JSON",
+      "validatedAgainstSdar": true
+    },
+    "openWebUi": {
+      "version": "0.10.2",
+      "installation": "pip",
+      "healthUrl": "http://127.0.0.1:8080/health",
+      "connected": false
+    },
+    "sdar": {
+      "repository": "zhouwen-giser/skill-driven-agent-runtime",
+      "baselineCommit": "667146a3639eefdfed9b89c2417c08e1ac50e9a9",
+      "baseUrl": "http://127.0.0.1:9999",
+      "agentCardHash": "9c5227962711fb1defbf5bc1f438315d46749fd0164487b3c46b8986b9a9d99c",
+      "selectedInterfaceUrl": "http://127.0.0.1:9999/a2a",
+      "endpointOverride": null,
+      "reachable": false,
+      "lastVerifiedAt": "2026-07-18T19:30:00+08:00",
+      "temporaryRuntimeCleaned": true
+    }
+  },
+  "systems": {
+    "postgres": "phase-0-temporary-runtime-removed",
+    "server": "not-implemented",
+    "openWebUi": "healthy-on-loopback-8080",
+    "sdar": "exact-commit-card-verified-temporary-runtime-removed"
+  },
+  "phases": {
+    "0": {
+      "status": "READY_FOR_PUBLICATION",
+      "report": "reports/goal/00-baseline.md",
+      "commit": null,
+      "pushed": false
+    }
+  },
+  "tests": {
+    "upstreamTemplateUnit": "passed:1",
+    "upstreamTemplateBuild": "passed",
+    "upstreamTemplateLint": "passed-with-deprecation-warnings",
+    "upstreamTemplateLanggraphConfig": "passed",
+    "phase0Repository": "passed: format,lint,config,typecheck,unit:1,integration:1,build"
+  },
+  "blockers": [],
+  "updatedAt": "2026-07-18T19:36:16+08:00",
+  "taskPackageRevision": "R2"
+}
