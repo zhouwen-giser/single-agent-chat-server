@@ -55,7 +55,8 @@ Open WebUI
 - [x] 2026-07-18: Phase 5 Open WebUI signed identity and chat continuity complete.
 - [x] 2026-07-18: Phase 6 verified, committed as 0f35d53, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 6 submission, status, bounded streaming, polling fallback, and disconnect recovery complete.
-- [ ] Phase 7: follow-up, input, cancellation, and terminal outcomes.
+- [x] 2026-07-18: Phase 7 verified, committed as c144198, pushed, and recorded on Draft PR #1.
+- [x] 2026-07-18: Phase 7 phase-gated Follow-up, input, cancellation, terminal outcomes, and redaction complete.
 - [ ] Phase 8: restart, concurrency, and consistency hardening.
 - [ ] Phase 9: secure observability and operational controls.
 - [ ] Phase 10: Docker, CI, licenses, SBOM, and governance gates.
@@ -204,3 +205,14 @@ cancellation. Real PostgreSQL tests cover long tasks, disconnect recovery,
 terminal text/JSON results, and exact-message replay. Production A2A discovery
 is lazy, so readiness passed with SDAR deliberately unavailable. Phase 6 is
 published; Phase 7 Follow-up and terminal interaction handling is next.
+
+## Phase 7 outcome
+
+Published `INPUT_REQUIRED` phase and input-request data now drives strict
+Follow-up decisions. Plan approval is explicit only; user input, pause/resume,
+goal actions, and top-level cancellation reuse the authorized Task boundary
+through permitted SDK operations. Capability Gap, ordinary business failure,
+completion, and cancellation are rendered separately with bounded redaction;
+streaming protocol failures close safely. Real PostgreSQL coordination and
+adapter contract gates passed. Phase 7 is published; Phase 8 recovery and
+consistency hardening is next.
