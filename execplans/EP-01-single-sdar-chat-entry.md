@@ -59,7 +59,8 @@ Open WebUI
 - [x] 2026-07-18: Phase 7 phase-gated Follow-up, input, cancellation, terminal outcomes, and redaction complete.
 - [x] 2026-07-18: Phase 8 verified, committed as 9e906a1, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 8 restart, concurrency, lease recovery, and stale-event hardening complete.
-- [ ] Phase 9: secure observability and operational controls.
+- [x] 2026-07-19: Phase 9 verified, committed as 34e731b, pushed, and recorded on Draft PR #1.
+- [x] 2026-07-19: Phase 9 secure logs, telemetry, limits, and dependency readiness complete.
 - [ ] Phase 10: Docker, CI, licenses, SBOM, and governance gates.
 - [ ] Phase 11: real Open WebUI-to-SDAR vertical-slice E2E evidence.
 - [ ] Phase 12: adversarial review, fixes, and regressions.
@@ -132,6 +133,9 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
   pool emitted its documented idle-client error, discarded that client, and
   the unchanged production server process served the next request through a
   fresh connection. The same persisted chat also survived a server restart.
+- A Phase 9 lease-expiry test exposed a real 10ms wall-clock race under a busy
+  integration run. Replacing the delay with an explicit expired SQL timestamp
+  made the recovery assertion deterministic without weakening the behavior.
 
 ## Decision Log
 
@@ -152,6 +156,12 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
 - 2026-07-18: Add a separate per-chat submission lease before lazy A2A
   discovery. It closes the interval before an SDAR Task ID exists while the
   existing partial unique index remains authoritative after binding.
+- 2026-07-19: Keep telemetry content-free and low-cardinality. Use only route,
+  status class, operation, outcome, and stream-kind labels; correlation IDs
+  remain in redacted logs and response headers, never metric attributes.
+- 2026-07-19: PostgreSQL is the readiness dependency. SDAR discovery remains
+  lazy so temporary Agent outage fails a chat operation without withdrawing
+  the otherwise healthy OpenAI-compatible entrance.
 
 - The first isolated Open WebUI smoke inherited the chat server DATABASE_URL
   and failed before proxy testing because the pip install lacked psycopg2.
@@ -235,3 +245,14 @@ recovers after temporary outage; graceful shutdown closes persistence once.
 The built production server passed both a live PostgreSQL restart and a process
 restart against the same persisted chat. Phase 8 is published; Phase 9 secure
 observability and operational controls is next.
+
+## Phase 9 outcome
+
+Production now emits content-free Pino JSON logs, bounded correlation IDs, and
+no-op-safe OpenTelemetry spans/metrics for API, model, Agent Card, and permitted
+A2A boundaries. Rate limiting, message/body/database/stream limits, active Task
+and stream gauges, and low-cardinality enforcement are covered by regression
+tests. A real built server kept liveness at 200 while PostgreSQL was down,
+reported readiness 503, and recovered readiness in the same PID after database
+restart; its logs passed a secret scan. Phase 9 is published; Phase 10 Docker,
+CI, license, SBOM, and governance work is next.
