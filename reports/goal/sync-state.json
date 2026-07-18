@@ -4,11 +4,11 @@
   "status": "IN_PROGRESS",
   "repository": "zhouwen-giser/single-agent-chat-server",
   "branch": "feature/single-sdar-chat-entry-v0.1",
-  "headSha": "c144198a4855f6bc6b683727e575dc9d92b922de",
+  "headSha": "9e906a1bbe2d70afdbf9002ea71f9b7f660c2a9f",
   "mainSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
   "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
-  "lastCompletedPhase": 7,
-  "nextPhase": 8,
+  "lastCompletedPhase": 8,
+  "nextPhase": 9,
   "upstreams": {
     "langgraphTemplate": {
       "source": "langchain-ai/new-langgraphjs-project",
@@ -42,8 +42,8 @@
     }
   },
   "systems": {
-    "postgres": "phase-7-real-integration-passed-temporary-runtime-removed",
-    "server": "phase-7-input-cancel-terminal-outcomes-verified-not-deployed",
+    "postgres": "phase-8-real-integration-and-restart-smoke-passed-temporary-runtime-removed",
+    "server": "phase-8-recovery-consistency-and-production-restart-verified-not-deployed",
     "openWebUi": "0.10.2-existing-healthy;isolated-real-proxy-smoke-passed-and-cleaned",
     "sdar": "exact-commit-card-verified-temporary-runtime-removed"
   },
@@ -95,6 +95,12 @@
       "report": "reports/goal/07-input-cancellation-terminal.md",
       "commit": "c144198a4855f6bc6b683727e575dc9d92b922de",
       "pushed": true
+    },
+    "8": {
+      "status": "COMPLETED",
+      "report": "reports/goal/08-recovery-consistency.md",
+      "commit": "9e906a1bbe2d70afdbf9002ea71f9b7f660c2a9f",
+      "pushed": true
     }
   },
   "tests": {
@@ -109,9 +115,10 @@
     "phase4Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:16,contract:14,integration:10-real-postgres:9,build,server-readiness,license-audit",
     "phase5Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:16,contract:18,integration:10-real-postgres:9,build,real-openwebui-proxy,real-checkpoint-query",
     "phase6Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:16,contract:19,integration:17-real-postgres:16,phase6-coordinator:7,open-handles,build,production-ready-with-sdar-unavailable",
-    "phase7Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:18,contract:20,integration:30-real-postgres:29,coordinator:20-open-handles,build"
+    "phase7Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:18,contract:20,integration:30-real-postgres:29,coordinator:20-open-handles,build",
+    "phase8Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:20,contract:20,integration:35-real-postgres:34,coordinator:23-open-handles,build,postgres-restart,server-restart"
   },
   "blockers": [],
-  "updatedAt": "2026-07-18T23:12:40+08:00",
+  "updatedAt": "2026-07-18T23:39:25+08:00",
   "taskPackageRevision": "R2"
 }

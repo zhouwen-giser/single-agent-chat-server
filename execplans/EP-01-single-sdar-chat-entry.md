@@ -57,7 +57,8 @@ Open WebUI
 - [x] 2026-07-18: Phase 6 submission, status, bounded streaming, polling fallback, and disconnect recovery complete.
 - [x] 2026-07-18: Phase 7 verified, committed as c144198, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 7 phase-gated Follow-up, input, cancellation, terminal outcomes, and redaction complete.
-- [ ] Phase 8: restart, concurrency, and consistency hardening.
+- [x] 2026-07-18: Phase 8 verified, committed as 9e906a1, pushed, and recorded on Draft PR #1.
+- [x] 2026-07-18: Phase 8 restart, concurrency, lease recovery, and stale-event hardening complete.
 - [ ] Phase 9: secure observability and operational controls.
 - [ ] Phase 10: Docker, CI, licenses, SBOM, and governance gates.
 - [ ] Phase 11: real Open WebUI-to-SDAR vertical-slice E2E evidence.
@@ -127,6 +128,10 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
   existing listener. docker exec pg_isready hung, while direct pg access,
   all integration tests, and server startup succeeded; the temporary container
   and its unpersisted test data were then removed.
+- A real PostgreSQL container restart killed an idle pooled connection. The
+  pool emitted its documented idle-client error, discarded that client, and
+  the unchanged production server process served the next request through a
+  fresh connection. The same persisted chat also survived a server restart.
 
 ## Decision Log
 
@@ -144,6 +149,9 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
 - 2026-07-18: Scope idempotency by key, user, and chat; use request hashes and
   leases for conflict, replay, and interrupted-worker recovery. Never infer an
   A2A cursor from the local event cache.
+- 2026-07-18: Add a separate per-chat submission lease before lazy A2A
+  discovery. It closes the interval before an SDAR Task ID exists while the
+  existing partial unique index remains authoritative after binding.
 
 - The first isolated Open WebUI smoke inherited the chat server DATABASE_URL
   and failed before proxy testing because the pip install lacked psycopg2.
@@ -216,3 +224,14 @@ completion, and cancellation are rendered separately with bounded redaction;
 streaming protocol failures close safely. Real PostgreSQL coordination and
 adapter contract gates passed. Phase 7 is published; Phase 8 recovery and
 consistency hardening is next.
+
+## Phase 8 outcome
+
+Concurrent distinct turns are now serialized before any remote Task creation,
+and expired submission/idempotency leases are reclaimed on startup. Persisted
+observations reject older timestamps, terminal Tasks cannot reopen, and
+optimistic versions still expose concurrent updates. Lazy SDAR discovery
+recovers after temporary outage; graceful shutdown closes persistence once.
+The built production server passed both a live PostgreSQL restart and a process
+restart against the same persisted chat. Phase 8 is published; Phase 9 secure
+observability and operational controls is next.
