@@ -11,6 +11,7 @@ const { Pool } = pg;
 export interface PersistenceRuntime {
   readonly repository: ChatPersistenceRepository;
   readonly checkpointer: PostgresSaver;
+  readiness(): Promise<boolean>;
   close(): Promise<void>;
 }
 
@@ -20,6 +21,8 @@ export async function setupPersistence(
   const pool = new Pool({
     connectionString: config.connectionString,
     max: config.poolMax,
+    connectionTimeoutMillis: config.operationTimeoutMs,
+    query_timeout: config.operationTimeoutMs,
   });
   pool.on("error", () => {
     // An idle connection may die during a PostgreSQL restart. pg removes it;
@@ -36,6 +39,14 @@ export async function setupPersistence(
         config.idempotencyLeaseMs,
       ),
       checkpointer: activeCheckpointer,
+      async readiness() {
+        try {
+          await pool.query("SELECT 1");
+          return true;
+        } catch {
+          return false;
+        }
+      },
       async close() {
         await Promise.all([pool.end(), activeCheckpointer.end()]);
       },

@@ -1,6 +1,6 @@
 # OpenAI-compatible API contract
 
-Status: Phase 7 SDAR Follow-up, cancellation, and safe terminal outcomes.
+Status: Phase 9 secure observability and operational controls.
 
 ## Authentication
 
@@ -74,10 +74,13 @@ exception messages are not exposed.
 - `400 invalid_request`
 - `404 model_not_found`
 - `413 request_too_large`
+- `429 rate_limit_exceeded` with `Retry-After`
 - redacted `500 internal_error`
 
-The default body limit is 1 MiB and request timeout is 30 seconds. The A2A
-stream observation budget defaults to 30 seconds, followed by at most 5 seconds
+The default body limit is 1 MiB, message limit is 64, per-message serialized
+content limit is 32 KiB, and request timeout is 30 seconds. Authenticated model
+and chat requests share a per-user 60-request/60-second fixed window by default.
+The A2A stream observation budget defaults to 30 seconds, followed by at most 5 seconds
 of 1-second `getTask` polling. All values are bounded by configuration
 validation.
 
@@ -86,4 +89,6 @@ validation.
 - `GET /health` is unauthenticated liveness.
 - `GET /ready` is unauthenticated process readiness. Production startup
   completes PostgreSQL migrations, checkpointer setup, and reconciliation
-  before listening.
+  before listening. The live readiness check returns `503 not_ready` while
+  PostgreSQL is unavailable; SDAR discovery remains lazy and does not gate
+  readiness.

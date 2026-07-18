@@ -22,10 +22,15 @@ import {
 } from "../auth/openwebui-user.js";
 import { createServiceKeyAuthenticator } from "../auth/service-key.js";
 import type { ServerConfig } from "../config.js";
+import type {
+  SecureTelemetry,
+  TimedOperation,
+} from "../observability/telemetry.js";
 import {
   parseOpenWebUiRequestContext,
   type OpenWebUiRequestContext,
 } from "../openwebui/request-context.js";
+import type { FixedWindowRateLimiter } from "../operations/rate-limiter.js";
 
 export interface ChatRunnerContext {
   readonly userText: string;
@@ -47,6 +52,8 @@ export type ResolveChatThread = (input: {
 
 export interface OpenAiRoutesOptions {
   readonly config: ServerConfig;
+  readonly telemetry: SecureTelemetry;
+  readonly rateLimiter: FixedWindowRateLimiter;
   readonly resolveChatThread: ResolveChatThread;
   readonly checkpointer?: BaseCheckpointSaver;
   readonly now?: () => number;
@@ -96,6 +103,24 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
       now,
     }),
   );
+  server.addHook("preHandler", async (request, reply) => {
+    if (reply.sent) return;
+    const decision = options.rateLimiter.consume(
+      requireOpenWebUiIdentity(request).userId,
+    );
+    if (!decision.allowed) {
+      await reply
+        .header("retry-after", decision.retryAfterSeconds)
+        .code(429)
+        .send(
+          openAiError(
+            "rate_limit_exceeded",
+            "Rate limit exceeded. Retry later.",
+            "rate_limit_error",
+          ),
+        );
+    }
+  });
 
   server.get("/models", async () =>
     createModelsResponse(options.config.modelId, Math.floor(now() / 1000)),
@@ -131,6 +156,19 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
         );
     }
 
+    if (
+      parsed.data.messages.length > options.config.maxMessages ||
+      parsed.data.messages.some(
+        (message) =>
+          messageContentLength(message.content) >
+          options.config.maxMessageChars,
+      )
+    ) {
+      return reply
+        .code(400)
+        .send(openAiError("invalid_request", "Message limits were exceeded."));
+    }
+
     const identity = requireOpenWebUiIdentity(request);
     const openWebUi = parseOpenWebUiRequestContext(request);
     const thread = await options.resolveChatThread({
@@ -151,13 +189,25 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
     const abortController = new AbortController();
     request.raw.once("aborted", () => abortController.abort());
     reply.raw.once("close", () => abortController.abort());
-    const result = await runChat({
-      userText,
-      identity,
-      openWebUi,
-      threadId: thread.threadId,
-      signal: abortController.signal,
-    });
+    const timedChat = options.telemetry.beginChat();
+    let result: ChatRunnerResult;
+    try {
+      result = await runChat({
+        userText,
+        identity,
+        openWebUi,
+        threadId: thread.threadId,
+        signal: abortController.signal,
+      });
+    } catch (error) {
+      timedChat.end(abortController.signal.aborted ? "aborted" : "error");
+      throw error;
+    }
+    const fragments = observeFragments(
+      result,
+      timedChat,
+      abortController.signal,
+    );
     if (parsed.data.stream) {
       return reply
         .type(SSE_CONTENT_TYPE)
@@ -165,19 +215,23 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
         .header("connection", "keep-alive")
         .send(
           Readable.from(
-            streamChatCompletion({
-              id,
-              created,
-              model: options.config.modelId,
-              fragments: toFragments(result),
-              signal: abortController.signal,
-              includeUsage: parsed.data.stream_options?.include_usage === true,
-            }),
+            observeOpenAiStream(
+              streamChatCompletion({
+                id,
+                created,
+                model: options.config.modelId,
+                fragments,
+                signal: abortController.signal,
+                includeUsage:
+                  parsed.data.stream_options?.include_usage === true,
+              }),
+              options.telemetry,
+            ),
           ),
         );
     }
 
-    const content = await collectFragments(toFragments(result));
+    const content = await collectFragments(fragments);
     return createChatCompletionResponse({
       id,
       created,
@@ -246,6 +300,40 @@ async function* toFragments(result: ChatRunnerResult): AsyncGenerator<string> {
     return;
   }
   yield* result;
+}
+
+async function* observeFragments(
+  result: ChatRunnerResult,
+  timed: TimedOperation,
+  signal: AbortSignal,
+): AsyncGenerator<string> {
+  try {
+    yield* toFragments(result);
+    timed.end(signal.aborted ? "aborted" : "ok");
+  } catch (error) {
+    timed.end(signal.aborted ? "aborted" : "error");
+    throw error;
+  } finally {
+    timed.end(signal.aborted ? "aborted" : "ok");
+  }
+}
+
+async function* observeOpenAiStream(
+  source: AsyncIterable<string>,
+  telemetry: SecureTelemetry,
+): AsyncGenerator<string> {
+  telemetry.streamStarted("openai");
+  try {
+    yield* source;
+  } finally {
+    telemetry.streamEnded("openai");
+  }
+}
+
+function messageContentLength(content: unknown): number {
+  if (typeof content === "string") return content.length;
+  if (content === null) return 0;
+  return JSON.stringify(content).length;
 }
 
 async function collectFragments(

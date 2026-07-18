@@ -174,7 +174,7 @@ describeWithPostgres("PostgreSQL persistence", () => {
         chatId: "slot-chat",
         userId: "slot-user",
         leaseOwner: "worker-a",
-        leaseMs: 5,
+        leaseMs: 5_000,
       }),
     ).resolves.toBe(true);
     await expect(
@@ -184,7 +184,11 @@ describeWithPostgres("PostgreSQL persistence", () => {
         leaseOwner: "worker-b",
       }),
     ).resolves.toBe(false);
-    await new Promise((resolveDelay) => setTimeout(resolveDelay, 20));
+    await pool.query(`
+      UPDATE chat_service.chat_thread_binding
+      SET submission_lease_until = now() - interval '1 second'
+      WHERE openwebui_chat_id = 'slot-chat' AND user_id = 'slot-user'
+    `);
     const recovery = await repository.reconcileStartup({
       leaseOwner: "startup-worker",
     });
@@ -345,6 +349,7 @@ describeWithPostgres("PostgreSQL persistence", () => {
     return {
       connectionString,
       poolMax: 4,
+      operationTimeoutMs: 5_000,
       idempotencyLeaseMs: 60_000,
     } as const;
   }

@@ -19,6 +19,15 @@ export class ChatPersistenceRepository {
     private readonly defaultLeaseMs: number,
   ) {}
 
+  async countActiveTaskBindings(): Promise<number> {
+    const result = await this.pool.query<{ count: string }>(`
+      SELECT count(*)::text AS count
+      FROM chat_service.conversation_task_binding
+      WHERE terminal_at IS NULL
+    `);
+    return Number(requiredRow(result.rows, "active task count").count);
+  }
+
   async getOrCreateThread(input: {
     readonly openWebUiChatId: string;
     readonly userId: string;

@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { Writable } from "node:stream";
 
 import { afterEach, describe, expect, it } from "@jest/globals";
 import type { FastifyInstance } from "fastify";
@@ -9,6 +10,7 @@ import {
 } from "../apps/server/src/bootstrap.js";
 import type { ChatRunnerContext } from "../apps/server/src/api/openai-routes.js";
 import type { ServerConfig } from "../apps/server/src/config.js";
+import { createSecureLoggerOptions } from "../apps/server/src/observability/logging.js";
 
 const serviceKey = "phase-1-test-service-key-32-bytes-minimum";
 const jwtSecret = "phase-5-openwebui-jwt-secret-32-bytes-minimum";
@@ -35,6 +37,11 @@ const config: ServerConfig = {
   bodyLimitBytes: 1024,
   requestTimeoutMs: 5000,
   modelId: "sdar-single-agent",
+  rateLimitMax: 60,
+  rateLimitWindowMs: 60_000,
+  maxMessages: 64,
+  maxMessageChars: 32_768,
+  logLevel: "silent",
   streamBudgetMs: 30_000,
   pollingBudgetMs: 5_000,
   pollingIntervalMs: 1_000,
@@ -44,11 +51,26 @@ const servers: FastifyInstance[] = [];
 
 function createServer(
   overrides: Partial<
-    Pick<BuildServerOptions, "runChat" | "resolveChatThread">
+    Pick<
+      BuildServerOptions,
+      | "config"
+      | "logger"
+      | "rateLimiter"
+      | "readinessCheck"
+      | "runChat"
+      | "resolveChatThread"
+    >
   > = {},
 ): FastifyInstance {
   const server = buildServer({
-    config,
+    config: overrides.config ?? config,
+    ...(overrides.logger === undefined ? {} : { logger: overrides.logger }),
+    ...(overrides.rateLimiter === undefined
+      ? {}
+      : { rateLimiter: overrides.rateLimiter }),
+    ...(overrides.readinessCheck === undefined
+      ? {}
+      : { readinessCheck: overrides.readinessCheck }),
     now: () => nowMilliseconds,
     nextId: () => "fixed-id",
     runChat: overrides.runChat ?? (async () => chatResponse),
@@ -84,6 +106,35 @@ describe("OpenAI-compatible HTTP contracts", () => {
     });
   });
 
+  it("reports dependency readiness without affecting liveness", async () => {
+    const server = createServer({ readinessCheck: async () => false });
+    const health = await server.inject({ method: "GET", url: "/health" });
+    const ready = await server.inject({ method: "GET", url: "/ready" });
+
+    expect(health.statusCode).toBe(200);
+    expect(ready.statusCode).toBe(503);
+    expect(ready.json()).toEqual({
+      status: "not_ready",
+      checks: { configuration: "ok", postgres: "unavailable" },
+    });
+  });
+
+  it("propagates only a bounded safe correlation ID", async () => {
+    const server = createServer();
+    const accepted = await server.inject({
+      method: "GET",
+      url: "/health",
+      headers: { "x-request-id": "owui-request-123" },
+    });
+    const replaced = await server.inject({
+      method: "GET",
+      url: "/health",
+      headers: { "x-request-id": "unsafe request id with spaces" },
+    });
+
+    expect(accepted.headers["x-request-id"]).toBe("owui-request-123");
+    expect(replaced.headers["x-request-id"]).toMatch(/^[0-9a-f-]{36}$/u);
+  });
   it("requires the exact service bearer key before user identity", async () => {
     const server = createServer();
     const missing = await server.inject({ method: "GET", url: "/v1/models" });
@@ -121,6 +172,60 @@ describe("OpenAI-compatible HTTP contracts", () => {
     });
   });
 
+  it("rate limits an authenticated identity with a retry hint", async () => {
+    const server = createServer({
+      config: { ...config, rateLimitMax: 1 },
+    });
+    const first = await server.inject({
+      method: "GET",
+      url: "/v1/models",
+      headers: identityHeaders,
+    });
+    const second = await server.inject({
+      method: "GET",
+      url: "/v1/models",
+      headers: identityHeaders,
+    });
+
+    expect(first.statusCode).toBe(200);
+    expect(second.statusCode).toBe(429);
+    expect(second.headers["retry-after"]).toBe("60");
+    expect(second.json().error.code).toBe("rate_limit_exceeded");
+  });
+
+  it("redacts credentials, prompts, bodies, and artifacts in Pino JSON", () => {
+    let output = "";
+    const stream = new Writable({
+      write(chunk, _encoding, callback) {
+        output += chunk.toString();
+        callback();
+      },
+    });
+    const server = createServer({
+      logger: { ...createSecureLoggerOptions("info"), stream },
+    });
+    server.log.info(
+      {
+        authorization: serviceKey,
+        token: signedIdentity,
+        prompt: "private-prompt-value",
+        artifact: "private-artifact-value",
+        body: chatPayload(),
+      },
+      "redaction probe",
+    );
+
+    expect(output).toContain("[REDACTED]");
+    for (const secret of [
+      serviceKey,
+      signedIdentity,
+      "private-prompt-value",
+      "private-artifact-value",
+      "hello",
+    ]) {
+      expect(output).not.toContain(secret);
+    }
+  });
   it("rejects missing, expired, forged, and plaintext-only identity", async () => {
     const server = createServer();
     const missing = await server.inject({
@@ -378,6 +483,36 @@ describe("OpenAI-compatible HTTP contracts", () => {
     expect(conflictingLimits.statusCode).toBe(400);
   });
 
+  it("enforces configured message count and content limits", async () => {
+    const server = createServer({
+      config: { ...config, maxMessages: 1, maxMessageChars: 4 },
+    });
+    const tooLong = await server.inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: chatPayload(),
+    });
+    const tooMany = await server.inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: {
+        model: "sdar-single-agent",
+        messages: [
+          { role: "user", content: "one" },
+          { role: "assistant", content: "two" },
+        ],
+      },
+    });
+
+    for (const response of [tooLong, tooMany]) {
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error.message).toBe(
+        "Message limits were exceeded.",
+      );
+    }
+  });
   it("rejects an unknown model with an OpenAI error", async () => {
     const response = await createServer().inject({
       method: "POST",

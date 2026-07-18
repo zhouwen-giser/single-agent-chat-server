@@ -1,4 +1,10 @@
-import Fastify, { LogController, type FastifyInstance } from "fastify";
+import { randomUUID } from "node:crypto";
+
+import Fastify, {
+  LogController,
+  type FastifyInstance,
+  type FastifyServerOptions,
+} from "fastify";
 
 import { openAiError } from "../../../packages/openai-api-contract/src/index.js";
 import { registerHealthRoutes } from "./api/health-routes.js";
@@ -7,21 +13,64 @@ import {
   type OpenAiRoutesOptions,
 } from "./api/openai-routes.js";
 import type { ServerConfig } from "./config.js";
+import { SecureTelemetry } from "./observability/telemetry.js";
+import { FixedWindowRateLimiter } from "./operations/rate-limiter.js";
 
 export interface BuildServerOptions extends Pick<
   OpenAiRoutesOptions,
   "now" | "nextId" | "runChat" | "resolveChatThread" | "checkpointer"
 > {
   readonly config: ServerConfig;
-  readonly logger?: boolean;
+  readonly logger?: FastifyServerOptions["logger"];
+  readonly readinessCheck?: () => Promise<boolean>;
+  readonly telemetry?: SecureTelemetry;
+  readonly rateLimiter?: FixedWindowRateLimiter;
 }
 
 export function buildServer(options: BuildServerOptions): FastifyInstance {
+  const telemetry = options.telemetry ?? new SecureTelemetry();
+  const rateLimiter =
+    options.rateLimiter ??
+    new FixedWindowRateLimiter(
+      options.config.rateLimitMax,
+      options.config.rateLimitWindowMs,
+    );
+  const requestStartedAt = new WeakMap<object, number>();
   const server = Fastify({
     logger: options.logger ?? false,
     bodyLimit: options.config.bodyLimitBytes,
     requestTimeout: options.config.requestTimeoutMs,
     logController: new LogController({ disableRequestLogging: true }),
+    genReqId: (request) => {
+      const proposed = request.headers["x-request-id"];
+      return typeof proposed === "string" &&
+        /^[A-Za-z0-9._:-]{1,128}$/u.test(proposed)
+        ? proposed
+        : randomUUID();
+    },
+  });
+
+  server.addHook("onRequest", async (request, reply) => {
+    requestStartedAt.set(request, Date.now());
+    void reply.header("x-request-id", request.id);
+  });
+  server.addHook("onResponse", async (request, reply) => {
+    const durationMs = Math.max(
+      0,
+      Date.now() - (requestStartedAt.get(request) ?? Date.now()),
+    );
+    const route = request.routeOptions.url ?? "other";
+    telemetry.recordApi({ route, statusCode: reply.statusCode, durationMs });
+    server.log.info(
+      {
+        requestId: request.id,
+        route,
+        method: request.method,
+        statusCode: reply.statusCode,
+        durationMs,
+      },
+      "request completed",
+    );
   });
 
   server.setErrorHandler(async (error, _request, reply) => {
@@ -46,10 +95,16 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
       );
   });
 
-  void server.register(registerHealthRoutes);
+  void server.register(registerHealthRoutes, {
+    ...(options.readinessCheck === undefined
+      ? {}
+      : { readinessCheck: options.readinessCheck }),
+  });
   void server.register(registerOpenAiRoutes, {
     prefix: "/v1",
     config: options.config,
+    telemetry,
+    rateLimiter,
     resolveChatThread: options.resolveChatThread,
     ...(options.now === undefined ? {} : { now: options.now }),
     ...(options.nextId === undefined ? {} : { nextId: options.nextId }),

@@ -26,6 +26,23 @@ const serverConfigSchema = z.object({
     .min(1)
     .max(256)
     .default(DEFAULT_CHAT_MODEL_ID),
+  CHAT_RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(10_000).default(60),
+  CHAT_RATE_LIMIT_WINDOW_MS: z.coerce
+    .number()
+    .int()
+    .min(1_000)
+    .max(3_600_000)
+    .default(60_000),
+  CHAT_MAX_MESSAGES: z.coerce.number().int().min(1).max(128).default(64),
+  CHAT_MAX_MESSAGE_CHARS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(1_000_000)
+    .default(32_768),
+  LOG_LEVEL: z
+    .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
+    .default("info"),
   CHAT_HTTP_STREAM_BUDGET_MS: z.coerce
     .number()
     .int()
@@ -54,6 +71,11 @@ export interface ServerConfig {
   readonly bodyLimitBytes: number;
   readonly requestTimeoutMs: number;
   readonly modelId: string;
+  readonly rateLimitMax: number;
+  readonly rateLimitWindowMs: number;
+  readonly maxMessages: number;
+  readonly maxMessageChars: number;
+  readonly logLevel: string;
   readonly streamBudgetMs: number;
   readonly pollingBudgetMs: number;
   readonly pollingIntervalMs: number;
@@ -71,6 +93,11 @@ export function parseServerConfig(
     bodyLimitBytes: parsed.CHAT_SERVER_BODY_LIMIT_BYTES,
     requestTimeoutMs: parsed.CHAT_SERVER_REQUEST_TIMEOUT_MS,
     modelId: parsed.CHAT_SERVER_MODEL_ID,
+    rateLimitMax: parsed.CHAT_RATE_LIMIT_MAX,
+    rateLimitWindowMs: parsed.CHAT_RATE_LIMIT_WINDOW_MS,
+    maxMessages: parsed.CHAT_MAX_MESSAGES,
+    maxMessageChars: parsed.CHAT_MAX_MESSAGE_CHARS,
+    logLevel: parsed.LOG_LEVEL,
     streamBudgetMs: parsed.CHAT_HTTP_STREAM_BUDGET_MS,
     pollingBudgetMs: parsed.SDAR_POLLING_BUDGET_MS,
     pollingIntervalMs: parsed.SDAR_POLLING_INTERVAL_MS,

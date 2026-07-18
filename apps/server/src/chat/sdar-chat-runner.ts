@@ -8,14 +8,16 @@ import {
 } from "../../../../packages/chat-runtime/src/index.js";
 import type { ChatPersistenceRepository } from "../../../../packages/persistence/src/index.js";
 import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
+import type { StructuredChatModel } from "../../../../src/agent/model.js";
 import type { ActiveTaskSnapshot } from "../../../../src/agent/state.js";
 
 export function createSdarChatRunner(input: {
   readonly repository: ChatPersistenceRepository;
   readonly checkpointer: BaseCheckpointSaver;
   readonly coordinator: SdarTaskCoordinator;
+  readonly model?: StructuredChatModel;
 }): ChatRunner {
-  const graph = createSingleAgentChatGraph(undefined, input.checkpointer);
+  const graph = createSingleAgentChatGraph(input.model, input.checkpointer);
   return async (context) => {
     const binding = await input.repository.findActiveTaskForChat({
       chatId: context.openWebUi.chatId,
