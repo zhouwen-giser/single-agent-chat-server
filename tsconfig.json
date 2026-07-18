@@ -18,6 +18,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "include": [
+    "apps/**/*.ts",
+    "packages/**/*.ts",
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

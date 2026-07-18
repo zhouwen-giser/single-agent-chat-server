@@ -43,7 +43,7 @@
   },
   "systems": {
     "postgres": "phase-0-temporary-runtime-removed",
-    "server": "not-implemented",
+    "server": "phase-1-openai-api-implemented-not-deployed",
     "openWebUi": "healthy-on-loopback-8080",
     "sdar": "exact-commit-card-verified-temporary-runtime-removed"
   },
@@ -53,6 +53,12 @@
       "report": "reports/goal/00-baseline.md",
       "commit": "03423e99390681108591ea77a4c912938862240d",
       "pushed": true
+    },
+    "1": {
+      "status": "READY_FOR_PUBLICATION",
+      "report": "reports/goal/01-openai-api-contracts.md",
+      "commit": null,
+      "pushed": false
     }
   },
   "tests": {
@@ -60,9 +66,10 @@
     "upstreamTemplateBuild": "passed",
     "upstreamTemplateLint": "passed-with-deprecation-warnings",
     "upstreamTemplateLanggraphConfig": "passed",
-    "phase0Repository": "passed: format,lint,config,typecheck,unit:1,integration:1,build"
+    "phase0Repository": "passed: format,lint,config,typecheck,unit:1,integration:1,build",
+    "phase1Repository": "passed: format,lint,config,typecheck,unit:5,contract:8,integration:1,build,http-smoke"
   },
   "blockers": [],
-  "updatedAt": "2026-07-18T19:52:00+08:00",
+  "updatedAt": "2026-07-18T20:20:00+08:00",
   "taskPackageRevision": "R2"
 }
