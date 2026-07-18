@@ -53,7 +53,8 @@ Open WebUI
 - [x] 2026-07-18: Phase 4 PostgreSQL checkpoints, bindings, events, and idempotency complete.
 - [x] 2026-07-18: Phase 5 verified, committed as 8b878ee, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 5 Open WebUI signed identity and chat continuity complete.
-- [ ] Phase 6: submission, status, bounded streaming, and polling fallback.
+- [x] 2026-07-18: Phase 6 verified, committed as 0f35d53, pushed, and recorded on Draft PR #1.
+- [x] 2026-07-18: Phase 6 submission, status, bounded streaming, polling fallback, and disconnect recovery complete.
 - [ ] Phase 7: follow-up, input, cancellation, and terminal outcomes.
 - [ ] Phase 8: restart, concurrency, and consistency hardening.
 - [ ] Phase 9: secure observability and operational controls.
@@ -192,3 +193,14 @@ thread mapping, and the Postgres graph checkpointer are wired into production.
 A real isolated pip Open WebUI 0.10.2 instance forwarded its own signed JWT,
 discovered the model, proxied a chat completion, and produced one binding plus
 six checkpoint rows. Phase 5 is published; Phase 6 submission and bounded streaming is next.
+
+## Phase 6 outcome
+
+New SDAR-bound turns now claim idempotency before `sendMessageStream`, persist
+the published Task/context binding, and emit real OpenAI SSE deltas from only
+published status and Artifact data. Nonterminal stream completion and the
+30-second observation boundary fall back to bounded `getTask` polling without
+cancellation. Real PostgreSQL tests cover long tasks, disconnect recovery,
+terminal text/JSON results, and exact-message replay. Production A2A discovery
+is lazy, so readiness passed with SDAR deliberately unavailable. Phase 6 is
+published; Phase 7 Follow-up and terminal interaction handling is next.
