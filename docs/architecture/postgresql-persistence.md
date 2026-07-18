@@ -11,7 +11,8 @@ PostgreSQL stores only local routing, recovery, and deduplication data.
 - `chat_service` is owned by this repository and changed only through numbered,
   append-only SQL files in `migrations/`.
 - `chat_thread_binding` maps one `(openwebui_chat_id, user_id)` pair to a stable
-  internal LangGraph thread identifier.
+  internal LangGraph thread identifier. Its bounded submission lease closes the
+  pre-Task race so concurrent distinct messages cannot create two remote Tasks.
 - `conversation_task_binding` stores the authorized SDAR task/context binding,
   last published status observation, pending input summary, event hash,
   terminal timestamp, and optimistic version.
@@ -33,8 +34,11 @@ Task, or Evidence records. SDAR remains authoritative for all of them.
   nonterminal updates cannot clear it or roll the persisted status backward.
 - Duplicate same-hash claims are either reported as in progress or replay the
   completed result. A different hash for the same key is a conflict.
-- Startup reconciliation lists active bindings and reclaims only expired
-  idempotency leases. It does not contact SDAR or assume an A2A event cursor.
+- Older published observations cannot overwrite a newer persisted observation;
+  optimistic versions still advance so callers can detect concurrent writes.
+- Startup reconciliation lists active bindings and reclaims expired
+  idempotency and submission leases. It does not contact SDAR or assume an A2A
+  event cursor.
 
 ## Operation
 
@@ -51,6 +55,9 @@ migration instead of editing a published one.
 
 `DATABASE_POOL_MAX` defaults to 10 and `IDEMPOTENCY_LEASE_MS` defaults to 60000.
 Keep PostgreSQL on a trusted network and use a least-privilege database role.
+Idle PostgreSQL connection failures are delegated back to the pool so a later
+query can reconnect after a temporary database restart. SIGINT and SIGTERM
+close Fastify once; the close hook then drains both persistence pools.
 
 ## Verification
 
@@ -66,4 +73,7 @@ pnpm.cmd test:persistence
 The suite verifies empty and append-only upgrade migrations, checkpoint schema
 setup, concurrent claims, same-hash replay, different-hash conflict, expired
 lease recovery, process restart, user/chat isolation, event deduplication, and
-terminal monotonicity against real PostgreSQL.
+terminal monotonicity against real PostgreSQL. Phase 8 additionally verifies
+submission-lease serialization/expiry/startup recovery, stale-event rejection,
+database restart recovery in the same production process, and a production
+service restart against the same persisted database.

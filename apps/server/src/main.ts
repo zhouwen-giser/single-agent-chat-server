@@ -7,14 +7,12 @@ import {
   setupPersistence,
   type PersistenceRuntime,
 } from "../../../packages/persistence/src/index.js";
-import {
-  createSdarA2aClient,
-  parseSdarA2aConfig,
-  type SdarA2aClient,
-} from "../../../packages/sdar-a2a-adapter/src/index.js";
+
 import { buildServer } from "./bootstrap.js";
+import { createLazySdarClient } from "./chat/lazy-sdar-client.js";
 import { createSdarChatRunner } from "./chat/sdar-chat-runner.js";
 import { loadServerConfig } from "./config.js";
+import { installGracefulShutdown } from "./shutdown.js";
 
 let persistence: PersistenceRuntime | undefined;
 try {
@@ -45,10 +43,12 @@ try {
     }),
   });
   server.addHook("onClose", async () => activePersistence.close());
+  installGracefulShutdown(server);
   server.log.info(
     {
       activeTaskBindings: reconciliation.activeBindings.length,
       recoveredIdempotencyClaims: reconciliation.recoveredClaimCount,
+      recoveredSubmissionSlots: reconciliation.recoveredSubmissionSlotCount,
     },
     "persistence startup reconciliation complete",
   );
@@ -62,19 +62,4 @@ try {
       String.fromCharCode(10),
   );
   process.exitCode = 1;
-}
-
-function createLazySdarClient(): () => Promise<SdarA2aClient> {
-  let pending: Promise<SdarA2aClient> | undefined;
-  return () => {
-    if (pending === undefined) {
-      pending = createSdarA2aClient(parseSdarA2aConfig(process.env)).catch(
-        (error: unknown) => {
-          pending = undefined;
-          throw error;
-        },
-      );
-    }
-    return pending;
-  };
 }

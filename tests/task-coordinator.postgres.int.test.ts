@@ -210,6 +210,22 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     expect(replay).toEqual(["**SDAR status: COMPLETED**", "first result"]);
   });
 
+  it("serializes concurrent different-message submissions before remote Task creation", async () => {
+    const client = new ConcurrentSubmitClient();
+    const runtime = coordinator(client);
+    const first = collect(
+      runtime.submit({ ...turn(), userMessageId: "concurrent-a" }),
+    );
+    await client.started;
+    const second = await collect(
+      runtime.submit({ ...turn(), userMessageId: "concurrent-b" }),
+    );
+    client.release();
+    await first;
+
+    expect(client.submitCount).toBe(1);
+    expect(second.join("\n")).toContain("already submitting");
+  });
   it("stops at plan confirmation without inferring an automatic decision", async () => {
     const client = new FakeClient([
       {
@@ -344,6 +360,26 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     expect(output.at(-1)).toContain("does not prove");
   });
 
+  it("does not repeat the same provide_input message", async () => {
+    await seedBinding("INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+    });
+    const client = new InteractiveClient(task("WORKING", "input accepted"));
+    const runtime = coordinator(client);
+    const input = { ...turn(), action: "provide_input" as const };
+    await collect(runtime.followUp(input));
+    await collect(runtime.followUp(input));
+    expect(client.followUps).toHaveLength(1);
+  });
+
+  it("does not repeat the same top-level cancellation", async () => {
+    await seedBinding("WORKING");
+    const client = new InteractiveClient(task("CANCELED", "canceled"));
+    const runtime = coordinator(client);
+    await collect(runtime.cancel(turn()));
+    await collect(runtime.cancel(turn()));
+    expect(client.cancelCount).toBe(1);
+  });
   it("distinguishes and redacts Capability Gap from business failure", async () => {
     await seedBinding("WORKING");
     const client = new FakeClient(
@@ -475,6 +511,33 @@ class FakeClient implements SdarA2aClient {
   }
 }
 
+class ConcurrentSubmitClient extends FakeClient {
+  readonly started: Promise<void>;
+  private markStarted!: () => void;
+  private continueFirst!: () => void;
+  private readonly continued: Promise<void>;
+
+  constructor() {
+    super([]);
+    this.started = new Promise((resolve) => {
+      this.markStarted = resolve;
+    });
+    this.continued = new Promise((resolve) => {
+      this.continueFirst = resolve;
+    });
+  }
+
+  release(): void {
+    this.continueFirst();
+  }
+
+  override async *submitTaskStream(): AsyncGenerator<NormalizedStreamEvent> {
+    this.submitCount += 1;
+    this.markStarted();
+    await this.continued;
+    yield { kind: "task", task: task("COMPLETED", "only one task") };
+  }
+}
 class InteractiveClient extends FakeClient {
   readonly followUps: FollowUpInput[] = [];
 

@@ -149,12 +149,44 @@ export class ChatPersistenceRepository {
     const result = await this.pool.query<TaskRow>(
       `
         UPDATE chat_service.conversation_task_binding
-        SET status = CASE WHEN terminal_at IS NULL THEN $3 ELSE status END,
-            pending_input_json = $4,
-            last_status_timestamp = $5,
-            last_event_hash = $6,
+        SET status = CASE
+              WHEN terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN $3
+              ELSE status
+            END,
+            pending_input_json = CASE
+              WHEN terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN $4
+              ELSE pending_input_json
+            END,
+            last_status_timestamp = CASE
+              WHEN terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN COALESCE($5::timestamptz, last_status_timestamp)
+              ELSE last_status_timestamp
+            END,
+            last_event_hash = CASE
+              WHEN terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN $6
+              ELSE last_event_hash
+            END,
             terminal_at = CASE
-              WHEN $7 THEN COALESCE(terminal_at, now())
+              WHEN $7 AND terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN now()
               ELSE terminal_at
             END,
             version = version + 1,
@@ -312,6 +344,56 @@ export class ChatPersistenceRepository {
     return result.rowCount === 1;
   }
 
+  async claimTaskSubmissionSlot(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly leaseOwner: string;
+    readonly leaseMs?: number;
+  }): Promise<boolean> {
+    const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
+    const result = await this.pool.query(
+      `
+        UPDATE chat_service.chat_thread_binding AS thread
+        SET submission_lease_owner = $3,
+            submission_lease_until = now() + ($4::bigint * interval '1 millisecond'),
+            updated_at = now()
+        WHERE thread.openwebui_chat_id = $1
+          AND thread.user_id = $2
+          AND (
+            thread.submission_lease_until IS NULL
+            OR thread.submission_lease_until <= now()
+            OR thread.submission_lease_owner = $3
+          )
+          AND NOT EXISTS (
+            SELECT 1
+            FROM chat_service.conversation_task_binding AS task
+            WHERE task.thread_id = thread.thread_id
+              AND task.terminal_at IS NULL
+          )
+      `,
+      [input.chatId, input.userId, input.leaseOwner, leaseMs],
+    );
+    return result.rowCount === 1;
+  }
+
+  async releaseTaskSubmissionSlot(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    await this.pool.query(
+      `
+        UPDATE chat_service.chat_thread_binding
+        SET submission_lease_owner = NULL,
+            submission_lease_until = NULL,
+            updated_at = now()
+        WHERE openwebui_chat_id = $1
+          AND user_id = $2
+          AND submission_lease_owner = $3
+      `,
+      [input.chatId, input.userId, input.leaseOwner],
+    );
+  }
   async reconcileStartup(input: {
     readonly leaseOwner: string;
     readonly leaseMs?: number;
@@ -328,9 +410,18 @@ export class ChatPersistenceRepository {
       `,
       [input.leaseOwner, leaseMs],
     );
+    const releasedSubmissionSlots = await this.pool.query(`
+      UPDATE chat_service.chat_thread_binding
+      SET submission_lease_owner = NULL,
+          submission_lease_until = NULL,
+          updated_at = now()
+      WHERE submission_lease_until IS NOT NULL
+        AND submission_lease_until <= now()
+    `);
     return {
       activeBindings: await this.listActiveBindings(),
       recoveredClaimCount: recovered.rowCount ?? 0,
+      recoveredSubmissionSlotCount: releasedSubmissionSlots.rowCount ?? 0,
     };
   }
 

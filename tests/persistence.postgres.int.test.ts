@@ -62,6 +62,7 @@ describeWithPostgres("PostgreSQL persistence", () => {
     expect(migrations.rows.map(({ version }) => version)).toEqual([
       "0001_initial_persistence.sql",
       "0002_events_and_recovery.sql",
+      "0003_submission_lease.sql",
     ]);
 
     const checkpointTables = await pool.query<{ table_name: string }>(`
@@ -92,7 +93,7 @@ describeWithPostgres("PostgreSQL persistence", () => {
       const versions = await pool.query<{ version: string; checksum: string }>(
         "SELECT version, checksum FROM chat_service.schema_migrations ORDER BY version",
       );
-      expect(versions.rows).toHaveLength(2);
+      expect(versions.rows).toHaveLength(3);
       expect(versions.rows[0]?.checksum).toBe(
         createHash("sha256").update(sql).digest("hex"),
       );
@@ -161,6 +162,46 @@ describeWithPostgres("PostgreSQL persistence", () => {
     ).resolves.toEqual({ outcome: "acquired" });
   });
 
+  it("serializes and recovers per-chat Task submission leases", async () => {
+    const repository = repositoryFor(pool);
+    await repository.getOrCreateThread({
+      openWebUiChatId: "slot-chat",
+      userId: "slot-user",
+      userRole: "user",
+    });
+    await expect(
+      repository.claimTaskSubmissionSlot({
+        chatId: "slot-chat",
+        userId: "slot-user",
+        leaseOwner: "worker-a",
+        leaseMs: 5,
+      }),
+    ).resolves.toBe(true);
+    await expect(
+      repository.claimTaskSubmissionSlot({
+        chatId: "slot-chat",
+        userId: "slot-user",
+        leaseOwner: "worker-b",
+      }),
+    ).resolves.toBe(false);
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, 20));
+    const recovery = await repository.reconcileStartup({
+      leaseOwner: "startup-worker",
+    });
+    expect(recovery.recoveredSubmissionSlotCount).toBe(1);
+    await expect(
+      repository.claimTaskSubmissionSlot({
+        chatId: "slot-chat",
+        userId: "slot-user",
+        leaseOwner: "worker-b",
+      }),
+    ).resolves.toBe(true);
+    await repository.releaseTaskSubmissionSlot({
+      chatId: "slot-chat",
+      userId: "slot-user",
+      leaseOwner: "worker-b",
+    });
+  });
   it("restores active task bindings after a process restart", async () => {
     const firstRuntime = await setupPersistence(config());
     await firstRuntime.repository.getOrCreateThread({
@@ -225,6 +266,38 @@ describeWithPostgres("PostgreSQL persistence", () => {
     ).rejects.toBeInstanceOf(PersistenceConflictError);
   });
 
+  it("ignores stale status timestamps without losing optimistic versioning", async () => {
+    const repository = repositoryFor(pool);
+    await repository.getOrCreateThread({
+      openWebUiChatId: "stale-chat",
+      userId: "stale-user",
+      userRole: "user",
+    });
+    const binding = await repository.createTaskBinding({
+      openWebUiChatId: "stale-chat",
+      userId: "stale-user",
+      sdarTaskId: "stale-task",
+      sdarContextId: "stale-context",
+      status: "SUBMITTED",
+    });
+    const current = await repository.updateTaskBinding({
+      bindingId: binding.bindingId,
+      expectedVersion: binding.version,
+      status: "WORKING",
+      lastStatusTimestamp: "2026-07-18T10:00:00.000Z",
+      terminal: false,
+    });
+    const stale = await repository.updateTaskBinding({
+      bindingId: current.bindingId,
+      expectedVersion: current.version,
+      status: "FAILED",
+      lastStatusTimestamp: "2026-07-18T09:00:00.000Z",
+      terminal: true,
+    });
+    expect(stale.status).toBe("WORKING");
+    expect(stale.terminalAt).toBeUndefined();
+    expect(stale.version).toBe(current.version + 1);
+  });
   it("deduplicates events and never reopens a terminal binding", async () => {
     const repository = repositoryFor(pool);
     await repository.getOrCreateThread({

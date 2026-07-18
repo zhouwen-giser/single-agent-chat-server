@@ -35,4 +35,5 @@ export type IdempotencyClaim =
 export interface StartupReconciliation {
   readonly activeBindings: readonly TaskBinding[];
   readonly recoveredClaimCount: number;
+  readonly recoveredSubmissionSlotCount: number;
 }

@@ -93,8 +93,8 @@ export class SdarTaskCoordinator {
       return;
     }
 
-    const client = await this.options.getClient();
     if (claim.outcome === "replay") {
+      const client = await this.options.getClient();
       const binding = await this.options.repository.findAuthorizedTask({
         openWebUiChatId: input.chatId,
         userId: input.userId,
@@ -111,61 +111,80 @@ export class SdarTaskCoordinator {
       return;
     }
 
-    let binding: TaskBinding | undefined;
-    let latestState: NormalizedTaskState | undefined;
-    let sawMessage = false;
-    let completedClaim = false;
-    const streamController = new AbortController();
-    const streamTimer = setTimeout(
-      () => streamController.abort(new Error("chat stream budget elapsed")),
-      this.streamBudgetMs,
-    );
-    const signal =
-      callerSignal === undefined
-        ? streamController.signal
-        : AbortSignal.any([callerSignal, streamController.signal]);
+    const submissionSlot =
+      await this.options.repository.claimTaskSubmissionSlot({
+        chatId: input.chatId,
+        userId: input.userId,
+        leaseOwner,
+      });
+    if (!submissionSlot) {
+      yield "Another message is already submitting a Task for this chat; no duplicate SDAR Task was created.";
+      return;
+    }
     try {
-      for await (const event of client.submitTaskStream(
-        {
-          messageId: input.userMessageId,
-          text: input.userText,
-          userId: input.userId,
-        },
-        { signal },
-      )) {
-        const observed = await this.observeEvent(event, input, binding);
-        binding = observed.binding ?? binding;
-        latestState = eventState(event) ?? latestState;
-        sawMessage ||= event.kind === "message";
-        if (binding !== undefined && !completedClaim) {
-          await this.options.repository.completeRequest({
-            idempotencyKey: input.userMessageId,
+      const client = await this.options.getClient();
+      let binding: TaskBinding | undefined;
+      let latestState: NormalizedTaskState | undefined;
+      let sawMessage = false;
+      let completedClaim = false;
+      const streamController = new AbortController();
+      const streamTimer = setTimeout(
+        () => streamController.abort(new Error("chat stream budget elapsed")),
+        this.streamBudgetMs,
+      );
+      const signal =
+        callerSignal === undefined
+          ? streamController.signal
+          : AbortSignal.any([callerSignal, streamController.signal]);
+      try {
+        for await (const event of client.submitTaskStream(
+          {
+            messageId: input.userMessageId,
+            text: input.userText,
             userId: input.userId,
-            openWebUiChatId: input.chatId,
-            requestHash,
-            leaseOwner,
-            resultTaskId: binding.sdarTaskId,
-          });
-          completedClaim = true;
+          },
+          { signal },
+        )) {
+          const observed = await this.observeEvent(event, input, binding);
+          binding = observed.binding ?? binding;
+          latestState = eventState(event) ?? latestState;
+          sawMessage ||= event.kind === "message";
+          if (binding !== undefined && !completedClaim) {
+            await this.options.repository.completeRequest({
+              idempotencyKey: input.userMessageId,
+              userId: input.userId,
+              openWebUiChatId: input.chatId,
+              requestHash,
+              leaseOwner,
+              resultTaskId: binding.sdarTaskId,
+            });
+            completedClaim = true;
+          }
+          for (const fragment of observed.fragments) yield fragment;
+          if (latestState !== undefined && isResponseBoundary(latestState))
+            return;
         }
-        for (const fragment of observed.fragments) yield fragment;
-        if (latestState !== undefined && isResponseBoundary(latestState))
-          return;
+      } catch (error) {
+        if (!signal.aborted) throw error;
+      } finally {
+        clearTimeout(streamTimer);
       }
-    } catch (error) {
-      if (!signal.aborted) throw error;
+
+      if (binding === undefined) {
+        if (callerSignal?.aborted === true) return;
+        if (sawMessage) return;
+        throw new Error("SDAR stream ended before publishing a Task binding");
+      }
+      if (latestState !== undefined && isResponseBoundary(latestState)) return;
+
+      yield* this.pollTask(client, binding, callerSignal);
     } finally {
-      clearTimeout(streamTimer);
+      await this.options.repository.releaseTaskSubmissionSlot({
+        chatId: input.chatId,
+        userId: input.userId,
+        leaseOwner,
+      });
     }
-
-    if (binding === undefined) {
-      if (callerSignal?.aborted === true) return;
-      if (sawMessage) return;
-      throw new Error("SDAR stream ended before publishing a Task binding");
-    }
-    if (latestState !== undefined && isResponseBoundary(latestState)) return;
-
-    yield* this.pollTask(client, binding, callerSignal);
   }
 
   async *followUp(

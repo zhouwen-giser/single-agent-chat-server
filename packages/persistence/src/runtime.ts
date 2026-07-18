@@ -21,6 +21,10 @@ export async function setupPersistence(
     connectionString: config.connectionString,
     max: config.poolMax,
   });
+  pool.on("error", () => {
+    // An idle connection may die during a PostgreSQL restart. pg removes it;
+    // the next repository query obtains a fresh connection from the pool.
+  });
   let checkpointer: PostgresSaver | undefined;
   try {
     await runMigrations(pool);
