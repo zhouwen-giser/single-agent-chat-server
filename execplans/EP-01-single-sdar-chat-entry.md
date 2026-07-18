@@ -51,9 +51,8 @@ Open WebUI
 - [x] 2026-07-18: Phase 3 verified, committed as 34641c6, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 4 verified, committed as b8be3b3, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 4 PostgreSQL checkpoints, bindings, events, and idempotency complete.
-- [ ] 2026-07-18: Phase 5 implementation, full gate, and real isolated pip
-      Open WebUI 0.10.2 proxy smoke passed; publication is pending.
-- [ ] Phase 5: Open WebUI signed identity and chat continuity.
+- [x] 2026-07-18: Phase 5 verified, committed as 8b878ee, pushed, and recorded on Draft PR #1.
+- [x] 2026-07-18: Phase 5 Open WebUI signed identity and chat continuity complete.
 - [ ] Phase 6: submission, status, bounded streaming, and polling fallback.
 - [ ] Phase 7: follow-up, input, cancellation, and terminal outcomes.
 - [ ] Phase 8: restart, concurrency, and consistency hardening.
@@ -192,4 +191,4 @@ Two-layer Open WebUI authentication, strict session headers, persisted user/chat
 thread mapping, and the Postgres graph checkpointer are wired into production.
 A real isolated pip Open WebUI 0.10.2 instance forwarded its own signed JWT,
 discovered the model, proxied a chat completion, and produced one binding plus
-six checkpoint rows. No real SDAR E2E is claimed; publication remains.
+six checkpoint rows. Phase 5 is published; Phase 6 submission and bounded streaming is next.

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "phase": 5,
-  "status": "VERIFIED_PENDING_PUBLICATION",
-  "generatedAt": "2026-07-18T22:07:11+08:00",
+  "status": "COMPLETED",
+  "generatedAt": "2026-07-18T22:11:07+08:00",
   "branch": "feature/single-sdar-chat-entry-v0.1",
   "headBeforePhaseCommit": "e2c29ef7bfb4c69af459b7518d2fa77dcb29481b",
-  "phaseCommit": null,
+  "phaseCommit": "8b878ee9349c4fae1ff6d761c269c9c3d8fe7f0d",
   "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
   "delivered": {
     "serviceKey": true,
@@ -47,9 +47,9 @@
     "assignedPhase": 11
   },
   "publication": {
-    "committed": false,
-    "pushed": false,
-    "draftPullRequestUpdated": false
+    "committed": true,
+    "pushed": true,
+    "draftPullRequestUpdated": true
   },
   "blockers": []
 }
