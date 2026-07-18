@@ -1,0 +1,296 @@
+import { createHash, randomUUID } from "node:crypto";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "@jest/globals";
+import pg from "pg";
+
+import {
+  ChatPersistenceRepository,
+  PersistenceConflictError,
+  runMigrations,
+  setupPersistence,
+} from "../packages/persistence/src/index.js";
+
+const { Pool } = pg;
+const connectionString = process.env.TEST_DATABASE_URL;
+const describeWithPostgres =
+  connectionString === undefined ? describe.skip : describe;
+
+describeWithPostgres("PostgreSQL persistence", () => {
+  const pool = new Pool({ connectionString, max: 8 });
+
+  beforeAll(async () => {
+    const database = await pool.query<{ database_name: string }>(
+      "SELECT current_database() AS database_name",
+    );
+    expect(database.rows[0]?.database_name).toBe("single_agent_chat_phase4");
+    await resetSchemas();
+    await runMigrations(pool);
+  });
+
+  beforeEach(async () => {
+    await pool.query(`
+      TRUNCATE TABLE
+        chat_service.a2a_event_cache,
+        chat_service.request_idempotency,
+        chat_service.conversation_task_binding,
+        chat_service.chat_thread_binding
+      CASCADE
+    `);
+  });
+
+  afterAll(async () => {
+    await pool.end();
+  });
+
+  it("migrates an empty database and initializes the isolated checkpoint schema", async () => {
+    const runtime = await setupPersistence(config());
+    await runtime.close();
+
+    const migrations = await pool.query<{ version: string }>(
+      "SELECT version FROM chat_service.schema_migrations ORDER BY version",
+    );
+    expect(migrations.rows.map(({ version }) => version)).toEqual([
+      "0001_initial_persistence.sql",
+      "0002_events_and_recovery.sql",
+    ]);
+
+    const checkpointTables = await pool.query<{ table_name: string }>(`
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'langgraph_checkpoint'
+    `);
+    expect(checkpointTables.rows.length).toBeGreaterThan(0);
+  });
+
+  it("upgrades a version-one database append-only", async () => {
+    await resetSchemas();
+    const directory = await mkdtemp(
+      join(tmpdir(), "single-agent-chat-migrations-"),
+    );
+    try {
+      const file = "0001_initial_persistence.sql";
+      const sql = await readFile(resolve("migrations", file), "utf8");
+      await writeFile(join(directory, file), sql, "utf8");
+      await runMigrations(pool, directory);
+
+      const beforeUpgrade = await pool.query<{ exists: boolean }>(`
+        SELECT to_regclass('chat_service.a2a_event_cache') IS NOT NULL AS exists
+      `);
+      expect(beforeUpgrade.rows[0]?.exists).toBe(false);
+
+      await runMigrations(pool);
+      const versions = await pool.query<{ version: string; checksum: string }>(
+        "SELECT version, checksum FROM chat_service.schema_migrations ORDER BY version",
+      );
+      expect(versions.rows).toHaveLength(2);
+      expect(versions.rows[0]?.checksum).toBe(
+        createHash("sha256").update(sql).digest("hex"),
+      );
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("serializes concurrent claims for the same message", async () => {
+    const repository = repositoryFor(pool);
+    const input = claimInput("same-message", "same-hash");
+    const outcomes = await Promise.all([
+      repository.claimRequest({ ...input, leaseOwner: "worker-a" }),
+      repository.claimRequest({ ...input, leaseOwner: "worker-b" }),
+    ]);
+    expect(outcomes.map(({ outcome }) => outcome).sort()).toEqual([
+      "acquired",
+      "in_progress",
+    ]);
+  });
+
+  it("replays a completed same-hash retry", async () => {
+    const repository = repositoryFor(pool);
+    const input = claimInput("retry-message", "stable-hash");
+    await expect(
+      repository.claimRequest({ ...input, leaseOwner: "worker-a" }),
+    ).resolves.toEqual({ outcome: "acquired" });
+    await repository.completeRequest({
+      ...input,
+      leaseOwner: "worker-a",
+      resultTaskId: "task-result",
+    });
+    await expect(
+      repository.claimRequest({ ...input, leaseOwner: "worker-b" }),
+    ).resolves.toEqual({ outcome: "replay", resultTaskId: "task-result" });
+  });
+
+  it("rejects reuse of an idempotency key with a different hash", async () => {
+    const repository = repositoryFor(pool);
+    const input = claimInput("conflict-message", "hash-one");
+    await repository.claimRequest({ ...input, leaseOwner: "worker-a" });
+    await expect(
+      repository.claimRequest({
+        ...input,
+        requestHash: "hash-two",
+        leaseOwner: "worker-b",
+      }),
+    ).resolves.toEqual({ outcome: "conflict" });
+  });
+
+  it("recovers an expired claim after a worker stops", async () => {
+    const repository = repositoryFor(pool);
+    const input = claimInput("expired-message", "expired-hash");
+    await repository.claimRequest({
+      ...input,
+      leaseOwner: "worker-a",
+      leaseMs: 5,
+    });
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, 20));
+    await expect(
+      repository.claimRequest({
+        ...input,
+        leaseOwner: "worker-b",
+        leaseMs: 5_000,
+      }),
+    ).resolves.toEqual({ outcome: "acquired" });
+  });
+
+  it("restores active task bindings after a process restart", async () => {
+    const firstRuntime = await setupPersistence(config());
+    await firstRuntime.repository.getOrCreateThread({
+      openWebUiChatId: "restart-chat",
+      userId: "restart-user",
+      userRole: "user",
+    });
+    await firstRuntime.repository.createTaskBinding({
+      openWebUiChatId: "restart-chat",
+      userId: "restart-user",
+      sdarTaskId: "restart-task",
+      sdarContextId: "restart-context",
+      status: "WORKING",
+    });
+    await firstRuntime.close();
+
+    const secondRuntime = await setupPersistence(config());
+    try {
+      const recovery = await secondRuntime.repository.reconcileStartup({
+        leaseOwner: randomUUID(),
+      });
+      expect(
+        recovery.activeBindings.map(({ sdarTaskId }) => sdarTaskId),
+      ).toEqual(["restart-task"]);
+    } finally {
+      await secondRuntime.close();
+    }
+  });
+
+  it("isolates task bindings by both chat and user", async () => {
+    const repository = repositoryFor(pool);
+    for (const userId of ["user-a", "user-b"]) {
+      await repository.getOrCreateThread({
+        openWebUiChatId: "shared-chat-id",
+        userId,
+        userRole: "user",
+      });
+    }
+    await repository.createTaskBinding({
+      openWebUiChatId: "shared-chat-id",
+      userId: "user-a",
+      sdarTaskId: "private-task",
+      sdarContextId: "private-context",
+      status: "WORKING",
+    });
+
+    await expect(
+      repository.findAuthorizedTask({
+        openWebUiChatId: "shared-chat-id",
+        userId: "user-b",
+        sdarTaskId: "private-task",
+      }),
+    ).resolves.toBeUndefined();
+    await expect(
+      repository.createTaskBinding({
+        openWebUiChatId: "shared-chat-id",
+        userId: "user-a",
+        sdarTaskId: "second-active-task",
+        sdarContextId: "second-context",
+        status: "WORKING",
+      }),
+    ).rejects.toBeInstanceOf(PersistenceConflictError);
+  });
+
+  it("deduplicates events and never reopens a terminal binding", async () => {
+    const repository = repositoryFor(pool);
+    await repository.getOrCreateThread({
+      openWebUiChatId: "terminal-chat",
+      userId: "terminal-user",
+      userRole: "user",
+    });
+    const binding = await repository.createTaskBinding({
+      openWebUiChatId: "terminal-chat",
+      userId: "terminal-user",
+      sdarTaskId: "terminal-task",
+      sdarContextId: "terminal-context",
+      status: "WORKING",
+    });
+    const terminal = await repository.updateTaskBinding({
+      bindingId: binding.bindingId,
+      expectedVersion: binding.version,
+      status: "COMPLETED",
+      terminal: true,
+    });
+    const staleUpdate = await repository.updateTaskBinding({
+      bindingId: terminal.bindingId,
+      expectedVersion: terminal.version,
+      status: "WORKING",
+      terminal: false,
+    });
+    expect(staleUpdate.terminalAt).toBe(terminal.terminalAt);
+    expect(staleUpdate.status).toBe("COMPLETED");
+
+    const event = {
+      taskId: "terminal-task",
+      eventKind: "status-update",
+      eventHash: "event-hash",
+      status: "COMPLETED",
+      summary: { message: "done" },
+    } as const;
+    await expect(repository.recordEvent(event)).resolves.toBe(true);
+    await expect(repository.recordEvent(event)).resolves.toBe(false);
+  });
+
+  function config() {
+    if (connectionString === undefined) {
+      throw new Error("TEST_DATABASE_URL is required for PostgreSQL tests");
+    }
+    return {
+      connectionString,
+      poolMax: 4,
+      idempotencyLeaseMs: 60_000,
+    } as const;
+  }
+
+  async function resetSchemas(): Promise<void> {
+    await pool.query("DROP SCHEMA IF EXISTS langgraph_checkpoint CASCADE");
+    await pool.query("DROP SCHEMA IF EXISTS chat_service CASCADE");
+  }
+});
+
+function repositoryFor(pool: pg.Pool): ChatPersistenceRepository {
+  return new ChatPersistenceRepository(pool, 60_000);
+}
+
+function claimInput(idempotencyKey: string, requestHash: string) {
+  return {
+    idempotencyKey,
+    requestHash,
+    userId: "claim-user",
+    openWebUiChatId: "claim-chat",
+  } as const;
+}

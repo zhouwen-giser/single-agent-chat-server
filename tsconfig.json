@@ -21,6 +21,7 @@
   "include": [
     "apps/**/*.ts",
     "packages/**/*.ts",
+    "scripts/**/*.ts",
     "src/**/*.ts",
     "tests/**/*.ts"
   ],

@@ -49,6 +49,8 @@ Open WebUI
 - [x] 2026-07-18: Phase 1 verified, committed as `a28b882`, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 2 verified, committed as a5d1b8a, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 3 verified, committed as 34641c6, pushed, and recorded on Draft PR #1.
+- [ ] 2026-07-18: Phase 4 implementation and real PostgreSQL verification
+      passed; semantic commit and publication are pending.
 - [ ] Phase 4: PostgreSQL checkpoints, bindings, events, and idempotency.
 - [ ] Phase 5: Open WebUI signed identity and chat continuity.
 - [ ] Phase 6: submission, status, bounded streaming, and polling fallback.
@@ -118,6 +120,11 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
   on `127.0.0.1:8080`; integration evidence must follow the actual topology.
 - No SDAR initially listened on 9999. An isolated temporary server from the
   exact commit produced the Agent Card; all temporary resources were removed.
+- The first dedicated PostgreSQL host port was already allocated. The test
+  container was recreated on an unused loopback port without touching the
+  existing listener. docker exec pg_isready hung, while direct pg access,
+  all integration tests, and server startup succeeded; the temporary container
+  and its unpersisted test data were then removed.
 
 ## Decision Log
 
@@ -129,6 +136,12 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
 - 2026-07-18: Keep Phase 0 graph deterministic and Studio-only. Public API and
   SDAR behavior begin in later independently verified phases.
 - 2026-07-18: Treat pip Open WebUI as the authoritative installed topology.
+- 2026-07-18: Keep LangGraph checkpoint tables in langgraph_checkpoint and
+  local bindings/idempotency/event observations in chat_service. Apply the
+  latter only through checksum-verified append-only migrations.
+- 2026-07-18: Scope idempotency by key, user, and chat; use request hashes and
+  leases for conflict, replay, and interrupted-worker recovery. Never infer an
+  A2A cursor from the local event cache.
 
 ## Outcomes & Retrospective
 
@@ -153,3 +166,12 @@ advertised. Endpoint correction is explicit only. The four permitted SDK
 operations, strict metadata, normalization, and timeout/abort behavior passed a
 real local HTTP+JSON mock contract. No final real SDAR E2E is claimed. Phase 4
 PostgreSQL persistence is next.
+
+## Phase 4 outcome
+
+Real PostgreSQL 16.9 verification covers empty and upgrade migrations,
+checkpointer setup, concurrent idempotency, retry replay/conflict, expired lease
+recovery, process restart, binding authorization, event deduplication, and
+terminal monotonicity. The built server completed startup reconciliation and
+reported ready against that database. No final SDAR/Open WebUI E2E is claimed;
+publication evidence is the remaining Phase 4 step.
