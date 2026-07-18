@@ -3,6 +3,7 @@ import type { BaseCheckpointSaver } from "@langchain/langgraph";
 import type { ChatRunner, ChatRunnerContext } from "../api/openai-routes.js";
 import {
   SdarTaskCoordinator,
+  type FollowUpTurnContext,
   type TaskTurnContext,
 } from "../../../../packages/chat-runtime/src/index.js";
 import type { ChatPersistenceRepository } from "../../../../packages/persistence/src/index.js";
@@ -44,8 +45,17 @@ export function createSdarChatRunner(input: {
         context.signal,
       );
     }
-    if (result.requestKind === "follow_up" || result.requestKind === "cancel") {
-      return "This action is classified safely but becomes executable in Phase 7.";
+    if (result.requestKind === "follow_up") {
+      if (result.followUpAction === undefined) {
+        return "No safe SDAR Follow-up action could be determined; nothing was sent.";
+      }
+      return input.coordinator.followUp(
+        toFollowUpTurn(context, result.followUpAction),
+        context.signal,
+      );
+    }
+    if (result.requestKind === "cancel") {
+      return input.coordinator.cancel(toTaskTurn(context), context.signal);
     }
     return renderGraphResult(result);
   };
@@ -60,23 +70,47 @@ function toTaskTurn(context: ChatRunnerContext): TaskTurnContext {
   };
 }
 
+function toFollowUpTurn(
+  context: ChatRunnerContext,
+  action: FollowUpTurnContext["action"],
+): FollowUpTurnContext {
+  return { ...toTaskTurn(context), action };
+}
 function toActiveTask(binding: {
   readonly sdarTaskId: string;
   readonly sdarContextId: string;
   readonly status: string;
+  readonly pendingInput?: unknown;
 }): ActiveTaskSnapshot {
   const status = ["SUBMITTED", "WORKING", "INPUT_REQUIRED"].includes(
     binding.status,
   )
     ? (binding.status as ActiveTaskSnapshot["status"])
     : "WORKING";
+  const internalPhase = readInternalPhase(binding.pendingInput);
   return {
     taskId: binding.sdarTaskId,
     contextId: binding.sdarContextId,
     status,
+    ...(internalPhase === undefined ? {} : { internalPhase }),
   };
 }
 
+function readInternalPhase(
+  value: unknown,
+): ActiveTaskSnapshot["internalPhase"] | undefined {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+  const phase = (value as { readonly internalPhase?: unknown }).internalPhase;
+  return [
+    "awaiting_plan_confirmation",
+    "awaiting_user_input",
+    "paused",
+  ].includes(typeof phase === "string" ? phase : "")
+    ? (phase as ActiveTaskSnapshot["internalPhase"])
+    : undefined;
+}
 function renderGraphResult(result: {
   readonly messages: readonly { readonly content: unknown }[];
 }): string {

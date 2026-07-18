@@ -170,6 +170,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
               created,
               model: options.config.modelId,
               fragments: toFragments(result),
+              signal: abortController.signal,
               includeUsage: parsed.data.stream_options?.include_usage === true,
             }),
           ),
@@ -191,6 +192,7 @@ async function* streamChatCompletion(input: {
   readonly created: number;
   readonly model: string;
   readonly fragments: AsyncIterable<string>;
+  readonly signal: AbortSignal;
   readonly includeUsage: boolean;
 }): AsyncGenerator<string> {
   const common = {
@@ -203,12 +205,30 @@ async function* streamChatCompletion(input: {
     ...common,
     choices: [{ index: 0, delta: { role: "assistant" }, finish_reason: null }],
   });
-  for await (const content of input.fragments) {
-    if (content.length === 0) continue;
-    yield encodeSseData({
-      ...common,
-      choices: [{ index: 0, delta: { content }, finish_reason: null }],
-    });
+  try {
+    for await (const content of input.fragments) {
+      if (content.length === 0) continue;
+      yield encodeSseData({
+        ...common,
+        choices: [{ index: 0, delta: { content }, finish_reason: null }],
+      });
+    }
+  } catch {
+    if (!input.signal.aborted) {
+      yield encodeSseData({
+        ...common,
+        choices: [
+          {
+            index: 0,
+            delta: {
+              content:
+                "The SDAR operation failed safely. No internal protocol details were exposed.",
+            },
+            finish_reason: null,
+          },
+        ],
+      });
+    }
   }
   yield encodeSseData({
     ...common,

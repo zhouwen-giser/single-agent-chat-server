@@ -59,6 +59,7 @@ export interface NormalizedTask {
   readonly statusMessage?: NormalizedMessage;
   readonly statusTimestamp?: string;
   readonly internalPhase?: string;
+  readonly inputRequestId?: string;
   readonly phaseMessage?: string;
   readonly errorCode?: string;
   readonly capabilityGap?: JsonValue;
@@ -81,8 +82,10 @@ export type NormalizedStreamEvent =
       readonly message?: NormalizedMessage;
       readonly timestamp?: string;
       readonly internalPhase?: string;
+      readonly inputRequestId?: string;
       readonly phaseMessage?: string;
       readonly errorCode?: string;
+      readonly nextAction?: string;
       readonly capabilityGap?: JsonValue;
     }
   | {

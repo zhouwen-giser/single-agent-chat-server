@@ -71,6 +71,8 @@ describe("thin single-agent chat graph", () => {
   it.each([
     ["what is the task status?", undefined, "status", undefined],
     ["cancel the task", activeTask, "cancel", undefined],
+    ["pause", activeTask, "follow_up", "pause"],
+    ["cancel the goal", activeTask, "follow_up", "cancel_goal"],
     [
       "the requested value is 42",
       {

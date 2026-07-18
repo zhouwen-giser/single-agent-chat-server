@@ -7,6 +7,7 @@ import type {
   NormalizedTask,
   NormalizedTaskState,
   SdarA2aClient,
+  SdarFollowUpAction,
 } from "../../sdar-a2a-adapter/src/index.js";
 import {
   ChatPersistenceRepository,
@@ -30,6 +31,10 @@ export interface TaskTurnContext {
   readonly userMessageId: string;
 }
 
+export interface FollowUpTurnContext extends TaskTurnContext {
+  readonly action: SdarFollowUpAction;
+  readonly data?: JsonValue;
+}
 export interface TaskCoordinatorOptions {
   readonly repository: ChatPersistenceRepository;
   readonly getClient: () => Promise<SdarA2aClient>;
@@ -144,7 +149,8 @@ export class SdarTaskCoordinator {
           completedClaim = true;
         }
         for (const fragment of observed.fragments) yield fragment;
-        if (latestState !== undefined && isTerminal(latestState)) return;
+        if (latestState !== undefined && isResponseBoundary(latestState))
+          return;
       }
     } catch (error) {
       if (!signal.aborted) throw error;
@@ -157,11 +163,158 @@ export class SdarTaskCoordinator {
       if (sawMessage) return;
       throw new Error("SDAR stream ended before publishing a Task binding");
     }
-    if (latestState !== undefined && isTerminal(latestState)) return;
+    if (latestState !== undefined && isResponseBoundary(latestState)) return;
 
     yield* this.pollTask(client, binding, callerSignal);
   }
 
+  async *followUp(
+    input: FollowUpTurnContext,
+    callerSignal?: AbortSignal,
+  ): AsyncGenerator<string> {
+    const binding = await this.options.repository.findActiveTaskForChat({
+      chatId: input.chatId,
+      userId: input.userId,
+    });
+    if (binding === undefined) {
+      yield "There is no active SDAR Task for this user and chat.";
+      return;
+    }
+    const pending = pendingDetails(binding.pendingInput);
+    if (
+      !isFollowUpAllowed(input.action, binding.status, pending.internalPhase)
+    ) {
+      yield wrongPhaseMessage(binding.status, pending.internalPhase);
+      return;
+    }
+    if (input.action !== "provide_input" && input.data !== undefined) {
+      yield "Structured data is allowed only for provide_input; no Follow-up was sent.";
+      return;
+    }
+
+    const requestHash = hashJson({
+      chatId: input.chatId,
+      userId: input.userId,
+      userMessageId: input.userMessageId,
+      taskId: binding.sdarTaskId,
+      action: input.action,
+      text: input.userText,
+      ...(input.data === undefined ? {} : { data: input.data }),
+    });
+    const leaseOwner = randomUUID();
+    const claim = await this.options.repository.claimRequest({
+      idempotencyKey: input.userMessageId,
+      userId: input.userId,
+      openWebUiChatId: input.chatId,
+      requestHash,
+      leaseOwner,
+    });
+    if (claim.outcome === "conflict") {
+      yield "The same Open WebUI message ID was reused with different Follow-up content; nothing was sent.";
+      return;
+    }
+    if (claim.outcome === "in_progress") {
+      yield "This Follow-up is already being processed. Ask for task status shortly.";
+      return;
+    }
+
+    const client = await this.options.getClient();
+    if (claim.outcome === "replay") {
+      const task = await client.getTask(binding.sdarTaskId, {
+        signal: callerSignal,
+      });
+      const observed = await this.observeTask(task, binding, true);
+      for (const fragment of observed.fragments) yield fragment;
+      return;
+    }
+
+    const result = await client.sendFollowUp(
+      {
+        messageId: input.userMessageId,
+        taskId: binding.sdarTaskId,
+        contextId: binding.sdarContextId,
+        action: input.action,
+        text: input.userText,
+        userId: input.userId,
+        ...(pending.inputRequestId === undefined
+          ? {}
+          : { inputRequestId: pending.inputRequestId }),
+        ...(input.data === undefined ? {} : { data: input.data }),
+      },
+      { signal: callerSignal },
+    );
+    await this.options.repository.completeRequest({
+      idempotencyKey: input.userMessageId,
+      userId: input.userId,
+      openWebUiChatId: input.chatId,
+      requestHash,
+      leaseOwner,
+      resultTaskId: binding.sdarTaskId,
+    });
+    if (result.kind === "message") {
+      for (const fragment of renderMessage(result.message)) yield fragment;
+      return;
+    }
+    assertSameTask(result.task, binding);
+    const observed = await this.observeTask(result.task, binding, true);
+    for (const fragment of observed.fragments) yield fragment;
+  }
+
+  async *cancel(
+    input: TaskTurnContext,
+    callerSignal?: AbortSignal,
+  ): AsyncGenerator<string> {
+    const binding = await this.options.repository.findActiveTaskForChat({
+      chatId: input.chatId,
+      userId: input.userId,
+    });
+    if (binding === undefined) {
+      yield "There is no active SDAR Task for this user and chat.";
+      return;
+    }
+    const requestHash = hashJson({
+      chatId: input.chatId,
+      userId: input.userId,
+      userMessageId: input.userMessageId,
+      taskId: binding.sdarTaskId,
+      operation: "cancelTask",
+    });
+    const leaseOwner = randomUUID();
+    const claim = await this.options.repository.claimRequest({
+      idempotencyKey: input.userMessageId,
+      userId: input.userId,
+      openWebUiChatId: input.chatId,
+      requestHash,
+      leaseOwner,
+    });
+    if (claim.outcome === "conflict") {
+      yield "The same Open WebUI message ID was reused with different cancellation content; no cancellation was sent.";
+      return;
+    }
+    if (claim.outcome === "in_progress") {
+      yield "Cancellation is already being processed. Ask for task status shortly.";
+      return;
+    }
+    const client = await this.options.getClient();
+    const task =
+      claim.outcome === "replay"
+        ? await client.getTask(binding.sdarTaskId, { signal: callerSignal })
+        : await client.cancelTask(binding.sdarTaskId, { signal: callerSignal });
+    assertSameTask(task, binding);
+    if (claim.outcome !== "replay") {
+      await this.options.repository.completeRequest({
+        idempotencyKey: input.userMessageId,
+        userId: input.userId,
+        openWebUiChatId: input.chatId,
+        requestHash,
+        leaseOwner,
+        resultTaskId: binding.sdarTaskId,
+      });
+    }
+    const observed = await this.observeTask(task, binding, true);
+    for (const fragment of observed.fragments) yield fragment;
+    yield "This is the top-level SDAR Task state returned by cancelTask; it does not prove that every lower-level Provider has stopped.";
+  }
   async *status(
     input: Pick<TaskTurnContext, "chatId" | "userId">,
     callerSignal?: AbortSignal,
@@ -193,7 +346,7 @@ export class SdarTaskCoordinator {
       const observed = await this.observeTask(task, binding);
       binding = observed.binding;
       for (const fragment of observed.fragments) yield fragment;
-      if (isTerminal(task.state)) return;
+      if (isResponseBoundary(task.state)) return;
     }
     yield "SDAR is still working. This chat response is ending without cancellation; ask for status to continue.";
   }
@@ -262,11 +415,12 @@ export class SdarTaskCoordinator {
       state: event.state,
       timestamp: event.timestamp,
       eventHash: hash,
+      pendingInput: pendingSnapshot(event),
     });
     return {
       binding: updated,
       fragments: unique
-        ? renderStatus(event.state, event.message, event.phaseMessage)
+        ? renderStatus(event.state, event.message, event.phaseMessage, event)
         : [],
     };
   }
@@ -291,12 +445,18 @@ export class SdarTaskCoordinator {
       state: task.state,
       timestamp: task.statusTimestamp,
       eventHash: hash,
+      pendingInput: pendingSnapshot(task),
     });
     if (!unique && !forceRender) return { binding: updated, fragments: [] };
     return {
       binding: updated,
       fragments: [
-        ...renderStatus(task.state, task.statusMessage, task.phaseMessage),
+        ...renderStatus(
+          task.state,
+          task.statusMessage,
+          task.phaseMessage,
+          task,
+        ),
         ...(isTerminal(task.state)
           ? task.artifacts.flatMap(renderArtifact)
           : []),
@@ -344,6 +504,7 @@ export class SdarTaskCoordinator {
       readonly state: NormalizedTaskState;
       readonly timestamp?: string;
       readonly eventHash: string;
+      readonly pendingInput?: JsonValue;
     },
   ): Promise<TaskBinding> {
     return this.options.repository.updateTaskBinding({
@@ -351,6 +512,7 @@ export class SdarTaskCoordinator {
       expectedVersion: binding.version,
       status: observation.state,
       lastEventHash: observation.eventHash,
+      pendingInput: observation.pendingInput,
       ...(observation.timestamp === undefined
         ? {}
         : { lastStatusTimestamp: observation.timestamp }),
@@ -375,23 +537,185 @@ export class SdarTaskCoordinator {
   }
 }
 
+function pendingSnapshot(
+  value: PublishedStatusDetails & {
+    readonly state: NormalizedTaskState;
+    readonly phaseMessage?: string;
+  },
+): JsonValue | undefined {
+  if (value.state !== "INPUT_REQUIRED") return undefined;
+  return {
+    ...(value.internalPhase === undefined
+      ? {}
+      : { internalPhase: value.internalPhase }),
+    ...(value.inputRequestId === undefined
+      ? {}
+      : { inputRequestId: value.inputRequestId }),
+    ...(value.phaseMessage === undefined
+      ? {}
+      : { phaseMessage: value.phaseMessage }),
+  };
+}
+
+function pendingDetails(value: JsonValue | undefined): {
+  readonly internalPhase?: string;
+  readonly inputRequestId?: string;
+} {
+  if (value === undefined || value === null || Array.isArray(value)) return {};
+  if (typeof value !== "object") return {};
+  const internalPhase = value.internalPhase;
+  const inputRequestId = value.inputRequestId;
+  return {
+    ...(typeof internalPhase === "string" ? { internalPhase } : {}),
+    ...(typeof inputRequestId === "string" ? { inputRequestId } : {}),
+  };
+}
+
+function isFollowUpAllowed(
+  action: SdarFollowUpAction,
+  status: string,
+  internalPhase?: string,
+): boolean {
+  if (status === "INPUT_REQUIRED") {
+    if (internalPhase === "awaiting_plan_confirmation") {
+      return [
+        "confirm_plan",
+        "reject_plan",
+        "revise_plan",
+        "patch_goal",
+      ].includes(action);
+    }
+    if (internalPhase === "awaiting_user_input") {
+      return action === "provide_input";
+    }
+    if (internalPhase === "paused") return action === "resume";
+    return false;
+  }
+  return ["patch_goal", "cancel_goal", "pause"].includes(action);
+}
+
+function wrongPhaseMessage(status: string, internalPhase?: string): string {
+  const phase = internalPhase ?? "unpublished";
+  return `Follow-up was not sent: action is not allowed for SDAR status ${status} and internalPhase ${phase}.`;
+}
+
+function assertSameTask(task: NormalizedTask, binding: TaskBinding): void {
+  if (
+    task.taskId !== binding.sdarTaskId ||
+    task.contextId !== binding.sdarContextId
+  ) {
+    throw new Error("SDAR returned a mismatched Task identity");
+  }
+}
+
+function inputRequiredExplanation(internalPhase?: string): string {
+  if (internalPhase === "awaiting_plan_confirmation") {
+    return "SDAR is waiting for an explicit plan decision: confirm, reject, revise the plan, or patch the goal. No decision is inferred automatically.";
+  }
+  if (internalPhase === "awaiting_user_input") {
+    return "SDAR is waiting for the requested user input. A substantive reply will be sent as provide_input.";
+  }
+  if (internalPhase === "paused") {
+    return "SDAR is paused. Send an explicit resume request to continue.";
+  }
+  return "SDAR requires input, but its published internalPhase is missing or unsupported. No Follow-up will be inferred.";
+}
+
+function isCapabilityGap(details: PublishedStatusDetails): boolean {
+  return (
+    details.internalPhase === "capability_gap" ||
+    details.errorCode === "CAPABILITY_GAP" ||
+    details.capabilityGap !== undefined
+  );
+}
+
+function safeErrorCode(value: string | undefined): string | undefined {
+  return value !== undefined && /^[A-Z0-9_.-]{1,128}$/u.test(value)
+    ? value
+    : undefined;
+}
+
+function safePublishedText(
+  value: string | undefined,
+  limit: number,
+): string | undefined {
+  if (value === undefined) return undefined;
+  const redacted = value
+    .replace(/Bearer\s+\S+/giu, "Bearer [REDACTED]")
+    .replace(
+      /(password|secret|token|api[_-]?key)\s*[:=]\s*\S+/giu,
+      "$1=[REDACTED]",
+    )
+    .split("")
+    .filter((character) => {
+      const code = character.charCodeAt(0);
+      return (
+        code === 9 || code === 10 || code === 13 || (code >= 32 && code !== 127)
+      );
+    })
+    .join("")
+    .trim();
+  if (redacted.length === 0) return undefined;
+  return redacted.length <= limit
+    ? redacted
+    : redacted.slice(0, limit) + "... truncated";
+}
+interface PublishedStatusDetails {
+  readonly internalPhase?: string;
+  readonly inputRequestId?: string;
+  readonly errorCode?: string;
+  readonly capabilityGap?: JsonValue;
+  readonly nextAction?: string;
+}
+
 function renderStatus(
   state: NormalizedTaskState,
   message?: NormalizedMessage,
   phaseMessage?: string,
+  details: PublishedStatusDetails = {},
 ): string[] {
   const text = message === undefined ? [] : renderMessage(message);
-  const phase =
-    phaseMessage === undefined || phaseMessage.trim().length === 0
-      ? []
-      : [phaseMessage.trim()];
-  return [`**SDAR status: ${state}**`, ...text, ...phase];
+  const phase = safePublishedText(phaseMessage, 4_000);
+  const base = [
+    `**SDAR status: ${state}**`,
+    ...text,
+    ...(phase === undefined ? [] : [phase]),
+  ];
+  if (state === "INPUT_REQUIRED") {
+    return [...base, inputRequiredExplanation(details.internalPhase)];
+  }
+  if (state === "FAILED" && isCapabilityGap(details)) {
+    return [
+      ...base,
+      "SDAR reported a Capability Gap, not a chat-server protocol failure.",
+      ...(details.capabilityGap === undefined
+        ? []
+        : ["```json\n" + boundedJson(details.capabilityGap) + "\n```"]),
+      ...(safePublishedText(details.nextAction, 512) === undefined
+        ? []
+        : [
+            "Next action published by SDAR: " +
+              safePublishedText(details.nextAction, 512),
+          ]),
+    ];
+  }
+  if (state === "FAILED") {
+    const code = safeErrorCode(details.errorCode);
+    return [
+      ...base,
+      "SDAR reported a business failure.",
+      ...(code === undefined ? [] : ["Published error code: `" + code + "`"]),
+    ];
+  }
+  return base;
 }
 
 function renderMessage(message: NormalizedMessage): string[] {
   return message.parts.flatMap((part) =>
     part.kind === "text" && part.text !== undefined
-      ? [part.text.trim()].filter(Boolean)
+      ? [safePublishedText(part.text, 8_000)].filter(
+          (value): value is string => value !== undefined,
+        )
       : [],
   );
 }
@@ -399,7 +723,9 @@ function renderMessage(message: NormalizedMessage): string[] {
 function renderArtifact(artifact: NormalizedArtifact): string[] {
   return artifact.parts.flatMap((part) => {
     if (part.kind === "text" && part.text !== undefined) {
-      return [part.text.trim()].filter(Boolean);
+      return [safePublishedText(part.text, 16_000)].filter(
+        (value): value is string => value !== undefined,
+      );
     }
     if (part.kind === "data" && part.data !== undefined) {
       return ["```json\n" + boundedJson(part.data) + "\n```"];
@@ -434,6 +760,9 @@ function isTerminal(state: NormalizedTaskState): boolean {
   return terminalStates.has(state);
 }
 
+function isResponseBoundary(state: NormalizedTaskState): boolean {
+  return isTerminal(state) || state === "INPUT_REQUIRED";
+}
 function eventState(
   event: NormalizedStreamEvent,
 ): NormalizedTaskState | undefined {

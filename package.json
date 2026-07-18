@@ -32,7 +32,8 @@
     "test:persistence": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --testPathPattern=\\.postgres\\.int\\.test\\.ts$",
     "verify:phase4": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
     "verify:phase5": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
-    "verify:phase6": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build"
+    "verify:phase6": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
+    "verify:phase7": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build"
   },
   "dependencies": {
     "@a2a-js/sdk": "1.0.0-beta.0",

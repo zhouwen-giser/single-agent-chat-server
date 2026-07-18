@@ -1,6 +1,6 @@
 # OpenAI-compatible API contract
 
-Status: Phase 6 bounded SDAR streaming and recovery.
+Status: Phase 7 SDAR Follow-up, cancellation, and safe terminal outcomes.
 
 ## Authentication
 
@@ -55,6 +55,17 @@ browser-specific event protocol is used.
 Client disconnect aborts only this HTTP observation. It never maps to
 `cancelTask`. A later status request can resume observation through the
 persisted user/chat/Task binding and `getTask`.
+
+## Active Task interaction
+
+A status turn refreshes the authorized binding with `getTask` and never sends a
+Task Message. Explicit plan decisions, requested user input, pause/resume, goal
+patch/cancel actions, and top-level Task cancellation are phase-gated before an
+A2A operation. Ordinary text at plan confirmation never implies approval.
+
+Streaming protocol failures produce a generic safe delta and still terminate
+with the standard stop chunk and `[DONE]`; internal endpoints, tokens, and
+exception messages are not exposed.
 
 ## Errors and limits
 

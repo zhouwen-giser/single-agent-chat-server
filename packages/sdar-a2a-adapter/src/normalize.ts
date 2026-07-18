@@ -68,6 +68,14 @@ export function normalizeArtifact(artifact: Artifact): NormalizedArtifact {
   };
 }
 
+function inputRequestId(
+  metadata: Record<string, unknown> | undefined,
+): string | undefined {
+  return (
+    metadataString(metadata, "input_request_id") ??
+    metadataString(metadata, "inputRequestId")
+  );
+}
 export function normalizeState(state: TaskState): NormalizedTaskState {
   const states: Record<number, NormalizedTaskState> = {
     [TaskState.TASK_STATE_UNSPECIFIED]: "UNSPECIFIED",
@@ -108,6 +116,9 @@ export function normalizeTask(task: Task): NormalizedTask {
     ...(metadataString(metadata, "internalPhase") === undefined
       ? {}
       : { internalPhase: metadataString(metadata, "internalPhase") }),
+    ...(inputRequestId(metadata) === undefined
+      ? {}
+      : { inputRequestId: inputRequestId(metadata) }),
     ...(metadataString(metadata, "phaseMessage") === undefined
       ? {}
       : { phaseMessage: metadataString(metadata, "phaseMessage") }),
@@ -173,12 +184,18 @@ export function normalizeStreamEvent(
       ...(metadataString(metadata, "internalPhase") === undefined
         ? {}
         : { internalPhase: metadataString(metadata, "internalPhase") }),
+      ...(inputRequestId(metadata) === undefined
+        ? {}
+        : { inputRequestId: inputRequestId(metadata) }),
       ...(metadataString(metadata, "phaseMessage") === undefined
         ? {}
         : { phaseMessage: metadataString(metadata, "phaseMessage") }),
       ...(metadataString(metadata, "errorCode") === undefined
         ? {}
         : { errorCode: metadataString(metadata, "errorCode") }),
+      ...(metadataString(metadata, "nextAction") === undefined
+        ? {}
+        : { nextAction: metadataString(metadata, "nextAction") }),
       ...(metadata?.capabilityGap === undefined
         ? {}
         : { capabilityGap: metadata.capabilityGap as JsonValue }),

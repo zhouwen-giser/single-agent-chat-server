@@ -335,6 +335,25 @@ describe("OpenAI-compatible HTTP contracts", () => {
     ]);
     expect(response.body).toMatch(/data: \[DONE\]\n\n$/u);
   });
+  it("redacts streaming protocol failures and still terminates SSE", async () => {
+    const response = await createServer({
+      runChat: async () =>
+        (async function* () {
+          yield "published progress";
+          throw new Error("Bearer secret-token internal endpoint");
+        })(),
+    }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: { ...chatPayload(), stream: true },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain("failed safely");
+    expect(response.body).not.toContain("secret-token");
+    expect(response.body).toMatch(/data: \[DONE\]\n\n$/u);
+  });
   it("rejects invalid bodies and conflicting token limits", async () => {
     const server = createServer();
     const emptyMessages = await server.inject({

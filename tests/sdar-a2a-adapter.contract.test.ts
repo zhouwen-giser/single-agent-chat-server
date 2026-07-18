@@ -87,6 +87,8 @@ async function startMock(
       json(response, {
         task: taskJson("TASK_STATE_INPUT_REQUIRED", {
           internalPhase: "awaiting_user_input",
+          inputRequestId: "request-1",
+          input_request_id: "request-1",
         }),
       });
       return;
@@ -237,6 +239,7 @@ describe("official SDAR A2A adapter HTTP+JSON contract", () => {
         taskId: "task-1",
         state: "INPUT_REQUIRED",
         internalPhase: "awaiting_user_input",
+        inputRequestId: "request-1",
       },
     });
     const request = seen.find((item) => item.url === "/a2a/message:send");

@@ -14,6 +14,8 @@ import {
   runMigrations,
 } from "../packages/persistence/src/index.js";
 import type {
+  FollowUpInput,
+  NormalizedSendResult,
   NormalizedStreamEvent,
   NormalizedTask,
   OperationOptions,
@@ -208,6 +210,215 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     expect(replay).toEqual(["**SDAR status: COMPLETED**", "first result"]);
   });
 
+  it("stops at plan confirmation without inferring an automatic decision", async () => {
+    const client = new FakeClient([
+      {
+        kind: "task",
+        task: {
+          ...task("INPUT_REQUIRED", "Review this plan"),
+          internalPhase: "awaiting_plan_confirmation",
+        },
+      },
+    ]);
+    const output = await collect(coordinator(client).submit(turn()));
+
+    expect(output.join("\n")).toContain("explicit plan decision");
+    expect(client.getCount).toBe(0);
+    const binding = await repository.findActiveTaskForChat({
+      chatId: "chat-a",
+      userId: "user-a",
+    });
+    expect(binding?.pendingInput).toMatchObject({
+      internalPhase: "awaiting_plan_confirmation",
+    });
+  });
+
+  it.each(["confirm_plan", "reject_plan", "revise_plan"] as const)(
+    "sends explicit %s only in the plan-confirmation phase",
+    async (action) => {
+      await seedBinding("INPUT_REQUIRED", {
+        internalPhase: "awaiting_plan_confirmation",
+      });
+      const client = new InteractiveClient(
+        task("WORKING", "decision accepted"),
+      );
+      const output = await collect(
+        coordinator(client).followUp({ ...turn(), action }),
+      );
+
+      expect(client.followUps).toHaveLength(1);
+      expect(client.followUps[0]).toMatchObject({
+        action,
+        taskId: "task-a",
+        contextId: "context-a",
+        userId: "user-a",
+      });
+      expect(output.join("\n")).toContain("decision accepted");
+    },
+  );
+
+  it("sends provide_input with the published input_request_id and one Data value", async () => {
+    await seedBinding("INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+      inputRequestId: "input-42",
+    });
+    const client = new InteractiveClient(task("WORKING", "input accepted"));
+    await collect(
+      coordinator(client).followUp({
+        ...turn(),
+        action: "provide_input",
+        data: { answer: 42 },
+      }),
+    );
+
+    expect(client.followUps[0]).toMatchObject({
+      action: "provide_input",
+      inputRequestId: "input-42",
+      data: { answer: 42 },
+    });
+  });
+
+  it("rejects a wrong phase/action locally without contacting SDAR", async () => {
+    await seedBinding("INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+    });
+    const client = new InteractiveClient(task("WORKING"));
+    const output = await collect(
+      coordinator(client).followUp({ ...turn(), action: "confirm_plan" }),
+    );
+
+    expect(output[0]).toContain("not allowed");
+    expect(client.followUps).toEqual([]);
+  });
+
+  it("resumes only a published paused interaction", async () => {
+    await seedBinding("INPUT_REQUIRED", { internalPhase: "paused" });
+    const client = new InteractiveClient(task("WORKING", "resumed"));
+    await collect(
+      coordinator(client).followUp({ ...turn(), action: "resume" }),
+    );
+    expect(client.followUps[0]?.action).toBe("resume");
+  });
+
+  it("sends pause for a working Task", async () => {
+    await seedBinding("WORKING");
+    const client = new InteractiveClient({
+      ...task("INPUT_REQUIRED", "paused by user"),
+      internalPhase: "paused",
+    });
+    await collect(coordinator(client).followUp({ ...turn(), action: "pause" }));
+    expect(client.followUps[0]?.action).toBe("pause");
+  });
+
+  it("renders rejected user input and preserves the awaiting-input phase", async () => {
+    await seedBinding("INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+      inputRequestId: "input-42",
+    });
+    const client = new InteractiveClient({
+      ...task("INPUT_REQUIRED", "Input rejected: use an integer"),
+      internalPhase: "awaiting_user_input",
+      inputRequestId: "input-43",
+    });
+    const output = await collect(
+      coordinator(client).followUp({ ...turn(), action: "provide_input" }),
+    );
+
+    expect(output.join("\n")).toContain("Input rejected");
+    const binding = await repository.findActiveTaskForChat({
+      chatId: "chat-a",
+      userId: "user-a",
+    });
+    expect(binding?.pendingInput).toMatchObject({
+      internalPhase: "awaiting_user_input",
+      inputRequestId: "input-43",
+    });
+  });
+  it("uses top-level cancelTask and renders exactly the returned state boundary", async () => {
+    await seedBinding("WORKING");
+    const client = new InteractiveClient(task("CANCELED", "cancel accepted"));
+    const output = await collect(coordinator(client).cancel(turn()));
+
+    expect(client.cancelCount).toBe(1);
+    expect(output.join("\n")).toContain("**SDAR status: CANCELED**");
+    expect(output.at(-1)).toContain("does not prove");
+  });
+
+  it("distinguishes and redacts Capability Gap from business failure", async () => {
+    await seedBinding("WORKING");
+    const client = new FakeClient(
+      [],
+      [
+        {
+          ...task("FAILED", "token=super-secret capability missing"),
+          internalPhase: "capability_gap",
+          errorCode: "CAPABILITY_GAP",
+          capabilityGap: { capability: "geo-analysis" },
+          nextAction: "register-capability-and-submit-new-task",
+        },
+      ],
+    );
+    const output = await collect(
+      coordinator(client).status({ chatId: "chat-a", userId: "user-a" }),
+    );
+
+    expect(output.join("\n")).toContain("Capability Gap");
+    expect(output.join("\n")).toContain("geo-analysis");
+    expect(output.join("\n")).not.toContain("super-secret");
+  });
+
+  it("labels an ordinary failed Task as a redacted business failure", async () => {
+    await seedBinding("WORKING");
+    const client = new FakeClient(
+      [],
+      [
+        {
+          ...task("FAILED", "password=hunter2 execution failed"),
+          errorCode: "EXECUTION_FAILED",
+        },
+      ],
+    );
+    const output = await collect(
+      coordinator(client).status({ chatId: "chat-a", userId: "user-a" }),
+    );
+
+    expect(output.join("\n")).toContain("business failure");
+    expect(output.join("\n")).toContain("EXECUTION_FAILED");
+    expect(output.join("\n")).not.toContain("hunter2");
+    expect(output.join("\n")).not.toContain("Capability Gap");
+  });
+  it("fails closed when cancelTask returns a different Task identity", async () => {
+    await seedBinding("WORKING");
+    const client = new InteractiveClient({
+      ...task("CANCELED"),
+      taskId: "different-task",
+    });
+    await expect(collect(coordinator(client).cancel(turn()))).rejects.toThrow(
+      "mismatched Task identity",
+    );
+  });
+
+  async function seedBinding(
+    status: string,
+    pendingInput?: Record<string, string>,
+  ): Promise<void> {
+    const binding = await repository.createTaskBinding({
+      openWebUiChatId: "chat-a",
+      userId: "user-a",
+      sdarTaskId: "task-a",
+      sdarContextId: "context-a",
+      status,
+    });
+    if (pendingInput !== undefined) {
+      await repository.updateTaskBinding({
+        bindingId: binding.bindingId,
+        expectedVersion: binding.version,
+        status,
+        pendingInput,
+        terminal: false,
+      });
+    }
+  }
   function coordinator(
     client: SdarA2aClient,
     overrides: Partial<
@@ -258,11 +469,31 @@ class FakeClient implements SdarA2aClient {
     return task("CANCELED");
   }
 
-  async sendFollowUp(): Promise<never> {
-    throw new Error("not used in Phase 6");
+  async sendFollowUp(input: FollowUpInput): Promise<NormalizedSendResult> {
+    void input;
+    throw new Error("not used by this test client");
   }
 }
 
+class InteractiveClient extends FakeClient {
+  readonly followUps: FollowUpInput[] = [];
+
+  constructor(private readonly returnedTask: NormalizedTask) {
+    super([]);
+  }
+
+  override async sendFollowUp(
+    input: FollowUpInput,
+  ): Promise<NormalizedSendResult> {
+    this.followUps.push(input);
+    return { kind: "task", task: this.returnedTask };
+  }
+
+  override async cancelTask(): Promise<NormalizedTask> {
+    this.cancelCount += 1;
+    return this.returnedTask;
+  }
+}
 class HangingClient extends FakeClient {
   streamSignalAborted = false;
   nextTask = task("WORKING", "still working");

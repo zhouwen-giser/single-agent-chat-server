@@ -120,6 +120,12 @@ function classifyGuardedFollowUp(
         : undefined;
     }
   }
+  if (
+    task !== undefined &&
+    /(?:\u53d6\u6d88\u76ee\u6807|cancel (?:the )?goal)/iu.test(text)
+  ) {
+    return "cancel_goal";
+  }
   if (task !== undefined && /(?:\u6682\u505c|pause)/iu.test(text))
     return "pause";
   if (
