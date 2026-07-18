@@ -7,8 +7,8 @@
   "license": "Apache-2.0",
   "packageManager": "pnpm@11.13.1",
   "engines": {
-    "node": ">=22.14.0 <23",
-    "pnpm": ">=11.13.1 <12"
+    "node": "\u003e=22.14.0 \u003c23",
+    "pnpm": "\u003e=11.13.1 \u003c12"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -21,16 +21,17 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "dev:graph": "langgraph dev --no-browser",
-    "verify:phase0": "pnpm format:check && pnpm lint && pnpm lint:langgraph-json && pnpm typecheck && pnpm test:unit && pnpm test:integration && pnpm build",
+    "verify:phase0": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
     "start": "node dist/apps/server/src/main.js",
     "dev:server": "tsx watch apps/server/src/main.ts",
     "test:contract": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --testPathPattern=\\.contract\\.test\\.ts$",
-    "verify:phase1": "pnpm format:check && pnpm lint && pnpm lint:langgraph-json && pnpm typecheck && pnpm test:unit && pnpm test:contract && pnpm test:integration && pnpm build",
-    "verify:phase2": "pnpm format:check && pnpm lint && pnpm lint:langgraph-json && pnpm typecheck && pnpm test:unit && pnpm test:contract && pnpm test:integration && pnpm build",
-    "verify:phase3": "pnpm format:check && pnpm lint && pnpm lint:langgraph-json && pnpm typecheck && pnpm test:unit && pnpm test:contract && pnpm test:integration && pnpm build",
+    "verify:phase1": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
+    "verify:phase2": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
+    "verify:phase3": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
     "migrate": "tsx scripts/migrate.ts",
     "test:persistence": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --testPathPattern=\\.postgres\\.int\\.test\\.ts$",
-    "verify:phase4": "pnpm format:check && pnpm lint && pnpm lint:langgraph-json && pnpm typecheck && pnpm test:unit && pnpm test:contract && pnpm test:integration && pnpm build"
+    "verify:phase4": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
+    "verify:phase5": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build"
   },
   "dependencies": {
     "@a2a-js/sdk": "1.0.0-beta.0",

@@ -1,14 +1,35 @@
+import { createHmac } from "node:crypto";
+
 import { afterEach, describe, expect, it } from "@jest/globals";
 import type { FastifyInstance } from "fastify";
 
-import { buildServer } from "../apps/server/src/bootstrap.js";
+import {
+  buildServer,
+  type BuildServerOptions,
+} from "../apps/server/src/bootstrap.js";
+import type { ChatRunnerContext } from "../apps/server/src/api/openai-routes.js";
 import type { ServerConfig } from "../apps/server/src/config.js";
 
 const serviceKey = "phase-1-test-service-key-32-bytes-minimum";
-const authorization = { authorization: `Bearer ${serviceKey}` };
+const jwtSecret = "phase-5-openwebui-jwt-secret-32-bytes-minimum";
+const nowMilliseconds = 1_700_000_000_000;
+const nowSeconds = Math.floor(nowMilliseconds / 1000);
+const authorization = { authorization: "Bearer " + serviceKey };
+const signedIdentity = signIdentity({ sub: "user-a" });
+const identityHeaders = {
+  ...authorization,
+  "x-openwebui-user-jwt": signedIdentity,
+};
+const chatHeaders = {
+  ...identityHeaders,
+  "x-openwebui-chat-id": "chat-a",
+  "x-openwebui-message-id": "assistant-message-a",
+  "x-openwebui-user-message-id": "user-message-a",
+};
 const chatResponse = "thin graph response";
 const config: ServerConfig = {
   serviceKey,
+  openWebUiUserJwtSecret: jwtSecret,
   host: "127.0.0.1",
   port: 3000,
   bodyLimitBytes: 1024,
@@ -18,12 +39,24 @@ const config: ServerConfig = {
 
 const servers: FastifyInstance[] = [];
 
-function createServer(): FastifyInstance {
+function createServer(
+  overrides: Partial<
+    Pick<BuildServerOptions, "runChat" | "resolveChatThread">
+  > = {},
+): FastifyInstance {
   const server = buildServer({
     config,
-    now: () => 1_700_000_000_000,
+    now: () => nowMilliseconds,
     nextId: () => "fixed-id",
-    runChat: async () => chatResponse,
+    runChat: overrides.runChat ?? (async () => chatResponse),
+    resolveChatThread:
+      overrides.resolveChatThread ??
+      (async (input) => ({
+        threadId: input.userId + ":" + input.openWebUiChatId,
+        openWebUiChatId: input.openWebUiChatId,
+        userId: input.userId,
+        userRole: input.userRole,
+      })),
   });
   servers.push(server);
   return server;
@@ -48,7 +81,7 @@ describe("OpenAI-compatible HTTP contracts", () => {
     });
   });
 
-  it("requires the exact service bearer key for OpenAI routes", async () => {
+  it("requires the exact service bearer key before user identity", async () => {
     const server = createServer();
     const missing = await server.inject({ method: "GET", url: "/v1/models" });
     const invalid = await server.inject({
@@ -61,13 +94,14 @@ describe("OpenAI-compatible HTTP contracts", () => {
     expect(missing.headers["www-authenticate"]).toBe("Bearer");
     expect(missing.json().error.code).toBe("invalid_api_key");
     expect(invalid.statusCode).toBe(401);
+    expect(invalid.json().error.code).toBe("invalid_api_key");
   });
 
-  it("returns stable model discovery for Open WebUI", async () => {
+  it("accepts a valid signed Open WebUI identity", async () => {
     const response = await createServer().inject({
       method: "GET",
       url: "/v1/models",
-      headers: authorization,
+      headers: identityHeaders,
     });
 
     expect(response.statusCode).toBe(200);
@@ -77,61 +111,166 @@ describe("OpenAI-compatible HTTP contracts", () => {
         {
           id: "sdar-single-agent",
           object: "model",
-          created: 1_700_000_000,
+          created: nowSeconds,
           owned_by: "single-agent-chat-server",
         },
       ],
     });
   });
 
-  it("returns an OpenAI chat completion without invoking SDAR", async () => {
+  it("rejects missing, expired, forged, and plaintext-only identity", async () => {
+    const server = createServer();
+    const missing = await server.inject({
+      method: "GET",
+      url: "/v1/models",
+      headers: authorization,
+    });
+    const expired = await server.inject({
+      method: "GET",
+      url: "/v1/models",
+      headers: {
+        ...authorization,
+        "x-openwebui-user-jwt": signIdentity({
+          sub: "expired-user",
+          iat: nowSeconds - 400,
+          exp: nowSeconds - 100,
+        }),
+      },
+    });
+    const forged = await server.inject({
+      method: "GET",
+      url: "/v1/models",
+      headers: {
+        ...authorization,
+        "x-openwebui-user-jwt": signIdentity(
+          { sub: "forged-user" },
+          "different-32-character-signing-secret",
+        ),
+      },
+    });
+    const plaintextOnly = await server.inject({
+      method: "GET",
+      url: "/v1/models",
+      headers: {
+        ...authorization,
+        "x-openwebui-user-id": "attacker",
+        "x-openwebui-user-role": "admin",
+      },
+    });
+
+    for (const response of [missing, expired, forged, plaintextOnly]) {
+      expect(response.statusCode).toBe(401);
+      expect(response.json().error.code).toBe("invalid_user_identity");
+    }
+  });
+
+  it("requires custom Chat and Message identifiers", async () => {
     const response = await createServer().inject({
       method: "POST",
       url: "/v1/chat/completions",
-      headers: authorization,
+      headers: identityHeaders,
+      payload: chatPayload(),
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.message).toContain(
+      "Open WebUI request headers",
+    );
+  });
+
+  it("returns an OpenAI chat completion with authenticated context", async () => {
+    let observed: ChatRunnerContext | undefined;
+    const response = await createServer({
+      runChat: async (context) => {
+        observed = context;
+        return chatResponse;
+      },
+    }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
       payload: {
-        model: "sdar-single-agent",
-        messages: [{ role: "user", content: "hello" }],
+        ...chatPayload(),
         temperature: 0.2,
         top_p: 0.9,
         max_completion_tokens: 128,
-        user: "opaque-user",
+        user: "untrusted-opaque-user",
         unsupported_but_ignored: true,
       },
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({
-      id: "chatcmpl-fixed-id",
-      object: "chat.completion",
-      created: 1_700_000_000,
-      model: "sdar-single-agent",
-      choices: [
-        {
-          index: 0,
-          message: {
-            role: "assistant",
-            content: chatResponse,
-          },
-          finish_reason: "stop",
-        },
-      ],
-      usage: {
-        prompt_tokens: 0,
-        completion_tokens: 0,
-        total_tokens: 0,
+    expect(observed).toMatchObject({
+      userText: "hello",
+      identity: { userId: "user-a", role: "user" },
+      openWebUi: {
+        chatId: "chat-a",
+        messageId: "assistant-message-a",
+        userMessageId: "user-message-a",
+      },
+      threadId: "user-a:chat-a",
+    });
+    expect(response.json().choices[0].message.content).toBe(chatResponse);
+  });
+
+  it("isolates two signed users that present the same Chat ID", async () => {
+    const contexts: ChatRunnerContext[] = [];
+    const server = createServer({
+      runChat: async (context) => {
+        contexts.push(context);
+        return chatResponse;
       },
     });
+    for (const userId of ["user-a", "user-b"]) {
+      const response = await server.inject({
+        method: "POST",
+        url: "/v1/chat/completions",
+        headers: {
+          ...chatHeaders,
+          "x-openwebui-user-jwt": signIdentity({ sub: userId }),
+        },
+        payload: chatPayload(),
+      });
+      expect(response.statusCode).toBe(200);
+    }
+
+    expect(contexts.map(({ threadId }) => threadId)).toEqual([
+      "user-a:chat-a",
+      "user-b:chat-a",
+    ]);
+  });
+
+  it("routes utility requests through the local deterministic graph", async () => {
+    const server = buildServer({
+      config,
+      now: () => nowMilliseconds,
+      nextId: () => "utility-id",
+      resolveChatThread: async (input) => ({
+        threadId: "utility-thread",
+        openWebUiChatId: input.openWebUiChatId,
+        userId: input.userId,
+        userRole: input.userRole,
+      }),
+    });
+    servers.push(server);
+    const response = await server.inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: { ...chatHeaders, "x-openwebui-task": "title_generation" },
+      payload: chatPayload(),
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().choices[0].message.content).toBe("Single SDAR chat");
   });
 
   it("returns standard SSE chunks, optional usage, and DONE", async () => {
     const response = await createServer().inject({
       method: "POST",
       url: "/v1/chat/completions",
-      headers: authorization,
+      headers: chatHeaders,
       payload: {
-        model: "sdar-single-agent",
-        messages: [{ role: "user", content: "hello" }],
+        ...chatPayload(),
         stream: true,
         stream_options: { include_usage: true },
       },
@@ -166,16 +305,15 @@ describe("OpenAI-compatible HTTP contracts", () => {
     const emptyMessages = await server.inject({
       method: "POST",
       url: "/v1/chat/completions",
-      headers: authorization,
+      headers: chatHeaders,
       payload: { model: "sdar-single-agent", messages: [] },
     });
     const conflictingLimits = await server.inject({
       method: "POST",
       url: "/v1/chat/completions",
-      headers: authorization,
+      headers: chatHeaders,
       payload: {
-        model: "sdar-single-agent",
-        messages: [{ role: "user", content: "hello" }],
+        ...chatPayload(),
         max_tokens: 10,
         max_completion_tokens: 10,
       },
@@ -190,11 +328,8 @@ describe("OpenAI-compatible HTTP contracts", () => {
     const response = await createServer().inject({
       method: "POST",
       url: "/v1/chat/completions",
-      headers: authorization,
-      payload: {
-        model: "another-model",
-        messages: [{ role: "user", content: "hello" }],
-      },
+      headers: chatHeaders,
+      payload: { ...chatPayload(), model: "another-model" },
     });
 
     expect(response.statusCode).toBe(404);
@@ -209,11 +344,11 @@ describe("OpenAI-compatible HTTP contracts", () => {
       method: "POST",
       url: "/v1/chat/completions",
       headers: {
-        ...authorization,
+        ...chatHeaders,
         "content-type": "application/json",
       },
       payload: JSON.stringify({
-        model: "sdar-single-agent",
+        ...chatPayload(),
         messages: [{ role: "user", content: "x".repeat(2000) }],
       }),
     });
@@ -222,3 +357,39 @@ describe("OpenAI-compatible HTTP contracts", () => {
     expect(response.json().error.code).toBe("request_too_large");
   });
 });
+
+function chatPayload() {
+  return {
+    model: "sdar-single-agent",
+    messages: [{ role: "user", content: "hello" }],
+  };
+}
+
+function signIdentity(
+  overrides: {
+    readonly sub: string;
+    readonly iat?: number;
+    readonly exp?: number;
+    readonly role?: string;
+  },
+  secret = jwtSecret,
+): string {
+  const header = encode({ alg: "HS256", typ: "JWT" });
+  const payload = encode({
+    iss: "open-webui",
+    sub: overrides.sub,
+    role: overrides.role ?? "user",
+    iat: overrides.iat ?? nowSeconds - 1,
+    exp: overrides.exp ?? nowSeconds + 299,
+    email: overrides.sub + "@example.test",
+    name: overrides.sub,
+  });
+  const signature = createHmac("sha256", secret)
+    .update(header + "." + payload, "ascii")
+    .digest("base64url");
+  return header + "." + payload + "." + signature;
+}
+
+function encode(value: unknown): string {
+  return Buffer.from(JSON.stringify(value), "utf8").toString("base64url");
+}

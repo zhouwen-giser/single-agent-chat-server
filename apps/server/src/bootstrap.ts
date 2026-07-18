@@ -10,7 +10,7 @@ import type { ServerConfig } from "./config.js";
 
 export interface BuildServerOptions extends Pick<
   OpenAiRoutesOptions,
-  "now" | "nextId" | "runChat"
+  "now" | "nextId" | "runChat" | "resolveChatThread" | "checkpointer"
 > {
   readonly config: ServerConfig;
   readonly logger?: boolean;
@@ -50,9 +50,13 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
   void server.register(registerOpenAiRoutes, {
     prefix: "/v1",
     config: options.config,
+    resolveChatThread: options.resolveChatThread,
     ...(options.now === undefined ? {} : { now: options.now }),
     ...(options.nextId === undefined ? {} : { nextId: options.nextId }),
     ...(options.runChat === undefined ? {} : { runChat: options.runChat }),
+    ...(options.checkpointer === undefined
+      ? {}
+      : { checkpointer: options.checkpointer }),
   });
   return server;
 }

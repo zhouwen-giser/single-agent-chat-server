@@ -1,5 +1,5 @@
 import { AIMessage } from "@langchain/core/messages";
-import { StateGraph } from "@langchain/langgraph";
+import { StateGraph, type BaseCheckpointSaver } from "@langchain/langgraph";
 
 import { classifyTurn } from "./classification.js";
 import { localFallbackChatModel, type StructuredChatModel } from "./model.js";
@@ -7,6 +7,7 @@ import { StateAnnotation } from "./state.js";
 
 export function createSingleAgentChatGraph(
   model: StructuredChatModel = localFallbackChatModel,
+  checkpointer?: BaseCheckpointSaver,
 ) {
   const normalizeRequest = async (
     state: typeof StateAnnotation.State,
@@ -89,7 +90,9 @@ export function createSingleAgentChatGraph(
     .addEdge("respond_without_tools", "compose_response")
     .addEdge("compose_response", "__end__");
 
-  const compiled = builder.compile();
+  const compiled = builder.compile(
+    checkpointer === undefined ? {} : { checkpointer },
+  );
   compiled.name = "Thin Single SDAR Chat Graph";
   return compiled;
 }

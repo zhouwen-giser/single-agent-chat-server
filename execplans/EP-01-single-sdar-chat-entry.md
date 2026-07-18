@@ -51,6 +51,8 @@ Open WebUI
 - [x] 2026-07-18: Phase 3 verified, committed as 34641c6, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 4 verified, committed as b8be3b3, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 4 PostgreSQL checkpoints, bindings, events, and idempotency complete.
+- [ ] 2026-07-18: Phase 5 implementation, full gate, and real isolated pip
+      Open WebUI 0.10.2 proxy smoke passed; publication is pending.
 - [ ] Phase 5: Open WebUI signed identity and chat continuity.
 - [ ] Phase 6: submission, status, bounded streaming, and polling fallback.
 - [ ] Phase 7: follow-up, input, cancellation, and terminal outcomes.
@@ -142,6 +144,15 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
   leases for conflict, replay, and interrupted-worker recovery. Never infer an
   A2A cursor from the local event cache.
 
+- The first isolated Open WebUI smoke inherited the chat server DATABASE_URL
+  and failed before proxy testing because the pip install lacked psycopg2.
+  Removing that variable only from the Open WebUI child restored its isolated
+  SQLite default; real signed model discovery and chat proxying then passed.
+
+- 2026-07-18: Accept only Open WebUI 0.10.2 default X-OpenWebUI-User-Jwt
+  with HS256 and strict claims. Do not trust plaintext user headers or permit
+  configurable algorithms/header names on the server side.
+
 ## Outcomes & Retrospective
 
 Phase 0 has a reproducible scaffold and verified upstream evidence. Publication
@@ -174,3 +185,11 @@ recovery, process restart, binding authorization, event deduplication, and
 terminal monotonicity. The built server completed startup reconciliation and
 reported ready against that database. No final SDAR/Open WebUI E2E is claimed;
 Phase 4 is published; Phase 5 Open WebUI identity integration is next.
+
+## Phase 5 outcome
+
+Two-layer Open WebUI authentication, strict session headers, persisted user/chat
+thread mapping, and the Postgres graph checkpointer are wired into production.
+A real isolated pip Open WebUI 0.10.2 instance forwarded its own signed JWT,
+discovered the model, proxied a chat completion, and produced one binding plus
+six checkpoint rows. No real SDAR E2E is claimed; publication remains.

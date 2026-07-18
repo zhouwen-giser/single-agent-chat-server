@@ -13,11 +13,18 @@ let persistence: PersistenceRuntime | undefined;
 try {
   const config = loadServerConfig();
   persistence = await setupPersistence(parsePersistenceConfig(process.env));
+  const activePersistence = persistence;
   const reconciliation = await persistence.repository.reconcileStartup({
     leaseOwner: randomUUID(),
   });
-  const server = buildServer({ config, logger: true });
-  server.addHook("onClose", async () => persistence?.close());
+  const server = buildServer({
+    config,
+    logger: true,
+    resolveChatThread: (input) =>
+      activePersistence.repository.getOrCreateThread(input),
+    checkpointer: activePersistence.checkpointer,
+  });
+  server.addHook("onClose", async () => activePersistence.close());
   server.log.info(
     {
       activeTaskBindings: reconciliation.activeBindings.length,

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import type { BaseCheckpointSaver } from "@langchain/langgraph";
 import type { FastifyPluginAsync } from "fastify";
 
 import {
@@ -11,14 +12,38 @@ import {
   openAiError,
   SSE_CONTENT_TYPE,
 } from "../../../../packages/openai-api-contract/src/index.js";
-import { graph } from "../../../../src/agent/graph.js";
+import type { ThreadBinding } from "../../../../packages/persistence/src/index.js";
+import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
+import {
+  createOpenWebUiUserAuthenticator,
+  requireOpenWebUiIdentity,
+  type OpenWebUiIdentity,
+} from "../auth/openwebui-user.js";
 import { createServiceKeyAuthenticator } from "../auth/service-key.js";
 import type { ServerConfig } from "../config.js";
+import {
+  parseOpenWebUiRequestContext,
+  type OpenWebUiRequestContext,
+} from "../openwebui/request-context.js";
 
-export type ChatRunner = (userText: string) => Promise<string>;
+export interface ChatRunnerContext {
+  readonly userText: string;
+  readonly identity: OpenWebUiIdentity;
+  readonly openWebUi: OpenWebUiRequestContext;
+  readonly threadId: string;
+}
+
+export type ChatRunner = (context: ChatRunnerContext) => Promise<string>;
+export type ResolveChatThread = (input: {
+  readonly openWebUiChatId: string;
+  readonly userId: string;
+  readonly userRole: string;
+}) => Promise<ThreadBinding>;
 
 export interface OpenAiRoutesOptions {
   readonly config: ServerConfig;
+  readonly resolveChatThread: ResolveChatThread;
+  readonly checkpointer?: BaseCheckpointSaver;
   readonly now?: () => number;
   readonly nextId?: () => string;
   readonly runChat?: ChatRunner;
@@ -29,10 +54,42 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
 > = async (server, options) => {
   const now = options.now ?? Date.now;
   const nextId = options.nextId ?? randomUUID;
-  const runChat = options.runChat ?? runThinChatGraph;
+  const chatGraph =
+    options.runChat === undefined
+      ? createSingleAgentChatGraph(undefined, options.checkpointer)
+      : undefined;
+  const runChat =
+    options.runChat ??
+    (async (context: ChatRunnerContext) => {
+      if (chatGraph === undefined) {
+        throw new Error("Chat graph is unavailable");
+      }
+      const result = await chatGraph.invoke(
+        {
+          messages: [{ role: "user", content: context.userText }],
+          threadId: context.threadId,
+          userId: context.identity.userId,
+          openWebUiChatId: context.openWebUi.chatId,
+          utilityRequest: context.openWebUi.utilityTask !== undefined,
+        },
+        { configurable: { thread_id: context.threadId } },
+      );
+      const content = result.messages.at(-1)?.content;
+      return typeof content === "string"
+        ? content
+        : "The response could not be rendered as conversational text.";
+    });
+
   server.addHook(
     "preHandler",
     createServiceKeyAuthenticator(options.config.serviceKey),
+  );
+  server.addHook(
+    "preHandler",
+    createOpenWebUiUserAuthenticator({
+      secret: options.config.openWebUiUserJwtSecret,
+      now,
+    }),
   );
 
   server.get("/models", async () =>
@@ -50,7 +107,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
             parsed.error.issues
               .map(
                 (issue) =>
-                  `${issue.path.join(".") || "body"}: ${issue.message}`,
+                  (issue.path.join(".") || "body") + ": " + issue.message,
               )
               .join("; "),
           ),
@@ -62,14 +119,22 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
         .send(
           openAiError(
             "model_not_found",
-            `The model '${parsed.data.model}' does not exist.`,
+            "The model '" + parsed.data.model + "' does not exist.",
             "invalid_request_error",
             "model",
           ),
         );
     }
 
-    const id = `chatcmpl-${nextId()}`;
+    const identity = requireOpenWebUiIdentity(request);
+    const openWebUi = parseOpenWebUiRequestContext(request);
+    const thread = await options.resolveChatThread({
+      openWebUiChatId: openWebUi.chatId,
+      userId: identity.userId,
+      userRole: identity.role,
+    });
+
+    const id = "chatcmpl-" + nextId();
     const created = Math.floor(now() / 1000);
     const lastUserMessage = [...parsed.data.messages]
       .reverse()
@@ -78,7 +143,12 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
       typeof lastUserMessage?.content === "string"
         ? lastUserMessage.content
         : "";
-    const content = await runChat(userText);
+    const content = await runChat({
+      userText,
+      identity,
+      openWebUi,
+      threadId: thread.threadId,
+    });
     if (parsed.data.stream) {
       const chunks = createChatCompletionChunks({
         id,
@@ -101,15 +171,4 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
       content,
     });
   });
-};
-
-const runThinChatGraph: ChatRunner = async (userText) => {
-  const result = await graph.invoke({
-    messages: [{ role: "user", content: userText }],
-    utilityRequest: false,
-  });
-  const content = result.messages.at(-1)?.content;
-  return typeof content === "string"
-    ? content
-    : "The response could not be rendered as conversational text.";
 };

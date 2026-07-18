@@ -6,6 +6,7 @@ import { DEFAULT_CHAT_MODEL_ID } from "../../../packages/openai-api-contract/src
 
 const serverConfigSchema = z.object({
   CHAT_SERVER_SERVICE_KEY: z.string().min(32).max(512),
+  OPENWEBUI_USER_JWT_SECRET: z.string().min(32).max(512),
   CHAT_SERVER_HOST: z.string().min(1).default("127.0.0.1"),
   CHAT_SERVER_PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
   CHAT_SERVER_BODY_LIMIT_BYTES: z.coerce
@@ -29,6 +30,7 @@ const serverConfigSchema = z.object({
 
 export interface ServerConfig {
   readonly serviceKey: string;
+  readonly openWebUiUserJwtSecret: string;
   readonly host: string;
   readonly port: number;
   readonly bodyLimitBytes: number;
@@ -42,6 +44,7 @@ export function parseServerConfig(
   const parsed = serverConfigSchema.parse(environment);
   return {
     serviceKey: parsed.CHAT_SERVER_SERVICE_KEY,
+    openWebUiUserJwtSecret: parsed.OPENWEBUI_USER_JWT_SECRET,
     host: parsed.CHAT_SERVER_HOST,
     port: parsed.CHAT_SERVER_PORT,
     bodyLimitBytes: parsed.CHAT_SERVER_BODY_LIMIT_BYTES,
