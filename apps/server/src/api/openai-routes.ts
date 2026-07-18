@@ -1,14 +1,15 @@
 import { randomUUID } from "node:crypto";
+import { Readable } from "node:stream";
 
 import type { BaseCheckpointSaver } from "@langchain/langgraph";
 import type { FastifyPluginAsync } from "fastify";
 
 import {
   chatCompletionRequestSchema,
-  createChatCompletionChunks,
   createChatCompletionResponse,
   createModelsResponse,
-  encodeChatCompletionStream,
+  emptyUsage,
+  encodeSseData,
   openAiError,
   SSE_CONTENT_TYPE,
 } from "../../../../packages/openai-api-contract/src/index.js";
@@ -31,9 +32,13 @@ export interface ChatRunnerContext {
   readonly identity: OpenWebUiIdentity;
   readonly openWebUi: OpenWebUiRequestContext;
   readonly threadId: string;
+  readonly signal?: AbortSignal;
 }
 
-export type ChatRunner = (context: ChatRunnerContext) => Promise<string>;
+export type ChatRunnerResult = string | AsyncIterable<string>;
+export type ChatRunner = (
+  context: ChatRunnerContext,
+) => Promise<ChatRunnerResult> | ChatRunnerResult;
 export type ResolveChatThread = (input: {
   readonly openWebUiChatId: string;
   readonly userId: string;
@@ -143,27 +148,35 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
       typeof lastUserMessage?.content === "string"
         ? lastUserMessage.content
         : "";
-    const content = await runChat({
+    const abortController = new AbortController();
+    request.raw.once("aborted", () => abortController.abort());
+    reply.raw.once("close", () => abortController.abort());
+    const result = await runChat({
       userText,
       identity,
       openWebUi,
       threadId: thread.threadId,
+      signal: abortController.signal,
     });
     if (parsed.data.stream) {
-      const chunks = createChatCompletionChunks({
-        id,
-        created,
-        model: options.config.modelId,
-        content,
-        includeUsage: parsed.data.stream_options?.include_usage === true,
-      });
       return reply
         .type(SSE_CONTENT_TYPE)
         .header("cache-control", "no-cache, no-transform")
         .header("connection", "keep-alive")
-        .send(encodeChatCompletionStream(chunks));
+        .send(
+          Readable.from(
+            streamChatCompletion({
+              id,
+              created,
+              model: options.config.modelId,
+              fragments: toFragments(result),
+              includeUsage: parsed.data.stream_options?.include_usage === true,
+            }),
+          ),
+        );
     }
 
+    const content = await collectFragments(toFragments(result));
     return createChatCompletionResponse({
       id,
       created,
@@ -172,3 +185,53 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
     });
   });
 };
+
+async function* streamChatCompletion(input: {
+  readonly id: string;
+  readonly created: number;
+  readonly model: string;
+  readonly fragments: AsyncIterable<string>;
+  readonly includeUsage: boolean;
+}): AsyncGenerator<string> {
+  const common = {
+    id: input.id,
+    object: "chat.completion.chunk" as const,
+    created: input.created,
+    model: input.model,
+  };
+  yield encodeSseData({
+    ...common,
+    choices: [{ index: 0, delta: { role: "assistant" }, finish_reason: null }],
+  });
+  for await (const content of input.fragments) {
+    if (content.length === 0) continue;
+    yield encodeSseData({
+      ...common,
+      choices: [{ index: 0, delta: { content }, finish_reason: null }],
+    });
+  }
+  yield encodeSseData({
+    ...common,
+    choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+  });
+  if (input.includeUsage) {
+    yield encodeSseData({ ...common, choices: [], usage: emptyUsage });
+  }
+  yield "data: [DONE]\n\n";
+}
+
+async function* toFragments(result: ChatRunnerResult): AsyncGenerator<string> {
+  if (typeof result === "string") {
+    yield result;
+    return;
+  }
+  yield* result;
+}
+
+async function collectFragments(
+  fragments: AsyncIterable<string>,
+): Promise<string> {
+  const collected: string[] = [];
+  for await (const fragment of fragments) collected.push(fragment);
+  return collected.join("\n\n");
+}

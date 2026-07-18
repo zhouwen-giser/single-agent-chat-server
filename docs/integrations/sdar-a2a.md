@@ -1,6 +1,6 @@
 # SDAR A2A client adapter
 
-Status: Phase 3 implementation.
+Status: Phase 6 production submission and bounded observation.
 
 The package at packages/sdar-a2a-adapter is the only production boundary that
 imports the official A2A SDK. It pins @a2a-js/sdk 1.0.0-beta.0 (Apache-2.0) and
@@ -39,3 +39,21 @@ Agent Card discovery and every operation have AbortSignal timeouts. Caller abort
 signals are combined with the configured timeout. A stream ending while the
 normalized Task is WORKING is not treated as terminal and does not cancel the
 Task; callers use getTask polling within their own request budget.
+
+## Production task coordination
+
+The production server creates the SDK client lazily on the first SDAR-bound
+turn. PostgreSQL readiness and utility/local chat remain available when SDAR is
+temporarily unreachable; a failed discovery is not cached permanently.
+
+New-task submission claims the Open WebUI user-message ID before calling
+`sendMessageStream`. The first published Task/status/artifact event persists
+`taskId` and `contextId`, completes the idempotency record, and authorizes later
+status recovery only for the same signed user and Chat ID. Exact repeated
+events are cached and suppressed from progress streaming, while an explicit
+status query always renders its current authorized snapshot.
+
+Published `status.message` text and `phaseMessage` become Markdown fragments.
+Terminal Artifact text is returned directly and JSON data is rendered in a
+bounded code block. Skill, MCP, Workflow, plan, and hidden-reasoning nodes are
+never synthesized.

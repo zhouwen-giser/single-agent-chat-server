@@ -1,6 +1,6 @@
 # OpenAI-compatible API contract
 
-Status: Phase 5 signed Open WebUI identity and persistent chat continuity.
+Status: Phase 6 bounded SDAR streaming and recovery.
 
 ## Authentication
 
@@ -47,7 +47,14 @@ The response uses `object=chat.completion`, one assistant choice,
 
 The media type is `text/event-stream`. Frames use standard
 `data: <ChatCompletionChunk JSON>` encoding and end with exactly one
-`data: [DONE]`. No browser-specific event protocol is used.
+`data: [DONE]`. Published SDAR status, `status.message`, `phaseMessage`, and
+terminal Artifact fragments are emitted as separate content deltas as they are
+observed; the route does not buffer the full A2A response first. No
+browser-specific event protocol is used.
+
+Client disconnect aborts only this HTTP observation. It never maps to
+`cancelTask`. A later status request can resume observation through the
+persisted user/chat/Task binding and `getTask`.
 
 ## Errors and limits
 
@@ -58,8 +65,10 @@ The media type is `text/event-stream`. Frames use standard
 - `413 request_too_large`
 - redacted `500 internal_error`
 
-The default body limit is 1 MiB and request timeout is 30 seconds. Both are
-bounded by configuration validation.
+The default body limit is 1 MiB and request timeout is 30 seconds. The A2A
+stream observation budget defaults to 30 seconds, followed by at most 5 seconds
+of 1-second `getTask` polling. All values are bounded by configuration
+validation.
 
 ## Health
 

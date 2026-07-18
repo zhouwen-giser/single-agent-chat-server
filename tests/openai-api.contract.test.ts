@@ -35,6 +35,9 @@ const config: ServerConfig = {
   bodyLimitBytes: 1024,
   requestTimeoutMs: 5000,
   modelId: "sdar-single-agent",
+  streamBudgetMs: 30_000,
+  pollingBudgetMs: 5_000,
+  pollingIntervalMs: 1_000,
 };
 
 const servers: FastifyInstance[] = [];
@@ -300,6 +303,38 @@ describe("OpenAI-compatible HTTP contracts", () => {
     });
   });
 
+  it("emits async runner fragments as distinct SSE deltas", async () => {
+    const response = await createServer({
+      runChat: async () =>
+        (async function* () {
+          yield "first progress";
+          yield "second progress";
+        })(),
+    }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: { ...chatPayload(), stream: true },
+    });
+
+    const chunks = response.body
+      .trim()
+      .split("\n\n")
+      .slice(0, -1)
+      .map(
+        (frame) =>
+          JSON.parse(frame.slice("data: ".length)) as {
+            choices: readonly { delta: { content?: string } }[];
+          },
+      );
+    expect(chunks.map((chunk) => chunk.choices[0]?.delta.content)).toEqual([
+      undefined,
+      "first progress",
+      "second progress",
+      undefined,
+    ]);
+    expect(response.body).toMatch(/data: \[DONE\]\n\n$/u);
+  });
   it("rejects invalid bodies and conflicting token limits", async () => {
     const server = createServer();
     const emptyMessages = await server.inject({

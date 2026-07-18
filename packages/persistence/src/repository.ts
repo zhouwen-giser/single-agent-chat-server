@@ -108,6 +108,24 @@ export class ChatPersistenceRepository {
     return result.rows[0] === undefined ? undefined : mapTask(result.rows[0]);
   }
 
+  async findActiveTaskForChat(input: {
+    readonly chatId: string;
+    readonly userId: string;
+  }): Promise<TaskBinding | undefined> {
+    const result = await this.pool.query<TaskRow>(
+      `
+        SELECT task.*
+        FROM chat_service.conversation_task_binding task
+        JOIN chat_service.chat_thread_binding thread
+          ON thread.thread_id = task.thread_id
+        WHERE thread.openwebui_chat_id = $1
+          AND thread.user_id = $2
+          AND task.terminal_at IS NULL
+      `,
+      [input.chatId, input.userId],
+    );
+    return result.rows[0] === undefined ? undefined : mapTask(result.rows[0]);
+  }
   async listActiveBindings(): Promise<readonly TaskBinding[]> {
     const result = await this.pool.query<TaskRow>(
       `

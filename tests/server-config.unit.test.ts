@@ -19,6 +19,9 @@ describe("server configuration", () => {
       bodyLimitBytes: 1_048_576,
       requestTimeoutMs: 30_000,
       modelId: "sdar-single-agent",
+      streamBudgetMs: 30_000,
+      pollingBudgetMs: 5_000,
+      pollingIntervalMs: 1_000,
     });
   });
 

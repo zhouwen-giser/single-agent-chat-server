@@ -26,6 +26,24 @@ const serverConfigSchema = z.object({
     .min(1)
     .max(256)
     .default(DEFAULT_CHAT_MODEL_ID),
+  CHAT_HTTP_STREAM_BUDGET_MS: z.coerce
+    .number()
+    .int()
+    .min(100)
+    .max(120_000)
+    .default(30_000),
+  SDAR_POLLING_BUDGET_MS: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(120_000)
+    .default(5_000),
+  SDAR_POLLING_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .min(10)
+    .max(30_000)
+    .default(1_000),
 });
 
 export interface ServerConfig {
@@ -36,6 +54,9 @@ export interface ServerConfig {
   readonly bodyLimitBytes: number;
   readonly requestTimeoutMs: number;
   readonly modelId: string;
+  readonly streamBudgetMs: number;
+  readonly pollingBudgetMs: number;
+  readonly pollingIntervalMs: number;
 }
 
 export function parseServerConfig(
@@ -50,6 +71,9 @@ export function parseServerConfig(
     bodyLimitBytes: parsed.CHAT_SERVER_BODY_LIMIT_BYTES,
     requestTimeoutMs: parsed.CHAT_SERVER_REQUEST_TIMEOUT_MS,
     modelId: parsed.CHAT_SERVER_MODEL_ID,
+    streamBudgetMs: parsed.CHAT_HTTP_STREAM_BUDGET_MS,
+    pollingBudgetMs: parsed.SDAR_POLLING_BUDGET_MS,
+    pollingIntervalMs: parsed.SDAR_POLLING_INTERVAL_MS,
   };
 }
 
