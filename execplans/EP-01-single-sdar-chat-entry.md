@@ -48,7 +48,7 @@ Open WebUI
 - [x] 2026-07-18: Phase 0 verified, committed as `03423e9`, pushed, and published as Draft PR #1.
 - [x] 2026-07-18: Phase 1 verified, committed as `a28b882`, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 2 verified, committed as a5d1b8a, pushed, and recorded on Draft PR #1.
-- [ ] Phase 3: isolated official A2A SDAR client adapter.
+- [x] 2026-07-18: Phase 3 verified, committed as 34641c6, pushed, and recorded on Draft PR #1.
 - [ ] Phase 4: PostgreSQL checkpoints, bindings, events, and idempotency.
 - [ ] Phase 5: Open WebUI signed identity and chat continuity.
 - [ ] Phase 6: submission, status, bounded streaming, and polling fallback.
@@ -144,3 +144,12 @@ Structured output is strict-schema validated and then checked against active
 task state and internal phase. Utility calls remain local, a second active task
 is blocked, and no A2A operation exists before Phase 3. Verification evidence
 is in reports/goal/02-thin-chat-graph.md. Phase 3 is next.
+
+## Phase 3 outcome
+
+The official beta.0 SDK is pinned and isolated behind stable internal DTOs.
+Agent Card discovery fails closed unless HTTP+JSON 1.0 with streaming is
+advertised. Endpoint correction is explicit only. The four permitted SDK
+operations, strict metadata, normalization, and timeout/abort behavior passed a
+real local HTTP+JSON mock contract. No final real SDAR E2E is claimed. Phase 4
+PostgreSQL persistence is next.
