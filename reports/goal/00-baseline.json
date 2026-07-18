@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "phase": 0,
-  "status": "READY_FOR_PUBLICATION",
+  "status": "COMPLETED",
   "generatedAt": "2026-07-18T19:36:16+08:00",
   "repository": "zhouwen-giser/single-agent-chat-server",
   "branch": "feature/single-sdar-chat-entry-v0.1",
   "mainSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
-  "phaseCommit": null,
-  "pullRequest": null,
+  "phaseCommit": "03423e99390681108591ea77a4c912938862240d",
+  "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
   "template": {
     "cli": "create-langgraph@1.1.5",
     "id": "new-langgraph-project-js",
@@ -51,8 +51,8 @@
   "blockers": [],
   "publication": {
     "repositoryVerification": "PASSED",
-    "committed": false,
-    "pushed": false,
-    "draftPullRequestCreated": false
+    "committed": true,
+    "pushed": true,
+    "draftPullRequestCreated": true
   }
 }

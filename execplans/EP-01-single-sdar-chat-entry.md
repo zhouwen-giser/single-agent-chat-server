@@ -45,7 +45,7 @@ Open WebUI
       `langgraph.json` path verification.
 - [x] 2026-07-18: Verify exact SDAR source and a live Agent Card; record hash.
 - [x] 2026-07-18: Confirm pip Open WebUI 0.10.2 is healthy on loopback 8080.
-- [ ] Phase 0 publication: verify repository, commit, push, and open Draft PR.
+- [x] 2026-07-18: Phase 0 verified, committed as `03423e9`, pushed, and published as Draft PR #1.
 - [ ] Phase 1: OpenAI-compatible API contracts and Fastify skeleton.
 - [ ] Phase 2: thin LangGraph state machine and guarded classification.
 - [ ] Phase 3: isolated official A2A SDAR client adapter.

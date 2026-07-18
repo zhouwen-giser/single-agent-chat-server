@@ -4,7 +4,7 @@ Generated: 2026-07-18T19:36:16+08:00
 
 ## Result
 
-Phase 0 implementation passed repository verification and is ready for publication.
+Phase 0 passed repository verification and was published to Draft PR #1.
 No production chat or SDAR client behavior exists in this phase.
 
 ## Repository
@@ -12,7 +12,9 @@ No production chat or SDAR client behavior exists in this phase.
 - Repository: `zhouwen-giser/single-agent-chat-server`
 - Branch: `feature/single-sdar-chat-entry-v0.1`
 - Main baseline: `3e5be7150e959006d4d152ba6d0d32ebc93ab419`
-- Phase commit, push, and Draft PR: pending publication step
+- Phase commit: `03423e99390681108591ea77a4c912938862240d`
+- Feature push: succeeded
+- Draft PR: https://github.com/zhouwen-giser/single-agent-chat-server/pull/1 (open, draft)
 
 ## Task package integrity
 
@@ -89,8 +91,8 @@ The first repository test run revealed that Jest was traversing the ignored
 `.tmp` evidence checkout. The configuration now fixes `roots` to this
 repository's `tests` directory, and the complete gate passed afterward.
 
-## Remaining publication gates
+## Publication evidence
 
-1. Commit with `docs: establish single SDAR chat server goal baseline`.
-2. Push the feature branch and create the required Draft PR.
-3. Append exact publication evidence and advance sync state to Phase 1.
+1. Commit `03423e9` uses the required semantic subject.
+2. Feature branch push and Draft PR #1 creation succeeded.
+3. `sync-state.json` advances the active Goal to Phase 1.
