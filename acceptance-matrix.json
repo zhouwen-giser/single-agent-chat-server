@@ -1,0 +1,123 @@
+{
+  "version": "0.1.0",
+  "taskPackageRevision": "R2",
+  "sdarA2aBaseline": {
+    "upstreamCommit": "667146a3639eefdfed9b89c2417c08e1ac50e9a9",
+    "specPatch": "1.0.1",
+    "wireVersion": "1.0",
+    "binding": "HTTP+JSON",
+    "sdk": "@a2a-js/sdk@1.0.0-beta.0"
+  },
+  "acceptance": [
+    {
+      "id": "AC-01",
+      "name": "model discovery",
+      "required": true
+    },
+    {
+      "id": "AC-02",
+      "name": "normal chat without SDAR",
+      "required": true
+    },
+    {
+      "id": "AC-03",
+      "name": "single A2A task submission over HTTP+JSON",
+      "required": true
+    },
+    {
+      "id": "AC-04",
+      "name": "published A2A status and phaseMessage to OpenAI SSE",
+      "required": true
+    },
+    {
+      "id": "AC-05",
+      "name": "bounded A2A stream falls back to getTask without cancellation",
+      "required": true
+    },
+    {
+      "id": "AC-06",
+      "name": "follow-up status query reuses authorized binding without sending a Task message",
+      "required": true
+    },
+    {
+      "id": "AC-07",
+      "name": "plan confirmation rejection and revision use explicit sdar_action",
+      "required": true
+    },
+    {
+      "id": "AC-08",
+      "name": "provide_input reuses task and context with strict metadata",
+      "required": true
+    },
+    {
+      "id": "AC-09",
+      "name": "top-level cancelTask displays SDAR returned state without Provider inference",
+      "required": true
+    },
+    {
+      "id": "AC-10",
+      "name": "completion renders result artifact text and JSON summary",
+      "required": true
+    },
+    {
+      "id": "AC-11",
+      "name": "failure and capability gap are distinguished and redacted",
+      "required": true
+    },
+    {
+      "id": "AC-12",
+      "name": "Open WebUI retry idempotency",
+      "required": true
+    },
+    {
+      "id": "AC-13",
+      "name": "server restart recovery",
+      "required": true
+    },
+    {
+      "id": "AC-14",
+      "name": "A2A stream disconnect or bounded end recovery through getTask",
+      "required": true
+    },
+    {
+      "id": "AC-15",
+      "name": "utility request isolation",
+      "required": true
+    },
+    {
+      "id": "AC-16",
+      "name": "cross-user task isolation",
+      "required": true
+    },
+    {
+      "id": "AC-17",
+      "name": "signed Open WebUI identity validation",
+      "required": true
+    },
+    {
+      "id": "AC-18",
+      "name": "SDAR outage behavior",
+      "required": true
+    },
+    {
+      "id": "AC-19",
+      "name": "no direct SDAR management API database or MCP dependency",
+      "required": true
+    },
+    {
+      "id": "AC-20",
+      "name": "A2A 1.0.1 HTTP+JSON and SDK pin drift gate",
+      "required": true
+    },
+    {
+      "id": "AC-21",
+      "name": "explicit Docker advertised endpoint override",
+      "required": true
+    },
+    {
+      "id": "AC-22",
+      "name": "Follow-up action and metadata allowlist",
+      "required": true
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "project": "single-agent-chat-server",
+  "version": "0.1.0",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "phases": [
+    {
+      "id": 0,
+      "name": "baseline-template-protocol"
+    },
+    {
+      "id": 1,
+      "name": "openai-api-contracts"
+    },
+    {
+      "id": 2,
+      "name": "thin-langgraph-chat-graph"
+    },
+    {
+      "id": 3,
+      "name": "a2a-sdar-client"
+    },
+    {
+      "id": 4,
+      "name": "postgres-persistence-idempotency"
+    },
+    {
+      "id": 5,
+      "name": "openwebui-identity-continuity"
+    },
+    {
+      "id": 6,
+      "name": "task-submit-status-bounded-stream"
+    },
+    {
+      "id": 7,
+      "name": "follow-up-input-cancel-outcome"
+    },
+    {
+      "id": 8,
+      "name": "recovery-consistency"
+    },
+    {
+      "id": 9,
+      "name": "observability-security-operations"
+    },
+    {
+      "id": 10,
+      "name": "docker-ci-governance"
+    },
+    {
+      "id": 11,
+      "name": "real-openwebui-sdar-e2e"
+    },
+    {
+      "id": 12,
+      "name": "adversarial-hardening"
+    },
+    {
+      "id": 13,
+      "name": "final-acceptance-release-evidence"
+    }
+  ],
+  "completionMarker": "SINGLE_AGENT_CHAT_SERVER_GOAL_COMPLETE",
+  "taskPackageRevision": "R2",
+  "sdarA2aBaseline": {
+    "specPatch": "1.0.1",
+    "wireVersion": "1.0",
+    "binding": "HTTP+JSON",
+    "sdk": "@a2a-js/sdk@1.0.0-beta.0"
+  }
+}

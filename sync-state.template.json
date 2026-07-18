@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 2,
+  "goal": "Build single-agent-chat-server v0.1.0",
+  "status": "NOT_STARTED",
+  "repository": "zhouwen-giser/single-agent-chat-server",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "headSha": null,
+  "mainSha": null,
+  "pullRequest": null,
+  "lastCompletedPhase": null,
+  "nextPhase": 0,
+  "upstreams": {
+    "langgraphTemplate": {
+      "source": null,
+      "version": null,
+      "validated": false
+    },
+    "a2aSdk": {
+      "version": "@a2a-js/sdk@1.0.0-beta.0",
+      "protocolRevision": "1.0",
+      "specPatch": "1.0.1",
+      "binding": "HTTP+JSON",
+      "validatedAgainstSdar": false
+    },
+    "openWebUi": {
+      "version": null,
+      "connected": false
+    },
+    "sdar": {
+      "repository": "zhouwen-giser/skill-driven-agent-runtime",
+      "baselineCommit": "667146a3639eefdfed9b89c2417c08e1ac50e9a9",
+      "baseUrl": null,
+      "agentCardHash": null,
+      "selectedInterfaceUrl": null,
+      "endpointOverride": null,
+      "reachable": false
+    }
+  },
+  "systems": {
+    "postgres": "unknown",
+    "server": "unknown",
+    "openWebUi": "unknown",
+    "sdar": "unknown"
+  },
+  "phases": {},
+  "tests": {},
+  "blockers": [],
+  "updatedAt": null,
+  "taskPackageRevision": "R2"
+}
