@@ -47,7 +47,7 @@ Open WebUI
 - [x] 2026-07-18: Confirm pip Open WebUI 0.10.2 is healthy on loopback 8080.
 - [x] 2026-07-18: Phase 0 verified, committed as `03423e9`, pushed, and published as Draft PR #1.
 - [x] 2026-07-18: Phase 1 verified, committed as `a28b882`, pushed, and recorded on Draft PR #1.
-- [ ] Phase 2: thin LangGraph state machine and guarded classification.
+- [x] 2026-07-18: Phase 2 verified, committed as a5d1b8a, pushed, and recorded on Draft PR #1.
 - [ ] Phase 3: isolated official A2A SDAR client adapter.
 - [ ] Phase 4: PostgreSQL checkpoints, bindings, events, and idempotency.
 - [ ] Phase 5: Open WebUI signed identity and chat continuity.
@@ -136,3 +136,11 @@ Phase 0 has a reproducible scaffold and verified upstream evidence. Publication
 evidence will be appended after the phase commit, push, and Draft PR exist. The
 Phase 1 now provides authenticated OpenAI-compatible HTTP/SSE contracts without
 SDAR behavior. It is published; Phase 2 is the next code boundary.
+
+## Phase 2 outcome
+
+The OpenAI Chat Completions route now executes the thin LangGraph chat graph.
+Structured output is strict-schema validated and then checked against active
+task state and internal phase. Utility calls remain local, a second active task
+is blocked, and no A2A operation exists before Phase 3. Verification evidence
+is in reports/goal/02-thin-chat-graph.md. Phase 3 is next.
