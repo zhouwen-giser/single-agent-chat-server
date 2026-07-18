@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it } from "@jest/globals";
 import type { FastifyInstance } from "fastify";
 
 import { buildServer } from "../apps/server/src/bootstrap.js";
-import { PHASE_1_PLACEHOLDER_RESPONSE } from "../apps/server/src/api/openai-routes.js";
 import type { ServerConfig } from "../apps/server/src/config.js";
 
 const serviceKey = "phase-1-test-service-key-32-bytes-minimum";
 const authorization = { authorization: `Bearer ${serviceKey}` };
+const chatResponse = "thin graph response";
 const config: ServerConfig = {
   serviceKey,
   host: "127.0.0.1",
@@ -23,6 +23,7 @@ function createServer(): FastifyInstance {
     config,
     now: () => 1_700_000_000_000,
     nextId: () => "fixed-id",
+    runChat: async () => chatResponse,
   });
   servers.push(server);
   return server;
@@ -110,7 +111,7 @@ describe("OpenAI-compatible HTTP contracts", () => {
           index: 0,
           message: {
             role: "assistant",
-            content: PHASE_1_PLACEHOLDER_RESPONSE,
+            content: chatResponse,
           },
           finish_reason: "stop",
         },
@@ -149,7 +150,7 @@ describe("OpenAI-compatible HTTP contracts", () => {
       choices: [{ delta: { role: "assistant" }, finish_reason: null }],
     });
     expect(chunks[1]).toMatchObject({
-      choices: [{ delta: { content: PHASE_1_PLACEHOLDER_RESPONSE } }],
+      choices: [{ delta: { content: chatResponse } }],
     });
     expect(chunks[2]).toMatchObject({
       choices: [{ finish_reason: "stop" }],

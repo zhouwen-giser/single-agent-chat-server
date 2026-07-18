@@ -1,7 +1,6 @@
 # OpenAI-compatible API contract
 
-Status: Phase 1 baseline. Conversation routing is introduced in Phase 2 and
-SDAR A2A operations in Phase 3 and later.
+Status: Phase 2 thin-chat integration. SDAR A2A operations begin in Phase 3.
 
 ## Authentication
 
@@ -53,9 +52,11 @@ Unknown top-level and message fields are ignored for forward compatibility.
 Known fields are bounded and validated. The only configured model is accepted;
 an unknown model produces `model_not_found`.
 
-The Phase 1 response is deliberately deterministic and does not call a model,
-LangGraph, or SDAR. It proves the public transport contract without moving
-future phase logic into the HTTP layer.
+The Phase 2 response runs through the thin LangGraph state machine. The default
+local fallback produces stable, simplified conversational text; a narrow
+structured-model port can be injected for validated classification and local
+answers. The graph still performs no SDAR operation until the isolated Phase 3
+adapter is introduced.
 
 ### Non-streaming
 

@@ -10,7 +10,7 @@ import type { ServerConfig } from "./config.js";
 
 export interface BuildServerOptions extends Pick<
   OpenAiRoutesOptions,
-  "now" | "nextId"
+  "now" | "nextId" | "runChat"
 > {
   readonly config: ServerConfig;
   readonly logger?: boolean;
@@ -52,6 +52,7 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     config: options.config,
     ...(options.now === undefined ? {} : { now: options.now }),
     ...(options.nextId === undefined ? {} : { nextId: options.nextId }),
+    ...(options.runChat === undefined ? {} : { runChat: options.runChat }),
   });
   return server;
 }

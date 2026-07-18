@@ -11,16 +11,17 @@ import {
   openAiError,
   SSE_CONTENT_TYPE,
 } from "../../../../packages/openai-api-contract/src/index.js";
+import { graph } from "../../../../src/agent/graph.js";
 import { createServiceKeyAuthenticator } from "../auth/service-key.js";
 import type { ServerConfig } from "../config.js";
 
-export const PHASE_1_PLACEHOLDER_RESPONSE =
-  "The OpenAI-compatible API baseline is ready. Conversation routing is introduced in Phase 2.";
+export type ChatRunner = (userText: string) => Promise<string>;
 
 export interface OpenAiRoutesOptions {
   readonly config: ServerConfig;
   readonly now?: () => number;
   readonly nextId?: () => string;
+  readonly runChat?: ChatRunner;
 }
 
 export const registerOpenAiRoutes: FastifyPluginAsync<
@@ -28,6 +29,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
 > = async (server, options) => {
   const now = options.now ?? Date.now;
   const nextId = options.nextId ?? randomUUID;
+  const runChat = options.runChat ?? runThinChatGraph;
   server.addHook(
     "preHandler",
     createServiceKeyAuthenticator(options.config.serviceKey),
@@ -69,12 +71,20 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
 
     const id = `chatcmpl-${nextId()}`;
     const created = Math.floor(now() / 1000);
+    const lastUserMessage = [...parsed.data.messages]
+      .reverse()
+      .find((message) => message.role === "user");
+    const userText =
+      typeof lastUserMessage?.content === "string"
+        ? lastUserMessage.content
+        : "";
+    const content = await runChat(userText);
     if (parsed.data.stream) {
       const chunks = createChatCompletionChunks({
         id,
         created,
         model: options.config.modelId,
-        content: PHASE_1_PLACEHOLDER_RESPONSE,
+        content,
         includeUsage: parsed.data.stream_options?.include_usage === true,
       });
       return reply
@@ -88,7 +98,18 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
       id,
       created,
       model: options.config.modelId,
-      content: PHASE_1_PLACEHOLDER_RESPONSE,
+      content,
     });
   });
+};
+
+const runThinChatGraph: ChatRunner = async (userText) => {
+  const result = await graph.invoke({
+    messages: [{ role: "user", content: userText }],
+    utilityRequest: false,
+  });
+  const content = result.messages.at(-1)?.content;
+  return typeof content === "string"
+    ? content
+    : "The response could not be rendered as conversational text.";
 };
