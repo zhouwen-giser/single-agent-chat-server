@@ -49,9 +49,8 @@ Open WebUI
 - [x] 2026-07-18: Phase 1 verified, committed as `a28b882`, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 2 verified, committed as a5d1b8a, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-18: Phase 3 verified, committed as 34641c6, pushed, and recorded on Draft PR #1.
-- [ ] 2026-07-18: Phase 4 implementation and real PostgreSQL verification
-      passed; semantic commit and publication are pending.
-- [ ] Phase 4: PostgreSQL checkpoints, bindings, events, and idempotency.
+- [x] 2026-07-18: Phase 4 verified, committed as b8be3b3, pushed, and recorded on Draft PR #1.
+- [x] 2026-07-18: Phase 4 PostgreSQL checkpoints, bindings, events, and idempotency complete.
 - [ ] Phase 5: Open WebUI signed identity and chat continuity.
 - [ ] Phase 6: submission, status, bounded streaming, and polling fallback.
 - [ ] Phase 7: follow-up, input, cancellation, and terminal outcomes.
@@ -174,4 +173,4 @@ checkpointer setup, concurrent idempotency, retry replay/conflict, expired lease
 recovery, process restart, binding authorization, event deduplication, and
 terminal monotonicity. The built server completed startup reconciliation and
 reported ready against that database. No final SDAR/Open WebUI E2E is claimed;
-publication evidence is the remaining Phase 4 step.
+Phase 4 is published; Phase 5 Open WebUI identity integration is next.

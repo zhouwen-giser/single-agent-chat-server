@@ -1,12 +1,11 @@
 # Phase 4 PostgreSQL persistence and idempotency report
 
-Generated: 2026-07-18T21:23:11+08:00
+Generated: 2026-07-18T21:29:18+08:00
 
 ## Result
 
-Phase 4 implementation and real PostgreSQL verification are complete. The
-semantic phase commit and publication evidence are pending at this report
-snapshot.
+Phase 4 implementation, real PostgreSQL verification, semantic commit, push,
+and Draft PR update are complete.
 
 ## Delivered
 
@@ -75,8 +74,8 @@ an A2A cursor or arbitrary Task resubscription.
 ## Publication state
 
 - Head before phase commit: `d1538159d480011fa344ba2f094cf1e5dfd27c8e`
-- Phase commit: pending
-- Feature push: pending
-- Draft PR #1 update: pending
+- Phase commit: b8be3b3800253f43fb0c2257a2e499ef283098f6
+- Feature push: succeeded
+- Draft PR #1 update: succeeded; PR remains open and draft
 - Blockers: none
 - Next phase after publication: Phase 5, Open WebUI identity and chat continuity
