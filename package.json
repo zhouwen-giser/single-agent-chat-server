@@ -35,7 +35,13 @@
     "verify:phase6": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
     "verify:phase7": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
     "verify:phase8": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
-    "verify:phase9": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build"
+    "verify:phase9": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm lint:langgraph-json \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test:unit \u0026\u0026 pnpm test:contract \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
+    "verify:architecture": "node scripts/verify-architecture.mjs",
+    "verify:licenses": "node scripts/check-licenses.mjs",
+    "verify:container": "node scripts/verify-container.mjs",
+    "docker:build": "docker build --target runtime -t single-agent-chat-server:0.1.0 .",
+    "generate:sbom": "node scripts/generate-sbom.mjs",
+    "verify:phase10": "pnpm verify:phase9 \u0026\u0026 pnpm verify:architecture \u0026\u0026 pnpm verify:licenses"
   },
   "dependencies": {
     "@a2a-js/sdk": "1.0.0-beta.0",

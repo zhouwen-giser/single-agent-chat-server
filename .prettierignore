@@ -18,3 +18,5 @@ phase-manifest.json
 sync-state.template.json
 LICENSE
 
+# Generated supply-chain evidence.
+reports/security/sbom.cdx.json
