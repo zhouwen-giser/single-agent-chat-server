@@ -39,6 +39,7 @@
     "verify:architecture": "node scripts/verify-architecture.mjs",
     "verify:licenses": "node scripts/check-licenses.mjs",
     "verify:container": "node scripts/verify-container.mjs",
+    "audit:phase11:evidence": "node scripts/audit-phase11-evidence.mjs",
     "docker:build": "docker build --target runtime -t single-agent-chat-server:0.1.0 .",
     "generate:sbom": "node scripts/generate-sbom.mjs",
     "verify:phase10": "pnpm verify:phase9 \u0026\u0026 pnpm verify:architecture \u0026\u0026 pnpm verify:licenses"

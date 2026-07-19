@@ -160,6 +160,19 @@ export class SdarTaskCoordinator {
             });
             completedClaim = true;
           }
+          if (
+            binding !== undefined &&
+            event.kind === "status" &&
+            latestState !== undefined &&
+            isResponseBoundary(latestState)
+          ) {
+            const task = await client.getTask(binding.sdarTaskId, { signal });
+            assertSameTask(task, binding);
+            const enriched = await this.observeTask(task, binding, true);
+            binding = enriched.binding;
+            for (const fragment of enriched.fragments) yield fragment;
+            return;
+          }
           for (const fragment of observed.fragments) yield fragment;
           if (latestState !== undefined && isResponseBoundary(latestState))
             return;

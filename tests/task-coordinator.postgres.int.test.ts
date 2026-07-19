@@ -70,17 +70,23 @@ describeWithPostgres("bounded SDAR task coordination", () => {
   });
 
   it("streams Task status.message and phaseMessage as conversational deltas", async () => {
-    const client = new FakeClient([
-      { kind: "task", task: task("WORKING", "planning", "Inspecting inputs") },
-      {
-        kind: "status",
-        taskId: "task-a",
-        contextId: "context-a",
-        state: "COMPLETED",
-        message: agentMessage("Finished safely"),
-        phaseMessage: "Publishing result",
-      },
-    ]);
+    const client = new FakeClient(
+      [
+        {
+          kind: "task",
+          task: task("WORKING", "planning", "Inspecting inputs"),
+        },
+        {
+          kind: "status",
+          taskId: "task-a",
+          contextId: "context-a",
+          state: "COMPLETED",
+          message: agentMessage("Finished safely"),
+          phaseMessage: "Publishing result",
+        },
+      ],
+      [task("COMPLETED", "Finished safely", "Publishing result")],
+    );
     const output = await collect(coordinator(client).submit(turn()));
 
     expect(output).toEqual([
@@ -98,6 +104,42 @@ describeWithPostgres("bounded SDAR task coordination", () => {
         sdarTaskId: "task-a",
       }),
     ).resolves.toMatchObject({ status: "COMPLETED" });
+    expect(client.getCount).toBe(1);
+  });
+
+  it("enriches an INPUT_REQUIRED status boundary from Task metadata", async () => {
+    const client = new FakeClient(
+      [
+        { kind: "task", task: task("WORKING", "planning") },
+        {
+          kind: "status",
+          taskId: "task-a",
+          contextId: "context-a",
+          state: "INPUT_REQUIRED",
+          message: agentMessage("Plan confirmation required."),
+        },
+      ],
+      [
+        {
+          ...task("INPUT_REQUIRED", "Plan confirmation required."),
+          internalPhase: "awaiting_plan_confirmation",
+        },
+      ],
+    );
+
+    const output = await collect(coordinator(client).submit(turn()));
+    const binding = await repository.findAuthorizedTask({
+      openWebUiChatId: "chat-a",
+      userId: "user-a",
+      sdarTaskId: "task-a",
+    });
+
+    expect(output.join("\n")).toContain("explicit plan decision");
+    expect(output.join("\n")).not.toContain("missing or unsupported");
+    expect(binding?.pendingInput).toMatchObject({
+      internalPhase: "awaiting_plan_confirmation",
+    });
+    expect(client.getCount).toBe(1);
   });
 
   it("polls a bounded stream to a terminal Task and renders text plus JSON artifacts", async () => {

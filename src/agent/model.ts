@@ -38,8 +38,12 @@ export interface StructuredChatModel {
  * It has no A2A, planning, workflow, tool, or MCP surface.
  */
 export const localFallbackChatModel: StructuredChatModel = {
-  async classify() {
-    return { requestKind: "general_chat" };
+  async classify({ userText }) {
+    return {
+      requestKind: isExplicitTaskRequest(userText)
+        ? "new_task"
+        : "general_chat",
+    };
   },
   async answer({ userText }) {
     const normalized = userText.trim();
@@ -49,3 +53,14 @@ export const localFallbackChatModel: StructuredChatModel = {
     return "我已收到这条普通聊天消息。当前本地简化回答器未配置外部模型；如果你希望交给 SDAR 执行，请明确描述任务目标。";
   },
 };
+function isExplicitTaskRequest(userText: string): boolean {
+  const text = userText.trim();
+  return (
+    /^(?:please\s+)?(?:(?:ask\s+)?sdar\s+(?:to\s+)?|sdar\s*[:,-]\s*)?(?:execute|run|perform|complete|create|inspect|analyze|prepare|build|verify)\b/iu.test(
+      text,
+    ) ||
+    /^(?:请|请让\s*SDAR\s*)?(?:执行|完成|创建|检查|分析|准备|构建|验证)/u.test(
+      text,
+    )
+  );
+}
