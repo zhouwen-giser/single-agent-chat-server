@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "phase": 10,
+  "status": "COMPLETED",
+  "generatedAt": "2026-07-19T08:04:05+08:00",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "headBeforePhaseCommit": "49540f2b3989e1c71c1899acce603ca705b69257",
+  "phaseCommit": "d8fade106e80cfd36998403225380cae99277413",
+  "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
+  "delivered": {
+    "multiStageDockerfile": true,
+    "nonRootRuntime": true,
+    "healthcheck": true,
+    "composeServerPostgres": true,
+    "externalOpenWebUiNetworkDocs": true,
+    "migrationCommand": true,
+    "githubActions": true,
+    "dependencyLicenseSbomChecks": true,
+    "securityGovernance": true
+  },
+  "tests": {
+    "unit": { "suites": 5, "passed": 27, "failed": 0 },
+    "contract": { "suites": 2, "passed": 25, "failed": 0 },
+    "integration": {
+      "suites": 3,
+      "passed": 35,
+      "failed": 0,
+      "realPostgresTests": 34
+    },
+    "build": "PASSED",
+    "architectureFiles": 41,
+    "productionLicenseEntries": 84,
+    "frozenInstall": "PASSED",
+    "peerCheck": "PASSED",
+    "containerMetadata": "PASSED",
+    "composeCleanDatabase": "PASSED",
+    "composeCleanup": "PASSED",
+    "remoteQualityJobs": 2,
+    "remoteContainerJobs": 2
+  },
+  "image": {
+    "id": "sha256:cd7f74a5fdf2e87842bb9138ecb13e46d911de6b781be9e7456a9f41e55756c4",
+    "user": "node",
+    "healthcheck": true
+  },
+  "sbom": {
+    "format": "CycloneDX",
+    "specVersion": "1.7",
+    "components": 3706,
+    "sha256": "bf01c58791a5b70764368b50a95717e768a29938117e33475d734ae47bdfa21a",
+    "localPathOrSecretHits": 0
+  },
+  "realE2e": {
+    "realPostgres": true,
+    "realBuiltContainer": true,
+    "realSdar": false,
+    "openWebUiToSdarVerticalSlice": false,
+    "assignedPhase": 11
+  },
+  "publication": { "committed": true, "pushed": true, "remoteCiPassed": true },
+  "temporaryResourcesRemoved": true,
+  "blockers": []
+}

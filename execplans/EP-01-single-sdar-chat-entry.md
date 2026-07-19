@@ -256,3 +256,13 @@ tests. A real built server kept liveness at 200 while PostgreSQL was down,
 reported readiness 503, and recovered readiness in the same PID after database
 restart; its logs passed a secret scan. Phase 9 is published; Phase 10 Docker,
 CI, license, SBOM, and governance work is next.
+
+## Phase 10 outcome
+
+The production image is multi-stage, production-dependency-only, non-root, and
+health-checked. Compose starts the server with a clean PostgreSQL 16.9 volume,
+applies all migrations, isolates the database network, publishes only to
+loopback, and documents the external Open WebUI network. Frozen dependency,
+peer, architecture, license, image, Compose, and CycloneDX SBOM gates passed
+locally. Both push and pull-request GitHub Actions quality/container jobs passed.
+Phase 10 is published; Phase 11 real SDAR and Open WebUI E2E is next.
