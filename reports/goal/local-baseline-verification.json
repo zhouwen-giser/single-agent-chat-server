@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T20:44:33+09:00",
+  "toolchain": {
+    "node": "22.14.0",
+    "pnpm": "11.13.1",
+    "frozenInstall": "PASSED",
+    "peerCheck": "PASSED"
+  },
+  "commands": {
+    "formatCheck": {
+      "status": "FAILED",
+      "file": "reports/goal/11-real-sdar-openwebui-e2e.json"
+    },
+    "lint": "PASSED",
+    "typecheck": "PASSED",
+    "unit": {
+      "status": "PASSED",
+      "suites": 5,
+      "tests": 31
+    },
+    "contract": {
+      "status": "PASSED",
+      "suites": 2,
+      "tests": 25
+    },
+    "integration": {
+      "status": "PARTIAL",
+      "passed": 1,
+      "skipped": 35,
+      "reason": "native PostgreSQL unavailable"
+    },
+    "build": "PASSED"
+  },
+  "pgliteCompatibilityProbe": {
+    "acceptedAsRealPostgres": false,
+    "databaseBackedTestsProgressed": 35,
+    "passedBeforeProtocolFailure": 33,
+    "failed": 2,
+    "reason": "socket multiplexer prepared-statement incompatibility"
+  },
+  "blocked": [
+    "native PostgreSQL integration",
+    "Docker and Compose",
+    "real Open WebUI plus real SDAR final-head E2E",
+    "real Redis and MCP transport"
+  ]
+}

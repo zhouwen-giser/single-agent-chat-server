@@ -38,6 +38,7 @@ async function startMock(
     readonly protocolBinding?: string;
     readonly protocolVersion?: string;
     readonly discoveryDelayMs?: number;
+    readonly streamEventCount?: number;
   } = {},
 ) {
   const seen: SeenRequest[] = [];
@@ -71,16 +72,16 @@ async function startMock(
     }
     if (request.url === "/a2a/message:stream") {
       response.writeHead(200, { "content-type": "text/event-stream" });
-      response.end(
+      const event =
         "data: " +
-          JSON.stringify({
-            task: taskJson("TASK_STATE_WORKING", {
-              internalPhase: "executing",
-              phaseMessage: "working",
-            }),
-          }) +
-          String.fromCharCode(10, 10),
-      );
+        JSON.stringify({
+          task: taskJson("TASK_STATE_WORKING", {
+            internalPhase: "executing",
+            phaseMessage: "working",
+          }),
+        }) +
+        String.fromCharCode(10, 10);
+      response.end(event.repeat(options.streamEventCount ?? 1));
       return;
     }
     if (request.url === "/a2a/message:send") {
@@ -180,6 +181,13 @@ describe("official SDAR A2A adapter HTTP+JSON contract", () => {
     await expect(
       createSdarA2aClient({ baseUrl: wrongVersion.baseUrl }),
     ).rejects.toThrow("does not advertise HTTP+JSON protocol version 1.0");
+
+    const redirected = await startMock({
+      advertisedEndpoint: "https://attacker.example/a2a",
+    });
+    await expect(
+      createSdarA2aClient({ baseUrl: redirected.baseUrl }),
+    ).rejects.toThrow("must share the configured SDAR base URL origin");
   });
 
   it("streams a bounded WORKING Task through the official SDK", async () => {
@@ -330,6 +338,24 @@ describe("official SDAR A2A adapter HTTP+JSON contract", () => {
         discoveryTimeoutMs: 100,
       }),
     ).rejects.toThrow();
+  });
+
+  it("fails closed when a stream floods more than the event budget", async () => {
+    const mock = await startMock({ streamEventCount: 513 });
+    const client = await createSdarA2aClient({
+      baseUrl: mock.baseUrl,
+      endpointOverride: mock.endpoint,
+    });
+    const consume = async () => {
+      for await (const event of client.submitTaskStream({
+        messageId: "message-flood",
+        text: "run",
+      })) {
+        // Consume through the adapter's hard event limit.
+        void event;
+      }
+    };
+    await expect(consume()).rejects.toThrow("512-event limit");
   });
 });
 function agentCard(input: {

@@ -7,7 +7,11 @@ const result = spawnSync(
   { encoding: "utf8", shell: false },
 );
 if (result.status !== 0) {
-  process.stderr.write(result.stderr);
+  process.stderr.write(
+    result.error instanceof Error
+      ? `Docker container verification could not start: ${result.error.message}\n`
+      : (result.stderr ?? "Docker container verification failed.\n"),
+  );
   process.exit(result.status ?? 1);
 }
 const config = JSON.parse(result.stdout);

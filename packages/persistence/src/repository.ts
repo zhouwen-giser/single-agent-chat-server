@@ -324,6 +324,34 @@ export class ChatPersistenceRepository {
     }
   }
 
+  async abandonRequestClaim(input: {
+    readonly idempotencyKey: string;
+    readonly userId: string;
+    readonly openWebUiChatId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    await this.pool.query(
+      `
+        DELETE FROM chat_service.request_idempotency
+        WHERE idempotency_key = $1
+          AND user_id = $2
+          AND openwebui_chat_id = $3
+          AND request_hash = $4
+          AND lease_owner = $5
+          AND status = 'CLAIMED'
+          AND result_task_id IS NULL
+      `,
+      [
+        input.idempotencyKey,
+        input.userId,
+        input.openWebUiChatId,
+        input.requestHash,
+        input.leaseOwner,
+      ],
+    );
+  }
+
   async recordEvent(input: {
     readonly taskId: string;
     readonly eventKind: string;
@@ -374,6 +402,38 @@ export class ChatPersistenceRepository {
             OR thread.submission_lease_owner = $3
           )
           AND NOT EXISTS (
+            SELECT 1
+            FROM chat_service.conversation_task_binding AS task
+            WHERE task.thread_id = thread.thread_id
+              AND task.terminal_at IS NULL
+          )
+      `,
+      [input.chatId, input.userId, input.leaseOwner, leaseMs],
+    );
+    return result.rowCount === 1;
+  }
+
+  async claimTaskInteractionSlot(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly leaseOwner: string;
+    readonly leaseMs?: number;
+  }): Promise<boolean> {
+    const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
+    const result = await this.pool.query(
+      `
+        UPDATE chat_service.chat_thread_binding AS thread
+        SET submission_lease_owner = $3,
+            submission_lease_until = now() + ($4::bigint * interval '1 millisecond'),
+            updated_at = now()
+        WHERE thread.openwebui_chat_id = $1
+          AND thread.user_id = $2
+          AND (
+            thread.submission_lease_until IS NULL
+            OR thread.submission_lease_until <= now()
+            OR thread.submission_lease_owner = $3
+          )
+          AND EXISTS (
             SELECT 1
             FROM chat_service.conversation_task_binding AS task
             WHERE task.thread_id = thread.thread_id

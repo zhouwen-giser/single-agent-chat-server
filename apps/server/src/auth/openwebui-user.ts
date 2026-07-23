@@ -18,7 +18,7 @@ const jwtPayloadSchema = z
     sub: z.string().min(1).max(256),
     exp: z.number().int().positive(),
     iat: z.number().int().positive(),
-    role: z.string().min(1).max(64),
+    role: z.enum(["user", "admin"]),
     email: z.string().email().max(320).optional(),
     name: z.string().min(1).max(256).optional(),
   })

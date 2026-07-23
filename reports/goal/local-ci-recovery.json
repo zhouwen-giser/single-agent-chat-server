@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T20:44:33+09:00",
+  "remoteFeatureSha": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
+  "remoteRuns": [29670952675, 29670953528],
+  "remoteFailure": {
+    "job": "quality",
+    "step": "pnpm verify:phase10",
+    "containerJob": "skipped",
+    "readOnlyEvidence": true
+  },
+  "rootCause": {
+    "command": "pnpm format:check",
+    "file": "reports/goal/11-real-sdar-openwebui-e2e.json",
+    "category": "prettier-format"
+  },
+  "fix": {
+    "scope": "format-only",
+    "semanticEvidenceChanged": false
+  },
+  "localPhase10AfterFix": {
+    "status": "PARTIAL",
+    "format": "PASSED",
+    "lint": "PASSED",
+    "langgraphConfig": "PASSED",
+    "typecheck": "PASSED",
+    "unitTests": 31,
+    "contractTests": 25,
+    "graphIntegrationTests": 1,
+    "postgresIntegrationTests": "SKIPPED",
+    "build": "PASSED",
+    "architectureFiles": 41,
+    "productionLicenseEntries": 84
+  },
+  "localFixPushed": false,
+  "remoteCiForLocalFix": "NOT_RUN",
+  "pullRequestModified": false
+}

@@ -119,5 +119,24 @@
       "name": "Follow-up action and metadata allowlist",
       "required": true
     }
-  ]
+  ],
+  "phase12LocalEvidence": {
+    "status": "COMPLETED_LOCAL",
+    "functionalCommit": "a93e953eebe1f342667a8e7005fc55c9ff3b2759",
+    "report": "reports/goal/12-adversarial-hardening.md",
+    "verification": "pnpm verify:phase12",
+    "result": "PASSED",
+    "remoteCi": "NOT_RUN_FOR_LOCAL_HEAD",
+    "finalRealE2e": "BLOCKED_BY_LOCAL_ENVIRONMENT"
+  },
+  "phase13LocalEvidence": {
+    "status": "BLOCKED_LOCAL_REVIEW",
+    "verificationSourceHead": "719572c744da0a7f195d060b74e762860ff4fac7",
+    "report": "reports/goal/13-final-acceptance.md",
+    "fixtureE2e": "PASSED",
+    "realE2e": "BLOCKED_BY_LOCAL_ENVIRONMENT",
+    "nativePostgres": "BLOCKED_BY_LOCAL_ENVIRONMENT",
+    "container": "BLOCKED_BY_LOCAL_ENVIRONMENT",
+    "remoteCi": "NOT_RUN_FOR_LOCAL_HEAD"
+  }
 }

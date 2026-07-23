@@ -42,6 +42,8 @@ interface ResolvedCard {
   readonly endpoint: string;
 }
 
+const MAX_STREAM_EVENTS = 512;
+
 export async function createSdarA2aClient(
   input: SdarA2aAdapterConfig,
 ): Promise<SdarA2aClient> {
@@ -57,6 +59,7 @@ export async function createSdarA2aClient(
   const downloadedCard = await resolver.resolve(parsed.baseUrl);
   const resolved = selectHttpJsonInterface(
     downloadedCard,
+    parsed.baseUrl,
     parsed.endpointOverride,
   );
   const factory = new ClientFactory({
@@ -84,6 +87,7 @@ export async function createSdarA2aClient(
 
 function selectHttpJsonInterface(
   card: AgentCard,
+  baseUrl: string,
   endpointOverride?: string,
 ): ResolvedCard {
   const selected = card.supportedInterfaces.find(
@@ -99,9 +103,23 @@ function selectHttpJsonInterface(
   if (card.capabilities?.streaming !== true) {
     throw new Error("Agent Card does not advertise required streaming support");
   }
+  if (!card.defaultInputModes.includes("text/plain")) {
+    throw new Error("Agent Card does not accept required text/plain input");
+  }
+  if (
+    !card.defaultOutputModes.includes("text/plain") ||
+    !card.defaultOutputModes.includes("application/json")
+  ) {
+    throw new Error("Agent Card does not advertise required output modes");
+  }
   validateHttpUrl(selected.url, "Agent Card interface URL");
   const endpoint = endpointOverride ?? selected.url;
   validateHttpUrl(endpoint, "A2A endpoint");
+  if (new URL(endpoint).origin !== new URL(baseUrl).origin) {
+    throw new Error(
+      "A2A endpoint must share the configured SDAR base URL origin",
+    );
+  }
   return {
     endpoint,
     card: {
@@ -128,9 +146,16 @@ class OfficialSdarA2aClient implements SdarA2aClient {
     const parsed = submitTaskInputSchema.parse(input);
     const request = createSubmitRequest(parsed);
     const signal = operationSignal(this.operationTimeoutMs, options.signal);
+    let eventCount = 0;
     for await (const event of this.client.sendMessageStream(request, {
       signal,
     })) {
+      eventCount += 1;
+      if (eventCount > MAX_STREAM_EVENTS) {
+        throw new Error(
+          `A2A stream exceeded the ${MAX_STREAM_EVENTS}-event limit`,
+        );
+      }
       yield normalizeStreamEvent(event);
     }
   }
@@ -149,6 +174,14 @@ class OfficialSdarA2aClient implements SdarA2aClient {
     options: OperationOptions & { readonly historyLength?: number } = {},
   ) {
     const id = requiredIdentifier(taskId, "taskId");
+    if (
+      options.historyLength !== undefined &&
+      (!Number.isInteger(options.historyLength) ||
+        options.historyLength < 0 ||
+        options.historyLength > 100)
+    ) {
+      throw new Error("historyLength must be an integer from 0 to 100");
+    }
     const task = await this.client.getTask(
       {
         tenant: "",

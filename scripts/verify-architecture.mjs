@@ -8,6 +8,15 @@ const packageJson = JSON.parse(
 if (packageJson.dependencies?.["@a2a-js/sdk"] !== "1.0.0-beta.0") {
   throw new Error("Frozen @a2a-js/sdk@1.0.0-beta.0 pin changed");
 }
+for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
+  if (
+    /(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|agent.?mesh|agent.?registry|copilotkit|ag-ui|clickhouse)/iu.test(
+      dependency,
+    )
+  ) {
+    throw new Error(`Out-of-bound production dependency: ${dependency}`);
+  }
+}
 
 const productionRoots = ["apps", "packages", "src"];
 const files = (
@@ -31,6 +40,28 @@ for (const file of files) {
     !name.startsWith("packages/persistence/")
   ) {
     violations.push(`${name}: PostgreSQL import outside persistence`);
+  }
+  if (
+    /\bfetch\s*\(/u.test(content) &&
+    !name.startsWith("packages/sdar-a2a-adapter/")
+  ) {
+    violations.push(`${name}: network fetch outside the isolated A2A adapter`);
+  }
+  if (
+    /from ["']node:child_process["']/u.test(content) ||
+    /from ["'](?:axios|undici|@modelcontextprotocol\/[^"']+)["']/u.test(content)
+  ) {
+    violations.push(`${name}: forbidden process or network client import`);
+  }
+  if (/["'`]\/(?:admin|internal|management|mcp)(?:\/|["'`])/iu.test(content)) {
+    violations.push(`${name}: forbidden management or MCP endpoint path`);
+  }
+  if (
+    /process\.env\.(?:SDAR|MCP)|process\.env\[\s*["'](?:SDAR|MCP)/u.test(
+      content,
+    )
+  ) {
+    violations.push(`${name}: direct dynamic SDAR or MCP environment access`);
   }
   for (const forbidden of [
     "tasks/send",

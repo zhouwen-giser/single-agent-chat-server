@@ -1,0 +1,454 @@
+import { createHmac } from "node:crypto";
+
+import { describe, expect, it, jest } from "@jest/globals";
+import { Role, TaskState } from "@a2a-js/sdk";
+
+import { buildServer } from "../apps/server/src/bootstrap.js";
+import type { ServerConfig } from "../apps/server/src/config.js";
+import {
+  boundedPublishedJson,
+  safePublishedText,
+} from "../packages/chat-runtime/src/safe-published-content.js";
+import { SdarTaskCoordinator } from "../packages/chat-runtime/src/task-coordinator.js";
+import type {
+  ChatPersistenceRepository,
+  TaskBinding,
+} from "../packages/persistence/src/index.js";
+import { normalizeTask } from "../packages/sdar-a2a-adapter/src/normalize.js";
+import type {
+  NormalizedTask,
+  SdarA2aClient,
+} from "../packages/sdar-a2a-adapter/src/types.js";
+
+const serviceKey = "phase-12-service-key-at-least-32-characters";
+const jwtSecret = "phase-12-user-jwt-secret-at-least-32-characters";
+const nowMilliseconds = 1_700_000_000_000;
+const nowSeconds = Math.floor(nowMilliseconds / 1000);
+const config: ServerConfig = {
+  serviceKey,
+  openWebUiUserJwtSecret: jwtSecret,
+  host: "127.0.0.1",
+  port: 3000,
+  bodyLimitBytes: 8_192,
+  requestTimeoutMs: 5_000,
+  modelId: "sdar-single-agent",
+  rateLimitMax: 60,
+  rateLimitWindowMs: 60_000,
+  maxMessages: 64,
+  maxMessageChars: 32_768,
+  maxResponseChars: 1_024,
+  logLevel: "silent",
+  streamBudgetMs: 30_000,
+  pollingBudgetMs: 5_000,
+  pollingIntervalMs: 1_000,
+};
+
+describe("Phase 12 adversarial hardening", () => {
+  it("rejects illegal JWT algorithms, issuers, roles, subjects, and lifetimes", async () => {
+    const server = buildServer({
+      config,
+      now: () => nowMilliseconds,
+      resolveChatThread: async (input) => ({
+        threadId: `${input.userId}:${input.openWebUiChatId}`,
+        openWebUiChatId: input.openWebUiChatId,
+        userId: input.userId,
+        userRole: input.userRole,
+      }),
+      runChat: async () => "safe",
+    });
+    const validPayload = {
+      iss: "open-webui",
+      sub: "user-a",
+      role: "user",
+      iat: nowSeconds - 1,
+      exp: nowSeconds + 299,
+    };
+    const invalidTokens = [
+      signJwt({ alg: "none", typ: "JWT" }, validPayload),
+      signJwt({ alg: "HS512", typ: "JWT" }, validPayload),
+      signJwt(
+        { alg: "HS256", typ: "JWT" },
+        {
+          ...validPayload,
+          iss: "attacker",
+        },
+      ),
+      signJwt({ alg: "HS256", typ: "JWT" }, { ...validPayload, sub: "" }),
+      signJwt(
+        { alg: "HS256", typ: "JWT" },
+        { ...validPayload, role: "superadmin" },
+      ),
+      signJwt(
+        { alg: "HS256", typ: "JWT" },
+        { ...validPayload, exp: nowSeconds + 601 },
+      ),
+      signJwt(
+        { alg: "HS256", typ: "JWT" },
+        {
+          ...validPayload,
+          iat: nowSeconds + 31,
+          exp: nowSeconds + 330,
+        },
+      ),
+    ];
+
+    for (const token of invalidTokens) {
+      const response = await server.inject({
+        method: "GET",
+        url: "/v1/models",
+        headers: {
+          authorization: `Bearer ${serviceKey}`,
+          "x-openwebui-user-jwt": token,
+        },
+      });
+      expect(response.statusCode).toBe(401);
+      expect(response.json().error.code).toBe("invalid_user_identity");
+    }
+    await server.close();
+  });
+
+  it("escapes HTML, Markdown, malicious links, code fences, and secrets", () => {
+    const rendered = safePublishedText(
+      "<script>alert(1)</script> [click](javascript:alert(1)) token=private",
+      8_000,
+    );
+    expect(rendered).toContain("&lt;script&gt;");
+    expect(rendered).not.toContain("<script>");
+    expect(rendered).not.toContain("[click](");
+    expect(rendered).not.toContain("private");
+
+    const json = boundedPublishedJson({
+      text: "```</script>",
+      token: "private-json-token",
+    });
+    expect(json).not.toContain("```");
+    expect(json).not.toContain("</script>");
+    expect(json).not.toContain("private-json-token");
+  });
+
+  it("rejects malformed Task identity, timestamp, message binding, and oversized artifacts", () => {
+    expect(() =>
+      normalizeTask({
+        ...sdkTask(),
+        id: "",
+      } as never),
+    ).toThrow("Task ID");
+    expect(() =>
+      normalizeTask({
+        ...sdkTask(),
+        status: { ...sdkTask().status, timestamp: "not-a-timestamp" },
+      } as never),
+    ).toThrow("RFC 3339");
+    expect(() =>
+      normalizeTask({
+        ...sdkTask(),
+        status: {
+          ...sdkTask().status,
+          message: {
+            ...sdkTask().status.message,
+            taskId: "different-task",
+          },
+        },
+      } as never),
+    ).toThrow("identity did not match");
+    expect(() =>
+      normalizeTask({
+        ...sdkTask(),
+        artifacts: [
+          {
+            artifactId: "large",
+            name: "",
+            description: "",
+            parts: [
+              {
+                content: { $case: "text", value: "x".repeat(65 * 1_024) },
+                mediaType: "text/plain",
+                filename: "",
+                metadata: undefined,
+              },
+            ],
+          },
+        ],
+      } as never),
+    ).toThrow("text Part");
+  });
+
+  it("bounds both streaming and non-streaming response output", async () => {
+    const server = buildServer({
+      config,
+      now: () => nowMilliseconds,
+      resolveChatThread: async (input) => ({
+        threadId: `${input.userId}:${input.openWebUiChatId}`,
+        openWebUiChatId: input.openWebUiChatId,
+        userId: input.userId,
+        userRole: input.userRole,
+      }),
+      runChat: async () =>
+        (async function* () {
+          yield "a".repeat(800);
+          yield "b".repeat(800);
+          yield "unreachable";
+        })(),
+    });
+    const headers = authenticatedChatHeaders();
+    const nonStreaming = await server.inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers,
+      payload: chatPayload(false),
+    });
+    const streaming = await server.inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers,
+      payload: chatPayload(true),
+    });
+
+    expect(nonStreaming.json().choices[0].message.content).toContain(
+      "truncated at the configured safety limit",
+    );
+    expect(nonStreaming.body).not.toContain("unreachable");
+    expect(streaming.body).toContain(
+      "truncated at the configured safety limit",
+    );
+    expect(streaming.body).not.toContain("unreachable");
+    expect(streaming.body).toMatch(/data: \[DONE\]\n\n$/u);
+    await server.close();
+  });
+
+  it("fails closed when one A2A stream changes Task identity", async () => {
+    const repository = repositoryStub();
+    const client: SdarA2aClient = {
+      protocolBinding: "HTTP+JSON",
+      protocolVersion: "1.0",
+      endpoint: "http://sdar.test/a2a",
+      async *submitTaskStream() {
+        yield { kind: "task", task: normalizedTask() };
+        yield {
+          kind: "status",
+          taskId: "task-attacker",
+          contextId: "context-1",
+          state: "WORKING",
+        };
+      },
+      sendFollowUp: async () => ({ kind: "task", task: normalizedTask() }),
+      getTask: async () => normalizedTask(),
+      cancelTask: async () => normalizedTask(),
+    };
+    const coordinator = new SdarTaskCoordinator({
+      repository,
+      getClient: async () => client,
+      pollingBudgetMs: 0,
+    });
+
+    await expect(
+      collect(
+        coordinator.submit({
+          userText: "run",
+          userId: "user-a",
+          chatId: "chat-a",
+          userMessageId: "message-a",
+        }),
+      ),
+    ).rejects.toThrow("changed Task identity");
+  });
+
+  it("serializes mutating Follow-ups and abandons an unsent idempotency claim", async () => {
+    const repository = repositoryStub({
+      findActiveTaskForChat: jest.fn(async () => ({
+        ...binding(),
+        status: "INPUT_REQUIRED",
+        pendingInput: { internalPhase: "awaiting_user_input" },
+      })),
+      claimTaskInteractionSlot: jest.fn(async () => false),
+    });
+    const sendFollowUp = jest.fn();
+    const client = {
+      protocolBinding: "HTTP+JSON",
+      protocolVersion: "1.0",
+      endpoint: "http://sdar.test/a2a",
+      submitTaskStream: jest.fn(),
+      sendFollowUp,
+      getTask: jest.fn(),
+      cancelTask: jest.fn(),
+    } as unknown as SdarA2aClient;
+    const coordinator = new SdarTaskCoordinator({
+      repository,
+      getClient: async () => client,
+    });
+    const output = await collect(
+      coordinator.followUp({
+        userText: "device-17",
+        userId: "user-a",
+        chatId: "chat-a",
+        userMessageId: "message-follow-up",
+        action: "provide_input",
+      }),
+    );
+
+    expect(output.join("\n")).toContain("already in progress");
+    expect(sendFollowUp).not.toHaveBeenCalled();
+    expect(repository.abandonRequestClaim).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not render a stale observation that persistence rejected", async () => {
+    const staleBinding = binding();
+    const repository = repositoryStub({
+      findActiveTaskForChat: jest.fn(async () => staleBinding),
+      recordEvent: jest.fn(async () => true),
+      updateTaskBinding: jest.fn(async () => ({
+        ...staleBinding,
+        status: "COMPLETED",
+        lastEventHash: "newer-terminal-hash",
+        terminalAt: "2026-07-23T00:00:00.000Z",
+        version: 2,
+      })),
+    });
+    const client = {
+      protocolBinding: "HTTP+JSON",
+      protocolVersion: "1.0",
+      endpoint: "http://sdar.test/a2a",
+      submitTaskStream: jest.fn(),
+      sendFollowUp: jest.fn(),
+      getTask: jest.fn(async () => normalizedTask()),
+      cancelTask: jest.fn(),
+    } as unknown as SdarA2aClient;
+    const coordinator = new SdarTaskCoordinator({
+      repository,
+      getClient: async () => client,
+    });
+
+    await expect(
+      collect(coordinator.status({ chatId: "chat-a", userId: "user-a" })),
+    ).resolves.toEqual([]);
+  });
+});
+
+function authenticatedChatHeaders() {
+  return {
+    authorization: `Bearer ${serviceKey}`,
+    "x-openwebui-user-jwt": signJwt(
+      { alg: "HS256", typ: "JWT" },
+      {
+        iss: "open-webui",
+        sub: "user-a",
+        role: "user",
+        iat: nowSeconds - 1,
+        exp: nowSeconds + 299,
+      },
+    ),
+    "x-openwebui-chat-id": "chat-a",
+    "x-openwebui-message-id": "assistant-a",
+    "x-openwebui-user-message-id": "user-message-a",
+  };
+}
+
+function signJwt(
+  headerValue: Readonly<Record<string, unknown>>,
+  payloadValue: Readonly<Record<string, unknown>>,
+): string {
+  const header = encode(headerValue);
+  const payload = encode(payloadValue);
+  const signature = createHmac("sha256", jwtSecret)
+    .update(`${header}.${payload}`, "ascii")
+    .digest("base64url");
+  return `${header}.${payload}.${signature}`;
+}
+
+function encode(value: unknown): string {
+  return Buffer.from(JSON.stringify(value), "utf8").toString("base64url");
+}
+
+function chatPayload(stream: boolean) {
+  return {
+    model: "sdar-single-agent",
+    messages: [{ role: "user", content: "run" }],
+    stream,
+  };
+}
+
+function sdkTask() {
+  return {
+    id: "task-1",
+    contextId: "context-1",
+    status: {
+      state: TaskState.TASK_STATE_WORKING,
+      message: {
+        messageId: "status-1",
+        taskId: "task-1",
+        contextId: "context-1",
+        role: Role.ROLE_AGENT,
+        parts: [
+          {
+            content: { $case: "text", value: "working" },
+            mediaType: "text/plain",
+            filename: "",
+            metadata: undefined,
+          },
+        ],
+        metadata: undefined,
+        extensions: [],
+        referenceTaskIds: [],
+      },
+      timestamp: "2026-07-23T00:00:00Z",
+    },
+    artifacts: [],
+    history: [],
+    metadata: { internalPhase: "executing" },
+  };
+}
+
+function normalizedTask(): NormalizedTask {
+  return {
+    taskId: "task-1",
+    contextId: "context-1",
+    state: "WORKING",
+    statusTimestamp: "2026-07-23T00:00:00Z",
+    artifacts: [],
+  };
+}
+
+function binding(): TaskBinding {
+  return {
+    bindingId: "binding-1",
+    threadId: "thread-1",
+    sdarTaskId: "task-1",
+    sdarContextId: "context-1",
+    status: "WORKING",
+    version: 0,
+  };
+}
+
+function repositoryStub(
+  overrides: Readonly<Record<string, unknown>> = {},
+): ChatPersistenceRepository & Readonly<Record<string, jest.Mock>> {
+  const currentBinding = binding();
+  return {
+    claimRequest: jest.fn(async () => ({ outcome: "acquired" })),
+    completeRequest: jest.fn(async () => undefined),
+    abandonRequestClaim: jest.fn(async () => undefined),
+    claimTaskSubmissionSlot: jest.fn(async () => true),
+    claimTaskInteractionSlot: jest.fn(async () => true),
+    releaseTaskSubmissionSlot: jest.fn(async () => undefined),
+    findAuthorizedTask: jest.fn(async () => undefined),
+    findActiveTaskForChat: jest.fn(async () => currentBinding),
+    createTaskBinding: jest.fn(async () => currentBinding),
+    recordEvent: jest.fn(async () => true),
+    updateTaskBinding: jest.fn(
+      async (input: { status: string; lastEventHash: string }) => ({
+        ...currentBinding,
+        status: input.status,
+        lastEventHash: input.lastEventHash,
+        version: currentBinding.version + 1,
+      }),
+    ),
+    ...overrides,
+  } as unknown as ChatPersistenceRepository &
+    Readonly<Record<string, jest.Mock>>;
+}
+
+async function collect(source: AsyncIterable<string>): Promise<string[]> {
+  const values: string[] = [];
+  for await (const value of source) values.push(value);
+  return values;
+}

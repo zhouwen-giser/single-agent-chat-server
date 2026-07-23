@@ -203,10 +203,9 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
       timedChat.end(abortController.signal.aborted ? "aborted" : "error");
       throw error;
     }
-    const fragments = observeFragments(
-      result,
-      timedChat,
-      abortController.signal,
+    const fragments = limitFragments(
+      observeFragments(result, timedChat, abortController.signal),
+      options.config.maxResponseChars,
     );
     if (parsed.data.stream) {
       return reply
@@ -342,4 +341,27 @@ async function collectFragments(
   const collected: string[] = [];
   for await (const fragment of fragments) collected.push(fragment);
   return collected.join("\n\n");
+}
+
+async function* limitFragments(
+  fragments: AsyncIterable<string>,
+  maximumCharacters: number,
+): AsyncGenerator<string> {
+  let emittedCharacters = 0;
+  let emittedFragments = 0;
+  for await (const fragment of fragments) {
+    emittedFragments += 1;
+    const remaining = maximumCharacters - emittedCharacters;
+    if (emittedFragments > 512 || remaining <= 0) {
+      yield "The response was truncated at the configured safety limit.";
+      return;
+    }
+    if (fragment.length > remaining) {
+      yield fragment.slice(0, remaining) +
+        "\n\nThe response was truncated at the configured safety limit.";
+      return;
+    }
+    emittedCharacters += fragment.length;
+    yield fragment;
+  }
 }

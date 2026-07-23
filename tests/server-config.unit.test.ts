@@ -23,6 +23,7 @@ describe("server configuration", () => {
       rateLimitWindowMs: 60_000,
       maxMessages: 64,
       maxMessageChars: 32_768,
+      maxResponseChars: 65_536,
       logLevel: "info",
       streamBudgetMs: 30_000,
       pollingBudgetMs: 5_000,

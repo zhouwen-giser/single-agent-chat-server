@@ -60,8 +60,15 @@
     "captured": false,
     "reason": "in-app Browser Node runtime blocked by Windows sandbox helper_unknown_error; no screenshot fabricated"
   },
-  "publication": { "committed": true, "pushed": true, "remoteCi": "PENDING_CAPTURE" },
+  "publication": {
+    "committed": true,
+    "pushed": true,
+    "remoteCi": "PENDING_CAPTURE"
+  },
   "temporaryResourcesRemoved": true,
-  "preservedUserResources": ["Open WebUI 0.10.2 on 127.0.0.1:8080", "sdar-rc2-test-db"],
+  "preservedUserResources": [
+    "Open WebUI 0.10.2 on 127.0.0.1:8080",
+    "sdar-rc2-test-db"
+  ],
   "blockers": []
 }

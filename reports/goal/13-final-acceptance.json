@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "phase": 13,
+  "name": "final-acceptance-release-evidence",
+  "status": "BLOCKED_LOCAL_REVIEW",
+  "verificationSourceHead": "719572c744da0a7f195d060b74e762860ff4fac7",
+  "branch": "work/local-phase12-phase13-handoff",
+  "remoteFeatureShaAtStart": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
+  "remoteMainSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
+  "pushed": false,
+  "publication": "LOCAL_ONLY",
+  "remoteCiForLocalHead": "NOT_RUN",
+  "commands": {
+    "format": "PASSED",
+    "lint": "PASSED",
+    "typecheck": "PASSED",
+    "unit": {
+      "status": "PASSED",
+      "passed": 31
+    },
+    "contract": {
+      "status": "PASSED",
+      "passed": 26
+    },
+    "integration": {
+      "status": "PARTIAL",
+      "passed": 1,
+      "skipped": 35,
+      "reason": "native PostgreSQL unavailable"
+    },
+    "e2e": {
+      "status": "BLOCKED",
+      "fixturePassed": 1,
+      "realRequiredPassed": 0,
+      "reason": "Open WebUI, SDAR, PostgreSQL, Redis, and MCP transport unavailable"
+    },
+    "security": {
+      "status": "PASSED",
+      "passed": 7
+    },
+    "build": "PASSED",
+    "smoke": "PASSED",
+    "migrations": "PASSED_STATIC_REAL_APPLY_BLOCKED",
+    "architecture": {
+      "status": "PASSED",
+      "productionFiles": 42
+    },
+    "openaiApi": {
+      "status": "PASSED",
+      "passed": 19
+    },
+    "a2a": {
+      "status": "PASSED",
+      "passed": 7
+    },
+    "openwebui": "BLOCKED",
+    "verify": "BLOCKED_AT_REAL_ENVIRONMENT_PREFLIGHT",
+    "licenses": {
+      "status": "PASSED",
+      "entries": 84
+    },
+    "workflows": "PASSED_STATIC",
+    "secretScan": "PASSED",
+    "gitDiffCheck": "PASSED",
+    "dockerBuild": "BLOCKED_DOCKER_NOT_INSTALLED",
+    "container": "BLOCKED_DOCKER_NOT_INSTALLED",
+    "sbomCurrentHead": "BLOCKED_DOCKER_NOT_INSTALLED"
+  },
+  "upstreams": {
+    "openWebUi": "0.10.2 retained Phase 11 evidence",
+    "sdarCommit": "667146a3639eefdfed9b89c2417c08e1ac50e9a9",
+    "phase11AgentCardSha256": "bfcf6ebdb2e603a0859379ad1e5d234eeda4ff47f57f46b3d16e3330d6c302b1",
+    "a2aSpecPatch": "1.0.1",
+    "wire": "1.0",
+    "binding": "HTTP+JSON",
+    "sdk": "@a2a-js/sdk@1.0.0-beta.0"
+  },
+  "archive": {
+    "status": "GENERATED_AFTER_FINAL_EVIDENCE_COMMIT",
+    "namePattern": "single-agent-chat-server-v0.1.0-BLOCKED-LOCAL-REVIEW-<final-shortsha>.zip",
+    "integrityLocation": "external delivery manifest and .sha256 companion"
+  },
+  "updatedAt": "2026-07-23T21:12:17+09:00"
+}

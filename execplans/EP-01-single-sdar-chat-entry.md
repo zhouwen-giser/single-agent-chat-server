@@ -61,10 +61,23 @@ Open WebUI
 - [x] 2026-07-18: Phase 8 restart, concurrency, lease recovery, and stale-event hardening complete.
 - [x] 2026-07-19: Phase 9 verified, committed as 34e731b, pushed, and recorded on Draft PR #1.
 - [x] 2026-07-19: Phase 9 secure logs, telemetry, limits, and dependency readiness complete.
-- [ ] Phase 10: Docker, CI, licenses, SBOM, and governance gates.
-- [ ] Phase 11: real Open WebUI-to-SDAR vertical-slice E2E evidence.
-- [ ] Phase 12: adversarial review, fixes, and regressions.
-- [ ] Phase 13: final acceptance, release evidence, and PR Ready state.
+- [x] 2026-07-19: Phase 10 verified and published as `d8fade1`, with its
+      evidence follow-up committed as `c479c04`.
+- [x] 2026-07-19: Phase 11 real Open WebUI-to-SDAR vertical-slice E2E
+      verified and published as `d6a79a9`, with the evidence report committed
+      as `61fec2f`.
+- [x] 2026-07-23: Work-mode handoff verified the remote feature/main SHAs,
+      both Phase 11 commits, Draft PR #1, and the two latest failed Actions
+      runs without performing a remote write.
+- [x] 2026-07-23: Reproduced the latest `verify:phase10` failure as a
+      Prettier-only defect in the Phase 11 JSON report and repaired it locally
+      in `2124f21`.
+- [x] 2026-07-23: Phase 12 adversarial review, actionable fixes, seven
+      dedicated security regressions, the expanded architecture gate, and
+      `verify:phase12` completed locally as `a93e953`; nothing was pushed.
+- [ ] 2026-07-23: Phase 13 implementation, documentation, and every available
+      local gate completed; required native PostgreSQL, real Open WebUI/SDAR,
+      Docker/Compose, and current SBOM gates are blocked by the workspace.
 
 ## Implementation sequence
 
@@ -136,6 +149,13 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
 - A Phase 9 lease-expiry test exposed a real 10ms wall-clock race under a busy
   integration run. Replacing the delay with an explicit expired SQL timestamp
   made the recovery assertion deterministic without weakening the behavior.
+- The Phase 11 report commit added valid evidence but serialized two JSON
+  values in a style rejected by the pinned Prettier. Both remote workflows
+  therefore failed in `quality`, and the dependent container job was skipped.
+- The current Work-mode workspace provides neither Docker nor native
+  PostgreSQL, Open WebUI, SDAR, Redis, or MCP listeners. An isolated PGlite
+  wire-compatibility probe exercised most database tests but is explicitly not
+  accepted as a real PostgreSQL replacement.
 
 ## Decision Log
 
@@ -162,6 +182,10 @@ EBADF`. The exact extracted baseline was complete and tested unchanged.
 - 2026-07-19: PostgreSQL is the readiness dependency. SDAR discovery remains
   lazy so temporary Agent outage fails a chat operation without withdrawing
   the otherwise healthy OpenAI-compatible entrance.
+- 2026-07-23: Apply the Work-mode handoff package's stricter local-only rule.
+  All Phase 12/13 commits stay on `work/local-phase12-phase13-handoff`;
+  `origin` has `NO_PUSH_ALLOWED` as its push URL, and the repository owner owns
+  all later publication and PR decisions.
 
 - The first isolated Open WebUI smoke inherited the chat server DATABASE_URL
   and failed before proxy testing because the pip install lacked psycopg2.
@@ -266,3 +290,50 @@ loopback, and documents the external Open WebUI network. Frozen dependency,
 peer, architecture, license, image, Compose, and CycloneDX SBOM gates passed
 locally. Both push and pull-request GitHub Actions quality/container jobs passed.
 Phase 10 is published; Phase 11 real SDAR and Open WebUI E2E is next.
+
+## Phase 11 outcome
+
+The remote `d6a79a9` commit and its `61fec2f` evidence report record a real
+Open WebUI 0.10.2 → production chat server → SDAR
+`667146a3639eefdfed9b89c2417c08e1ac50e9a9` vertical slice with real
+PostgreSQL, Redis and MCP transport. The official
+`@a2a-js/sdk@1.0.0-beta.0` HTTP+JSON path was used; the deterministic
+structured-model fixture did not replace those components. The stale Progress
+and sync-state records were a publication-state defect, not grounds to delete
+or rewrite Phase 11 evidence.
+
+## Local handoff outcome
+
+The handoff starts from remote feature `61fec2f` on local branch
+`work/local-phase12-phase13-handoff`. The fetch URL remains read-only and the
+push URL is `NO_PUSH_ALLOWED`. The existing PR is unchanged, and GitHub
+Actions has not run for any local handoff commit. Phase 12 is next. Final-head
+real E2E and container checks remain environment-dependent required gates; if
+they cannot be supplied, Phase 13 must produce a truthful blocked local-review
+package.
+
+## Phase 12 outcome
+
+Local functional commit `a93e953` bounds and validates untrusted A2A payloads,
+fails closed on Task/context identity drift and cross-origin endpoints,
+serializes mutating Task interactions, suppresses stale rejected observations,
+restricts signed roles, and safely bounds published output. The repeatable
+architecture gate also rejects production drift toward management APIs, MCP,
+mesh, registry, capability discovery, multi-agent UI stacks, or direct network
+access outside the isolated adapter. `pnpm verify:phase12` passed with 31 unit,
+26 contract, and seven dedicated security tests across 42 production files.
+The commit is local only. Phase 13 final-head real E2E and container verification
+remain blocked unless the required external runtimes are supplied.
+
+## Phase 13 local outcome
+
+Final acceptance tooling and documentation are present at verification source
+HEAD `719572c`. Hermetic quality passed with unit 31/31, contract 26/26,
+security 7/7, fixture E2E 1/1, OpenAI 19/19, A2A 7/7, architecture 42 files,
+licenses 84 entries, built-server smoke, and static migration/workflow/secret
+gates. Integration was only partial because 35 native-PostgreSQL cases skipped.
+The strict live E2E and aggregate `verify` commands failed closed on missing real
+environment configuration; Docker, Compose, container, and current SBOM checks
+were unavailable. Phase 13 remains incomplete and produces a blocked
+local-review archive. PR #1 is unchanged; the repository owner must review,
+unblock, push, and verify remote CI manually.

@@ -40,6 +40,12 @@ const serverConfigSchema = z.object({
     .min(1)
     .max(1_000_000)
     .default(32_768),
+  CHAT_MAX_RESPONSE_CHARS: z.coerce
+    .number()
+    .int()
+    .min(1_024)
+    .max(4 * 1024 * 1024)
+    .default(64 * 1024),
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .default("info"),
@@ -75,6 +81,7 @@ export interface ServerConfig {
   readonly rateLimitWindowMs: number;
   readonly maxMessages: number;
   readonly maxMessageChars: number;
+  readonly maxResponseChars: number;
   readonly logLevel: string;
   readonly streamBudgetMs: number;
   readonly pollingBudgetMs: number;
@@ -97,6 +104,7 @@ export function parseServerConfig(
     rateLimitWindowMs: parsed.CHAT_RATE_LIMIT_WINDOW_MS,
     maxMessages: parsed.CHAT_MAX_MESSAGES,
     maxMessageChars: parsed.CHAT_MAX_MESSAGE_CHARS,
+    maxResponseChars: parsed.CHAT_MAX_RESPONSE_CHARS,
     logLevel: parsed.LOG_LEVEL,
     streamBudgetMs: parsed.CHAT_HTTP_STREAM_BUDGET_MS,
     pollingBudgetMs: parsed.SDAR_POLLING_BUDGET_MS,

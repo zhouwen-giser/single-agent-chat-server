@@ -22,7 +22,14 @@ const result = spawnSync(
   ],
   { encoding: "utf8", shell: false, stdio: "inherit" },
 );
-if (result.status !== 0) process.exit(result.status ?? 1);
+if (result.status !== 0) {
+  process.stderr.write(
+    result.error instanceof Error
+      ? `SBOM generation could not start: ${result.error.message}\n`
+      : "SBOM generation failed.\n",
+  );
+  process.exit(result.status ?? 1);
+}
 process.stdout.write(
   "CycloneDX SBOM written to reports/security/sbom.cdx.json\n",
 );

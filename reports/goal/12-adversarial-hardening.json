@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "phase": 12,
+  "name": "adversarial-hardening",
+  "status": "COMPLETED_LOCAL",
+  "branch": "work/local-phase12-phase13-handoff",
+  "functionalCommit": "a93e953eebe1f342667a8e7005fc55c9ff3b2759",
+  "pushed": false,
+  "publication": "LOCAL_ONLY",
+  "remoteCiForLocalHead": "NOT_RUN",
+  "verification": {
+    "command": "pnpm verify:phase12",
+    "result": "PASSED",
+    "node": "22.14.0",
+    "pnpm": "11.13.1",
+    "unit": {
+      "passed": 31,
+      "failed": 0
+    },
+    "contract": {
+      "passed": 26,
+      "failed": 0
+    },
+    "security": {
+      "passed": 7,
+      "failed": 0
+    },
+    "architectureFiles": 42,
+    "typecheck": "PASSED",
+    "build": "PASSED"
+  },
+  "findings": [
+    "Bound and validate malformed or oversized A2A Task, Status, Message, Artifact, timestamp, URL, and metadata payloads",
+    "Reject Task and context identity drift within one A2A stream",
+    "Redact and encode untrusted published content and bound response aggregation",
+    "Reject cross-origin Agent Card endpoints",
+    "Serialize mutating Follow-up and cancel operations",
+    "Suppress observations rejected by persistence monotonicity",
+    "Restrict signed Open WebUI roles"
+  ],
+  "productBoundary": "one fixed SDAR through isolated A2A HTTP+JSON 1.0 adapter",
+  "environmentBlockers": [
+    "native PostgreSQL unavailable",
+    "Docker unavailable",
+    "Open WebUI unavailable",
+    "SDAR unavailable",
+    "Redis and MCP transport unavailable"
+  ],
+  "diagnosticOnly": "A PGlite wire probe was not accepted as real PostgreSQL evidence",
+  "updatedAt": "2026-07-23T21:00:10+09:00"
+}
