@@ -1,6 +1,6 @@
 {
   "phase": "P03",
-  "status": "PASSED_LOCAL_AWAITING_EVIDENCE_PUSH",
+  "status": "PASSED_PUBLISHED",
   "implementationCommit": "21282a5632728c3995d40baa024261f729ad6af6",
   "checks": {
     "freshMigration": "PASSED",
