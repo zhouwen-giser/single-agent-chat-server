@@ -61,11 +61,12 @@ async function handle(path, rawBody, response) {
       const inputRequired =
         /phase11 input required/iu.test(requestText) &&
         !/device-17/iu.test(requestText);
-      const description = /phase11 capability gap/iu.test(requestText)
-        ? "PHASE11_CAPABILITY_GAP TEMPORARY_SKILL_GOAL:mcp.phase11/device_status"
-        : /phase11 delay/iu.test(requestText)
-          ? "PHASE11_DELAY TEMPORARY_SKILL_GOAL:mcp.phase11/device_status"
-          : "PHASE11_NORMAL TEMPORARY_SKILL_GOAL:mcp.phase11/device_status";
+      const description =
+        /(?:phase11 capability gap|PHASE11_GAP_BRANCH)/iu.test(requestText)
+          ? "PHASE11_CAPABILITY_GAP TEMPORARY_SKILL_GOAL:mcp.phase11/device_status"
+          : /phase11 delay/iu.test(requestText)
+            ? "PHASE11_DELAY TEMPORARY_SKILL_GOAL:mcp.phase11/device_status"
+            : "PHASE11_NORMAL TEMPORARY_SKILL_GOAL:mcp.phase11/device_status";
       respond(response, {
         title: "Phase 11 real A2A task",
         description,
@@ -211,6 +212,7 @@ async function handle(path, rawBody, response) {
       const delayed = String(input.goalContract?.description ?? "").includes(
         "PHASE11_DELAY",
       );
+      const outcomeNodeId = delayed ? "next" : "device";
       respond(response, {
         ...identity,
         entryNodeId: "device",
@@ -223,20 +225,39 @@ async function handle(path, rawBody, response) {
             tool: { serverId: "mcp.phase11", toolName: "device_status" },
             arguments: {
               deviceId: "device-17",
-              ...(delayed ? { delayMs: 2_000 } : {}),
+              ...(delayed ? { delayMs: 300 } : {}),
             },
           },
+          ...(delayed
+            ? [
+                {
+                  nodeId: "next",
+                  name: "Read device status after resume",
+                  type: "mcp_tool",
+                  tool: {
+                    serverId: "mcp.phase11",
+                    toolName: "device_status",
+                  },
+                  arguments: { deviceId: "device-17-after-resume" },
+                },
+              ]
+            : []),
           {
             nodeId: "result",
             name: "Return governed result",
             type: "result",
             value: {
               op: "ref",
-              path: ["nodes", "device", "data", "structuredContent"],
+              path: ["nodes", outcomeNodeId, "data", "structuredContent"],
             },
           },
         ],
-        edges: [{ sourceNodeId: "device", targetNodeId: "result" }],
+        edges: delayed
+          ? [
+              { sourceNodeId: "device", targetNodeId: "next" },
+              { sourceNodeId: "next", targetNodeId: "result" },
+            ]
+          : [{ sourceNodeId: "device", targetNodeId: "result" }],
       });
       return;
     }
@@ -296,17 +317,27 @@ async function handle(path, rawBody, response) {
       respond(response, {
         ...source,
         version: Number(source.version) + 1,
-        entryNodeId: "result",
+        entryNodeId: "device",
         exitNodeIds: ["result"],
         nodes: [
+          {
+            nodeId: "device",
+            name: "Read device status for revised plan",
+            type: "mcp_tool",
+            tool: { serverId: "mcp.phase11", toolName: "device_status" },
+            arguments: { deviceId: "device-17-revised" },
+          },
           {
             nodeId: "result",
             name: "Return revised Phase 11 result",
             type: "result",
-            value: { op: "literal", value: "online" },
+            value: {
+              op: "ref",
+              path: ["nodes", "device", "data", "structuredContent"],
+            },
           },
         ],
-        edges: [],
+        edges: [{ sourceNodeId: "device", targetNodeId: "result" }],
       });
       return;
     }
