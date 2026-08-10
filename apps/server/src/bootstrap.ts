@@ -6,7 +6,12 @@ import Fastify, {
   type FastifyServerOptions,
 } from "fastify";
 
+import type { AgUiRunHandler } from "../../../packages/ag-ui-interaction-adapter/src/index.js";
 import { openAiError } from "../../../packages/openai-api-contract/src/index.js";
+import {
+  registerAgUiRoutes,
+  type ResolveAgUiThread,
+} from "./api/ag-ui-routes.js";
 import { registerHealthRoutes } from "./api/health-routes.js";
 import {
   registerOpenAiRoutes,
@@ -24,6 +29,8 @@ export interface BuildServerOptions extends Pick<
   readonly logger?: FastifyServerOptions["logger"];
   readonly readinessCheck?: () => Promise<boolean>;
   readonly telemetry?: SecureTelemetry;
+  readonly resolveAgUiThread?: ResolveAgUiThread;
+  readonly runAgUi?: AgUiRunHandler;
   readonly rateLimiter?: FixedWindowRateLimiter;
 }
 
@@ -95,6 +102,14 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
       );
   });
 
+  void server.register(registerAgUiRoutes, {
+    config: options.config,
+    telemetry,
+    rateLimiter,
+    resolveThread: options.resolveAgUiThread ?? unavailableAgUiThread,
+    ...(options.runAgUi === undefined ? {} : { runAgUi: options.runAgUi }),
+    ...(options.now === undefined ? {} : { now: options.now }),
+  });
   void server.register(registerHealthRoutes, {
     ...(options.readinessCheck === undefined
       ? {}
@@ -116,6 +131,13 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
   return server;
 }
 
+async function unavailableAgUiThread(): Promise<never> {
+  const error = new Error("AG-UI persistence is unavailable.") as Error & {
+    statusCode: number;
+  };
+  error.statusCode = 503;
+  throw error;
+}
 function normalizeError(error: unknown): {
   readonly code?: string;
   readonly statusCode?: number;

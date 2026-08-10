@@ -26,6 +26,7 @@ const nowMilliseconds = 1_700_000_000_000;
 const nowSeconds = Math.floor(nowMilliseconds / 1000);
 const config: ServerConfig = {
   serviceKey,
+  agUiServiceKey: "phase-5-ag-ui-service-key-at-least-32-characters",
   openWebUiUserJwtSecret: jwtSecret,
   host: "127.0.0.1",
   port: 3000,

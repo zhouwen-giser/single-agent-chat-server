@@ -1,8 +1,12 @@
 import { randomUUID } from "node:crypto";
 import process from "node:process";
 
+import { createTextAgUiRunHandler } from "../../../packages/ag-ui-interaction-adapter/src/index.js";
 import { SdarTaskCoordinator } from "../../../packages/chat-runtime/src/index.js";
-import { InteractionQueryService } from "../../../packages/interaction-query/src/index.js";
+import {
+  InteractionQueryService,
+  resolveQueryIntent,
+} from "../../../packages/interaction-query/src/index.js";
 import {
   parsePersistenceConfig,
   setupPersistence,
@@ -42,10 +46,23 @@ try {
       throw error;
     }
   });
+  const chatModel = instrumentChatModel(localFallbackChatModel, telemetry);
   const queryService = new InteractionQueryService(
     activePersistence.interactionRepository,
     getClient,
   );
+  const runAgUi = createTextAgUiRunHandler(async (context) => {
+    const query = resolveQueryIntent(context.userText);
+    if (query !== undefined) {
+      return queryService.execute({
+        ...query,
+        principalId: context.principalId,
+        threadId: context.internalThreadId,
+        signal: context.signal,
+      });
+    }
+    return chatModel.answer({ userText: context.userText });
+  });
   const coordinator = new SdarTaskCoordinator({
     repository: activePersistence.repository,
     getClient,
@@ -63,7 +80,7 @@ try {
       checkpointer: activePersistence.checkpointer,
       coordinator,
       queryService,
-      model: instrumentChatModel(localFallbackChatModel, telemetry),
+      model: chatModel,
     }),
     async () => {
       telemetry.setActiveTasks(
@@ -78,6 +95,20 @@ try {
     readinessCheck: () => activePersistence.readiness(),
     resolveChatThread: (input) =>
       activePersistence.repository.getOrCreateThread(input),
+    resolveAgUiThread: async (input) => {
+      const principal =
+        await activePersistence.interactionRepository.resolvePrincipal({
+          issuer: "openwebui-jwt",
+          subject: input.userId,
+          role: input.userRole,
+        });
+      return activePersistence.interactionRepository.getOrCreateThread({
+        clientType: "ag_ui",
+        externalThreadId: input.externalThreadId,
+        principalId: principal.principalId,
+      });
+    },
+    runAgUi,
     checkpointer: activePersistence.checkpointer,
     runChat,
   });

@@ -4,8 +4,10 @@ import { parseServerConfig } from "../apps/server/src/config.js";
 
 const validKey = "phase-1-test-service-key-32-bytes-minimum";
 const validJwtSecret = "phase-5-openwebui-jwt-secret-32-bytes-minimum";
+const validAgUiKey = "phase-5-ag-ui-service-key-32-bytes-minimum";
 const validEnvironment = {
   CHAT_SERVER_SERVICE_KEY: validKey,
+  AG_UI_SERVICE_KEY: validAgUiKey,
   OPENWEBUI_USER_JWT_SECRET: validJwtSecret,
 };
 
@@ -13,6 +15,7 @@ describe("server configuration", () => {
   it("applies safe loopback and resource defaults", () => {
     expect(parseServerConfig(validEnvironment)).toEqual({
       serviceKey: validKey,
+      agUiServiceKey: validAgUiKey,
       openWebUiUserJwtSecret: validJwtSecret,
       host: "127.0.0.1",
       port: 3000,
@@ -43,6 +46,14 @@ describe("server configuration", () => {
     ).toThrow();
   });
 
+  it("requires an independent AG-UI service key", () => {
+    expect(() =>
+      parseServerConfig({
+        ...validEnvironment,
+        AG_UI_SERVICE_KEY: validKey,
+      }),
+    ).toThrow("must differ");
+  });
   it("rejects resource limits outside the bounded range", () => {
     expect(() =>
       parseServerConfig({

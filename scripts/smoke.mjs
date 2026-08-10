@@ -8,6 +8,7 @@ const serviceKey = "phase-13-smoke-service-key-32-bytes";
 const jwtSecret = "phase-13-smoke-jwt-secret-32-bytes";
 const config = {
   serviceKey,
+  agUiServiceKey: "phase-5-ag-ui-smoke-service-key-32-bytes",
   openWebUiUserJwtSecret: jwtSecret,
   host: "127.0.0.1",
   port: 3000,

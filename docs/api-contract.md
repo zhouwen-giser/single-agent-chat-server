@@ -1,5 +1,9 @@
 # OpenAI-compatible API contract
 
+The official AG-UI HTTP/SSE profile is documented separately in
+[`docs/api/ag-ui.md`](api/ag-ui.md). Both northbound protocols share the same
+protocol-neutral interaction state but use independent service credentials.
+
 ## Authentication
 
 Every `/v1/*` request requires:

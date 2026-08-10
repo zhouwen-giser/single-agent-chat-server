@@ -12,7 +12,7 @@
 
 ## Configuration
 
-Required production values are `CHAT_SERVER_SERVICE_KEY`,
+Required production values are `CHAT_SERVER_SERVICE_KEY`, `AG_UI_SERVICE_KEY`,
 `OPENWEBUI_USER_JWT_SECRET`, `DATABASE_URL`, and `SDAR_A2A_BASE_URL`. Use an
 explicit `SDAR_A2A_ENDPOINT_OVERRIDE` only for a validated but unusable
 container-advertised endpoint. Never derive it from user input.

@@ -44,6 +44,7 @@ jobs:
     timeout-minutes: 20
     env:
       CHAT_SERVER_SERVICE_KEY: ci-service-key-at-least-32-characters
+      AG_UI_SERVICE_KEY: ci-ag-ui-service-key-at-least-32-characters
       OPENWEBUI_USER_JWT_SECRET: ci-openwebui-secret-at-least-32-characters
       POSTGRES_PASSWORD: ci-postgres-password
       CHAT_SERVER_PUBLISHED_PORT: 3000
