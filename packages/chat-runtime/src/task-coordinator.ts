@@ -174,7 +174,11 @@ export class SdarTaskCoordinator {
             assertSameTask(task, binding);
             const enriched = await this.observeTask(task, binding, true);
             binding = enriched.binding;
-            for (const fragment of enriched.fragments) yield fragment;
+            const boundaryFragments =
+              enriched.fragments.length > 0
+                ? enriched.fragments
+                : observed.fragments;
+            for (const fragment of boundaryFragments) yield fragment;
             return;
           }
           for (const fragment of observed.fragments) yield fragment;
