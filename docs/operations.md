@@ -18,7 +18,9 @@ explicit `SDAR_A2A_ENDPOINT_OVERRIDE` only for a validated but unusable
 container-advertised endpoint. Never derive it from user input.
 
 Tune request/body/message/response, polling, connection-pool, and rate limits
-with the documented environment settings in `.env.example`. Supply secrets
+with the documented environment settings in `.env.example`. Browser CORS is
+deny-by-default; set `CHAT_CORS_ALLOW_ORIGINS` only to exact trusted origins.
+Supply secrets
 through the deployment secret store, not image layers or Git.
 
 ## Observability

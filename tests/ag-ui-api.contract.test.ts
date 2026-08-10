@@ -29,6 +29,7 @@ const config: ServerConfig = {
   bodyLimitBytes: 16_384,
   requestTimeoutMs: 5_000,
   modelId: "sdar-single-agent",
+  corsAllowedOrigins: [],
   rateLimitMax: 60,
   rateLimitWindowMs: 60_000,
   maxMessages: 64,
@@ -66,6 +67,14 @@ describe("AG-UI HTTP/SSE endpoint", () => {
       url: "/ag-ui/capabilities",
       headers: { authorization: `Bearer ${agUiServiceKey}` },
     });
+    const forgedPlainIdentity = await server.inject({
+      method: "GET",
+      url: "/ag-ui/capabilities",
+      headers: {
+        authorization: "Bearer " + agUiServiceKey,
+        "x-user-id": "attacker",
+      },
+    });
     const accepted = await server.inject({
       method: "GET",
       url: "/ag-ui/capabilities",
@@ -74,6 +83,7 @@ describe("AG-UI HTTP/SSE endpoint", () => {
 
     expect(wrongService.statusCode).toBe(401);
     expect(missingPrincipal.statusCode).toBe(401);
+    expect(forgedPlainIdentity.statusCode).toBe(401);
     expect(accepted.statusCode).toBe(200);
     expect(AgentCapabilitiesSchema.parse(accepted.json())).toMatchObject({
       transport: { streaming: true, resumable: false },

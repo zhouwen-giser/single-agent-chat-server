@@ -22,6 +22,7 @@ describe("server configuration", () => {
       bodyLimitBytes: 1_048_576,
       requestTimeoutMs: 30_000,
       modelId: "sdar-single-agent",
+      corsAllowedOrigins: [],
       rateLimitMax: 60,
       rateLimitWindowMs: 60_000,
       maxMessages: 64,
@@ -53,6 +54,29 @@ describe("server configuration", () => {
         AG_UI_SERVICE_KEY: validKey,
       }),
     ).toThrow("must differ");
+  });
+  it("parses only exact HTTP(S) CORS origins", () => {
+    expect(
+      parseServerConfig({
+        ...validEnvironment,
+        CHAT_CORS_ALLOW_ORIGINS:
+          "https://openwebui.example,http://127.0.0.1:8080",
+      }).corsAllowedOrigins,
+    ).toEqual(["https://openwebui.example", "http://127.0.0.1:8080"]);
+    for (const value of [
+      "https://openwebui.example/path",
+      "https://user@openwebui.example",
+      "file:///tmp/ui",
+      "https://openwebui.example,https://openwebui.example",
+      "null",
+    ]) {
+      expect(() =>
+        parseServerConfig({
+          ...validEnvironment,
+          CHAT_CORS_ALLOW_ORIGINS: value,
+        }),
+      ).toThrow();
+    }
   });
   it("rejects resource limits outside the bounded range", () => {
     expect(() =>

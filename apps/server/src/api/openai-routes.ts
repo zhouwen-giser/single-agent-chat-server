@@ -113,7 +113,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
   server.addHook("preHandler", async (request, reply) => {
     if (reply.sent) return;
     const decision = options.rateLimiter.consume(
-      requireOpenWebUiIdentity(request).userId,
+      `openai:${requireOpenWebUiIdentity(request).userId}`,
     );
     if (!decision.allowed) {
       await reply

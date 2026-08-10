@@ -38,6 +38,7 @@ const config: ServerConfig = {
   bodyLimitBytes: 1024,
   requestTimeoutMs: 5000,
   modelId: "sdar-single-agent",
+  corsAllowedOrigins: [],
   rateLimitMax: 60,
   rateLimitWindowMs: 60_000,
   maxMessages: 64,

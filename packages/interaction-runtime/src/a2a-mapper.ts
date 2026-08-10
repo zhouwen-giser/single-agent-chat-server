@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 import {
   InteractionEventFactory,
   safePublicText,
@@ -441,7 +443,8 @@ function safePublicUrl(value: string | undefined): string | undefined {
     if (
       url.protocol !== "https:" ||
       url.username !== "" ||
-      url.password !== ""
+      url.password !== "" ||
+      !isAllowedReferenceHost(url.hostname)
     ) {
       return undefined;
     }
@@ -451,6 +454,75 @@ function safePublicUrl(value: string | undefined): string | undefined {
   }
 }
 
+function isAllowedReferenceHost(value: string): boolean {
+  const lower = value.toLowerCase();
+  const hostname =
+    lower.startsWith("[") && lower.endsWith("]") ? lower.slice(1, -1) : lower;
+  if (
+    hostname.length === 0 ||
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local") ||
+    hostname.endsWith(".internal") ||
+    hostname.endsWith(".home.arpa")
+  ) {
+    return false;
+  }
+  const family = isIP(hostname);
+  if (family === 4) return isPublicIpv4(hostname);
+  if (family === 6) {
+    if (
+      hostname === "::" ||
+      hostname === "::1" ||
+      /^(?:fc|fd|fe[89ab])/u.test(hostname) ||
+      hostname.startsWith("2001:db8:")
+    ) {
+      return false;
+    }
+    const mapped = mappedIpv4Address(hostname);
+    return mapped === undefined || isPublicIpv4(mapped);
+  }
+  return hostname.includes(".");
+}
+
+function mappedIpv4Address(hostname: string): string | undefined {
+  if (!hostname.startsWith("::ffff:")) return undefined;
+  const suffix = hostname.slice("::ffff:".length);
+  if (isIP(suffix) === 4) return suffix;
+  const groups = suffix.split(":");
+  if (
+    groups.length !== 2 ||
+    groups.some((group) => !/^[0-9a-f]{1,4}$/u.test(group))
+  ) {
+    return undefined;
+  }
+  const high = Number.parseInt(groups[0] ?? "", 16);
+  const low = Number.parseInt(groups[1] ?? "", 16);
+  return `${high >>> 8}.${high & 0xff}.${low >>> 8}.${low & 0xff}`;
+}
+
+function isPublicIpv4(value: string): boolean {
+  const octets = value.split(".").map(Number);
+  const first = octets[0] ?? -1;
+  const second = octets[1] ?? -1;
+  const third = octets[2] ?? -1;
+  return !(
+    first === 0 ||
+    first === 10 ||
+    (first === 100 && second >= 64 && second <= 127) ||
+    first === 127 ||
+    (first === 169 && second === 254) ||
+    (first === 172 && second >= 16 && second <= 31) ||
+    (first === 192 && second === 0 && third === 0) ||
+    (first === 192 && second === 0 && third === 2) ||
+    (first === 192 && second === 88 && third === 99) ||
+    (first === 192 && second === 168) ||
+    (first === 198 && (second === 18 || second === 19)) ||
+    (first === 198 && second === 51 && third === 100) ||
+    (first === 203 && second === 0 && third === 113) ||
+    first >= 224
+  );
+}
 function compact<T>(values: readonly (T | undefined)[]): T[] {
   return values.filter((value): value is T => value !== undefined);
 }

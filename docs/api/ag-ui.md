@@ -14,7 +14,10 @@ Authorization: Bearer <AG_UI_SERVICE_KEY>
 X-OpenWebUI-User-Jwt: <signed principal JWT>
 ```
 
-`AG_UI_SERVICE_KEY` must be different from `CHAT_SERVER_SERVICE_KEY`. The
+`AG_UI_SERVICE_KEY` must be different from `CHAT_SERVER_SERVICE_KEY`. Browser
+clients also require their exact origin in `CHAT_CORS_ALLOW_ORIGINS`; the empty
+default denies cross-origin requests. Wildcards and credentialed CORS are not
+supported. The
 principal JWT remains the frozen SACS v0.2 signed-identity profile: HS256,
 `iss=open-webui`, bounded lifetime, subject, and `user` or `admin` role. A
 plaintext user ID header is never trusted.

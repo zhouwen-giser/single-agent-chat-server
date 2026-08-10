@@ -114,6 +114,57 @@ describe("A2A to AG-UI public mapping", () => {
     ).toEqual(["capabilityGap", "errorCode", "nextAction", "taskId"]);
   });
 
+  it("projects only public HTTPS artifact references without fetching them", () => {
+    const mapper = createMapper();
+    const events = mapper.mapTask({
+      ...task("COMPLETED"),
+      artifacts: [
+        {
+          artifactId: "artifact-url-policy",
+          parts: [
+            {
+              kind: "url",
+              mediaType: "text/plain",
+              url: "https://artifacts.example/public.txt",
+            },
+            {
+              kind: "url",
+              mediaType: "text/plain",
+              url: "https://127.0.0.1/private.txt",
+            },
+            {
+              kind: "url",
+              mediaType: "text/plain",
+              url: "https://[::1]/private.txt",
+            },
+            {
+              kind: "url",
+              mediaType: "text/plain",
+              url: "https://[::ffff:127.0.0.1]/private.txt",
+            },
+            {
+              kind: "url",
+              mediaType: "text/plain",
+              url: "https://metadata.local/token",
+            },
+            {
+              kind: "url",
+              mediaType: "text/plain",
+              url: "http://artifacts.example/insecure.txt",
+            },
+          ],
+        },
+      ],
+    });
+    const references = events.filter(
+      (event) => event.eventType === "artifact.reference",
+    );
+
+    expect(references).toHaveLength(1);
+    expect(references[0]?.payload.url).toBe(
+      "https://artifacts.example/public.txt",
+    );
+  });
   it("turns phase-specific INPUT_REQUIRED into an official interrupt outcome", () => {
     const mapper = createMapper();
     const events = mapper.mapTask({

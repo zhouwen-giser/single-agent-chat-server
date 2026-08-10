@@ -20,6 +20,7 @@ import {
 import type { ServerConfig } from "./config.js";
 import { SecureTelemetry } from "./observability/telemetry.js";
 import { FixedWindowRateLimiter } from "./operations/rate-limiter.js";
+import { registerCorsPolicy } from "./security/cors.js";
 
 export interface BuildServerOptions extends Pick<
   OpenAiRoutesOptions,
@@ -56,6 +57,8 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
         : randomUUID();
     },
   });
+
+  registerCorsPolicy(server, options.config.corsAllowedOrigins);
 
   server.addHook("onRequest", async (request, reply) => {
     requestStartedAt.set(request, Date.now());

@@ -3,6 +3,7 @@ import process from "node:process";
 import { z } from "zod";
 
 import { DEFAULT_CHAT_MODEL_ID } from "../../../packages/openai-api-contract/src/index.js";
+import { parseCorsAllowedOrigins } from "./security/cors.js";
 
 const serverConfigSchema = z.object({
   CHAT_SERVER_SERVICE_KEY: z.string().min(32).max(512),
@@ -27,6 +28,7 @@ const serverConfigSchema = z.object({
     .min(1)
     .max(256)
     .default(DEFAULT_CHAT_MODEL_ID),
+  CHAT_CORS_ALLOW_ORIGINS: z.string().max(4_096).default(""),
   CHAT_RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(10_000).default(60),
   CHAT_RATE_LIMIT_WINDOW_MS: z.coerce
     .number()
@@ -79,6 +81,7 @@ export interface ServerConfig {
   readonly bodyLimitBytes: number;
   readonly requestTimeoutMs: number;
   readonly modelId: string;
+  readonly corsAllowedOrigins: readonly string[];
   readonly rateLimitMax: number;
   readonly rateLimitWindowMs: number;
   readonly maxMessages: number;
@@ -108,6 +111,7 @@ export function parseServerConfig(
     bodyLimitBytes: parsed.CHAT_SERVER_BODY_LIMIT_BYTES,
     requestTimeoutMs: parsed.CHAT_SERVER_REQUEST_TIMEOUT_MS,
     modelId: parsed.CHAT_SERVER_MODEL_ID,
+    corsAllowedOrigins: parseCorsAllowedOrigins(parsed.CHAT_CORS_ALLOW_ORIGINS),
     rateLimitMax: parsed.CHAT_RATE_LIMIT_MAX,
     rateLimitWindowMs: parsed.CHAT_RATE_LIMIT_WINDOW_MS,
     maxMessages: parsed.CHAT_MAX_MESSAGES,
