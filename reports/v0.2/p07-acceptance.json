@@ -1,6 +1,6 @@
 {
   "phase": "P07",
-  "status": "PASSED",
+  "status": "PASSED_PUBLISHED",
   "implementationCommit": "a7a3a84cb99af3e9731432cd3ddf7274802bd987",
   "checks": {
     "officialRunAgentInputResume": "PASSED",
