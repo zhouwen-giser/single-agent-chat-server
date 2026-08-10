@@ -3,6 +3,8 @@ export { createSdarA2aClient, type SdarA2aAdapterConfig } from "./client.js";
 export type {
   FollowUpInput,
   JsonValue,
+  NormalizedAgentCard,
+  NormalizedAgentSkill,
   NormalizedArtifact,
   NormalizedMessage,
   NormalizedPart,

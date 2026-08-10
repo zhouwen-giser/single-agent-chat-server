@@ -169,6 +169,81 @@ export class InteractionPersistenceRepository {
       : mapInteractionTask(result.rows[0]);
   }
 
+  async listTaskBindings(input: {
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly limit?: number;
+  }): Promise<readonly TaskBinding[]> {
+    const limit = input.limit ?? 50;
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new Error("Task binding limit must be an integer from 1 to 100");
+    }
+    const result = await this.pool.query<InteractionTaskRow>(
+      `
+        SELECT task.*
+        FROM chat_service.conversation_task_binding task
+        JOIN chat_service.conversation_thread thread
+          ON thread.thread_id = task.conversation_thread_id
+        WHERE task.conversation_thread_id = $1
+          AND thread.principal_id = $2
+        ORDER BY task.created_at DESC, task.binding_id DESC
+        LIMIT $3
+      `,
+      [input.threadId, input.principalId, limit],
+    );
+    return result.rows.map(mapInteractionTask);
+  }
+  async recordAuthorizedTaskObservation(input: {
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly sdarTaskId: string;
+    readonly status: string;
+    readonly pendingInput?: JsonValue;
+    readonly lastStatusTimestamp?: string;
+    readonly terminal: boolean;
+  }): Promise<TaskBinding | undefined> {
+    const result = await this.pool.query<InteractionTaskRow>(
+      `
+        UPDATE chat_service.conversation_task_binding AS task
+        SET status = $4,
+            pending_input_json = $5,
+            last_status_timestamp = COALESCE(
+              $6::timestamptz,
+              task.last_status_timestamp
+            ),
+            terminal_at = CASE
+              WHEN $7 THEN COALESCE(task.terminal_at, now())
+              ELSE task.terminal_at
+            END,
+            version = task.version + 1,
+            updated_at = now()
+        FROM chat_service.conversation_thread AS thread
+        WHERE task.conversation_thread_id = $2
+          AND task.sdar_task_id = $3
+          AND task.conversation_thread_id = thread.thread_id
+          AND thread.principal_id = $1
+          AND task.terminal_at IS NULL
+          AND (
+            $6::timestamptz IS NULL
+            OR task.last_status_timestamp IS NULL
+            OR $6::timestamptz >= task.last_status_timestamp
+          )
+        RETURNING task.*
+      `,
+      [
+        input.principalId,
+        input.threadId,
+        input.sdarTaskId,
+        input.status,
+        input.pendingInput ?? null,
+        input.lastStatusTimestamp ?? null,
+        input.terminal,
+      ],
+    );
+    return result.rows[0] === undefined
+      ? undefined
+      : mapInteractionTask(result.rows[0]);
+  }
   async claimRequest(input: {
     readonly protocol: InteractionProtocol;
     readonly externalRequestId: string;

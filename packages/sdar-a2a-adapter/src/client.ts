@@ -13,12 +13,14 @@ import {
 } from "@a2a-js/sdk/client";
 
 import {
+  normalizeAgentCard,
   normalizeSendResult,
   normalizeStreamEvent,
   normalizeTask,
 } from "./normalize.js";
 import type {
   FollowUpInput,
+  NormalizedAgentCard,
   OperationOptions,
   SdarA2aClient,
   SubmitTaskInput,
@@ -81,6 +83,7 @@ export async function createSdarA2aClient(
   return new OfficialSdarA2aClient(
     sdkClient,
     resolved.endpoint,
+    normalizeAgentCard(resolved.card),
     parsed.operationTimeoutMs,
   );
 }
@@ -136,6 +139,7 @@ class OfficialSdarA2aClient implements SdarA2aClient {
   constructor(
     private readonly client: Client,
     readonly endpoint: string,
+    readonly agentCard: NormalizedAgentCard,
     private readonly operationTimeoutMs: number,
   ) {}
 

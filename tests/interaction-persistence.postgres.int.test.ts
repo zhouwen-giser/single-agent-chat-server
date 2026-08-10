@@ -139,6 +139,120 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
     ).resolves.toEqual({ outcome: "conflict" });
   });
 
+  it("lists and authorizes Tasks only inside the principal-owned internal thread", async () => {
+    const repository = interactionRepository();
+    const owner = await repository.resolvePrincipal({
+      issuer: "sacs-test",
+      subject: "query-owner",
+      role: "user",
+    });
+    const other = await repository.resolvePrincipal({
+      issuer: "sacs-test",
+      subject: "query-other",
+      role: "user",
+    });
+    const ownerThread = await repository.getOrCreateThread({
+      clientType: "openwebui",
+      externalThreadId: "query-owner-thread",
+      principalId: owner.principalId,
+    });
+    const siblingThread = await repository.getOrCreateThread({
+      clientType: "openwebui",
+      externalThreadId: "query-sibling-thread",
+      principalId: owner.principalId,
+    });
+    await repository.createTaskBinding({
+      principalId: owner.principalId,
+      threadId: ownerThread.threadId,
+      sdarTaskId: "owner-task",
+      sdarContextId: "owner-context",
+      status: "WORKING",
+    });
+    await repository.createTaskBinding({
+      principalId: owner.principalId,
+      threadId: siblingThread.threadId,
+      sdarTaskId: "sibling-task",
+      sdarContextId: "sibling-context",
+      status: "WORKING",
+    });
+
+    await expect(
+      repository.listTaskBindings({
+        principalId: owner.principalId,
+        threadId: ownerThread.threadId,
+      }),
+    ).resolves.toMatchObject([{ sdarTaskId: "owner-task" }]);
+    await expect(
+      repository.listTaskBindings({
+        principalId: other.principalId,
+        threadId: ownerThread.threadId,
+      }),
+    ).resolves.toEqual([]);
+    await expect(
+      repository.findAuthorizedTask({
+        principalId: owner.principalId,
+        threadId: ownerThread.threadId,
+        sdarTaskId: "sibling-task",
+      }),
+    ).resolves.toBeUndefined();
+    await expect(
+      repository.findAuthorizedTask({
+        principalId: other.principalId,
+        threadId: ownerThread.threadId,
+        sdarTaskId: "owner-task",
+      }),
+    ).resolves.toBeUndefined();
+  });
+  it("records getTask observations only for an authorized Task binding", async () => {
+    const repository = interactionRepository();
+    const owner = await repository.resolvePrincipal({
+      issuer: "sacs-test",
+      subject: "observation-owner",
+      role: "user",
+    });
+    const other = await repository.resolvePrincipal({
+      issuer: "sacs-test",
+      subject: "observation-other",
+      role: "user",
+    });
+    const thread = await repository.getOrCreateThread({
+      clientType: "openwebui",
+      externalThreadId: "observation-thread",
+      principalId: owner.principalId,
+    });
+    await repository.createTaskBinding({
+      principalId: owner.principalId,
+      threadId: thread.threadId,
+      sdarTaskId: "observation-task",
+      sdarContextId: "observation-context",
+      status: "WORKING",
+    });
+
+    await expect(
+      repository.recordAuthorizedTaskObservation({
+        principalId: other.principalId,
+        threadId: thread.threadId,
+        sdarTaskId: "observation-task",
+        status: "COMPLETED",
+        terminal: true,
+      }),
+    ).resolves.toBeUndefined();
+    await expect(
+      repository.recordAuthorizedTaskObservation({
+        principalId: owner.principalId,
+        threadId: thread.threadId,
+        sdarTaskId: "observation-task",
+        status: "INPUT_REQUIRED",
+        pendingInput: { internalPhase: "awaiting_user_input" },
+        lastStatusTimestamp: "2026-08-11T01:00:00.000Z",
+        terminal: false,
+      }),
+    ).resolves.toMatchObject({
+      status: "INPUT_REQUIRED",
+      pendingInput: { internalPhase: "awaiting_user_input" },
+      lastStatusTimestamp: "2026-08-11T01:00:00.000Z",
+    });
+  });
   it("restores an open interrupt and run after repository restart", async () => {
     const firstRepository = interactionRepository();
     const principal = await firstRepository.resolvePrincipal({

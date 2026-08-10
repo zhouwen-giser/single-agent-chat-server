@@ -13,6 +13,7 @@ export function instrumentSdarClient(
     protocolBinding: client.protocolBinding,
     protocolVersion: client.protocolVersion,
     endpoint: client.endpoint,
+    ...(client.agentCard === undefined ? {} : { agentCard: client.agentCard }),
     async *submitTaskStream(input, options) {
       const timed = telemetry.beginA2a("send_message_stream");
       telemetry.streamStarted("a2a");

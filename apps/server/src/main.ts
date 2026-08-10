@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import process from "node:process";
 
 import { SdarTaskCoordinator } from "../../../packages/chat-runtime/src/index.js";
+import { InteractionQueryService } from "../../../packages/interaction-query/src/index.js";
 import {
   parsePersistenceConfig,
   setupPersistence,
@@ -41,6 +42,10 @@ try {
       throw error;
     }
   });
+  const queryService = new InteractionQueryService(
+    activePersistence.interactionRepository,
+    getClient,
+  );
   const coordinator = new SdarTaskCoordinator({
     repository: activePersistence.repository,
     getClient,
@@ -57,6 +62,7 @@ try {
       repository: activePersistence.repository,
       checkpointer: activePersistence.checkpointer,
       coordinator,
+      queryService,
       model: instrumentChatModel(localFallbackChatModel, telemetry),
     }),
     async () => {

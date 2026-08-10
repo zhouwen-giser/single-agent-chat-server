@@ -154,6 +154,18 @@ describe("Phase 12 adversarial hardening", () => {
     expect(() =>
       normalizeTask({
         ...sdkTask(),
+        history: [
+          {
+            ...sdkTask().status.message,
+            messageId: "history-foreign",
+            taskId: "different-task",
+          },
+        ],
+      } as never),
+    ).toThrow("identity did not match");
+    expect(() =>
+      normalizeTask({
+        ...sdkTask(),
         artifacts: [
           {
             artifactId: "large",
