@@ -111,6 +111,7 @@ export class InterruptResumeService {
   async persistInputRequired(input: {
     readonly event: SdarInteractionEvent;
     readonly principalId: string;
+    readonly internalThreadId?: string;
   }): Promise<InterruptBinding> {
     const { event } = input;
     if (event.eventType !== "input.required") {
@@ -134,9 +135,10 @@ export class InterruptResumeService {
       );
     }
     const responseSchema = optionalPublicJson(event.payload.responseSchema);
+    const authorizationThreadId = input.internalThreadId ?? event.threadId;
     const taskBinding = await this.options.repository.findAuthorizedTask({
       principalId: input.principalId,
-      threadId: event.threadId,
+      threadId: authorizationThreadId,
       sdarTaskId: taskId,
     });
     if (taskBinding === undefined || taskBinding.sdarContextId !== contextId) {
@@ -147,7 +149,7 @@ export class InterruptResumeService {
     }
     const existing = await this.options.repository.findOpenInterruptForTask({
       principalId: input.principalId,
-      threadId: event.threadId,
+      threadId: authorizationThreadId,
       taskId,
     });
     if (existing !== undefined) {
@@ -172,7 +174,7 @@ export class InterruptResumeService {
       interruptId: interruptIdFor(event.runId),
       runId: event.runId,
       principalId: input.principalId,
-      threadId: event.threadId,
+      threadId: authorizationThreadId,
       taskId,
       contextId,
       internalPhase,
@@ -369,6 +371,7 @@ export async function* persistInterruptsBeforeRunFinish(
   input: {
     readonly service: InterruptResumeService;
     readonly principalId: string;
+    readonly internalThreadId?: string;
   },
 ): AsyncGenerator<SdarInteractionEvent> {
   for await (const event of events) {
@@ -376,6 +379,9 @@ export async function* persistInterruptsBeforeRunFinish(
       const interrupt = await input.service.persistInputRequired({
         event,
         principalId: input.principalId,
+        ...(input.internalThreadId === undefined
+          ? {}
+          : { internalThreadId: input.internalThreadId }),
       });
       yield {
         ...event,

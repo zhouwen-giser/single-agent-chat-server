@@ -25,10 +25,14 @@ describe("durable AG-UI Interrupt and Resume", () => {
   it("persists a phase-specific interrupt before yielding run finish input", async () => {
     const repository = new FakeInterruptRepository();
     const service = createService(repository, fakeClient([]));
-    const event = inputRequiredEvent("awaiting_user_input", "input-1");
+    const event = {
+      ...inputRequiredEvent("awaiting_user_input", "input-1"),
+      threadId: "external-thread",
+    };
     const source = persistInterruptsBeforeRunFinish(events(event), {
       service,
       principalId: "principal-1",
+      internalThreadId: "thread-1",
     });
 
     const first = await source.next();

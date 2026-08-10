@@ -9,6 +9,7 @@ import { SdarTaskCoordinator } from "../../../packages/chat-runtime/src/index.js
 import {
   DurableAgUiRunService,
   InterruptResumeService,
+  persistInterruptsBeforeRunFinish,
   resumeRunToInteractionEvents,
 } from "../../../packages/interaction-runtime/src/index.js";
 import { InteractionQueryService } from "../../../packages/interaction-query/src/index.js";
@@ -70,16 +71,36 @@ try {
     pollingBudgetMs: config.pollingBudgetMs,
     pollingIntervalMs: config.pollingIntervalMs,
   });
+  const interruptResumeService = new InterruptResumeService({
+    repository: activePersistence.interactionRepository,
+    getClient,
+  });
+  const agUiInteractionSource = createSdarAgUiInteractionSource({
+    repository: activePersistence.interactionRepository,
+    checkpointer: activePersistence.checkpointer,
+    coordinator: agUiCoordinator,
+    queryService,
+    model: chatModel,
+  });
+  const agUiTaskRecoverySource =
+    createSdarAgUiTaskRecoverySource(agUiCoordinator);
   const durableAgUiRunService = new DurableAgUiRunService({
     repository: activePersistence.interactionRepository,
-    execute: createSdarAgUiInteractionSource({
-      repository: activePersistence.interactionRepository,
-      checkpointer: activePersistence.checkpointer,
-      coordinator: agUiCoordinator,
-      queryService,
-      model: chatModel,
-    }),
-    recoverTask: createSdarAgUiTaskRecoverySource(agUiCoordinator),
+    execute: (context) =>
+      persistInterruptsBeforeRunFinish(agUiInteractionSource(context), {
+        service: interruptResumeService,
+        principalId: context.principalId,
+        internalThreadId: context.threadId,
+      }),
+    recoverTask: (context, taskId) =>
+      persistInterruptsBeforeRunFinish(
+        agUiTaskRecoverySource(context, taskId),
+        {
+          service: interruptResumeService,
+          principalId: context.principalId,
+          internalThreadId: context.threadId,
+        },
+      ),
   });
   const runGeneralAgUi = createInteractionAgUiRunHandler((context) =>
     durableAgUiRunService.run({
@@ -89,10 +110,6 @@ try {
       signal: context.signal,
     }),
   );
-  const interruptResumeService = new InterruptResumeService({
-    repository: activePersistence.interactionRepository,
-    getClient,
-  });
   const runResumeAgUi = createInteractionAgUiRunHandler((context) =>
     resumeRunToInteractionEvents({
       service: interruptResumeService,

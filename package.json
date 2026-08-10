@@ -55,6 +55,8 @@
     "generate:sbom": "node scripts/generate-sbom.mjs",
     "test:openai:predecessor": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/openai-predecessor-regression.contract.test.ts",
     "verify:phase10": "pnpm verify:phase9 && pnpm test:openai:predecessor && pnpm test:security && pnpm test:e2e:fixture && pnpm verify:migrations && pnpm verify:architecture && pnpm verify:licenses && pnpm verify:secrets && pnpm smoke",
+    "test:agui:real": "node scripts/phase11-official-client-e2e.mjs",
+    "verify:phase11": "pnpm verify:phase10 && pnpm test:agui:real",
     "verify:phase12": "pnpm format:check && pnpm lint && pnpm lint:langgraph-json && pnpm typecheck && pnpm test:unit && pnpm test:contract && pnpm test:security && pnpm verify:architecture && pnpm build",
     "verify": "node scripts/require-final-environment.mjs && pnpm verify:phase12 && pnpm test:integration && pnpm test:e2e && pnpm smoke && pnpm verify:migrations && pnpm verify:openai-api && pnpm verify:a2a && pnpm verify:workflows && pnpm verify:licenses && pnpm verify:secrets && pnpm docker:build && pnpm verify:container && pnpm generate:sbom"
   },
