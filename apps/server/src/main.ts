@@ -114,7 +114,10 @@ function withActiveTaskRefresh(
 async function* refreshAfter(
   result: Exclude<ChatRunnerResult, string>,
   refresh: () => Promise<void>,
-): AsyncGenerator<string> {
+): AsyncGenerator<
+  | string
+  | import("../../../packages/interaction-contract/src/index.js").SdarInteractionEvent
+> {
   try {
     yield* result;
   } finally {

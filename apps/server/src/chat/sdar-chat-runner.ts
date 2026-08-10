@@ -2,6 +2,10 @@ import type { BaseCheckpointSaver } from "@langchain/langgraph";
 
 import type { ChatRunner, ChatRunnerContext } from "../api/openai-routes.js";
 import {
+  legacyChatResultToInteractionEvents,
+  type LegacyChatResult,
+} from "../../../../packages/interaction-runtime/src/index.js";
+import {
   SdarTaskCoordinator,
   type FollowUpTurnContext,
   type TaskTurnContext,
@@ -18,7 +22,9 @@ export function createSdarChatRunner(input: {
   readonly model?: StructuredChatModel;
 }): ChatRunner {
   const graph = createSingleAgentChatGraph(input.model, input.checkpointer);
-  return async (context) => {
+  const runLegacy = async (
+    context: ChatRunnerContext,
+  ): Promise<LegacyChatResult> => {
     const binding = await input.repository.findActiveTaskForChat({
       chatId: context.openWebUi.chatId,
       userId: context.identity.userId,
@@ -61,6 +67,11 @@ export function createSdarChatRunner(input: {
     }
     return renderGraphResult(result);
   };
+  return async (context) =>
+    legacyChatResultToInteractionEvents(await runLegacy(context), {
+      runId: context.runId,
+      threadId: context.threadId,
+    });
 }
 
 function toTaskTurn(context: ChatRunnerContext): TaskTurnContext {
