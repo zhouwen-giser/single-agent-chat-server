@@ -1,0 +1,37 @@
+{
+  "phase": "P07",
+  "status": "PASSED",
+  "implementationCommit": "a7a3a84cb99af3e9731432cd3ddf7274802bd987",
+  "checks": {
+    "officialRunAgentInputResume": "PASSED",
+    "officialResumeEntryRuntimeParse": "PASSED",
+    "planConfirmationInterrupt": "PASSED",
+    "userInputInterrupt": "PASSED",
+    "pausedInterrupt": "PASSED",
+    "persistBeforeRunFinish": "PASSED",
+    "principalThreadTaskContextAuthorization": "PASSED",
+    "durableExpiryAndResponseSchema": "PASSED",
+    "phaseActionAndInputRequestValidation": "PASSED",
+    "currentGetTaskRevalidation": "PASSED",
+    "durableResolutionClaim": "PASSED",
+    "sameHashReplayNoFollowUp": "PASSED",
+    "differentPayloadConflict": "PASSED",
+    "uncertainResultNoAutomaticResend": "PASSED",
+    "localCancelNoSdarCancellation": "PASSED",
+    "expiredAndCrossIdentityRejected": "PASSED",
+    "multiResumeFailClosedBeforeSideEffect": "PASSED",
+    "strictA2aFollowUpAdapter": "PASSED",
+    "appendOnlyMigration0005": "PASSED"
+  },
+  "tests": {
+    "unit": "70/70",
+    "contract": "37/37",
+    "integration": "45/45",
+    "security": "8/8",
+    "architecture": "PASSED_55_SOURCE_FILES",
+    "migrations": "5/5",
+    "smoke": "PASSED"
+  },
+  "requiredSkips": 0,
+  "failedAttemptsRetained": 11
+}

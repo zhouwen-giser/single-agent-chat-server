@@ -54,7 +54,8 @@ Open WebUI / OpenAI client     official AG-UI client
       client compatibility.
 - [x] 2026-08-11: P06 implemented strict normalized A2A to interaction and
       official AG-UI event projection.
-- [ ] P07-P09: implement interrupts, recovery, and security.
+- [x] 2026-08-11: P07 implemented durable phase-specific Interrupt/Resume.
+- [ ] P08-P09: implement recovery and security.
 - [ ] P10-P12: run compatibility, persistence, official-client, and real E2E.
 - [ ] P13: produce the release candidate evidence set.
 - [ ] P14: merge latest `main`, run final gates, and open/update the PR. Do not
@@ -122,6 +123,13 @@ and exact local/remote-head comparison. Required failures remain under
   Text, Custom, Interrupt, and Run events.
 - Constructing Custom values from the frozen public-field catalog is safer than
   copying a normalized payload and trying to subtract forbidden fields later.
+
+- Durable `RESOLVING` intentionally has no automatic lease recovery: after an
+  uncertain A2A result, refusing an automatic retry is the only way to preserve
+  the no-duplicate-side-effect invariant without an upstream transaction.
+- Resume authorization must re-read the current Task with `getTask()` before
+  claim; a persisted Interrupt is identity evidence, not authority that the
+  SDAR Task is still in the same `INPUT_REQUIRED` phase.
 
 ## Validation
 
