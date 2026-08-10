@@ -66,7 +66,8 @@
     "P09": {
       "status": "passed",
       "implementationCommit": "45faac3cbf1102b0171ced4b4b16ae0dc4a7aec9",
-      "remoteHead": "45faac3cbf1102b0171ced4b4b16ae0dc4a7aec9"
+      "evidenceCommit": "6dcf966f75f2c4b483ea13ba8d8bb19f2541eb87",
+      "remoteHead": "6dcf966f75f2c4b483ea13ba8d8bb19f2541eb87"
     },
     "P10": { "status": "pending" },
     "P11": { "status": "pending" },
