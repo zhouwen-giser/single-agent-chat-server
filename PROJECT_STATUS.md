@@ -1,20 +1,17 @@
 # Project status
 
-Status: `IN_PROGRESS`
+Status: `ACCEPTANCE_PASSED_PUBLICATION_PENDING`
 
-The authoritative branch is `feature/single-sdar-chat-entry-v0.1`. Phase 12 is
-complete and published: adversarial regression `15bf0897` exposed a lost
-terminal-stream publication, and minimal fix `0d05d522` restored it. Both push
-and pull-request CI passed at the exact fix commit.
+Phase 13 local acceptance passed at source commit
+`085e456c9802462c5d0c2a8c2310cadbfa760a96` on
+`feature/single-sdar-chat-entry-v0.1`. The exact source commit has green push
+and pull-request CI. Required final gates passed with real PostgreSQL 16.9, pip
+Open WebUI 0.10.2, frozen SDAR `667146a`, Redis, real MCP transport, Docker,
+Compose, and a current CycloneDX SBOM.
 
-Current verified Phase 12 gates include unit 31/31, contract 26/26, security 8/8,
-architecture 42 production files, build, and PostgreSQL integration 36/36
-against PostgreSQL 16.9. The frozen boundary remains SDAR `667146a`, A2A spec
-patch `1.0.1`, wire `1.0`, `HTTP+JSON`, and
-`@a2a-js/sdk@1.0.0-beta.0`.
+Counts: unit 31/31, contract 26/26, integration 36/36, fixture E2E 1/1, required
+real scenarios 26/26, security 8/8, OpenAI 19/19, and A2A 7/7.
 
-Phase 13 is in progress. The prior `BLOCKED_LOCAL_REVIEW` handoff is historical
-and is not final release evidence. Required final-head real Open WebUI to frozen
-SDAR E2E, Docker/Compose, current SBOM, final CI, and PR Ready publication must
-still pass before the goal can be declared complete. The PR remains Draft and
-merge remains user-controlled.
+The remaining publication step is to push this Phase 13 report commit, wait for
+its quality/container checks, update PR #1, and mark it Ready. Merge, tag, and
+release remain user-controlled and are not performed.

@@ -75,8 +75,9 @@ Open WebUI
 - [x] 2026-08-10: Phase 12 adversarial regression `15bf0897` reproduced the
       terminal-stream publication loss; fix `0d05d522` passed security 8/8,
       PostgreSQL integration 36/36, `verify:phase12`, and exact-commit push/PR CI.
-- [ ] 2026-08-10: Phase 13 final-head real Open WebUI/SDAR, Docker/Compose,
-      current SBOM, final CI, and PR Ready publication are in progress.
+- [x] 2026-08-10: Phase 13 source-head real Open WebUI/SDAR, PostgreSQL,
+      Docker/Compose, endpoint override, current SBOM, and source CI passed at
+      `085e456c`; final documentation publication and PR Ready are in progress.
 
 ## Implementation sequence
 
@@ -346,3 +347,14 @@ force-push. The first current-head audit reproduced the remote PostgreSQL
 terminal-stream failure. Regression commit `15bf0897` intentionally failed;
 fix `0d05d522` passed local Phase 12 gates and both GitHub Actions runs. Phase
 13 remains incomplete until its real external-system and publication gates pass.
+
+## Phase 13 real acceptance outcome
+
+Source commit `085e456c` passed the complete local aggregate gate, PostgreSQL
+integration 36/36 with zero skips, pip Open WebUI 0.10.2 to frozen SDAR
+`667146a` real E2E 26/26, Docker endpoint-override proof, clean hardened Compose,
+current CycloneDX SBOM, and exact-commit push/PR CI. The live evidence audit
+recorded 12 chat-owned bindings and 47 sanitized published events. No browser
+screenshot or hidden SDAR state is claimed. The remaining authorized work is
+the final documentation commit, its exact CI, PR body update, and changing PR #1
+from Draft to Ready; merge, tag, and release remain user-controlled.

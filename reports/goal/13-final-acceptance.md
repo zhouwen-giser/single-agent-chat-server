@@ -1,95 +1,132 @@
-# Phase 13 — final local acceptance
+# Phase 13 — final acceptance and v0.1.0 evidence
 
 ## Result
 
-`BLOCKED_LOCAL_REVIEW`
+`ACCEPTANCE_PASSED_PUBLICATION_PENDING`
 
-Verification ran at local source HEAD
-`719572c744da0a7f195d060b74e762860ff4fac7` on
-`work/local-phase12-phase13-handoff`. All hermetic gates passed. The required
-final-head native PostgreSQL, real Open WebUI-to-SDAR, Docker, Compose, current
-SBOM, and container checks could not run because those runtimes are absent.
-Phase 13 is therefore not complete and the delivery must use a `BLOCKED` ZIP.
+All required local, PostgreSQL, real Open WebUI-to-SDAR, Docker, Compose, supply
+chain, and adversarial gates passed at source commit
+`085e456c9802462c5d0c2a8c2310cadbfa760a96` on
+`feature/single-sdar-chat-entry-v0.1`. Push and pull-request CI for that exact
+commit also passed. This report is the required publication commit payload; the
+PR remains Draft until this commit is pushed and its final checks pass.
 
-Remote GitHub Actions: NOT RUN FOR LOCAL HEAD
+No PR merge, tag, GitHub Release, or SDAR upstream change is authorized or
+performed.
 
-## Protocol and retained upstream evidence
-
-- Remote feature baseline:
-  `61fec2fd04981b36cdd0794e927cf9c85f9b929a`
-- Remote main: `3e5be7150e959006d4d152ba6d0d32ebc93ab419`
-- Phase 11 functional/report commits: `d6a79a9` / `61fec2f`
-- Open WebUI retained evidence version: `0.10.2`
-- SDAR: `667146a3639eefdfed9b89c2417c08e1ac50e9a9`
-- Phase 11 live Agent Card SHA-256:
-  `bfcf6ebdb2e603a0859379ad1e5d234eeda4ff47f57f46b3d16e3330d6c302b1`
-- A2A spec patch `1.0.1`, wire `1.0`, `HTTP+JSON`
-- SDK: `@a2a-js/sdk@1.0.0-beta.0`
-
-Phase 11 evidence is retained and was audited for consistency. It is not
-presented as a final-head rerun.
-
-## Final command record
-
-| Command                    | Result        | Evidence                                                                                             |
-| -------------------------- | ------------- | ---------------------------------------------------------------------------------------------------- |
-| `pnpm format:check`        | PASSED        | all files matched Prettier                                                                           |
-| `pnpm lint`                | PASSED        | production, tests, and scripts; zero findings                                                        |
-| `pnpm typecheck`           | PASSED        | TypeScript no-emit                                                                                   |
-| `pnpm test:unit`           | PASSED        | 31/31                                                                                                |
-| `pnpm test:contract`       | PASSED        | 26/26                                                                                                |
-| `pnpm test:integration`    | PARTIAL       | graph 1/1 passed; 35 native-PostgreSQL tests skipped                                                 |
-| `pnpm test:e2e`            | BLOCKED       | deterministic fixture 1/1 passed, then live gate failed closed on absent `OPENWEBUI_VERIFY_BASE_URL` |
-| `pnpm test:security`       | PASSED        | 7/7                                                                                                  |
-| `pnpm build`               | PASSED        | production TypeScript build                                                                          |
-| `pnpm smoke`               | PASSED        | built server health, model discovery, completion                                                     |
-| `pnpm verify:migrations`   | PASSED_STATIC | three contiguous append-only migrations; real apply blocked with PostgreSQL                          |
-| `pnpm verify:architecture` | PASSED        | 42 production files                                                                                  |
-| `pnpm verify:openai-api`   | PASSED        | 19/19                                                                                                |
-| `pnpm verify:a2a`          | PASSED        | 7/7 official-SDK adapter contracts                                                                   |
-| `pnpm verify:openwebui`    | BLOCKED       | live Open WebUI/SDAR configuration absent                                                            |
-| `pnpm verify`              | BLOCKED       | strict preflight failed on absent `TEST_DATABASE_URL`                                                |
-
-Additional results:
-
-- `pnpm verify:phase12`: passed at the recorded local source HEAD.
-- `pnpm peers check`: passed.
-- production license gate: 84 entries passed.
-- GitHub Actions static quality/container gate: passed.
-- tracked-file secret pattern gate: passed.
-- `git diff --check`: passed.
-- Docker build: blocked, `docker` not installed.
-- container metadata/Compose clean-start/read-only/non-root verification:
-  blocked, `docker` not installed.
-- current-head SBOM generation: blocked, `docker` not installed; the retained
-  Phase 10 SBOM was not relabeled as current.
-
-## Real E2E boundary
-
-The 26 required final scenarios in `scripts/verify-openwebui.mjs` remain
-unverified at the local final source HEAD. The script actively requires live
-Open WebUI model/completion traffic, a compatible live SDAR Agent Card, native
-PostgreSQL configuration, and a scenario matrix bound to `git rev-parse HEAD`.
-The deterministic fixture covers model discovery, ordinary chat, utility and
-user isolation, streaming, and `[DONE]`, but is explicitly auxiliary.
-
-## Packaging and integrity
-
-The clean archive name is resolved after the final evidence commit as:
+## Frozen topology verified
 
 ```text
-single-agent-chat-server-v0.1.0-BLOCKED-LOCAL-REVIEW-<final-shortsha>.zip
+pip Open WebUI 0.10.2
+  -> OpenAI-compatible backend proxy
+  -> current single-agent-chat-server
+  -> thin LangGraph chat graph
+  -> @a2a-js/sdk@1.0.0-beta.0 adapter
+  -> A2A 1.0 HTTP+JSON
+  -> SDAR 667146a
+  -> real Redis and Streamable HTTP MCP transport
 ```
 
-Because an archive cannot contain its own stable SHA-256, the exact final
-commit, filename, archive hash, size, and file audit are recorded in the
-external delivery manifest and `.sha256` companion generated from `git
-archive`. `.env*`, `.git`, dependencies, build output, credentials, and runtime
-data are excluded.
+- SDAR source: `667146a3639eefdfed9b89c2417c08e1ac50e9a9`.
+- A2A spec patch: `1.0.1`; wire: `1.0`; binding: `HTTP+JSON`.
+- Agent Card selected interface: `http://127.0.0.1:9999/a2a`.
+- Live raw Agent Card SHA-256:
+  `d6de4beb1b6af17dac3db6c25be74672f38a5bd184e6e9b9682b499b99c24068`.
+- Open WebUI used an isolated pip data directory and forwarded a signed user
+  JWT plus documented chat/message header templates.
+- The chat service itself used no SDAR management API, SDAR database, MCP,
+  Registry, Mesh, or capability-discovery dependency. The isolated test harness
+  used the loopback management API only to configure the disposable SDAR test
+  database.
 
-## Required unblock
+## Required command record
 
-The owner must review the local commits, supply the required runtimes, rerun the
-entire release checklist with zero required skips, then push and inspect remote
-`quality` and `container` jobs. PR #1 was not modified and must not be marked
-Ready or merged based on this blocked package.
+| Command                          | Result | Evidence                                                     |
+| -------------------------------- | ------ | ------------------------------------------------------------ |
+| `pnpm install --frozen-lockfile` | PASSED | lockfile unchanged                                           |
+| `pnpm peers check`               | PASSED | no peer dependency issues                                    |
+| `pnpm format:check`              | PASSED | all files matched                                            |
+| `pnpm lint`                      | PASSED | zero findings                                                |
+| `pnpm typecheck`                 | PASSED | TypeScript no-emit                                           |
+| `pnpm test:unit`                 | PASSED | 31/31                                                        |
+| `pnpm test:contract`             | PASSED | 26/26                                                        |
+| `pnpm test:integration`          | PASSED | 36/36 against PostgreSQL 16.9; zero skips                    |
+| `pnpm test:e2e`                  | PASSED | fixture 1/1 plus 26/26 required real scenarios               |
+| `pnpm test:security`             | PASSED | 8/8                                                          |
+| `pnpm build`                     | PASSED | production TypeScript build                                  |
+| `pnpm smoke`                     | PASSED | built health, model discovery, completion                    |
+| `pnpm verify:migrations`         | PASSED | three append-only migrations; real startup apply also passed |
+| `pnpm verify:architecture`       | PASSED | 42 production files                                          |
+| `pnpm verify:openai-api`         | PASSED | 19/19                                                        |
+| `pnpm verify:a2a`                | PASSED | 7/7 official-SDK adapter contracts                           |
+| `pnpm verify:openwebui`          | PASSED | live Open WebUI, live frozen Agent Card, 26 real scenarios   |
+| `pnpm verify`                    | PASSED | strict aggregate gate including Docker and current SBOM      |
+
+Additional aggregate results:
+
+- production licenses: 84 entries; Apache-2.0, BSD-3-Clause, ISC, MIT;
+- workflow static gate: quality and container jobs present;
+- secret-pattern scan: 178 tracked files;
+- current CycloneDX 1.7 SBOM regenerated from the production image;
+- production image: non-root `node`, healthcheck present, port 3000 exposed.
+
+## Real E2E evidence
+
+The live run used real HTTP/SSE, the official SDK adapter, PostgreSQL 16.9, the
+exact frozen SDAR, Redis, and real Streamable HTTP MCP tool discovery/execution.
+The chat-owned evidence audit passed with 12 bindings and 47 sanitized published
+events.
+
+All 26 verifier scenarios are `PASSED_REAL`:
+
+- model discovery, ordinary chat without Task, Agent Card discovery;
+- Task creation, published phase messages, bounded stream and `getTask()`
+  enrichment, status query;
+- plan confirm/reject/revise, `provide_input`, pause/resume, top-level
+  `cancelTask()`;
+- completed text+JSON Artifact, failed state and Capability Gap;
+- server restart recovery, cross-user isolation, utility isolation, retry
+  idempotency, and forged signed-identity rejection;
+- real SDAR outage behavior, explicit Docker endpoint override, and the Phase 12
+  terminal-stream regression.
+
+The `provide_input` run demonstrated that `awaiting_user_input` transitions
+later to a separate `awaiting_plan_confirmation` boundary; no plan decision was
+inferred from the user input. Pause was separately rendered from both input
+states.
+
+## Outage and Docker evidence
+
+With only the verified temporary SDAR process stopped, Open WebUI returned a
+sanitized generic error, chat `/ready` remained HTTP 200, and the outage chat
+had zero Task bindings. SDAR then recovered from its isolated PostgreSQL/Redis
+state with its provider and MCP registration intact.
+
+A hardened production container read an Agent Card advertising
+`http://0.0.0.0:7000/advertised-a2a`. With the explicit configured override,
+the shim recorded exactly:
+
+```text
+GET  /.well-known/agent-card.json
+POST /selected-a2a/message:stream
+```
+
+It did not silently use or rewrite the advertised endpoint. The isolated
+override containers/network were deleted after capture.
+
+A clean repository Compose project also passed: PostgreSQL and server were
+healthy, five chat-service tables were applied, the server ran as `node` with
+read-only root filesystem, `cap_drop: ALL`, and
+`no-new-privileges:true`. `docker compose down -v --remove-orphans` left zero
+project containers, volumes, or networks. Those disposable resources are not
+recoverable; unrelated Docker resources were untouched.
+
+## Evidence boundary
+
+No browser screenshot was fabricated. Evidence is live HTTP/SSE output,
+sanitized server/process logs, chat-owned PostgreSQL rows, Docker health/config
+metadata, and recorded internal shim paths. Secrets, JWTs, request bodies,
+prompts, hidden reasoning, and SDAR internal state are not published.
+
+Exact-head publication evidence after this documentation commit is recorded in
+PR #1 because a commit cannot contain its own SHA or its later CI result.

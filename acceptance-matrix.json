@@ -127,18 +127,18 @@
     "verification": "pnpm verify:phase12",
     "result": "PASSED",
     "remoteCi": "PASSED_AT_EXACT_COMMIT",
-    "finalRealE2e": "PENDING_PHASE_13_FINAL_HEAD",
+    "finalRealE2e": "PASSED_PHASE_13",
     "regressionCommit": "15bf0897d1f0c4e09aaad3780c22a600d676bc2d",
     "postgresIntegration": "PASSED_36_OF_36_POSTGRESQL_16_9"
   },
   "phase13LocalEvidence": {
-    "status": "IN_PROGRESS",
-    "verificationSourceHead": "719572c744da0a7f195d060b74e762860ff4fac7",
+    "status": "ACCEPTANCE_PASSED_PUBLICATION_PENDING",
+    "verificationSourceHead": "085e456c9802462c5d0c2a8c2310cadbfa760a96",
     "report": "reports/goal/13-final-acceptance.md",
-    "fixtureE2e": "PASSED",
-    "realE2e": "PENDING_RERUN",
-    "nativePostgres": "PASSED_PHASE_12_36_OF_36_FINAL_RERUN_PENDING",
-    "container": "PENDING_RERUN",
-    "remoteCi": "PASSED_PHASE_12_FIX_HEAD_FINAL_HEAD_PENDING"
+    "fixtureE2e": "PASSED_1_OF_1",
+    "realE2e": "PASSED_REAL_26_OF_26",
+    "nativePostgres": "PASSED_36_OF_36_POSTGRESQL_16_9_ZERO_SKIPS",
+    "container": "PASSED_IMAGE_COMPOSE_AND_EXPLICIT_ENDPOINT_OVERRIDE",
+    "remoteCi": "PASSED_AT_SOURCE_HEAD_FINAL_DOC_PENDING"
   }
 }

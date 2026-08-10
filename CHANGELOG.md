@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 — local release candidate, blocked
+## 0.1.0 — acceptance passed, PR publication pending
 
 ### Added
 
@@ -12,10 +12,17 @@
   checkpoints, migrations, and restart reconciliation.
 - Signed Open WebUI identity, rate/resource limits, secure observability,
   production container, Compose topology, CI, license, and SBOM gates.
-- Phase 11 real Open WebUI/SDAR vertical-slice evidence at the remote baseline.
-- Phase 12 adversarial tests and repeatable architecture drift gate.
-- Phase 13 deterministic fixture, built-server smoke, migration/workflow/secret
-  gates, and strict live-environment verification entry points.
+- Real pip Open WebUI 0.10.2 to frozen SDAR `667146a` evidence with Redis and
+  real Streamable HTTP MCP transport.
+- Adversarial tests and repeatable architecture drift gate.
+- Strict final live-environment verification bound to the current Git HEAD.
+
+### Fixed
+
+- Preserve accepted terminal stream fragments when an already-terminal
+  `getTask()` enrichment is rejected as a redundant monotonic observation.
+- Send required Open WebUI session metadata in the final non-mutating live probe.
+- Validate A2A protocol revision on the selected Agent Card interface.
 
 ### Security
 
@@ -25,9 +32,10 @@
 - Serialize all mutating Task interactions.
 - Suppress stale observations rejected by persistence.
 - Restrict signed roles to `user` or `admin`.
+- Require an explicit endpoint override for unusable advertised container URLs.
 
 ### Release status
 
-This local candidate is not published. Final-head native PostgreSQL, Docker, and
-live Open WebUI-to-SDAR verification could not run in the current workspace.
-Remote GitHub Actions have not run for the local commits.
+All required local and real-environment acceptance gates passed. PR publication
+is permitted after the Phase 13 documentation commit's remote checks pass.
+There is no tag or GitHub Release, and merge remains user-controlled.

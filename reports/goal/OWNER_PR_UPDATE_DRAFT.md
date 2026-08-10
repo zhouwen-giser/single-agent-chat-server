@@ -1,52 +1,37 @@
-# Owner PR update draft
+## Summary
 
-This draft has not been posted to GitHub. Use it only after reviewing and
-pushing the local commits and after checking the new remote Actions runs.
+- Adds an OpenAI-compatible chat entrance for exactly one configured SDAR.
+- Keeps LangGraph thin and isolates the pinned
+  `@a2a-js/sdk@1.0.0-beta.0` HTTP+JSON adapter.
+- Persists Open WebUI identity, chat/task binding, idempotency, bounded
+  observations, and restart recovery in PostgreSQL.
+- Supports explicit plan/input/pause/resume Follow-up metadata and top-level
+  `cancelTask()` without accessing SDAR internals.
+- Includes hardened Docker/Compose, CI, licenses, SBOM, operations, and release
+  evidence.
 
-## Suggested PR body update
+## Frozen compatibility
 
-### Local handoff
+- SDAR commit: `667146a3639eefdfed9b89c2417c08e1ac50e9a9`
+- A2A spec patch: `1.0.1`
+- wire/binding: `1.0` / `HTTP+JSON`
+- SDK: `@a2a-js/sdk@1.0.0-beta.0`
 
-- Reconciled the existing Phase 11 remote evidence and fixed the formatting-only
-  defect that failed the latest remote quality workflow.
-- Completed Phase 12 adversarial hardening: bounded/malformed A2A validation,
-  Task identity drift rejection, safe publication, same-origin endpoint
-  enforcement, mutating-interaction serialization, stale-observation
-  suppression, and strict signed roles.
-- Added seven security regressions, one deterministic E2E fixture, strict
-  current-head live OpenWebUI/SDAR verification, built-server smoke, migration,
-  workflow, license, secret, and architecture gates.
-- Updated operator, API, architecture, security, compatibility,
-  troubleshooting, traceability, and release documentation.
+## Final verification
 
-### Local verification
+- unit 31/31; contract 26/26; PostgreSQL integration 36/36;
+- fixture E2E 1/1; required real Open WebUI-to-SDAR scenarios 26/26;
+- security 8/8; OpenAI 19/19; A2A 7/7; architecture 42 files;
+- real pip Open WebUI 0.10.2, exact frozen SDAR, Redis, and real MCP transport;
+- real outage, restart, idempotency, user/utility isolation, and explicit Docker
+  endpoint-override evidence;
+- hardened production image, clean Compose startup/cleanup, 84-entry license
+  gate, 178-file secret scan, and current CycloneDX SBOM;
+- `pnpm verify` passed with strict real-environment preflight.
 
-- `verify:phase12`: passed.
-- unit 31/31, contract 26/26, security 7/7.
-- fixture E2E 1/1, built-server smoke, OpenAI 19/19, A2A 7/7.
-- architecture 42 files, licenses 84 entries, migration/workflow/secret static
-  gates passed.
-- integration was partial: 1 passed, 35 PostgreSQL tests skipped.
-- required current-head real E2E, Docker/Compose, container, and current SBOM:
-  blocked by the local environment.
+## Publication boundary
 
-### Publication boundary
-
-- Remote GitHub Actions: NOT RUN FOR LOCAL HEAD
-- Local commits were not pushed by Work mode.
-- Existing Draft PR was not modified.
-- This package is `BLOCKED_LOCAL_REVIEW`; do not mark Ready or auto-merge.
-
-## Review checklist
-
-- [ ] Verify the delivered ZIP SHA-256 and manifest.
-- [ ] Review each local commit and complete diff from `61fec2f`.
-- [ ] Run native PostgreSQL integration with zero required skips.
-- [ ] Run all 26 real Open WebUI-to-SDAR scenarios at the pushed candidate SHA.
-- [ ] Run Docker build, security metadata, clean Compose startup/cleanup, and
-      current SBOM.
-- [ ] Confirm `pnpm verify` passes.
-- [ ] Push only after owner approval.
-- [ ] Confirm remote `quality` and `container` jobs at the exact pushed SHA.
-- [ ] Decide manually whether the PR can leave Draft.
-- [ ] Do not auto-merge.
+- Phase 13 report: `reports/goal/13-final-acceptance.md`
+- PR may leave Draft only after the final documentation commit's exact
+  `quality` and `container` checks pass.
+- Do not auto-merge. Merge, tag, and GitHub Release remain user-controlled.

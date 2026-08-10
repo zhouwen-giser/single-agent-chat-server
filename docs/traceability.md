@@ -1,36 +1,34 @@
 # Requirement traceability
 
-This table maps the acceptance matrix to executable evidence. `Passed local`
-means the named check ran at or after the Phase 12 functional commit. `Inherited`
-means the repository retains evidence from the cited remote phase, but the real
-environment was not available for a final-head rerun.
+All required acceptance items were rerun at Phase 13 source commit
+`085e456c9802462c5d0c2a8c2310cadbfa760a96`. `Passed real` means the
+Open WebUI-to-SDAR scenario used live HTTP/SSE, the official SDK adapter, real
+PostgreSQL, and the exact frozen SDAR; it is not a fixture-only label.
 
-| Acceptance                          | Primary executable evidence                                             | Current evidence                                     |
-| ----------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------- |
-| AC-01 model discovery               | `openai-api.contract.test.ts`; Phase 11 report                          | Passed local contract; inherited real E2E            |
-| AC-02 normal chat                   | unit graph tests; OpenAI contract; Phase 11 report                      | Passed local; inherited real E2E                     |
-| AC-03 single A2A submission         | `sdar-a2a-adapter.contract.test.ts`; coordinator PostgreSQL integration | Passed local adapter; inherited database/real E2E    |
-| AC-04 status and phase SSE          | OpenAI contract; coordinator integration                                | Passed local contract; inherited database/real E2E   |
-| AC-05 bounded stream and `getTask`  | coordinator integration and Phase 11 report                             | Inherited; final-head real rerun required            |
-| AC-06 status query isolation        | graph/unit and coordinator integration                                  | Passed local unit; inherited database                |
-| AC-07 plan actions                  | coordinator integration                                                 | Inherited; Phase 12 action gate reviewed             |
-| AC-08 `provide_input` identity      | adapter contract and coordinator integration                            | Passed local adapter; inherited database             |
-| AC-09 top-level cancellation        | coordinator integration                                                 | Inherited; Phase 12 mutation lease reviewed          |
-| AC-10 result artifacts              | coordinator integration; adversarial Artifact validation                | Passed local security validation; inherited real E2E |
-| AC-11 failure versus Capability Gap | coordinator integration; safe-publication security test                 | Passed local security; inherited real E2E            |
-| AC-12 retry idempotency             | persistence PostgreSQL integration                                      | Inherited; native PostgreSQL rerun blocked           |
-| AC-13 restart recovery              | recovery unit and PostgreSQL integration                                | Passed local unit; inherited real restart            |
-| AC-14 disconnect recovery           | adapter/coordinator integration                                         | Passed local adapter; inherited database/real E2E    |
-| AC-15 utility isolation             | unit graph and OpenAI contract                                          | Passed local                                         |
-| AC-16 cross-user isolation          | OpenAI contract and PostgreSQL integration                              | Passed local contract; inherited database            |
-| AC-17 signed identity               | `adversarial.security.test.ts`; OpenAI contract                         | Passed local                                         |
-| AC-18 SDAR outage                   | recovery unit and Phase 11 report                                       | Passed local unit; inherited real outage             |
-| AC-19 no management/DB/MCP          | `verify:architecture`                                                   | Passed local across 42 production files              |
-| AC-20 protocol and SDK pin          | adapter contract; `verify:architecture`                                 | Passed local                                         |
-| AC-21 explicit endpoint override    | adapter contract                                                        | Passed local, including same-origin rejection        |
-| AC-22 Follow-up allowlist           | adapter contract and coordinator integration                            | Passed local adapter; inherited database             |
+| Acceptance                          | Primary executable evidence                     | Final evidence               |
+| ----------------------------------- | ----------------------------------------------- | ---------------------------- |
+| AC-01 model discovery               | OpenAI contract; live Open WebUI proxy          | Passed real                  |
+| AC-02 normal chat                   | graph/unit; OpenAI contract; chat DB audit      | Passed real; no Task binding |
+| AC-03 single A2A submission         | adapter contract; PostgreSQL audit              | Passed real; one Task        |
+| AC-04 status and phase SSE          | OpenAI SSE; published-event audit               | Passed real                  |
+| AC-05 bounded stream and `getTask`  | coordinator integration; event audit            | Passed real                  |
+| AC-06 status query isolation        | graph/unit; live status query                   | Passed real                  |
+| AC-07 plan actions                  | live confirm/reject/revise branches             | Passed real                  |
+| AC-08 `provide_input` identity      | adapter contract; distinct phase audit          | Passed real                  |
+| AC-09 top-level cancellation        | live `cancelTask()` branch                      | Passed real                  |
+| AC-10 result artifacts              | completed text+JSON Artifact audit              | Passed real                  |
+| AC-11 failure versus Capability Gap | safe publication; live gap branch               | Passed real                  |
+| AC-12 retry idempotency             | PostgreSQL idempotency claim audit              | Passed real                  |
+| AC-13 restart recovery              | process restart plus persisted binding          | Passed real                  |
+| AC-14 disconnect recovery           | bounded stream and `getTask` enrichment         | Passed real                  |
+| AC-15 utility isolation             | Open WebUI utility plus DB audit                | Passed real; no Task         |
+| AC-16 cross-user isolation          | two signed Open WebUI users                     | Passed real                  |
+| AC-17 signed identity               | forged JWT live request; security matrix        | Passed real                  |
+| AC-18 SDAR outage                   | stopped frozen runtime; readiness/binding audit | Passed real                  |
+| AC-19 no management/DB/MCP          | architecture gate across 42 files               | Passed                       |
+| AC-20 protocol and SDK pin          | live Agent Card; adapter contracts              | Passed real                  |
+| AC-21 explicit endpoint override    | hardened Docker shim route log                  | Passed real                  |
+| AC-22 Follow-up allowlist           | adapter/coordinator plus live branches          | Passed real                  |
 
-Phase 12 details are in
-[`reports/goal/12-adversarial-hardening.md`](../reports/goal/12-adversarial-hardening.md).
-Final-head real Open WebUI, SDAR, PostgreSQL, and container evidence remains a
-required Phase 13 gate.
+Detailed evidence is in
+[`reports/goal/13-final-acceptance.md`](../reports/goal/13-final-acceptance.md).

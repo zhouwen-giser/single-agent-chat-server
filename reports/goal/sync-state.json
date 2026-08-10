@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "goal": "Build single-agent-chat-server v0.1.0",
-  "status": "IN_PROGRESS",
+  "status": "PHASE13_ACCEPTANCE_PASSED",
   "repository": "zhouwen-giser/single-agent-chat-server",
   "branch": "feature/single-sdar-chat-entry-v0.1",
-  "headSha": "0d05d52288c4acca55745fe137127dd91649e0ab",
+  "headSha": "085e456c9802462c5d0c2a8c2310cadbfa760a96",
   "mainSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
   "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
-  "lastCompletedPhase": 12,
-  "nextPhase": 13,
+  "lastCompletedPhase": 13,
+  "nextPhase": null,
   "localWorkBranch": "work/local-phase12-phase13-handoff",
   "remoteFeatureShaAtStart": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
   "localHeadShaBeforeStateCommit": "719572c744da0a7f195d060b74e762860ff4fac7",
-  "publicationStatus": "REMOTE_PHASE_12_COMPLETE",
+  "publicationStatus": "FINAL_DOCUMENTATION_PENDING",
   "remoteWritePerformed": true,
   "upstreams": {
     "langgraphTemplate": {
@@ -31,28 +31,28 @@
     "openWebUi": {
       "version": "0.10.2",
       "installation": "pip",
-      "healthUrl": "http://127.0.0.1:8080/health",
-      "connected": false,
+      "healthUrl": "http://127.0.0.1:18082/health",
+      "connected": true,
       "phase11RealE2eConnected": true
     },
     "sdar": {
       "repository": "zhouwen-giser/skill-driven-agent-runtime",
       "baselineCommit": "667146a3639eefdfed9b89c2417c08e1ac50e9a9",
       "baseUrl": "http://127.0.0.1:9999",
-      "agentCardHash": "9c5227962711fb1defbf5bc1f438315d46749fd0164487b3c46b8986b9a9d99c",
+      "agentCardHash": "d6de4beb1b6af17dac3db6c25be74672f38a5bd184e6e9b9682b499b99c24068",
       "phase11AgentCardHash": "bfcf6ebdb2e603a0859379ad1e5d234eeda4ff47f57f46b3d16e3330d6c302b1",
       "selectedInterfaceUrl": "http://127.0.0.1:9999/a2a",
       "endpointOverride": null,
-      "reachable": false,
-      "lastVerifiedAt": "2026-07-18T19:30:00+08:00",
-      "temporaryRuntimeCleaned": true
+      "reachable": true,
+      "lastVerifiedAt": "2026-08-10T22:25:04.6490444+08:00",
+      "temporaryRuntimeCleaned": false
     }
   },
   "systems": {
-    "postgres": "phase-12-isolated-postgresql-16.9:36/36",
-    "server": "phase-13-final-head-rerun-pending",
-    "openWebUi": "phase-11-real-evidence-retained;phase-13-final-head-rerun-pending",
-    "sdar": "phase-11-exact-commit-evidence-retained;phase-13-final-head-rerun-pending"
+    "postgres": "phase-13-isolated-postgresql-16.9:36/36-zero-skips",
+    "server": "phase-13-source-head-real-e2e-passed",
+    "openWebUi": "phase-13-pip-0.10.2-real-e2e-passed",
+    "sdar": "phase-13-exact-667146a-real-e2e-passed"
   },
   "localHandoff": {
     "baselineReport": "reports/goal/local-handoff-baseline.md",
@@ -66,18 +66,18 @@
       "publication": "SUPERSEDED"
     },
     "phase13": {
-      "status": "BLOCKED",
+      "status": "SUPERSEDED_BY_REAL_ACCEPTANCE",
       "implementationCommit": "3d3b5804ee4125b8f1645317c871c7fade5ea67b",
       "documentationCommit": "719572c744da0a7f195d060b74e762860ff4fac7",
       "report": "reports/goal/13-final-acceptance.md",
-      "pushed": false,
-      "publication": "LOCAL_ONLY"
+      "pushed": true,
+      "publication": "SUPERSEDED"
     },
     "remoteCiForLocalHead": "SUPERSEDED",
     "pullRequestModified": false
   },
   "blockers": [
-    "Phase 13 final-head real Open WebUI to frozen SDAR E2E and container gates have not yet been rerun"
+    "Final documentation commit must be pushed, exact CI must pass, and PR #1 must be marked Ready"
   ],
   "tests": {
     "upstreamTemplateUnit": "passed:1",
@@ -97,9 +97,9 @@
     "phase10Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:27,contract:25,integration:35-real-postgres:34,build,architecture:41,licenses:84,image,non-root,healthcheck,compose-clean-db,sbom,remote-ci",
     "phase11Repository": "passed at remote commit d6a79a9: real Open WebUI 0.10.2, real SDAR 667146a, real PostgreSQL, Redis, MCP transport, official A2A SDK, deterministic structured-model fixture, unit:31,contract:25,integration:36",
     "phase12Local": "passed at 0d05d52: format,lint,langgraph,typecheck,unit:31,contract:26,security:8,architecture:42,build,postgresql-integration:36",
-    "phase13Local": "in progress; prior blocked local report is not release evidence"
+    "phase13Local": "passed at 085e456: full verify, postgresql-integration:36/36-zero-skips, fixture-e2e:1/1, real-e2e:26/26, security:8/8, docker-compose-override, source-head-ci"
   },
-  "updatedAt": "2026-08-10T21:18:00+08:00",
+  "updatedAt": "2026-08-10T22:25:04.6490444+08:00",
   "taskPackageRevision": "R2",
   "phases": {
     "0": {
@@ -183,6 +183,13 @@
       "functionalCommit": "0d05d52288c4acca55745fe137127dd91649e0ab",
       "pushed": true,
       "publication": "REMOTE"
+    },
+    "13": {
+      "status": "ACCEPTANCE_PASSED",
+      "verificationSourceHead": "085e456c9802462c5d0c2a8c2310cadbfa760a96",
+      "report": "reports/goal/13-final-acceptance.md",
+      "pushed": false,
+      "publication": "PENDING_FINAL_DOC_COMMIT"
     }
   }
 }
