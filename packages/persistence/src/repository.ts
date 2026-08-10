@@ -33,18 +33,55 @@ export class ChatPersistenceRepository {
     readonly userId: string;
     readonly userRole: string;
   }): Promise<ThreadBinding> {
-    const result = await this.pool.query<ThreadRow>(
-      `
-        INSERT INTO chat_service.chat_thread_binding(
-          thread_id, openwebui_chat_id, user_id, user_role
-        ) VALUES ($1, $2, $3, $4)
-        ON CONFLICT (openwebui_chat_id, user_id)
-        DO UPDATE SET user_role = EXCLUDED.user_role, updated_at = now()
-        RETURNING thread_id, openwebui_chat_id, user_id, user_role
-      `,
-      [randomUUID(), input.openWebUiChatId, input.userId, input.userRole],
-    );
-    return mapThread(requiredRow(result.rows, "thread upsert"));
+    return this.transaction(async (client) => {
+      const result = await client.query<ThreadRow>(
+        `
+          INSERT INTO chat_service.chat_thread_binding(
+            thread_id, openwebui_chat_id, user_id, user_role
+          ) VALUES ($1, $2, $3, $4)
+          ON CONFLICT (openwebui_chat_id, user_id)
+          DO UPDATE SET user_role = EXCLUDED.user_role, updated_at = now()
+          RETURNING thread_id, openwebui_chat_id, user_id, user_role
+        `,
+        [randomUUID(), input.openWebUiChatId, input.userId, input.userRole],
+      );
+      const thread = mapThread(requiredRow(result.rows, "thread upsert"));
+      const principal = await client.query<{ principal_id: string }>(
+        `
+          INSERT INTO chat_service.principal(principal_id, issuer, subject, role)
+          VALUES ($1, 'openwebui-jwt', $1, $2)
+          ON CONFLICT (issuer, subject)
+          DO UPDATE SET role = EXCLUDED.role, updated_at = now()
+          RETURNING principal_id
+        `,
+        [input.userId, input.userRole],
+      );
+      const principalId = requiredRow(
+        principal.rows,
+        "principal upsert",
+      ).principal_id;
+      await client.query(
+        `
+          INSERT INTO chat_service.conversation_thread(thread_id, principal_id)
+          VALUES ($1, $2)
+          ON CONFLICT (thread_id) DO UPDATE SET updated_at = now()
+        `,
+        [thread.threadId, principalId],
+      );
+      await client.query(
+        `
+          INSERT INTO chat_service.client_thread_binding(
+            binding_id, client_type, external_thread_id, principal_id,
+            internal_thread_id
+          ) VALUES ($1, 'openwebui', $2, $3, $4)
+          ON CONFLICT (client_type, principal_id, external_thread_id)
+          DO UPDATE SET internal_thread_id = EXCLUDED.internal_thread_id,
+                        updated_at = now()
+        `,
+        [randomUUID(), input.openWebUiChatId, principalId, thread.threadId],
+      );
+      return thread;
+    });
   }
 
   async createTaskBinding(input: {
@@ -73,8 +110,9 @@ export class ChatPersistenceRepository {
         const result = await client.query<TaskRow>(
           `
             INSERT INTO chat_service.conversation_task_binding(
-              binding_id, thread_id, sdar_task_id, sdar_context_id, status
-            ) VALUES ($1, $2, $3, $4, $5)
+              binding_id, thread_id, conversation_thread_id, sdar_task_id,
+              sdar_context_id, status
+            ) VALUES ($1, $2, $2, $3, $4, $5)
             RETURNING *
           `,
           [

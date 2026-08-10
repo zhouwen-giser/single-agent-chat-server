@@ -1,6 +1,17 @@
 export { CHECKPOINT_SCHEMA, createPostgresCheckpointer } from "./checkpoint.js";
 export { parsePersistenceConfig, type PersistenceConfig } from "./config.js";
 export { hashJson } from "./hash.js";
+export { InteractionPersistenceRepository } from "./interaction-repository.js";
+export type {
+  AgentCardSnapshot,
+  ClientThreadBinding,
+  ClientType,
+  InteractionProtocol,
+  InteractionRequestClaim,
+  InteractionRun,
+  InterruptBinding,
+  Principal,
+} from "./interaction-types.js";
 export { runMigrations, type AppliedMigration } from "./migrations.js";
 export {
   ChatPersistenceRepository,
