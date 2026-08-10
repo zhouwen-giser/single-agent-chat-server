@@ -55,7 +55,10 @@ Open WebUI / OpenAI client     official AG-UI client
 - [x] 2026-08-11: P06 implemented strict normalized A2A to interaction and
       official AG-UI event projection.
 - [x] 2026-08-11: P07 implemented durable phase-specific Interrupt/Resume.
-- [ ] P08-P09: implement recovery and security.
+- [x] 2026-08-11: P08 implemented durable Run idempotency, disconnect-only
+      observation abort, crash recovery, authorized `getTask()` rebuild, and
+      real PostgreSQL restart proof.
+- [ ] P09: implement security, identity, privacy, and negative gates.
 - [ ] P10-P12: run compatibility, persistence, official-client, and real E2E.
 - [ ] P13: produce the release candidate evidence set.
 - [ ] P14: merge latest `main`, run final gates, and open/update the PR. Do not
@@ -130,6 +133,15 @@ and exact local/remote-head comparison. Required failures remain under
 - Resume authorization must re-read the current Task with `getTask()` before
   claim; a persisted Interrupt is identity evidence, not authority that the
   SDAR Task is still in the same `INPUT_REQUIRED` phase.
+- Durable AG-UI recovery needs separate outer Run and inner Task-submission
+  idempotency scopes. The stable inner A2A message ID prevents a crash retry
+  from selecting a new remote Task identity, while local Runs remain Task-free.
+- A browser close is observation authority only. Persisting any accepted Task
+  binding before returning lets a later authorized `getTask()` rebuild state
+  without a stream cursor, resubscription, or implicit cancellation.
+- Docker may reassign a dynamically published host port after container restart;
+  post-restart verification must rediscover `docker port` rather than reuse a
+  stale test URL.
 
 ## Validation
 
