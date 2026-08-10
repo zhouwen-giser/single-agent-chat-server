@@ -10,6 +10,18 @@ Plain `X-OpenWebUI-User-*` headers are never accepted as identity.
 
 ## Open WebUI 0.10.2 environment
 
+Verify the installed pip artifact before starting the isolated UI process:
+
+```powershell
+python -m pip show open-webui
+open-webui serve --host 127.0.0.1 --port 18080
+Invoke-RestMethod http://127.0.0.1:18080/health
+```
+
+The P10 regression baseline accepts only `Version: 0.10.2` from `pip show` and
+an HTTP 200 health response from that same loopback process. A fixture or a
+direct call to SACS is not real Open WebUI evidence.
+
 Configure Open WebUI before it starts:
 
 ```text
@@ -88,9 +100,7 @@ services:
 ```
 
 Use `http://single-agent-chat-server:3000/v1` as the Open WebUI URL. PostgreSQL
-and SDAR belong only on trusted backend networks. Phase 10 supplies the actual
-production Docker and Compose artifacts; this example defines the required
-connection boundary.
+and SDAR belong only on trusted backend networks. The repository Compose artifacts implement this boundary; the externally installed Open WebUI remains outside this repository and is verified through its real proxy endpoints.
 
 ## Failure checks
 
