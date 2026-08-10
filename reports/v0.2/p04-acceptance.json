@@ -1,0 +1,32 @@
+{
+  "phase": "P04",
+  "status": "PASSED",
+  "implementationCommit": "09a600fd4677ac83248304da5086e77512735d65",
+  "checks": {
+    "queryIntents": "9/9",
+    "queryBeforeGraph": "PASSED",
+    "queryCannotMutateTask": "PASSED",
+    "authorizationBeforeA2a": "PASSED",
+    "unboundTaskDoesNotCreateClient": "PASSED",
+    "principalThreadIsolation": "PASSED",
+    "currentAgentCardAuthority": "PASSED",
+    "agentCardLkgDegradedOnly": "PASSED",
+    "taskFactsUseGetTaskOnly": "PASSED",
+    "historyLengthBoundedAt100": "PASSED",
+    "taskAndHistoryIdentity": "PASSED",
+    "lastObservationPersisted": "PASSED",
+    "inputRequiredPhaseActionsDistinct": "PASSED",
+    "completedTaskFallback": "PASSED",
+    "localConversationTaskList": "PASSED"
+  },
+  "tests": {
+    "unit": "56/56",
+    "contract": "30/30",
+    "integration": "43/43",
+    "security": "8/8",
+    "architecture": "PASSED",
+    "migrations": "4/4"
+  },
+  "requiredSkips": 0,
+  "failedAttemptsRetained": 3
+}

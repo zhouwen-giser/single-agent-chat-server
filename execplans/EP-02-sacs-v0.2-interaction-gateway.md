@@ -46,10 +46,10 @@ Open WebUI / OpenAI client     official AG-UI client
 - [x] 2026-08-10: Lock current SACS, SDAR, and AG-UI sources.
 - [x] 2026-08-10: Re-run the v0.1 hermetic and PostgreSQL baseline: unit 31,
       contract 26, security 8, integration 36, architecture, and build pass.
-- [ ] P01: freeze dual-protocol contracts and ADRs.
-- [ ] P02: implement the typed interaction event spine and OpenAI renderer.
-- [ ] P03: add protocol-neutral persistence and migrations.
-- [ ] P04: implement authorized, non-mutating query services.
+- [x] 2026-08-10: P01 froze dual-protocol contracts and ADRs.
+- [x] 2026-08-10: P02 implemented the typed interaction event spine and OpenAI renderer.
+- [x] 2026-08-11: P03 added protocol-neutral persistence and migration `0004`.
+- [x] 2026-08-11: P04 implemented authorized, non-mutating query services.
 - [ ] P05-P09: implement AG-UI SSE, mapping, interrupts, recovery, and security.
 - [ ] P10-P12: run compatibility, persistence, official-client, and real E2E.
 - [ ] P13: produce the release candidate evidence set.
@@ -100,6 +100,12 @@ and exact local/remote-head comparison. Required failures remain under
   packages and interrupt/A2A references.
 - The v0.1 PostgreSQL tests intentionally assert the isolated database name;
   using another disposable name fails closed before persistence behavior.
+
+- The current A2A SDK exposes Agent Card skills and Task history, but both need
+  bounded protocol-neutral projections before they can leave the adapter.
+- Query safety is strongest when an unbound explicit Task ID is rejected before
+  client creation; tests therefore assert both zero mutation calls and zero
+  A2A client construction on that path.
 
 ## Validation
 
