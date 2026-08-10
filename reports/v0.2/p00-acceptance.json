@@ -1,6 +1,6 @@
 {
   "phase": "P00",
-  "status": "PASSED_LOCAL_AWAITING_CLEAN_PUSH",
+  "status": "PASSED_PUBLISHED",
   "checks": {
     "taskPackageComplete": "PASSED",
     "phase13MergedMain": "PASSED",

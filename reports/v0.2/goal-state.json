@@ -11,7 +11,9 @@
   "phases": {
     "P00": {
       "status": "passed",
-      "implementationCommit": "611c6584380398a6f3e00b680f1e6b0622b10f79"
+      "implementationCommit": "611c6584380398a6f3e00b680f1e6b0622b10f79",
+      "evidenceCommit": "62c89862133b856dabc155ddfa2a33497f2e1452",
+      "remoteHead": "62c89862133b856dabc155ddfa2a33497f2e1452"
     },
     "P01": { "status": "pending" },
     "P02": { "status": "pending" },
