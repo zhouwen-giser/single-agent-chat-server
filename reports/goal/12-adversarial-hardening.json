@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "phase": 12,
   "name": "adversarial-hardening",
-  "status": "COMPLETED_LOCAL",
-  "branch": "work/local-phase12-phase13-handoff",
-  "functionalCommit": "a93e953eebe1f342667a8e7005fc55c9ff3b2759",
-  "pushed": false,
-  "publication": "LOCAL_ONLY",
-  "remoteCiForLocalHead": "NOT_RUN",
+  "status": "COMPLETED",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "functionalCommit": "0d05d52288c4acca55745fe137127dd91649e0ab",
+  "pushed": true,
+  "publication": "REMOTE",
+  "remoteCiForLocalHead": "PASSED",
   "verification": {
     "command": "pnpm verify:phase12",
     "result": "PASSED",
@@ -22,12 +22,17 @@
       "failed": 0
     },
     "security": {
-      "passed": 7,
+      "passed": 8,
       "failed": 0
     },
     "architectureFiles": 42,
     "typecheck": "PASSED",
-    "build": "PASSED"
+    "build": "PASSED",
+    "postgresIntegration": {
+      "version": "16.9",
+      "passed": 36,
+      "failed": 0
+    }
   },
   "findings": [
     "Bound and validate malformed or oversized A2A Task, Status, Message, Artifact, timestamp, URL, and metadata payloads",
@@ -36,16 +41,19 @@
     "Reject cross-origin Agent Card endpoints",
     "Serialize mutating Follow-up and cancel operations",
     "Suppress observations rejected by persistence monotonicity",
-    "Restrict signed Open WebUI roles"
+    "Restrict signed Open WebUI roles",
+    "Preserve accepted terminal stream fragments when redundant terminal getTask enrichment is rejected"
   ],
   "productBoundary": "one fixed SDAR through isolated A2A HTTP+JSON 1.0 adapter",
   "environmentBlockers": [
-    "native PostgreSQL unavailable",
-    "Docker unavailable",
-    "Open WebUI unavailable",
-    "SDAR unavailable",
-    "Redis and MCP transport unavailable"
+    "Phase 13 final-head Open WebUI, frozen SDAR, Redis, real MCP transport, Docker image, and Compose acceptance remain pending"
   ],
   "diagnosticOnly": "A PGlite wire probe was not accepted as real PostgreSQL evidence",
-  "updatedAt": "2026-07-23T21:00:10+09:00"
+  "updatedAt": "2026-08-10T21:18:00+08:00",
+  "regressionCommit": "15bf0897d1f0c4e09aaad3780c22a600d676bc2d",
+  "fixCommit": "0d05d52288c4acca55745fe137127dd91649e0ab",
+  "remoteCi": {
+    "push": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/31391810117",
+    "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/31391813711"
+  }
 }

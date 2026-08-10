@@ -121,22 +121,24 @@
     }
   ],
   "phase12LocalEvidence": {
-    "status": "COMPLETED_LOCAL",
-    "functionalCommit": "a93e953eebe1f342667a8e7005fc55c9ff3b2759",
+    "status": "COMPLETED",
+    "functionalCommit": "0d05d52288c4acca55745fe137127dd91649e0ab",
     "report": "reports/goal/12-adversarial-hardening.md",
     "verification": "pnpm verify:phase12",
     "result": "PASSED",
-    "remoteCi": "NOT_RUN_FOR_LOCAL_HEAD",
-    "finalRealE2e": "BLOCKED_BY_LOCAL_ENVIRONMENT"
+    "remoteCi": "PASSED_AT_EXACT_COMMIT",
+    "finalRealE2e": "PENDING_PHASE_13_FINAL_HEAD",
+    "regressionCommit": "15bf0897d1f0c4e09aaad3780c22a600d676bc2d",
+    "postgresIntegration": "PASSED_36_OF_36_POSTGRESQL_16_9"
   },
   "phase13LocalEvidence": {
-    "status": "BLOCKED_LOCAL_REVIEW",
+    "status": "IN_PROGRESS",
     "verificationSourceHead": "719572c744da0a7f195d060b74e762860ff4fac7",
     "report": "reports/goal/13-final-acceptance.md",
     "fixtureE2e": "PASSED",
-    "realE2e": "BLOCKED_BY_LOCAL_ENVIRONMENT",
-    "nativePostgres": "BLOCKED_BY_LOCAL_ENVIRONMENT",
-    "container": "BLOCKED_BY_LOCAL_ENVIRONMENT",
-    "remoteCi": "NOT_RUN_FOR_LOCAL_HEAD"
+    "realE2e": "PENDING_RERUN",
+    "nativePostgres": "PASSED_PHASE_12_36_OF_36_FINAL_RERUN_PENDING",
+    "container": "PENDING_RERUN",
+    "remoteCi": "PASSED_PHASE_12_FIX_HEAD_FINAL_HEAD_PENDING"
   }
 }

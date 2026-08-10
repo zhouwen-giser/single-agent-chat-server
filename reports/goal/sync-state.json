@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "goal": "Build single-agent-chat-server v0.1.0",
-  "status": "BLOCKED_LOCAL_REVIEW",
+  "status": "IN_PROGRESS",
   "repository": "zhouwen-giser/single-agent-chat-server",
   "branch": "feature/single-sdar-chat-entry-v0.1",
-  "headSha": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
+  "headSha": "0d05d52288c4acca55745fe137127dd91649e0ab",
   "mainSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
   "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
   "lastCompletedPhase": 12,
@@ -12,8 +12,8 @@
   "localWorkBranch": "work/local-phase12-phase13-handoff",
   "remoteFeatureShaAtStart": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
   "localHeadShaBeforeStateCommit": "719572c744da0a7f195d060b74e762860ff4fac7",
-  "publicationStatus": "PENDING_OWNER_REVIEW",
-  "remoteWritePerformed": false,
+  "publicationStatus": "REMOTE_PHASE_12_COMPLETE",
+  "remoteWritePerformed": true,
   "upstreams": {
     "langgraphTemplate": {
       "source": "langchain-ai/new-langgraphjs-project",
@@ -49,11 +49,58 @@
     }
   },
   "systems": {
-    "postgres": "phase-11-real-evidence-retained;unavailable-in-current-local-workspace",
-    "server": "phase-11-production-image-evidence-retained;not-currently-deployed",
-    "openWebUi": "phase-11-real-0.10.2-evidence-retained;unavailable-in-current-local-workspace",
-    "sdar": "phase-11-exact-commit-evidence-retained;unavailable-in-current-local-workspace"
+    "postgres": "phase-12-isolated-postgresql-16.9:36/36",
+    "server": "phase-13-final-head-rerun-pending",
+    "openWebUi": "phase-11-real-evidence-retained;phase-13-final-head-rerun-pending",
+    "sdar": "phase-11-exact-commit-evidence-retained;phase-13-final-head-rerun-pending"
   },
+  "localHandoff": {
+    "baselineReport": "reports/goal/local-handoff-baseline.md",
+    "baselineVerification": "reports/goal/local-baseline-verification.md",
+    "ciRecoveryReport": "reports/goal/local-ci-recovery.md",
+    "phase12": {
+      "status": "SUPERSEDED_BY_REMOTE_PHASE_12",
+      "functionalCommit": "a93e953eebe1f342667a8e7005fc55c9ff3b2759",
+      "report": "reports/goal/12-adversarial-hardening.md",
+      "pushed": true,
+      "publication": "SUPERSEDED"
+    },
+    "phase13": {
+      "status": "BLOCKED",
+      "implementationCommit": "3d3b5804ee4125b8f1645317c871c7fade5ea67b",
+      "documentationCommit": "719572c744da0a7f195d060b74e762860ff4fac7",
+      "report": "reports/goal/13-final-acceptance.md",
+      "pushed": false,
+      "publication": "LOCAL_ONLY"
+    },
+    "remoteCiForLocalHead": "SUPERSEDED",
+    "pullRequestModified": false
+  },
+  "blockers": [
+    "Phase 13 final-head real Open WebUI to frozen SDAR E2E and container gates have not yet been rerun"
+  ],
+  "tests": {
+    "upstreamTemplateUnit": "passed:1",
+    "upstreamTemplateBuild": "passed",
+    "upstreamTemplateLint": "passed-with-deprecation-warnings",
+    "upstreamTemplateLanggraphConfig": "passed",
+    "phase0Repository": "passed: format,lint,config,typecheck,unit:1,integration:1,build",
+    "phase1Repository": "passed: format,lint,config,typecheck,unit:5,contract:8,integration:1,build,http-smoke",
+    "phase2Repository": "passed: format,lint,config,typecheck,unit:16,contract:8,integration:1,build,http-smoke,architecture-scan",
+    "phase3Repository": "passed: frozen-install,peers,format,lint,config,typecheck,unit:16,contract:14,integration:1,build,official-sdk-http-json-mock,declaration-audit",
+    "phase4Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:16,contract:14,integration:10-real-postgres:9,build,server-readiness,license-audit",
+    "phase5Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:16,contract:18,integration:10-real-postgres:9,build,real-openwebui-proxy,real-checkpoint-query",
+    "phase6Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:16,contract:19,integration:17-real-postgres:16,phase6-coordinator:7,open-handles,build,production-ready-with-sdar-unavailable",
+    "phase7Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:18,contract:20,integration:30-real-postgres:29,coordinator:20-open-handles,build",
+    "phase8Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:20,contract:20,integration:35-real-postgres:34,coordinator:23-open-handles,build,postgres-restart,server-restart",
+    "phase9Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:27,contract:25,integration:35-real-postgres:34,open-handles:51,build,readiness-outage-recovery,log-secret-scan",
+    "phase10Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:27,contract:25,integration:35-real-postgres:34,build,architecture:41,licenses:84,image,non-root,healthcheck,compose-clean-db,sbom,remote-ci",
+    "phase11Repository": "passed at remote commit d6a79a9: real Open WebUI 0.10.2, real SDAR 667146a, real PostgreSQL, Redis, MCP transport, official A2A SDK, deterministic structured-model fixture, unit:31,contract:25,integration:36",
+    "phase12Local": "passed at 0d05d52: format,lint,langgraph,typecheck,unit:31,contract:26,security:8,architecture:42,build,postgresql-integration:36",
+    "phase13Local": "in progress; prior blocked local report is not release evidence"
+  },
+  "updatedAt": "2026-08-10T21:18:00+08:00",
+  "taskPackageRevision": "R2",
   "phases": {
     "0": {
       "status": "COMPLETED",
@@ -128,53 +175,14 @@
       "reportCommit": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
       "pushed": true,
       "publication": "REMOTE_EXISTING"
-    }
-  },
-  "localHandoff": {
-    "baselineReport": "reports/goal/local-handoff-baseline.md",
-    "baselineVerification": "reports/goal/local-baseline-verification.md",
-    "ciRecoveryReport": "reports/goal/local-ci-recovery.md",
-    "phase12": {
+    },
+    "12": {
       "status": "COMPLETED",
-      "functionalCommit": "a93e953eebe1f342667a8e7005fc55c9ff3b2759",
       "report": "reports/goal/12-adversarial-hardening.md",
-      "pushed": false,
-      "publication": "LOCAL_ONLY"
-    },
-    "phase13": {
-      "status": "BLOCKED",
-      "implementationCommit": "3d3b5804ee4125b8f1645317c871c7fade5ea67b",
-      "documentationCommit": "719572c744da0a7f195d060b74e762860ff4fac7",
-      "report": "reports/goal/13-final-acceptance.md",
-      "pushed": false,
-      "publication": "LOCAL_ONLY"
-    },
-    "remoteCiForLocalHead": "NOT_RUN",
-    "pullRequestModified": false
-  },
-  "blockers": [
-    "Current workspace lacks native PostgreSQL, Docker, Open WebUI, SDAR, Redis, and MCP runtimes required for final-head real E2E and container verification"
-  ],
-  "tests": {
-    "upstreamTemplateUnit": "passed:1",
-    "upstreamTemplateBuild": "passed",
-    "upstreamTemplateLint": "passed-with-deprecation-warnings",
-    "upstreamTemplateLanggraphConfig": "passed",
-    "phase0Repository": "passed: format,lint,config,typecheck,unit:1,integration:1,build",
-    "phase1Repository": "passed: format,lint,config,typecheck,unit:5,contract:8,integration:1,build,http-smoke",
-    "phase2Repository": "passed: format,lint,config,typecheck,unit:16,contract:8,integration:1,build,http-smoke,architecture-scan",
-    "phase3Repository": "passed: frozen-install,peers,format,lint,config,typecheck,unit:16,contract:14,integration:1,build,official-sdk-http-json-mock,declaration-audit",
-    "phase4Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:16,contract:14,integration:10-real-postgres:9,build,server-readiness,license-audit",
-    "phase5Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:16,contract:18,integration:10-real-postgres:9,build,real-openwebui-proxy,real-checkpoint-query",
-    "phase6Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:16,contract:19,integration:17-real-postgres:16,phase6-coordinator:7,open-handles,build,production-ready-with-sdar-unavailable",
-    "phase7Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:18,contract:20,integration:30-real-postgres:29,coordinator:20-open-handles,build",
-    "phase8Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:20,contract:20,integration:35-real-postgres:34,coordinator:23-open-handles,build,postgres-restart,server-restart",
-    "phase9Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:27,contract:25,integration:35-real-postgres:34,open-handles:51,build,readiness-outage-recovery,log-secret-scan",
-    "phase10Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:27,contract:25,integration:35-real-postgres:34,build,architecture:41,licenses:84,image,non-root,healthcheck,compose-clean-db,sbom,remote-ci",
-    "phase11Repository": "passed at remote commit d6a79a9: real Open WebUI 0.10.2, real SDAR 667146a, real PostgreSQL, Redis, MCP transport, official A2A SDK, deterministic structured-model fixture, unit:31,contract:25,integration:36",
-    "phase12Local": "passed at local commit a93e953: format,lint,langgraph,typecheck,unit:31,contract:26,security:7,architecture:42,build",
-    "phase13Local": "blocked at source head 719572c: hermetic gates passed; integration 1 passed/35 skipped; fixture e2e 1 passed; real e2e, native postgres, docker, compose, container and current sbom unavailable"
-  },
-  "updatedAt": "2026-07-23T21:12:17+09:00",
-  "taskPackageRevision": "R2"
+      "regressionCommit": "15bf0897d1f0c4e09aaad3780c22a600d676bc2d",
+      "functionalCommit": "0d05d52288c4acca55745fe137127dd91649e0ab",
+      "pushed": true,
+      "publication": "REMOTE"
+    }
+  }
 }

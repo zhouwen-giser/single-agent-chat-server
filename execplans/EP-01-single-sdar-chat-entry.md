@@ -72,12 +72,11 @@ Open WebUI
 - [x] 2026-07-23: Reproduced the latest `verify:phase10` failure as a
       Prettier-only defect in the Phase 11 JSON report and repaired it locally
       in `2124f21`.
-- [x] 2026-07-23: Phase 12 adversarial review, actionable fixes, seven
-      dedicated security regressions, the expanded architecture gate, and
-      `verify:phase12` completed locally as `a93e953`; nothing was pushed.
-- [ ] 2026-07-23: Phase 13 implementation, documentation, and every available
-      local gate completed; required native PostgreSQL, real Open WebUI/SDAR,
-      Docker/Compose, and current SBOM gates are blocked by the workspace.
+- [x] 2026-08-10: Phase 12 adversarial regression `15bf0897` reproduced the
+      terminal-stream publication loss; fix `0d05d522` passed security 8/8,
+      PostgreSQL integration 36/36, `verify:phase12`, and exact-commit push/PR CI.
+- [ ] 2026-08-10: Phase 13 final-head real Open WebUI/SDAR, Docker/Compose,
+      current SBOM, final CI, and PR Ready publication are in progress.
 
 ## Implementation sequence
 
@@ -337,3 +336,13 @@ environment configuration; Docker, Compose, container, and current SBOM checks
 were unavailable. Phase 13 remains incomplete and produces a blocked
 local-review archive. PR #1 is unchanged; the repository owner must review,
 unblock, push, and verify remote CI manually.
+
+## 2026-08-10 continuation
+
+The repository owner published the former local handoff in `36d9bd8`, so the
+2026-07-23 no-push handoff restriction is historical rather than current.
+Authoritative work continues on the required feature branch without rebase or
+force-push. The first current-head audit reproduced the remote PostgreSQL
+terminal-stream failure. Regression commit `15bf0897` intentionally failed;
+fix `0d05d522` passed local Phase 12 gates and both GitHub Actions runs. Phase
+13 remains incomplete until its real external-system and publication gates pass.
