@@ -245,6 +245,144 @@ export class InteractionPersistenceRepository {
       ? undefined
       : mapInteractionTask(result.rows[0]);
   }
+  async updateTaskBinding(input: {
+    readonly bindingId: string;
+    readonly expectedVersion: number;
+    readonly status: string;
+    readonly pendingInput?: JsonValue;
+    readonly lastStatusTimestamp?: string;
+    readonly lastEventHash?: string;
+    readonly terminal: boolean;
+  }): Promise<TaskBinding> {
+    const result = await this.pool.query<InteractionTaskRow>(
+      `
+        UPDATE chat_service.conversation_task_binding
+        SET status = CASE
+              WHEN terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN $3
+              ELSE status
+            END,
+            pending_input_json = CASE
+              WHEN terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN $4
+              ELSE pending_input_json
+            END,
+            last_status_timestamp = CASE
+              WHEN terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN COALESCE($5::timestamptz, last_status_timestamp)
+              ELSE last_status_timestamp
+            END,
+            last_event_hash = CASE
+              WHEN terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN $6
+              ELSE last_event_hash
+            END,
+            terminal_at = CASE
+              WHEN $7 AND terminal_at IS NULL AND (
+                $5::timestamptz IS NULL
+                OR last_status_timestamp IS NULL
+                OR $5::timestamptz >= last_status_timestamp
+              ) THEN now()
+              ELSE terminal_at
+            END,
+            version = version + 1,
+            updated_at = now()
+        WHERE binding_id = $1 AND version = $2
+        RETURNING *
+      `,
+      [
+        input.bindingId,
+        input.expectedVersion,
+        input.status,
+        input.pendingInput ?? null,
+        input.lastStatusTimestamp ?? null,
+        input.lastEventHash ?? null,
+        input.terminal,
+      ],
+    );
+    if (result.rowCount !== 1) {
+      throw new PersistenceConflictError("Task binding version conflict");
+    }
+    return mapInteractionTask(requiredRow(result.rows, "Task binding update"));
+  }
+
+  async recordEvent(input: {
+    readonly taskId: string;
+    readonly eventKind: string;
+    readonly eventHash: string;
+    readonly status: string;
+    readonly summary: JsonValue;
+    readonly occurredAt?: string;
+  }): Promise<boolean> {
+    const result = await this.pool.query(
+      `
+        INSERT INTO chat_service.a2a_event_cache(
+          event_id, task_id, event_kind, event_hash, status,
+          summary_json, occurred_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (task_id, event_hash) DO NOTHING
+      `,
+      [
+        randomUUID(),
+        input.taskId,
+        input.eventKind,
+        input.eventHash,
+        input.status,
+        input.summary,
+        input.occurredAt ?? null,
+      ],
+    );
+    return result.rowCount === 1;
+  }
+
+  async claimTaskSubmissionSlot(input: {
+    readonly threadId: string;
+    readonly principalId: string;
+    readonly leaseOwner: string;
+    readonly leaseMs?: number;
+  }): Promise<boolean> {
+    return this.claimTaskSlot(input, false);
+  }
+
+  async claimTaskInteractionSlot(input: {
+    readonly threadId: string;
+    readonly principalId: string;
+    readonly leaseOwner: string;
+    readonly leaseMs?: number;
+  }): Promise<boolean> {
+    return this.claimTaskSlot(input, true);
+  }
+
+  async releaseTaskSubmissionSlot(input: {
+    readonly threadId: string;
+    readonly principalId: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    await this.pool.query(
+      `
+        UPDATE chat_service.conversation_thread
+        SET submission_lease_owner = NULL,
+            submission_lease_until = NULL,
+            updated_at = now()
+        WHERE thread_id = $1
+          AND principal_id = $2
+          AND submission_lease_owner = $3
+      `,
+      [input.threadId, input.principalId, input.leaseOwner],
+    );
+  }
   async claimRequest(input: {
     readonly protocol: InteractionProtocol;
     readonly externalRequestId: string;
@@ -350,6 +488,201 @@ export class InteractionPersistenceRepository {
     }
   }
 
+  async completeCoordinatorRequest(input: {
+    readonly protocol: InteractionProtocol;
+    readonly externalRequestId: string;
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+    readonly resultTaskId: string;
+  }): Promise<void> {
+    const result = await this.pool.query(
+      `
+        UPDATE chat_service.interaction_request
+        SET status = 'COMPLETED', result_task_id = $7,
+            lease_owner = NULL, lease_until = NULL, updated_at = now()
+        WHERE protocol = $1 AND external_request_id = $2
+          AND principal_id = $3 AND thread_id = $4
+          AND request_hash = $5 AND lease_owner = $6
+          AND status = 'CLAIMED'
+      `,
+      [
+        input.protocol,
+        input.externalRequestId,
+        input.principalId,
+        input.threadId,
+        input.requestHash,
+        input.leaseOwner,
+        input.resultTaskId,
+      ],
+    );
+    if (result.rowCount !== 1) {
+      throw new PersistenceConflictError(
+        "Interaction request completion conflict",
+      );
+    }
+  }
+
+  async abandonCoordinatorRequest(input: {
+    readonly protocol: InteractionProtocol;
+    readonly externalRequestId: string;
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    await this.pool.query(
+      `
+        DELETE FROM chat_service.interaction_request
+        WHERE protocol = $1 AND external_request_id = $2
+          AND principal_id = $3 AND thread_id = $4
+          AND request_hash = $5 AND lease_owner = $6
+          AND status = 'CLAIMED' AND result_task_id IS NULL
+      `,
+      [
+        input.protocol,
+        input.externalRequestId,
+        input.principalId,
+        input.threadId,
+        input.requestHash,
+        input.leaseOwner,
+      ],
+    );
+  }
+
+  async findRequestResult(input: {
+    readonly protocol: InteractionProtocol;
+    readonly externalRequestId: string;
+    readonly principalId: string;
+    readonly threadId: string;
+  }): Promise<string | undefined> {
+    const result = await this.pool.query<{
+      readonly result_task_id: string | null;
+    }>(
+      `
+        SELECT request.result_task_id
+        FROM chat_service.interaction_request request
+        JOIN chat_service.conversation_thread thread
+          ON thread.thread_id = request.thread_id
+        WHERE request.protocol = $1 AND request.external_request_id = $2
+          AND request.principal_id = $3 AND request.thread_id = $4
+          AND thread.principal_id = $3
+      `,
+      [
+        input.protocol,
+        input.externalRequestId,
+        input.principalId,
+        input.threadId,
+      ],
+    );
+    return result.rows[0]?.result_task_id ?? undefined;
+  }
+
+  async startOrGetRun(input: {
+    readonly runId: string;
+    readonly protocol: InteractionProtocol;
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly externalRequestId: string;
+  }): Promise<InteractionRun> {
+    return this.transaction(async (client) => {
+      await assertThreadPrincipal(client, input.threadId, input.principalId);
+      const existing = await client.query<InteractionRunRow>(
+        `SELECT * FROM chat_service.interaction_run WHERE run_id = $1 FOR UPDATE`,
+        [input.runId],
+      );
+      const row = existing.rows[0];
+      if (row !== undefined) {
+        if (
+          row.principal_id !== input.principalId ||
+          row.thread_id !== input.threadId
+        ) {
+          throw new PersistenceAuthorizationError(
+            "Interaction run is not authorized",
+          );
+        }
+        if (
+          row.protocol !== input.protocol ||
+          row.external_request_id !== input.externalRequestId
+        ) {
+          throw new PersistenceConflictError(
+            "Interaction run identity conflict",
+          );
+        }
+        return mapRun(row);
+      }
+      const inserted = await client.query<InteractionRunRow>(
+        `
+          INSERT INTO chat_service.interaction_run(
+            run_id, protocol, principal_id, thread_id, external_request_id,
+            status
+          ) VALUES ($1, $2, $3, $4, $5, 'RUNNING')
+          RETURNING *
+        `,
+        [
+          input.runId,
+          input.protocol,
+          input.principalId,
+          input.threadId,
+          input.externalRequestId,
+        ],
+      );
+      return mapRun(requiredRow(inserted.rows, "interaction run insert"));
+    });
+  }
+
+  async findAuthorizedRun(input: {
+    readonly runId: string;
+    readonly principalId: string;
+    readonly threadId: string;
+  }): Promise<InteractionRun | undefined> {
+    const result = await this.pool.query<InteractionRunRow>(
+      `
+        SELECT run.*
+        FROM chat_service.interaction_run run
+        JOIN chat_service.conversation_thread thread
+          ON thread.thread_id = run.thread_id
+        WHERE run.run_id = $1 AND run.principal_id = $2
+          AND run.thread_id = $3 AND thread.principal_id = $2
+      `,
+      [input.runId, input.principalId, input.threadId],
+    );
+    return result.rows[0] === undefined ? undefined : mapRun(result.rows[0]);
+  }
+
+  async updateRunProgress(input: {
+    readonly runId: string;
+    readonly principalId: string;
+    readonly lastSequence: number;
+    readonly taskId?: string;
+    readonly contextId?: string;
+  }): Promise<InteractionRun> {
+    const result = await this.pool.query<InteractionRunRow>(
+      `
+        UPDATE chat_service.interaction_run
+        SET last_sequence = GREATEST(last_sequence, $3),
+            task_id = COALESCE(task_id, $4),
+            context_id = COALESCE(context_id, $5),
+            updated_at = now()
+        WHERE run_id = $1 AND principal_id = $2 AND status = 'RUNNING'
+          AND (task_id IS NULL OR $4::text IS NULL OR task_id = $4)
+          AND (context_id IS NULL OR $5::text IS NULL OR context_id = $5)
+        RETURNING *
+      `,
+      [
+        input.runId,
+        input.principalId,
+        input.lastSequence,
+        input.taskId ?? null,
+        input.contextId ?? null,
+      ],
+    );
+    if (result.rowCount !== 1) {
+      throw new PersistenceConflictError("Interaction run progress conflict");
+    }
+    return mapRun(requiredRow(result.rows, "interaction run progress"));
+  }
   async startRun(input: {
     readonly runId: string;
     readonly protocol: InteractionProtocol;
@@ -389,8 +722,10 @@ export class InteractionPersistenceRepository {
     const result = await this.pool.query<InteractionRunRow>(
       `
         UPDATE chat_service.interaction_run
-        SET status = $3, last_sequence = $4, outcome_json = $5,
-            task_id = $6, context_id = $7, ended_at = now(), updated_at = now()
+        SET status = $3, last_sequence = GREATEST(last_sequence, $4),
+            outcome_json = $5, task_id = COALESCE(task_id, $6),
+            context_id = COALESCE(context_id, $7),
+            ended_at = now(), updated_at = now()
         WHERE run_id = $1 AND principal_id = $2 AND status = 'RUNNING'
         RETURNING *
       `,
@@ -664,6 +999,47 @@ export class InteractionPersistenceRepository {
       : mapAgentCard(result.rows[0]);
   }
 
+  private async claimTaskSlot(
+    input: {
+      readonly threadId: string;
+      readonly principalId: string;
+      readonly leaseOwner: string;
+      readonly leaseMs?: number;
+    },
+    requireActiveTask: boolean,
+  ): Promise<boolean> {
+    const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
+    const result = await this.pool.query(
+      `
+        UPDATE chat_service.conversation_thread AS thread
+        SET submission_lease_owner = $3,
+            submission_lease_until =
+              now() + ($4::bigint * interval '1 millisecond'),
+            updated_at = now()
+        WHERE thread.thread_id = $1
+          AND thread.principal_id = $2
+          AND (
+            thread.submission_lease_until IS NULL
+            OR thread.submission_lease_until <= now()
+            OR thread.submission_lease_owner = $3
+          )
+          AND $5::boolean = EXISTS (
+            SELECT 1
+            FROM chat_service.conversation_task_binding AS task
+            WHERE task.conversation_thread_id = thread.thread_id
+              AND task.terminal_at IS NULL
+          )
+      `,
+      [
+        input.threadId,
+        input.principalId,
+        input.leaseOwner,
+        leaseMs,
+        requireActiveTask,
+      ],
+    );
+    return result.rowCount === 1;
+  }
   private async assertThread(
     threadId: string,
     principalId: string,

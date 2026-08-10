@@ -1,6 +1,7 @@
 export { CHECKPOINT_SCHEMA, createPostgresCheckpointer } from "./checkpoint.js";
 export { parsePersistenceConfig, type PersistenceConfig } from "./config.js";
 export { hashJson } from "./hash.js";
+export { AgUiTaskCoordinatorRepository } from "./agui-task-coordinator-repository.js";
 export { InteractionPersistenceRepository } from "./interaction-repository.js";
 export type {
   AgentCardSnapshot,

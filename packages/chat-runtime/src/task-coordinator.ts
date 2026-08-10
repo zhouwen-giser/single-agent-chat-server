@@ -39,8 +39,23 @@ export interface FollowUpTurnContext extends TaskTurnContext {
   readonly action: SdarFollowUpAction;
   readonly data?: JsonValue;
 }
+export type TaskCoordinatorRepository = Pick<
+  ChatPersistenceRepository,
+  | "claimRequest"
+  | "completeRequest"
+  | "abandonRequestClaim"
+  | "claimTaskSubmissionSlot"
+  | "claimTaskInteractionSlot"
+  | "releaseTaskSubmissionSlot"
+  | "findActiveTaskForChat"
+  | "findAuthorizedTask"
+  | "createTaskBinding"
+  | "updateTaskBinding"
+  | "recordEvent"
+>;
+
 export interface TaskCoordinatorOptions {
-  readonly repository: ChatPersistenceRepository;
+  readonly repository: TaskCoordinatorRepository;
   readonly getClient: () => Promise<SdarA2aClient>;
   readonly streamBudgetMs?: number;
   readonly pollingBudgetMs?: number;
@@ -408,6 +423,31 @@ export class SdarTaskCoordinator {
     const observed = await this.observeTask(task, binding, true);
     for (const fragment of observed.fragments) yield fragment;
     yield "This is the top-level SDAR Task state returned by cancelTask; it does not prove that every lower-level Provider has stopped.";
+  }
+  async *statusForTask(
+    input: {
+      readonly chatId: string;
+      readonly userId: string;
+      readonly taskId: string;
+    },
+    callerSignal?: AbortSignal,
+  ): AsyncGenerator<string> {
+    const binding = await this.options.repository.findAuthorizedTask({
+      openWebUiChatId: input.chatId,
+      userId: input.userId,
+      sdarTaskId: input.taskId,
+    });
+    if (binding === undefined) {
+      yield "The requested SDAR Task is not bound to this user and chat.";
+      return;
+    }
+    const client = await this.options.getClient();
+    const task = await client.getTask(binding.sdarTaskId, {
+      signal: callerSignal,
+    });
+    assertSameTask(task, binding);
+    const observed = await this.observeTask(task, binding, true);
+    for (const fragment of observed.fragments) yield fragment;
   }
   async *status(
     input: Pick<TaskTurnContext, "chatId" | "userId">,

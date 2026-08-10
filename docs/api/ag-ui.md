@@ -42,6 +42,19 @@ only the current HTTP observation; it does not imply `cancelTask`.
 features; SDAR business capabilities remain authoritative in the current Agent
 Card and are queried through the interaction query service.
 
+## Durable Run and reconnect
+
+A non-Resume request claims `(principal, internal thread, runId)` before
+execution. Reusing the same `runId` with identical validated input replays the
+durable result or queries its bound Task. Reusing it with changed input produces
+`RUN_ERROR` with `run_id_conflict` and performs no A2A mutation.
+
+When a Run creates a Task, SACS uses the stable A2A message ID
+`${runId}:task`, persists the Task/context binding, and records it on the Run.
+After disconnect or process restart, the service calls authorized `getTask()`;
+it does not resubscribe to a stream or use an event cursor. A browser disconnect
+aborts only observation and never calls `cancelTask()`.
+
 ## Resume an interrupt
 
 Use the official `RunAgentInput.resume` array. This single-SDAR profile requires
