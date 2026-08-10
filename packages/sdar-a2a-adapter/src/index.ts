@@ -1,4 +1,5 @@
 export { parseSdarA2aConfig } from "./config.js";
+export { followUpActionValues } from "./types.js";
 export { createSdarA2aClient, type SdarA2aAdapterConfig } from "./client.js";
 export type {
   FollowUpInput,

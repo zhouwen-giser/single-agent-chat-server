@@ -41,3 +41,42 @@ only the current HTTP observation; it does not imply `cancelTask`.
 `AgentCapabilitiesSchema`. It describes AG-UI transport and interaction
 features; SDAR business capabilities remain authoritative in the current Agent
 Card and are queried through the interaction query service.
+
+## Resume an interrupt
+
+Use the official `RunAgentInput.resume` array. This single-SDAR profile requires
+exactly one complete `ResumeEntry`; the request is rejected before execution if
+the array is empty or contains multiple entries.
+
+```json
+{
+  "threadId": "the-original-external-thread",
+  "runId": "a-new-observation-run-id",
+  "state": {},
+  "messages": [],
+  "tools": [],
+  "context": [],
+  "forwardedProps": {},
+  "resume": [
+    {
+      "interruptId": "the-published-interrupt-id",
+      "status": "resolved",
+      "payload": {
+        "action": "provide_input",
+        "text": "the requested input",
+        "inputRequestId": "the-exact-published-id"
+      }
+    }
+  ]
+}
+```
+
+The server verifies the signed principal, internal thread, authorized Task and
+context, open/expiry state, phase/action pair, input request ID, optional public
+response schema, and durable resolution hash before calling the existing A2A
+Follow-up adapter. An identical completed Resume is replayed without a second
+Follow-up; changed payload conflicts.
+
+`status: "cancelled"` closes only the AG-UI interrupt and never infers SDAR Task
+or Goal cancellation. If a Follow-up result is uncertain, the interrupt stays
+`RESOLVING`; automatic retry is refused to prevent duplicate side effects.

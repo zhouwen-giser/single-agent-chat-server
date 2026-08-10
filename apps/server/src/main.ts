@@ -1,8 +1,16 @@
 import { randomUUID } from "node:crypto";
 import process from "node:process";
 
-import { createTextAgUiRunHandler } from "../../../packages/ag-ui-interaction-adapter/src/index.js";
+import {
+  createInteractionAgUiRunHandler,
+  createTextAgUiRunHandler,
+  type AgUiRunHandler,
+} from "../../../packages/ag-ui-interaction-adapter/src/index.js";
 import { SdarTaskCoordinator } from "../../../packages/chat-runtime/src/index.js";
+import {
+  InterruptResumeService,
+  resumeRunToInteractionEvents,
+} from "../../../packages/interaction-runtime/src/index.js";
 import {
   InteractionQueryService,
   resolveQueryIntent,
@@ -51,7 +59,7 @@ try {
     activePersistence.interactionRepository,
     getClient,
   );
-  const runAgUi = createTextAgUiRunHandler(async (context) => {
+  const runTextAgUi = createTextAgUiRunHandler(async (context) => {
     const query = resolveQueryIntent(context.userText);
     if (query !== undefined) {
       return queryService.execute({
@@ -63,6 +71,23 @@ try {
     }
     return chatModel.answer({ userText: context.userText });
   });
+  const interruptResumeService = new InterruptResumeService({
+    repository: activePersistence.interactionRepository,
+    getClient,
+  });
+  const runResumeAgUi = createInteractionAgUiRunHandler((context) =>
+    resumeRunToInteractionEvents({
+      service: interruptResumeService,
+      runInput: context.input,
+      principalId: context.principalId,
+      threadId: context.internalThreadId,
+      signal: context.signal,
+    }),
+  );
+  const runAgUi: AgUiRunHandler = (context) =>
+    (context.input.resume?.length ?? 0) > 0
+      ? runResumeAgUi(context)
+      : runTextAgUi(context);
   const coordinator = new SdarTaskCoordinator({
     repository: activePersistence.repository,
     getClient,

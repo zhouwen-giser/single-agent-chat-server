@@ -280,7 +280,9 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
       taskId: "task-1",
       contextId: "context-1",
       internalPhase: "awaiting_user_input",
+      reason: "sdar.input_required",
       inputRequestId: "input-request-1",
+      expiresAt: "2026-08-12T00:00:00.000Z",
     });
 
     const restartedRepository = interactionRepository();
@@ -303,6 +305,166 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
         threadId: thread.threadId,
       }),
     ).resolves.toBeUndefined();
+  });
+
+  it("claims interrupt resolution durably across restart and isolates identity", async () => {
+    const repository = interactionRepository();
+    const principal = await repository.resolvePrincipal({
+      issuer: "sacs-test",
+      subject: "resolution-owner",
+      role: "user",
+    });
+    const other = await repository.resolvePrincipal({
+      issuer: "sacs-test",
+      subject: "resolution-other",
+      role: "user",
+    });
+    const thread = await repository.getOrCreateThread({
+      clientType: "ag_ui",
+      externalThreadId: "resolution-thread",
+      principalId: principal.principalId,
+    });
+    await repository.createTaskBinding({
+      principalId: principal.principalId,
+      threadId: thread.threadId,
+      sdarTaskId: "resolution-task",
+      sdarContextId: "resolution-context",
+      status: "INPUT_REQUIRED",
+    });
+    await repository.startRun({
+      runId: "resolution-run",
+      protocol: "ag_ui",
+      principalId: principal.principalId,
+      threadId: thread.threadId,
+      externalRequestId: "resolution-request",
+    });
+    await repository.createInterrupt({
+      interruptId: "resolution-interrupt",
+      runId: "resolution-run",
+      principalId: principal.principalId,
+      threadId: thread.threadId,
+      taskId: "resolution-task",
+      contextId: "resolution-context",
+      internalPhase: "awaiting_plan_confirmation",
+      reason: "sdar.plan_confirmation",
+      expiresAt: "2099-01-01T00:00:00.000Z",
+    });
+    const claimInput = {
+      interruptId: "resolution-interrupt",
+      principalId: principal.principalId,
+      threadId: thread.threadId,
+      taskId: "resolution-task",
+      contextId: "resolution-context",
+      resolutionHash: "resolution-hash-a",
+    };
+
+    await expect(
+      repository.claimInterruptResolution(claimInput),
+    ).resolves.toMatchObject({
+      outcome: "acquired",
+      interrupt: { status: "RESOLVING", resolutionHash: "resolution-hash-a" },
+    });
+    const restarted = interactionRepository();
+    await expect(
+      restarted.claimInterruptResolution(claimInput),
+    ).resolves.toMatchObject({
+      outcome: "in_progress",
+    });
+    await expect(
+      restarted.claimInterruptResolution({
+        ...claimInput,
+        resolutionHash: "resolution-hash-b",
+      }),
+    ).resolves.toMatchObject({ outcome: "conflict" });
+    await expect(
+      restarted.claimInterruptResolution({
+        ...claimInput,
+        principalId: other.principalId,
+      }),
+    ).resolves.toEqual({ outcome: "not_found" });
+    await restarted.completeInterruptResolution({
+      interruptId: "resolution-interrupt",
+      principalId: principal.principalId,
+      resolutionHash: "resolution-hash-a",
+    });
+    await expect(
+      interactionRepository().claimInterruptResolution(claimInput),
+    ).resolves.toMatchObject({
+      outcome: "replay",
+      interrupt: { status: "RESOLVED" },
+    });
+  });
+
+  it("expires or locally cancels interrupts without opening a new side-effect claim", async () => {
+    const repository = interactionRepository();
+    const principal = await repository.resolvePrincipal({
+      issuer: "sacs-test",
+      subject: "interrupt-lifecycle-owner",
+      role: "user",
+    });
+    for (const [suffix, expiresAt] of [
+      ["expired", "2000-01-01T00:00:00.000Z"],
+      ["cancel", "2099-01-01T00:00:00.000Z"],
+    ] as const) {
+      const thread = await repository.getOrCreateThread({
+        clientType: "ag_ui",
+        externalThreadId: `${suffix}-thread`,
+        principalId: principal.principalId,
+      });
+      await repository.createTaskBinding({
+        principalId: principal.principalId,
+        threadId: thread.threadId,
+        sdarTaskId: `${suffix}-task`,
+        sdarContextId: `${suffix}-context`,
+        status: "INPUT_REQUIRED",
+      });
+      await repository.startRun({
+        runId: `${suffix}-run`,
+        protocol: "ag_ui",
+        principalId: principal.principalId,
+        threadId: thread.threadId,
+        externalRequestId: `${suffix}-request`,
+      });
+      await repository.createInterrupt({
+        interruptId: `${suffix}-interrupt`,
+        runId: `${suffix}-run`,
+        principalId: principal.principalId,
+        threadId: thread.threadId,
+        taskId: `${suffix}-task`,
+        contextId: `${suffix}-context`,
+        internalPhase: "paused",
+        reason: "sdar.paused",
+        expiresAt,
+      });
+      const resolution = {
+        interruptId: `${suffix}-interrupt`,
+        principalId: principal.principalId,
+        threadId: thread.threadId,
+        taskId: `${suffix}-task`,
+        contextId: `${suffix}-context`,
+        resolutionHash: `${suffix}-hash`,
+      };
+      if (suffix === "expired") {
+        await expect(
+          repository.claimInterruptResolution(resolution),
+        ).resolves.toMatchObject({
+          outcome: "expired",
+          interrupt: { status: "CANCELLED" },
+        });
+      } else {
+        await expect(
+          repository.cancelInterrupt(resolution),
+        ).resolves.toMatchObject({
+          outcome: "acquired",
+          interrupt: { status: "CANCELLED" },
+        });
+        await expect(
+          repository.cancelInterrupt(resolution),
+        ).resolves.toMatchObject({
+          outcome: "replay",
+        });
+      }
+    }
   });
 
   it("stores only the safe Agent Card LKG projection", async () => {
@@ -384,6 +546,7 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
         "0002_events_and_recovery.sql",
         "0003_submission_lease.sql",
         "0004_interaction_gateway.sql",
+        "0005_interrupt_resume.sql",
       ]);
     } finally {
       await rm(directory, { recursive: true, force: true });

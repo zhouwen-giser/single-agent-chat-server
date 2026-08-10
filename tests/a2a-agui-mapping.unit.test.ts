@@ -132,7 +132,7 @@ describe("A2A to AG-UI public mapping", () => {
         type: "interrupt",
         interrupts: [
           {
-            reason: "awaiting_user_input",
+            reason: "sdar.input_required",
             message: "Please provide the published input.",
             metadata: {
               taskId: "task-1",

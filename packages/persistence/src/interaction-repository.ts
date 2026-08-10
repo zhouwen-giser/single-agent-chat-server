@@ -14,6 +14,7 @@ import type {
   InteractionRequestClaim,
   InteractionRun,
   InterruptBinding,
+  InterruptResolutionClaim,
   Principal,
 } from "./interaction-types.js";
 import type { JsonValue, TaskBinding } from "./types.js";
@@ -410,15 +411,23 @@ export class InteractionPersistenceRepository {
   }
 
   async createInterrupt(
-    input: Omit<InterruptBinding, "status" | "version" | "resolutionHash">,
+    input: Omit<
+      InterruptBinding,
+      | "status"
+      | "version"
+      | "resolutionHash"
+      | "resolutionClaimedAt"
+      | "resolvedAt"
+    >,
   ): Promise<InterruptBinding> {
     await this.assertThread(input.threadId, input.principalId);
     const result = await this.pool.query<InterruptRow>(
       `
         INSERT INTO chat_service.agui_interrupt_binding(
           interrupt_id, run_id, principal_id, thread_id, task_id,
-          context_id, internal_phase, input_request_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          context_id, internal_phase, reason, input_request_id,
+          response_schema_json, response_schema_hash, expires_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING *
       `,
       [
@@ -429,10 +438,33 @@ export class InteractionPersistenceRepository {
         input.taskId,
         input.contextId,
         input.internalPhase,
+        input.reason,
         input.inputRequestId ?? null,
+        input.responseSchema === undefined
+          ? null
+          : JSON.stringify(input.responseSchema),
+        input.responseSchemaHash ?? null,
+        input.expiresAt,
       ],
     );
     return mapInterrupt(requiredRow(result.rows, "interrupt insert"));
+  }
+
+  async findInterrupt(input: {
+    readonly interruptId: string;
+    readonly principalId: string;
+    readonly threadId: string;
+  }): Promise<InterruptBinding | undefined> {
+    const result = await this.pool.query<InterruptRow>(
+      `
+        SELECT * FROM chat_service.agui_interrupt_binding
+        WHERE interrupt_id = $1 AND principal_id = $2 AND thread_id = $3
+      `,
+      [input.interruptId, input.principalId, input.threadId],
+    );
+    return result.rows[0] === undefined
+      ? undefined
+      : mapInterrupt(result.rows[0]);
   }
 
   async findOpenInterrupt(input: {
@@ -444,7 +476,7 @@ export class InteractionPersistenceRepository {
       `
         SELECT * FROM chat_service.agui_interrupt_binding
         WHERE interrupt_id = $1 AND principal_id = $2 AND thread_id = $3
-          AND status = 'OPEN'
+          AND status = 'OPEN' AND expires_at > now()
       `,
       [input.interruptId, input.principalId, input.threadId],
     );
@@ -453,6 +485,148 @@ export class InteractionPersistenceRepository {
       : mapInterrupt(result.rows[0]);
   }
 
+  async findOpenInterruptForTask(input: {
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly taskId: string;
+  }): Promise<InterruptBinding | undefined> {
+    const result = await this.pool.query<InterruptRow>(
+      `
+        SELECT * FROM chat_service.agui_interrupt_binding
+        WHERE principal_id = $1 AND thread_id = $2 AND task_id = $3
+          AND status = 'OPEN' AND expires_at > now()
+      `,
+      [input.principalId, input.threadId, input.taskId],
+    );
+    return result.rows[0] === undefined
+      ? undefined
+      : mapInterrupt(result.rows[0]);
+  }
+
+  async claimInterruptResolution(input: {
+    readonly interruptId: string;
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly taskId: string;
+    readonly contextId: string;
+    readonly resolutionHash: string;
+  }): Promise<InterruptResolutionClaim> {
+    return this.transaction(async (client) => {
+      const selected = await selectAuthorizedInterrupt(client, input);
+      if (selected === undefined) return { outcome: "not_found" };
+      if (selected.status === "RESOLVED") {
+        return selected.resolutionHash === input.resolutionHash
+          ? { outcome: "replay", interrupt: selected }
+          : { outcome: "conflict", interrupt: selected };
+      }
+      if (selected.status === "RESOLVING") {
+        return selected.resolutionHash === input.resolutionHash
+          ? { outcome: "in_progress", interrupt: selected }
+          : { outcome: "conflict", interrupt: selected };
+      }
+      if (selected.status === "CANCELLED") {
+        return { outcome: "cancelled", interrupt: selected };
+      }
+      if (Date.parse(selected.expiresAt) <= Date.now()) {
+        const expired = await updateInterruptStatus(client, {
+          interruptId: selected.interruptId,
+          expectedVersion: selected.version,
+          status: "CANCELLED",
+        });
+        return { outcome: "expired", interrupt: expired };
+      }
+      const claimed = await client.query<InterruptRow>(
+        `
+          UPDATE chat_service.agui_interrupt_binding
+          SET status = 'RESOLVING', resolution_hash = $3,
+              resolution_claimed_at = now(), version = version + 1,
+              updated_at = now()
+          WHERE interrupt_id = $1 AND version = $2 AND status = 'OPEN'
+          RETURNING *
+        `,
+        [selected.interruptId, selected.version, input.resolutionHash],
+      );
+      if (claimed.rowCount !== 1) {
+        throw new PersistenceConflictError(
+          "Interrupt resolution claim conflict",
+        );
+      }
+      return {
+        outcome: "acquired",
+        interrupt: mapInterrupt(requiredRow(claimed.rows, "interrupt claim")),
+      };
+    });
+  }
+
+  async completeInterruptResolution(input: {
+    readonly interruptId: string;
+    readonly principalId: string;
+    readonly resolutionHash: string;
+  }): Promise<InterruptBinding> {
+    const result = await this.pool.query<InterruptRow>(
+      `
+        UPDATE chat_service.agui_interrupt_binding
+        SET status = 'RESOLVED', resolved_at = now(), version = version + 1,
+            updated_at = now()
+        WHERE interrupt_id = $1 AND principal_id = $2
+          AND status = 'RESOLVING' AND resolution_hash = $3
+        RETURNING *
+      `,
+      [input.interruptId, input.principalId, input.resolutionHash],
+    );
+    if (result.rowCount !== 1) {
+      throw new PersistenceConflictError(
+        "Interrupt resolution completion conflict",
+      );
+    }
+    return mapInterrupt(requiredRow(result.rows, "interrupt resolution"));
+  }
+
+  async cancelInterrupt(input: {
+    readonly interruptId: string;
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly taskId: string;
+    readonly contextId: string;
+    readonly resolutionHash: string;
+  }): Promise<InterruptResolutionClaim> {
+    return this.transaction(async (client) => {
+      const selected = await selectAuthorizedInterrupt(client, input);
+      if (selected === undefined) return { outcome: "not_found" };
+      if (selected.status === "CANCELLED") {
+        return selected.resolutionHash === input.resolutionHash
+          ? { outcome: "replay", interrupt: selected }
+          : { outcome: "conflict", interrupt: selected };
+      }
+      if (selected.status !== "OPEN") {
+        return { outcome: "conflict", interrupt: selected };
+      }
+      if (Date.parse(selected.expiresAt) <= Date.now()) {
+        const expired = await updateInterruptStatus(client, {
+          interruptId: selected.interruptId,
+          expectedVersion: selected.version,
+          status: "CANCELLED",
+        });
+        return { outcome: "expired", interrupt: expired };
+      }
+      const cancelled = await client.query<InterruptRow>(
+        `
+          UPDATE chat_service.agui_interrupt_binding
+          SET status = 'CANCELLED', resolution_hash = $3,
+              resolved_at = now(), version = version + 1, updated_at = now()
+          WHERE interrupt_id = $1 AND version = $2 AND status = 'OPEN'
+          RETURNING *
+        `,
+        [selected.interruptId, selected.version, input.resolutionHash],
+      );
+      return {
+        outcome: "acquired",
+        interrupt: mapInterrupt(
+          requiredRow(cancelled.rows, "interrupt cancel"),
+        ),
+      };
+    });
+  }
   async saveAgentCardSnapshot(
     input: Omit<AgentCardSnapshot, "snapshotId">,
   ): Promise<AgentCardSnapshot> {
@@ -520,6 +694,67 @@ export class InteractionPersistenceRepository {
   }
 }
 
+async function selectAuthorizedInterrupt(
+  client: PoolClient,
+  input: {
+    readonly interruptId: string;
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly taskId: string;
+    readonly contextId: string;
+  },
+): Promise<InterruptBinding | undefined> {
+  const result = await client.query<InterruptRow>(
+    `
+      SELECT interrupt.*
+      FROM chat_service.agui_interrupt_binding interrupt
+      JOIN chat_service.conversation_task_binding task
+        ON task.conversation_thread_id = interrupt.thread_id
+       AND task.sdar_task_id = interrupt.task_id
+       AND task.sdar_context_id = interrupt.context_id
+      JOIN chat_service.conversation_thread thread
+        ON thread.thread_id = interrupt.thread_id
+      WHERE interrupt.interrupt_id = $1
+        AND interrupt.principal_id = $2
+        AND interrupt.thread_id = $3
+        AND interrupt.task_id = $4
+        AND interrupt.context_id = $5
+        AND thread.principal_id = $2
+      FOR UPDATE OF interrupt
+    `,
+    [
+      input.interruptId,
+      input.principalId,
+      input.threadId,
+      input.taskId,
+      input.contextId,
+    ],
+  );
+  return result.rows[0] === undefined
+    ? undefined
+    : mapInterrupt(result.rows[0]);
+}
+
+async function updateInterruptStatus(
+  client: PoolClient,
+  input: {
+    readonly interruptId: string;
+    readonly expectedVersion: number;
+    readonly status: "CANCELLED";
+  },
+): Promise<InterruptBinding> {
+  const result = await client.query<InterruptRow>(
+    `
+      UPDATE chat_service.agui_interrupt_binding
+      SET status = $3, resolved_at = now(), version = version + 1,
+          updated_at = now()
+      WHERE interrupt_id = $1 AND version = $2 AND status = 'OPEN'
+      RETURNING *
+    `,
+    [input.interruptId, input.expectedVersion, input.status],
+  );
+  return mapInterrupt(requiredRow(result.rows, "interrupt status update"));
+}
 async function findClientThread(
   client: PoolClient,
   input: {
@@ -611,9 +846,15 @@ interface InterruptRow {
   readonly task_id: string;
   readonly context_id: string;
   readonly internal_phase: InterruptBinding["internalPhase"];
+  readonly reason: InterruptBinding["reason"];
   readonly input_request_id: string | null;
+  readonly response_schema_json: JsonValue | null;
+  readonly response_schema_hash: string | null;
+  readonly expires_at: Date;
   readonly status: InterruptBinding["status"];
   readonly resolution_hash: string | null;
+  readonly resolution_claimed_at: Date | null;
+  readonly resolved_at: Date | null;
   readonly version: string | number;
 }
 
@@ -685,13 +926,27 @@ const mapInterrupt = (row: InterruptRow): InterruptBinding => ({
   taskId: row.task_id,
   contextId: row.context_id,
   internalPhase: row.internal_phase,
+  reason: row.reason,
   ...(row.input_request_id === null
     ? {}
     : { inputRequestId: row.input_request_id }),
+  ...(row.response_schema_json === null
+    ? {}
+    : { responseSchema: row.response_schema_json }),
+  ...(row.response_schema_hash === null
+    ? {}
+    : { responseSchemaHash: row.response_schema_hash }),
+  expiresAt: row.expires_at.toISOString(),
   status: row.status,
   ...(row.resolution_hash === null
     ? {}
     : { resolutionHash: row.resolution_hash }),
+  ...(row.resolution_claimed_at === null
+    ? {}
+    : { resolutionClaimedAt: row.resolution_claimed_at.toISOString() }),
+  ...(row.resolved_at === null
+    ? {}
+    : { resolvedAt: row.resolved_at.toISOString() }),
   version: Number(row.version),
 });
 

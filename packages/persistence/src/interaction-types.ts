@@ -31,6 +31,12 @@ export interface InteractionRun {
   readonly outcome?: JsonValue;
 }
 
+export type InterruptInternalPhase =
+  "awaiting_plan_confirmation" | "awaiting_user_input" | "paused";
+
+export type InterruptReason =
+  "sdar.plan_confirmation" | "sdar.input_required" | "sdar.paused";
+
 export interface InterruptBinding {
   readonly interruptId: string;
   readonly runId: string;
@@ -38,13 +44,27 @@ export interface InterruptBinding {
   readonly threadId: string;
   readonly taskId: string;
   readonly contextId: string;
-  readonly internalPhase:
-    "awaiting_plan_confirmation" | "awaiting_user_input" | "paused";
+  readonly internalPhase: InterruptInternalPhase;
+  readonly reason: InterruptReason;
   readonly inputRequestId?: string;
-  readonly status: "OPEN" | "RESOLVED" | "CANCELLED";
+  readonly responseSchema?: JsonValue;
+  readonly responseSchemaHash?: string;
+  readonly expiresAt: string;
+  readonly status: "OPEN" | "RESOLVING" | "RESOLVED" | "CANCELLED";
   readonly resolutionHash?: string;
+  readonly resolutionClaimedAt?: string;
+  readonly resolvedAt?: string;
   readonly version: number;
 }
+
+export type InterruptResolutionClaim =
+  | { readonly outcome: "acquired"; readonly interrupt: InterruptBinding }
+  | { readonly outcome: "replay"; readonly interrupt: InterruptBinding }
+  | { readonly outcome: "in_progress"; readonly interrupt: InterruptBinding }
+  | { readonly outcome: "conflict"; readonly interrupt: InterruptBinding }
+  | { readonly outcome: "expired"; readonly interrupt: InterruptBinding }
+  | { readonly outcome: "cancelled"; readonly interrupt: InterruptBinding }
+  | { readonly outcome: "not_found" };
 
 export interface AgentCardSnapshot {
   readonly snapshotId: string;

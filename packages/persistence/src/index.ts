@@ -10,6 +10,9 @@ export type {
   InteractionRequestClaim,
   InteractionRun,
   InterruptBinding,
+  InterruptInternalPhase,
+  InterruptReason,
+  InterruptResolutionClaim,
   Principal,
 } from "./interaction-types.js";
 export { runMigrations, type AppliedMigration } from "./migrations.js";

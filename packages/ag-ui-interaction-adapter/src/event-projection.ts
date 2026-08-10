@@ -103,12 +103,20 @@ export class AgUiEventProjection {
               interrupts: [
                 {
                   id: `${event.runId}:input-required`,
-                  reason:
-                    stringValue(event.payload.internalPhase) ??
-                    "input_required",
+                  reason: interruptReason(event.payload.internalPhase),
                   ...(stringValue(event.payload.text) === undefined
                     ? {}
                     : { message: stringValue(event.payload.text) }),
+                  ...(publicRecord(event.payload.responseSchema) === undefined
+                    ? {}
+                    : {
+                        responseSchema: publicRecord(
+                          event.payload.responseSchema,
+                        ),
+                      }),
+                  ...(stringValue(event.payload.expiresAt) === undefined
+                    ? {}
+                    : { expiresAt: stringValue(event.payload.expiresAt) }),
                   metadata: catalogValue(
                     event,
                     ["internalPhase", "inputRequestId", "allowedActions"],
@@ -337,6 +345,21 @@ function profile(input: unknown): AGUIEvent {
 function timestamp(value: string): number | undefined {
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function interruptReason(value: PublicJsonValue | undefined): string {
+  if (value === "awaiting_plan_confirmation") return "sdar.plan_confirmation";
+  if (value === "awaiting_user_input") return "sdar.input_required";
+  if (value === "paused") return "sdar.paused";
+  return "sdar.input_required";
+}
+
+function publicRecord(
+  value: PublicJsonValue | undefined,
+): Record<string, PublicJsonValue> | undefined {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, PublicJsonValue>)
+    : undefined;
 }
 
 function stringValue(value: PublicJsonValue | undefined): string | undefined {

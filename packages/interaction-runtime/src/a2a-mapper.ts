@@ -378,7 +378,7 @@ function allowedActions(status: PublicStatus): readonly SdarFollowUpAction[] {
     }
     if (status.internalPhase === "awaiting_user_input")
       return ["provide_input"];
-    if (status.internalPhase === "paused") return ["resume"];
+    if (status.internalPhase === "paused") return ["resume", "cancel_goal"];
     return [];
   }
   return ["patch_goal", "cancel_goal", "pause"];
