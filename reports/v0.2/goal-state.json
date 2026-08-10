@@ -35,7 +35,9 @@
     },
     "P04": {
       "status": "passed",
-      "implementationCommit": "09a600fd4677ac83248304da5086e77512735d65"
+      "implementationCommit": "09a600fd4677ac83248304da5086e77512735d65",
+      "evidenceCommit": "e6187ea28cd5dc98cc34044bd3ae50b9d6159299",
+      "remoteHead": "e6187ea28cd5dc98cc34044bd3ae50b9d6159299"
     },
     "P05": { "status": "pending" },
     "P06": { "status": "pending" },

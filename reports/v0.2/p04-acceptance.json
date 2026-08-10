@@ -1,6 +1,6 @@
 {
   "phase": "P04",
-  "status": "PASSED",
+  "status": "PASSED_PUBLISHED",
   "implementationCommit": "09a600fd4677ac83248304da5086e77512735d65",
   "checks": {
     "queryIntents": "9/9",
