@@ -57,6 +57,9 @@
     "verify:phase10": "pnpm verify:phase9 && pnpm test:openai:predecessor && pnpm test:security && pnpm test:e2e:fixture && pnpm verify:migrations && pnpm verify:architecture && pnpm verify:licenses && pnpm verify:secrets && pnpm smoke",
     "test:agui:real": "node scripts/phase11-official-client-e2e.mjs",
     "verify:phase11": "pnpm verify:phase10 && pnpm test:agui:real",
+    "test:current-sdar:real": "pnpm build && node scripts/phase12-real-e2e.mjs",
+    "test:p12:consistency:real": "pnpm build && node scripts/phase12-task-consistency.mjs",
+    "test:p12:long:real": "pnpm build && node scripts/phase12-long-observation.mjs",
     "verify:phase12": "pnpm format:check && pnpm lint && pnpm lint:langgraph-json && pnpm typecheck && pnpm test:unit && pnpm test:contract && pnpm test:security && pnpm verify:architecture && pnpm build",
     "verify": "node scripts/require-final-environment.mjs && pnpm verify:phase12 && pnpm test:integration && pnpm test:e2e && pnpm smoke && pnpm verify:migrations && pnpm verify:openai-api && pnpm verify:a2a && pnpm verify:workflows && pnpm verify:licenses && pnpm verify:secrets && pnpm docker:build && pnpm verify:container && pnpm generate:sbom"
   },
