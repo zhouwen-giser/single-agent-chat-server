@@ -1,0 +1,25 @@
+version: 1
+intents:
+  query_capabilities: { authority: current_agent_card, creates_task: false }
+  query_active_task:
+    { authority: local_binding_then_getTask, creates_task: false }
+  query_task_status:
+    { authority: authorized_binding_then_getTask, creates_task: false }
+  query_task_result:
+    { authority: authorized_binding_then_getTask_artifact, creates_task: false }
+  query_task_history:
+    {
+      authority: authorized_binding_then_getTask_historyLength,
+      creates_task: false,
+    }
+  list_conversation_tasks:
+    { authority: local_binding_index, creates_task: false }
+  query_previous_task:
+    { authority: local_binding_then_getTask, creates_task: false }
+  query_allowed_actions:
+    {
+      authority: normalized_task_phase_and_public_interaction_state,
+      creates_task: false,
+    }
+  query_capability_gap:
+    { authority: normalized_public_task_metadata, creates_task: false }

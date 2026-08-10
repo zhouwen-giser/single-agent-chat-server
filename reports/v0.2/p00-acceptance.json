@@ -1,0 +1,19 @@
+﻿{
+  "phase": "P00",
+  "status": "PASSED_LOCAL_PENDING_PUBLICATION",
+  "checks": {
+    "taskPackageComplete": "PASSED",
+    "phase13MergedMain": "PASSED",
+    "mainTreeProven": "PASSED",
+    "mainCi": "PASSED",
+    "sacsSourceLock": "PASSED",
+    "sdarSourceLock": "PASSED",
+    "aguiSourceLock": "PASSED",
+    "a2aCompatibilityDecision": "PASSED",
+    "hermeticBaseline": "PASSED",
+    "postgresBaseline": "PASSED",
+    "branchPolicy": "PASSED_USER_OVERRIDE"
+  },
+  "requiredSkips": 0,
+  "failedAttemptsRetained": 3
+}

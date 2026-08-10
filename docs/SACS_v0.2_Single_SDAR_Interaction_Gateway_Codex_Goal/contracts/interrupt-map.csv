@@ -1,0 +1,4 @@
+sdar_phase,interrupt_reason,allowed_resume_actions,required_binding
+awaiting_plan_confirmation,sdar.plan_confirmation,confirm_plan|reject_plan|revise_plan|patch_goal,task+context+principal+thread
+awaiting_user_input,sdar.input_required,provide_input,task+context+input_request_id+principal+thread
+paused,sdar.paused,resume|cancel_goal,task+context+principal+thread

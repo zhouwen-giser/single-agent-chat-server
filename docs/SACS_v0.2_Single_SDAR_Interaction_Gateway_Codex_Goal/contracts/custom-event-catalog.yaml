@@ -1,0 +1,28 @@
+version: 1
+events:
+  - name: sdar.task.bound
+    purpose: Authorized Task binding for this run/thread.
+    public_fields: [taskId, contextId]
+  - name: sdar.task.status
+    purpose: Compact public task activity signal.
+    public_fields: [taskId, state, internalPhase, phaseMessage, updatedAt]
+  - name: sdar.artifact.data
+    purpose: Bounded/redacted JSON Artifact.
+    public_fields: [taskId, artifactId, mediaType, data]
+  - name: sdar.artifact.reference
+    purpose: Allowed public Artifact URL reference.
+    public_fields: [taskId, artifactId, mediaType, url]
+  - name: sdar.capability_gap
+    purpose: Public capability-gap evidence.
+    public_fields: [taskId, errorCode, capabilityGap, nextAction]
+  - name: sdar.observation_ended
+    purpose: Observation ended while Task continues.
+    public_fields: [taskId, state, taskContinues]
+  - name: sdar.allowed_actions
+    purpose: Server-calculated authorized actions.
+    public_fields: [taskId, actions]
+forbidden_default:
+  - raw_a2a_event
+  - internal_mcp_call
+  - internal_skill_execution
+  - model_hidden_reasoning

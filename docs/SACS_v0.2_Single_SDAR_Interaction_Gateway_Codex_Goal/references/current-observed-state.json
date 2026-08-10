@@ -1,0 +1,41 @@
+{
+  "observedAt": "2026-08-10T14:19:27.414161+00:00",
+  "sacs": {
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "mainSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
+    "featureBranch": "feature/single-sdar-chat-entry-v0.1",
+    "featureSha": "085e456c9802462c5d0c2a8c2310cadbfa760a96",
+    "pr": 1,
+    "prState": "open",
+    "prDraft": true,
+    "projectStatus": "IN_PROGRESS",
+    "phase12": "complete",
+    "phase13": "in_progress",
+    "version": "0.1.0",
+    "packageManager": "pnpm@11.13.1",
+    "node": ">=22.14.0 <23",
+    "a2aSdk": "1.0.0-beta.0"
+  },
+  "sdar": {
+    "repository": "zhouwen-giser/skill-driven-agent-runtime",
+    "mainSha": "a9957c82c17ca01e77528f3817c03d86224aaf88",
+    "version": "1.4.1",
+    "a2aSdk": "1.0.0-beta.0",
+    "a2aProtocolVersion": "1.0",
+    "a2aSpecPatch": "1.0.1",
+    "binding": "HTTP+JSON",
+    "agentCard": "/.well-known/agent-card.json",
+    "endpoint": "/a2a"
+  },
+  "agui": {
+    "repository": "ag-ui-protocol/ag-ui",
+    "referenceRelease": "release/2026-08-07",
+    "releaseCommit": "338708ca8b57deda9c82d0329f30944ab4b0dea6",
+    "coreVersion": "0.0.57",
+    "clientVersion": "0.0.57",
+    "encoderVersion": "0.0.57",
+    "a2aIntegrationVersion": "0.0.6",
+    "a2aIntegrationA2aSdkRange": "^0.2.2",
+    "a2aIntegrationStatus": "Experimental"
+  }
+}

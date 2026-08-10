@@ -1,0 +1,21 @@
+version: 1
+northbound:
+  openai:
+    routes: ["GET /v1/models", "POST /v1/chat/completions"]
+    stability: preserve-v0.1
+  ag_ui:
+    routes: ["POST /ag-ui", "GET /ag-ui/capabilities"]
+    transport: HTTP_POST_SSE
+    schema_authority: exact_pinned_official_ag_ui_types
+southbound:
+  sdar:
+    protocol: A2A
+    operations:
+      [agent_card, sendMessageStream, sendMessage, getTask, cancelTask]
+forbidden:
+  [
+    direct_sdar_database,
+    node_control_proxy,
+    telemetry_query,
+    multi_sdar_routing,
+  ]

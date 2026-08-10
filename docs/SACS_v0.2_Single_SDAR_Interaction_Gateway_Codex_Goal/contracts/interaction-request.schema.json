@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.sacs.local/v0.2/interaction-request.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol", "principalId", "threadId", "requestId", "operation"],
+  "properties": {
+    "protocol": {
+      "enum": ["openai", "ag_ui"]
+    },
+    "principalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "threadId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "operation": {
+      "enum": [
+        "submit_task",
+        "query_capabilities",
+        "query_active_task",
+        "query_task_status",
+        "query_task_result",
+        "query_task_history",
+        "list_conversation_tasks",
+        "query_previous_task",
+        "query_allowed_actions",
+        "query_capability_gap",
+        "follow_up",
+        "cancel_task"
+      ]
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 65536
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "action": {
+      "enum": [
+        "confirm_plan",
+        "reject_plan",
+        "revise_plan",
+        "patch_goal",
+        "cancel_goal",
+        "provide_input",
+        "pause",
+        "resume"
+      ]
+    },
+    "inputRequestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "structuredInput": {}
+  }
+}

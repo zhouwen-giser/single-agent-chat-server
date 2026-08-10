@@ -1,0 +1,28 @@
+{
+  "goalId": "SACS-V0.2-SINGLE-SDAR-INTERACTION-GATEWAY",
+  "status": "IN_PROGRESS",
+  "baseline": {
+    "mainSha": "6a159aa87883568c96f7190c211150843a4d8ad4",
+    "mainTree": "bd047752f44acf7fd4028bfa77916752f705d019",
+    "sdarSha": "a9957c82c17ca01e77528f3817c03d86224aaf88",
+    "aguiSha": "338708ca8b57deda9c82d0329f30944ab4b0dea6"
+  },
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "phases": {
+    "P00": { "status": "in_progress" },
+    "P01": { "status": "pending" },
+    "P02": { "status": "pending" },
+    "P03": { "status": "pending" },
+    "P04": { "status": "pending" },
+    "P05": { "status": "pending" },
+    "P06": { "status": "pending" },
+    "P07": { "status": "pending" },
+    "P08": { "status": "pending" },
+    "P09": { "status": "pending" },
+    "P10": { "status": "pending" },
+    "P11": { "status": "pending" },
+    "P12": { "status": "pending" },
+    "P13": { "status": "pending" },
+    "P14": { "status": "pending" }
+  }
+}

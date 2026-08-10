@@ -1,0 +1,44 @@
+﻿{
+  "phase": "P00",
+  "head": "0a3cace9ce92166c7aa8d23f8ba96694cf6b6278",
+  "tree": "bd047752f44acf7fd4028bfa77916752f705d019",
+  "taskPackage": {
+    "validator": "PASSED",
+    "phases": 15,
+    "acceptanceCases": 22
+  },
+  "local": {
+    "frozenInstall": "PASSED",
+    "peers": "PASSED",
+    "format": "PASSED",
+    "lint": "PASSED",
+    "langgraphPaths": "PASSED",
+    "typecheck": "PASSED",
+    "unit": { "status": "PASSED", "passed": 31, "total": 31 },
+    "contract": { "status": "PASSED", "passed": 26, "total": 26 },
+    "security": { "status": "PASSED", "passed": 8, "total": 8 },
+    "architecture": { "status": "PASSED", "files": 42 },
+    "build": "PASSED",
+    "integration": {
+      "status": "PASSED",
+      "passed": 36,
+      "total": 36,
+      "database": "PostgreSQL 16.9"
+    }
+  },
+  "predecessorRealGate": {
+    "status": "PASSED_TREE_EQUIVALENT",
+    "sourceHead": "a9155beed5395038edee7bbc401aa0aa72781033",
+    "sourceTree": "bd047752f44acf7fd4028bfa77916752f705d019",
+    "mainTree": "bd047752f44acf7fd4028bfa77916752f705d019",
+    "requiredRealScenarios": 26,
+    "note": "The predecessor full local pnpm verify evidence applies to the byte-identical merged tree; it was not relabeled as a new v0.2 real E2E run."
+  },
+  "mainCi": {
+    "head": "6a159aa87883568c96f7190c211150843a4d8ad4",
+    "runId": 31399976963,
+    "quality": "PASSED",
+    "container": "PASSED"
+  },
+  "requiredFailuresRetained": 3
+}

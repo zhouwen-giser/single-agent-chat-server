@@ -1,0 +1,16 @@
+{
+  "pullRequest": 1,
+  "url": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
+  "state": "MERGED",
+  "mergedAt": "2026-08-10T14:46:23Z",
+  "mergeCommit": "6a159aa87883568c96f7190c211150843a4d8ad4",
+  "mainPushCi": {
+    "runId": 31399976963,
+    "conclusion": "success",
+    "quality": "success",
+    "container": "success"
+  },
+  "acceptedSourceTree": "bd047752f44acf7fd4028bfa77916752f705d019",
+  "retainedBranchTree": "bd047752f44acf7fd4028bfa77916752f705d019",
+  "treeEquivalent": true
+}

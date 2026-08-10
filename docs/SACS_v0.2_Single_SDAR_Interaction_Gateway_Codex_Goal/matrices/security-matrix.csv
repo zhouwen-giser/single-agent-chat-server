@@ -1,0 +1,10 @@
+asset,threat,required_control
+Task,arbitrary taskId enumeration,principal+thread binding before A2A
+Identity,forged user headers,signed JWT + service credential
+Run,duplicate side effects,durable request hash/idempotency claim
+Interrupt,stale/double resume,open/resolved state + resolution hash
+A2A,unauthenticated public endpoint,trusted private network; SACS boundary
+Artifact,secret/oversized data,bounded normalization + redaction
+AG-UI,raw event leak,RAW disabled by default
+State,client state as authority,server rebuilds from binding/A2A
+URL Part,SSRF/use,never server-fetch arbitrary URL; allow policy
