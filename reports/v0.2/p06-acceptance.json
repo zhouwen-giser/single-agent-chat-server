@@ -1,6 +1,6 @@
 {
   "phase": "P06",
-  "status": "PASSED",
+  "status": "PASSED_PUBLISHED",
   "implementationCommit": "b3d53e1186dc0fa244910c0e6d75569bea32e963",
   "checks": {
     "normalizedA2aToInteractionMapper": "PASSED",
