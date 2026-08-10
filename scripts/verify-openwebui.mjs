@@ -71,6 +71,7 @@ if (
   throw new Error("Live SDAR Agent Card does not satisfy the frozen baseline");
 }
 
+const verificationId = `phase13-live-${Date.now().toString(36)}`;
 const completion = await fetchJson(
   new URL("/openai/chat/completions", baseUrl),
   {
@@ -80,6 +81,13 @@ const completion = await fetchJson(
       model: "sdar-single-agent",
       messages: [{ role: "user", content: taskPrompt }],
       stream: false,
+      metadata: {
+        chat_id: verificationId,
+        message_id: `${verificationId}-assistant`,
+        user_message_id: `${verificationId}-user`,
+        user_message: { id: `${verificationId}-user`, parentId: "" },
+        task: "phase13_live_verification",
+      },
     }),
     signal: AbortSignal.timeout(120_000),
   },
