@@ -37,7 +37,11 @@ export function renderInteractionEventForOpenAi(
         ? event.payload.label
         : "Published artifact reference";
     const uri =
-      typeof event.payload.uri === "string" ? event.payload.uri : undefined;
+      typeof event.payload.url === "string"
+        ? event.payload.url
+        : typeof event.payload.uri === "string"
+          ? event.payload.uri
+          : undefined;
     return uri === undefined ? label : `${label}: ${uri}`;
   }
   if (event.eventType === "run.error") {

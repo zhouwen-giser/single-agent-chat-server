@@ -12,6 +12,8 @@ import {
 } from "../../ag-ui-api-contract/src/index.js";
 import { safePublicText } from "../../interaction-contract/src/index.js";
 
+export * from "./event-projection.js";
+
 const sseEncoder = new EventEncoder({ accept: "text/event-stream" });
 
 export interface AgUiRunContext {
