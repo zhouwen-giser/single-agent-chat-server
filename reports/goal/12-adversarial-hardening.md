@@ -53,3 +53,18 @@ unblocked release claim. A PGlite wire probe was diagnostic only and is not
 accepted as PostgreSQL evidence.
 
 Remote GitHub Actions: NOT RUN FOR LOCAL HEAD
+
+## Continuation audit ? 2026-08-10
+
+The published feature HEAD `36d9bd8` did not satisfy the Phase 12 or final
+quality gate. Both push and pull-request `quality` jobs failed in
+`task-coordinator.postgres.int.test.ts` because a persisted terminal stream
+update was suppressed when the immediate `getTask()` enrichment observed an
+already-terminal binding.
+
+The failure was reproduced against an isolated PostgreSQL 16.9 container:
+35/36 integration tests passed and the terminal streaming case failed. A
+dedicated adversarial regression now reproduces the same boundary without
+PostgreSQL: 7/8 security tests pass and the new case fails before the fix. This
+test-only commit intentionally records the observed defect; the following
+Phase 12 fix commit must make both suites green before any completion claim.

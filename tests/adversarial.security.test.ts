@@ -322,6 +322,85 @@ describe("Phase 12 adversarial hardening", () => {
       collect(coordinator.status({ chatId: "chat-a", userId: "user-a" })),
     ).resolves.toEqual([]);
   });
+
+  it("does not drop an accepted terminal stream update when getTask enrichment is already terminal", async () => {
+    let persisted = binding();
+    const updateTaskBinding = jest.fn(
+      async (input: { status: string; lastEventHash: string }) => {
+        if (persisted.terminalAt !== undefined) return persisted;
+        persisted = {
+          ...persisted,
+          status: input.status,
+          lastEventHash: input.lastEventHash,
+          terminalAt: "2026-07-23T00:00:01.000Z",
+          version: persisted.version + 1,
+        };
+        return persisted;
+      },
+    );
+    const repository = repositoryStub({ updateTaskBinding });
+    const terminalMessage = {
+      messageId: "status-terminal",
+      taskId: "task-1",
+      contextId: "context-1",
+      role: "AGENT" as const,
+      parts: [
+        {
+          kind: "text" as const,
+          mediaType: "text/plain",
+          text: "Finished safely",
+        },
+      ],
+    };
+    const terminalTask: NormalizedTask = {
+      taskId: "task-1",
+      contextId: "context-1",
+      state: "COMPLETED",
+      statusMessage: terminalMessage,
+      statusTimestamp: "2026-07-23T00:00:01Z",
+      phaseMessage: "Publishing result",
+      artifacts: [],
+    };
+    const client: SdarA2aClient = {
+      protocolBinding: "HTTP+JSON",
+      protocolVersion: "1.0",
+      endpoint: "http://sdar.test/a2a",
+      async *submitTaskStream() {
+        yield {
+          kind: "status",
+          taskId: "task-1",
+          contextId: "context-1",
+          state: "COMPLETED",
+          message: terminalMessage,
+          timestamp: "2026-07-23T00:00:01Z",
+          phaseMessage: "Publishing result",
+        };
+      },
+      sendFollowUp: async () => ({ kind: "task", task: terminalTask }),
+      getTask: async () => terminalTask,
+      cancelTask: async () => terminalTask,
+    };
+    const coordinator = new SdarTaskCoordinator({
+      repository,
+      getClient: async () => client,
+    });
+
+    await expect(
+      collect(
+        coordinator.submit({
+          userText: "run",
+          userId: "user-a",
+          chatId: "chat-a",
+          userMessageId: "message-terminal",
+        }),
+      ),
+    ).resolves.toEqual([
+      "**SDAR status: COMPLETED**",
+      "Finished safely",
+      "Publishing result",
+    ]);
+    expect(updateTaskBinding).toHaveBeenCalledTimes(2);
+  });
 });
 
 function authenticatedChatHeaders() {
