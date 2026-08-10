@@ -223,7 +223,7 @@ async function handle(path, rawBody, response) {
             tool: { serverId: "mcp.phase11", toolName: "device_status" },
             arguments: {
               deviceId: "device-17",
-              ...(delayed ? { delayMs: 300 } : {}),
+              ...(delayed ? { delayMs: 2_000 } : {}),
             },
           },
           {
