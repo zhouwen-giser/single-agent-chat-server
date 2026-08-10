@@ -62,10 +62,11 @@ const agentCard = await fetchJson(
   { signal: AbortSignal.timeout(10_000) },
 );
 if (
-  agentCard.protocolVersion !== "1.0" ||
   agentCard.capabilities?.streaming !== true ||
   !agentCard.supportedInterfaces?.some(
-    (candidate) => candidate.protocolBinding === "HTTP+JSON",
+    (candidate) =>
+      candidate.protocolBinding === "HTTP+JSON" &&
+      candidate.protocolVersion === "1.0",
   )
 ) {
   throw new Error("Live SDAR Agent Card does not satisfy the frozen baseline");
