@@ -1,6 +1,6 @@
 {
   "phase": "P05",
-  "status": "PASSED",
+  "status": "PASSED_PUBLISHED",
   "implementationCommit": "937862507c03af0dfd2a891fe6a2439dc4d713df",
   "checks": {
     "postAgUi": "PASSED",
