@@ -1,4 +1,4 @@
-﻿{
+{
   "phase": "P00",
   "head": "0a3cace9ce92166c7aa8d23f8ba96694cf6b6278",
   "tree": "bd047752f44acf7fd4028bfa77916752f705d019",
@@ -40,5 +40,5 @@
     "quality": "PASSED",
     "container": "PASSED"
   },
-  "requiredFailuresRetained": 3
+  "requiredFailuresRetained": 4
 }

@@ -9,7 +9,10 @@
   },
   "branch": "feature/single-sdar-chat-entry-v0.1",
   "phases": {
-    "P00": { "status": "in_progress" },
+    "P00": {
+      "status": "passed",
+      "implementationCommit": "611c6584380398a6f3e00b680f1e6b0622b10f79"
+    },
     "P01": { "status": "pending" },
     "P02": { "status": "pending" },
     "P03": { "status": "pending" },

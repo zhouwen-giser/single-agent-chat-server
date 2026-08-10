@@ -1,4 +1,4 @@
-﻿{
+{
   "package": "SACS_v0.2_Single_SDAR_Interaction_Gateway_Codex_Goal_详细实施任务包",
   "version": "1.0.0",
   "generatedAt": "2026-08-10T14:19:27.414161+00:00",
@@ -167,13 +167,13 @@
     },
     {
       "path": "contracts/a2a-agui-mapping.csv",
-      "size": 902,
-      "sha256": "b937ed5a0052eb45b252be994aeafbe07bf1003cf4df7e44bfa9592497957b66"
+      "size": 891,
+      "sha256": "b433b8c335dbf63323ee374edb20ea3e552c5dabebd44a47c0f586bcde2f2eb7"
     },
     {
       "path": "contracts/acceptance-matrix.csv",
-      "size": 1470,
-      "sha256": "6cf8189a391d2a1869f3a9a50d07cc76071ccaf0e0863896809f851f48f3036e"
+      "size": 1447,
+      "sha256": "c21a46eb12fcaa23a6838a7f9ac837892ab55a86e8aaa29d15d8df509b834d38"
     },
     {
       "path": "contracts/agui-public-state.schema.json",
@@ -207,8 +207,8 @@
     },
     {
       "path": "contracts/interrupt-map.csv",
-      "size": 369,
-      "sha256": "e7cf406d9267435c65c89447fc85612e1f2d255c962cddd0f191aec5b6fa2977"
+      "size": 365,
+      "sha256": "ff45023ffefb9d018b1d25cc7ecc119863ad4cdcfccf41a9a65d3c1edbb9a91b"
     },
     {
       "path": "contracts/query-intents.yaml",
@@ -217,8 +217,8 @@
     },
     {
       "path": "matrices/security-matrix.csv",
-      "size": 620,
-      "sha256": "60df00ce300ce6e4e8d88e8fd7f3a4bdb6778946ad164039499d4a58a8adf87f"
+      "size": 610,
+      "sha256": "b50336634c9fb160c86dea10e620ad47af2660833a598b74406521fab91481ec"
     },
     {
       "path": "phases/P00.md",

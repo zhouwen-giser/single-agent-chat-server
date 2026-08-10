@@ -1,4 +1,4 @@
-﻿# P00 completion
+# P00 completion
 
 Status: `IMPLEMENTATION_AND_LOCAL_EVIDENCE_COMPLETE`
 
@@ -13,7 +13,7 @@ experimental AG-UI A2A adapter is explicitly reference-only.
 
 Fresh local baseline results are unit 31/31, contract 26/26, security 8/8,
 integration 36/36 on PostgreSQL 16.9, plus formatting, lint, typecheck,
-architecture, and build. Three environment/setup failures are retained under
+architecture, and build. Four required/setup/publication-check failures are retained under
 `failed-attempts`; neither is labeled passed.
 
 User-authorized deviations are limited to retaining the current branch and

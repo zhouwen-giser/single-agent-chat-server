@@ -1,6 +1,6 @@
-﻿{
+{
   "phase": "P00",
-  "status": "PASSED_LOCAL_PENDING_PUBLICATION",
+  "status": "PASSED_LOCAL_AWAITING_CLEAN_PUSH",
   "checks": {
     "taskPackageComplete": "PASSED",
     "phase13MergedMain": "PASSED",
@@ -15,5 +15,5 @@
     "branchPolicy": "PASSED_USER_OVERRIDE"
   },
   "requiredSkips": 0,
-  "failedAttemptsRetained": 3
+  "failedAttemptsRetained": 4
 }
