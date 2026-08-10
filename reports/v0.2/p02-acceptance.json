@@ -1,6 +1,6 @@
 {
   "phase": "P02",
-  "status": "PASSED_LOCAL_AWAITING_EVIDENCE_PUSH",
+  "status": "PASSED_PUBLISHED",
   "implementationCommit": "9ba23949d122b1d2ab918cdb712f8a7aadaf89df",
   "checks": {
     "eventFamilies": "14/14",

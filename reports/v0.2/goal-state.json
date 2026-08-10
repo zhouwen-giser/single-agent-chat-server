@@ -24,7 +24,8 @@
     "P02": {
       "status": "passed",
       "implementationCommit": "9ba23949d122b1d2ab918cdb712f8a7aadaf89df",
-      "remoteHead": "9ba23949d122b1d2ab918cdb712f8a7aadaf89df"
+      "evidenceCommit": "2b1232b9c0dc60aed19dba269d348daac87143e4",
+      "remoteHead": "2b1232b9c0dc60aed19dba269d348daac87143e4"
     },
     "P03": { "status": "pending" },
     "P04": { "status": "pending" },
