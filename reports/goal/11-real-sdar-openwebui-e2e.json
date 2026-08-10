@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "phase": 11,
+  "status": "COMPLETED",
+  "generatedAt": "2026-07-19T09:49:22+08:00",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "phaseCommit": "d6a79a91114fe8d55bc711e3d580790d52393443",
+  "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
+  "runtime": {
+    "openWebUi": { "version": "0.10.2", "installation": "pip", "real": true },
+    "sdarCommit": "667146a3639eefdfed9b89c2417c08e1ac50e9a9",
+    "sdk": "@a2a-js/sdk@1.0.0-beta.0",
+    "protocol": "A2A 1.0.1 patch / HTTP+JSON 1.0",
+    "realPostgres": true,
+    "realRedis": true,
+    "realMcpTransport": true,
+    "deterministicStructuredModelFixture": true
+  },
+  "scenarios": {
+    "modelDiscovery": "PASSED",
+    "ordinaryChatWithoutTask": "PASSED",
+    "agentCardDiscovery": "PASSED",
+    "taskCreation": "PASSED",
+    "phaseMessageSse": "PASSED",
+    "boundedStreamGetTask": "PASSED",
+    "confirmRejectRevise": "PASSED",
+    "provideInput": "PASSED",
+    "pauseResume": "PASSED",
+    "cancelTask": "PASSED",
+    "completedResultArtifact": "PASSED",
+    "failedCapabilityGap": "PASSED",
+    "restartRecovery": "PASSED",
+    "crossUserIsolation": "PASSED",
+    "utilityIsolation": "PASSED",
+    "dockerEndpointOverride": "PASSED",
+    "retryIdempotency": "PASSED",
+    "signedIdentity": "PASSED",
+    "sdarOutage": "PASSED"
+  },
+  "audit": {
+    "bindings": 12,
+    "events": 47,
+    "knownSecretFileHits": 0
+  },
+  "tests": {
+    "unit": { "suites": 5, "passed": 31, "failed": 0 },
+    "contract": { "suites": 2, "passed": 25, "failed": 0 },
+    "integration": { "suites": 3, "passed": 36, "failed": 0 },
+    "build": "PASSED",
+    "architectureFiles": 41,
+    "productionLicenseEntries": 84,
+    "containerMetadata": "PASSED"
+  },
+  "image": {
+    "id": "sha256:84c2093be0c41920dbaf6a6940eabd538e44e05d29907d53aa591fbd6d521f57",
+    "user": "node",
+    "healthcheck": true
+  },
+  "screenshots": {
+    "captured": false,
+    "reason": "in-app Browser Node runtime blocked by Windows sandbox helper_unknown_error; no screenshot fabricated"
+  },
+  "publication": {
+    "committed": true,
+    "pushed": true,
+    "remoteCi": "PENDING_CAPTURE"
+  },
+  "temporaryResourcesRemoved": true,
+  "preservedUserResources": [
+    "Open WebUI 0.10.2 on 127.0.0.1:8080",
+    "sdar-rc2-test-db"
+  ],
+  "blockers": []
+}

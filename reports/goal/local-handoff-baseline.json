@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T20:44:33+09:00",
+  "repository": "https://github.com/zhouwen-giser/single-agent-chat-server",
+  "remoteFeatureShaAtStart": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
+  "remoteMainShaAtStart": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
+  "localWorkBranch": "work/local-phase12-phase13-handoff",
+  "localStartingHead": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
+  "workingTreeAtStart": "CLEAN",
+  "pushUrl": "NO_PUSH_ALLOWED",
+  "phase11CommitsVerified": [
+    "d6a79a91114fe8d55bc711e3d580790d52393443",
+    "61fec2fd04981b36cdd0794e927cf9c85f9b929a"
+  ],
+  "pullRequest": {
+    "number": 1,
+    "state": "open",
+    "draft": true,
+    "mergeable": true,
+    "headSha": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
+    "baseSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
+    "readOnly": true
+  },
+  "latestRemoteRuns": [
+    {
+      "id": 29670952675,
+      "event": "push",
+      "conclusion": "failure"
+    },
+    {
+      "id": 29670953528,
+      "event": "pull_request",
+      "conclusion": "failure",
+      "failedJob": "quality",
+      "failedStep": "pnpm verify:phase10",
+      "containerJob": "skipped"
+    }
+  ],
+  "environment": {
+    "systemNode": "v24.14.0",
+    "isolatedNode": "v22.14.0",
+    "isolatedPnpm": "11.13.1",
+    "docker": "UNAVAILABLE",
+    "nativePostgres": "UNAVAILABLE",
+    "openWebUi": "UNAVAILABLE",
+    "sdar": "UNAVAILABLE",
+    "redis": "UNAVAILABLE",
+    "mcpRuntime": "UNAVAILABLE"
+  },
+  "remoteWritePerformed": false
+}

@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 2,
+  "goal": "Build single-agent-chat-server v0.1.0",
+  "status": "PHASE13_ACCEPTANCE_PASSED",
+  "repository": "zhouwen-giser/single-agent-chat-server",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "headSha": "085e456c9802462c5d0c2a8c2310cadbfa760a96",
+  "mainSha": "3e5be7150e959006d4d152ba6d0d32ebc93ab419",
+  "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
+  "lastCompletedPhase": 13,
+  "nextPhase": null,
+  "localWorkBranch": "work/local-phase12-phase13-handoff",
+  "remoteFeatureShaAtStart": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
+  "localHeadShaBeforeStateCommit": "719572c744da0a7f195d060b74e762860ff4fac7",
+  "publicationStatus": "FINAL_DOCUMENTATION_PENDING",
+  "remoteWritePerformed": true,
+  "upstreams": {
+    "langgraphTemplate": {
+      "source": "langchain-ai/new-langgraphjs-project",
+      "version": "4e5f3cd20895663f43d77b91074fbab9d7d05476",
+      "cli": "create-langgraph@1.1.5",
+      "validated": true
+    },
+    "a2aSdk": {
+      "version": "@a2a-js/sdk@1.0.0-beta.0",
+      "protocolRevision": "1.0",
+      "specPatch": "1.0.1",
+      "binding": "HTTP+JSON",
+      "validatedAgainstSdar": true
+    },
+    "openWebUi": {
+      "version": "0.10.2",
+      "installation": "pip",
+      "healthUrl": "http://127.0.0.1:18082/health",
+      "connected": true,
+      "phase11RealE2eConnected": true
+    },
+    "sdar": {
+      "repository": "zhouwen-giser/skill-driven-agent-runtime",
+      "baselineCommit": "667146a3639eefdfed9b89c2417c08e1ac50e9a9",
+      "baseUrl": "http://127.0.0.1:9999",
+      "agentCardHash": "d6de4beb1b6af17dac3db6c25be74672f38a5bd184e6e9b9682b499b99c24068",
+      "phase11AgentCardHash": "bfcf6ebdb2e603a0859379ad1e5d234eeda4ff47f57f46b3d16e3330d6c302b1",
+      "selectedInterfaceUrl": "http://127.0.0.1:9999/a2a",
+      "endpointOverride": null,
+      "reachable": true,
+      "lastVerifiedAt": "2026-08-10T22:25:04.6490444+08:00",
+      "temporaryRuntimeCleaned": false
+    }
+  },
+  "systems": {
+    "postgres": "phase-13-isolated-postgresql-16.9:36/36-zero-skips",
+    "server": "phase-13-source-head-real-e2e-passed",
+    "openWebUi": "phase-13-pip-0.10.2-real-e2e-passed",
+    "sdar": "phase-13-exact-667146a-real-e2e-passed"
+  },
+  "localHandoff": {
+    "baselineReport": "reports/goal/local-handoff-baseline.md",
+    "baselineVerification": "reports/goal/local-baseline-verification.md",
+    "ciRecoveryReport": "reports/goal/local-ci-recovery.md",
+    "phase12": {
+      "status": "SUPERSEDED_BY_REMOTE_PHASE_12",
+      "functionalCommit": "a93e953eebe1f342667a8e7005fc55c9ff3b2759",
+      "report": "reports/goal/12-adversarial-hardening.md",
+      "pushed": true,
+      "publication": "SUPERSEDED"
+    },
+    "phase13": {
+      "status": "SUPERSEDED_BY_REAL_ACCEPTANCE",
+      "implementationCommit": "3d3b5804ee4125b8f1645317c871c7fade5ea67b",
+      "documentationCommit": "719572c744da0a7f195d060b74e762860ff4fac7",
+      "report": "reports/goal/13-final-acceptance.md",
+      "pushed": true,
+      "publication": "SUPERSEDED"
+    },
+    "remoteCiForLocalHead": "SUPERSEDED",
+    "pullRequestModified": false
+  },
+  "blockers": [
+    "Final documentation commit must be pushed, exact CI must pass, and PR #1 must be marked Ready"
+  ],
+  "tests": {
+    "upstreamTemplateUnit": "passed:1",
+    "upstreamTemplateBuild": "passed",
+    "upstreamTemplateLint": "passed-with-deprecation-warnings",
+    "upstreamTemplateLanggraphConfig": "passed",
+    "phase0Repository": "passed: format,lint,config,typecheck,unit:1,integration:1,build",
+    "phase1Repository": "passed: format,lint,config,typecheck,unit:5,contract:8,integration:1,build,http-smoke",
+    "phase2Repository": "passed: format,lint,config,typecheck,unit:16,contract:8,integration:1,build,http-smoke,architecture-scan",
+    "phase3Repository": "passed: frozen-install,peers,format,lint,config,typecheck,unit:16,contract:14,integration:1,build,official-sdk-http-json-mock,declaration-audit",
+    "phase4Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:16,contract:14,integration:10-real-postgres:9,build,server-readiness,license-audit",
+    "phase5Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:16,contract:18,integration:10-real-postgres:9,build,real-openwebui-proxy,real-checkpoint-query",
+    "phase6Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:16,contract:19,integration:17-real-postgres:16,phase6-coordinator:7,open-handles,build,production-ready-with-sdar-unavailable",
+    "phase7Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:18,contract:20,integration:30-real-postgres:29,coordinator:20-open-handles,build",
+    "phase8Repository": "passed: format,lint-zero-warnings,config,typecheck,unit:20,contract:20,integration:35-real-postgres:34,coordinator:23-open-handles,build,postgres-restart,server-restart",
+    "phase9Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:27,contract:25,integration:35-real-postgres:34,open-handles:51,build,readiness-outage-recovery,log-secret-scan",
+    "phase10Repository": "passed: frozen-install,peers,format,lint-zero-warnings,config,typecheck,unit:27,contract:25,integration:35-real-postgres:34,build,architecture:41,licenses:84,image,non-root,healthcheck,compose-clean-db,sbom,remote-ci",
+    "phase11Repository": "passed at remote commit d6a79a9: real Open WebUI 0.10.2, real SDAR 667146a, real PostgreSQL, Redis, MCP transport, official A2A SDK, deterministic structured-model fixture, unit:31,contract:25,integration:36",
+    "phase12Local": "passed at 0d05d52: format,lint,langgraph,typecheck,unit:31,contract:26,security:8,architecture:42,build,postgresql-integration:36",
+    "phase13Local": "passed at 085e456: full verify, postgresql-integration:36/36-zero-skips, fixture-e2e:1/1, real-e2e:26/26, security:8/8, docker-compose-override, source-head-ci"
+  },
+  "updatedAt": "2026-08-10T22:25:04.6490444+08:00",
+  "taskPackageRevision": "R2",
+  "phases": {
+    "0": {
+      "status": "COMPLETED",
+      "report": "reports/goal/00-baseline.md",
+      "commit": "03423e99390681108591ea77a4c912938862240d",
+      "pushed": true
+    },
+    "1": {
+      "status": "COMPLETED",
+      "report": "reports/goal/01-openai-api-contracts.md",
+      "commit": "a28b8826251cb0a71c7953a0c551df0a4c66d5c9",
+      "pushed": true
+    },
+    "2": {
+      "status": "COMPLETED",
+      "report": "reports/goal/02-thin-chat-graph.md",
+      "commit": "a5d1b8acb05ed42153c99224de0fef24c59095bf",
+      "pushed": true
+    },
+    "3": {
+      "status": "COMPLETED",
+      "report": "reports/goal/03-a2a-sdar-client.md",
+      "commit": "34641c6d0a5d67667f6f1dc8b632ecde4119b3bf",
+      "pushed": true
+    },
+    "4": {
+      "status": "COMPLETED",
+      "report": "reports/goal/04-postgresql-persistence.md",
+      "commit": "b8be3b3800253f43fb0c2257a2e499ef283098f6",
+      "pushed": true
+    },
+    "5": {
+      "status": "COMPLETED",
+      "report": "reports/goal/05-openwebui-identity.md",
+      "commit": "8b878ee9349c4fae1ff6d761c269c9c3d8fe7f0d",
+      "pushed": true
+    },
+    "6": {
+      "status": "COMPLETED",
+      "report": "reports/goal/06-bounded-task-streaming.md",
+      "commit": "0f35d537a3601eabecbc4a561c8d3f9bce9fed9a",
+      "pushed": true
+    },
+    "7": {
+      "status": "COMPLETED",
+      "report": "reports/goal/07-input-cancellation-terminal.md",
+      "commit": "c144198a4855f6bc6b683727e575dc9d92b922de",
+      "pushed": true
+    },
+    "8": {
+      "status": "COMPLETED",
+      "report": "reports/goal/08-recovery-consistency.md",
+      "commit": "9e906a1bbe2d70afdbf9002ea71f9b7f660c2a9f",
+      "pushed": true
+    },
+    "9": {
+      "status": "COMPLETED",
+      "report": "reports/goal/09-observability-security-operations.md",
+      "commit": "34e731ba8aa2079083eaf0fbe98c4df1e23dd782",
+      "pushed": true
+    },
+    "10": {
+      "status": "COMPLETED",
+      "report": "reports/goal/10-docker-ci-governance.md",
+      "commit": "d8fade106e80cfd36998403225380cae99277413",
+      "pushed": true
+    },
+    "11": {
+      "status": "COMPLETED",
+      "report": "reports/goal/11-real-sdar-openwebui-e2e.md",
+      "commit": "d6a79a91114fe8d55bc711e3d580790d52393443",
+      "reportCommit": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
+      "pushed": true,
+      "publication": "REMOTE_EXISTING"
+    },
+    "12": {
+      "status": "COMPLETED",
+      "report": "reports/goal/12-adversarial-hardening.md",
+      "regressionCommit": "15bf0897d1f0c4e09aaad3780c22a600d676bc2d",
+      "functionalCommit": "0d05d52288c4acca55745fe137127dd91649e0ab",
+      "pushed": true,
+      "publication": "REMOTE"
+    },
+    "13": {
+      "status": "ACCEPTANCE_PASSED",
+      "verificationSourceHead": "085e456c9802462c5d0c2a8c2310cadbfa760a96",
+      "report": "reports/goal/13-final-acceptance.md",
+      "pushed": false,
+      "publication": "PENDING_FINAL_DOC_COMMIT"
+    }
+  }
+}

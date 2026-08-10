@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "phase": 5,
+  "status": "COMPLETED",
+  "generatedAt": "2026-07-18T22:11:07+08:00",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "headBeforePhaseCommit": "e2c29ef7bfb4c69af459b7518d2fa77dcb29481b",
+  "phaseCommit": "8b878ee9349c4fae1ff6d761c269c9c3d8fe7f0d",
+  "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
+  "delivered": {
+    "serviceKey": true,
+    "signedUserJwt": true,
+    "chatThreadMapping": true,
+    "customMessageIdentifiers": true,
+    "utilityTaskHeader": true,
+    "postgresCheckpointerWired": true,
+    "connectionDeploymentDocs": true,
+    "dockerNetworkExamples": true
+  },
+  "tests": {
+    "unit": { "suites": 3, "passed": 16, "failed": 0 },
+    "contract": { "suites": 2, "passed": 18, "failed": 0 },
+    "integration": {
+      "suites": 2,
+      "passed": 10,
+      "failed": 0,
+      "realPostgresTests": 9
+    },
+    "build": "PASSED"
+  },
+  "realOpenWebUiSmoke": {
+    "version": "0.10.2",
+    "installation": "pip",
+    "isolatedTemporaryInstance": true,
+    "signedJwtForwarded": true,
+    "modelDiscovery": "PASSED",
+    "chatCompletion": "PASSED",
+    "responseNonEmpty": true,
+    "threadBindings": 1,
+    "checkpointRows": 6,
+    "temporaryRuntimeCleaned": true
+  },
+  "realE2e": {
+    "openWebUiToChatServer": true,
+    "realSdar": false,
+    "openWebUiToSdarVerticalSlice": false,
+    "assignedPhase": 11
+  },
+  "publication": {
+    "committed": true,
+    "pushed": true,
+    "draftPullRequestUpdated": true
+  },
+  "blockers": []
+}

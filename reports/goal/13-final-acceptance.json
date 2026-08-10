@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "phase": 13,
+  "name": "final-acceptance-release-evidence",
+  "status": "ACCEPTANCE_PASSED_PUBLICATION_PENDING",
+  "verificationSourceHead": "085e456c9802462c5d0c2a8c2310cadbfa760a96",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "pushed": true,
+  "publication": "REMOTE_SOURCE_GREEN_FINAL_DOC_PENDING",
+  "remoteCiForSourceHead": {
+    "push": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/31396028309",
+    "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/31396035089",
+    "result": "PASSED"
+  },
+  "commands": {
+    "frozenInstall": "PASSED",
+    "peers": "PASSED",
+    "format": "PASSED",
+    "lint": "PASSED",
+    "typecheck": "PASSED",
+    "unit": {
+      "status": "PASSED",
+      "passed": 31
+    },
+    "contract": {
+      "status": "PASSED",
+      "passed": 26
+    },
+    "integration": {
+      "status": "PASSED",
+      "passed": 36,
+      "skipped": 0,
+      "database": "PostgreSQL 16.9"
+    },
+    "e2e": {
+      "status": "PASSED",
+      "fixturePassed": 1,
+      "realRequiredPassed": 26
+    },
+    "security": {
+      "status": "PASSED",
+      "passed": 8
+    },
+    "build": "PASSED",
+    "smoke": "PASSED",
+    "migrations": "PASSED_REAL_APPLY",
+    "architecture": {
+      "status": "PASSED",
+      "productionFiles": 42
+    },
+    "openaiApi": {
+      "status": "PASSED",
+      "passed": 19
+    },
+    "a2a": {
+      "status": "PASSED",
+      "passed": 7
+    },
+    "openwebui": "PASSED_REAL",
+    "verify": "PASSED",
+    "licenses": {
+      "status": "PASSED",
+      "entries": 84
+    },
+    "workflows": "PASSED_STATIC",
+    "secretScan": {
+      "status": "PASSED",
+      "trackedFiles": 178
+    },
+    "gitDiffCheck": "PASSED",
+    "dockerBuild": "PASSED",
+    "container": "PASSED",
+    "compose": "PASSED_AND_CLEANED",
+    "explicitEndpointOverride": "PASSED",
+    "sbomCurrentSourceHead": "PASSED_CYCLONEDX_1_7"
+  },
+  "realE2e": {
+    "status": "PASSED_REAL",
+    "requiredScenarios": 26,
+    "bindings": 12,
+    "publishedEvents": 47,
+    "persistedScenarios": 13,
+    "openWebUi": "0.10.2 pip",
+    "identity": "signed JWT plus documented chat/message headers",
+    "evidenceManifest": ".tmp/phase13-real-e2e-evidence-085e456.json"
+  },
+  "upstreams": {
+    "sdarCommit": "667146a3639eefdfed9b89c2417c08e1ac50e9a9",
+    "agentCardSha256": "d6de4beb1b6af17dac3db6c25be74672f38a5bd184e6e9b9682b499b99c24068",
+    "selectedInterfaceUrl": "http://127.0.0.1:9999/a2a",
+    "a2aSpecPatch": "1.0.1",
+    "wire": "1.0",
+    "binding": "HTTP+JSON",
+    "sdk": "@a2a-js/sdk@1.0.0-beta.0"
+  },
+  "docker": {
+    "explicitOverride": "http://single-agent-chat-phase13-override-shim:7000/selected-a2a",
+    "advertisedEndpoint": "http://0.0.0.0:7000/advertised-a2a",
+    "observedPaths": [
+      "GET /.well-known/agent-card.json",
+      "POST /selected-a2a/message:stream"
+    ],
+    "composeProject": "single-agent-chat-phase13-compose",
+    "composeCleanup": "PASSED_ZERO_PROJECT_RESOURCES"
+  },
+  "evidenceBoundary": {
+    "browserScreenshot": "NOT_CLAIMED",
+    "published": [
+      "HTTP/SSE output",
+      "sanitized logs",
+      "chat-owned PostgreSQL rows",
+      "Docker metadata",
+      "internal shim paths"
+    ],
+    "excluded": [
+      "secrets",
+      "JWTs",
+      "request bodies",
+      "prompts",
+      "hidden reasoning",
+      "SDAR internal state"
+    ]
+  },
+  "updatedAt": "2026-08-10T22:25:04.6490444+08:00"
+}

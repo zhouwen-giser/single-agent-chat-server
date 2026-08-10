@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "phase": 8,
+  "status": "COMPLETED",
+  "generatedAt": "2026-07-18T23:39:25+08:00",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "headBeforePhaseCommit": "64481458e8cfe1ccc8dd8967cf35a9a8ed24a19b",
+  "phaseCommit": "9e906a1bbe2d70afdbf9002ea71f9b7f660c2a9f",
+  "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
+  "delivered": {
+    "submissionLease": true,
+    "singleActiveTask": true,
+    "startupLeaseRecovery": true,
+    "staleObservationProtection": true,
+    "terminalMonotonicity": true,
+    "boundedPollingRecovery": true,
+    "lazySdarRetry": true,
+    "postgresRestartRecovery": true,
+    "serverRestartRecovery": true,
+    "gracefulShutdown": true,
+    "duplicateActionSuppression": true
+  },
+  "tests": {
+    "unit": { "suites": 4, "passed": 20, "failed": 0 },
+    "contract": { "suites": 2, "passed": 20, "failed": 0 },
+    "integration": {
+      "suites": 3,
+      "passed": 35,
+      "failed": 0,
+      "realPostgresTests": 34,
+      "coordinatorTests": 23
+    },
+    "build": "PASSED",
+    "lintWarnings": 0,
+    "openHandleDetection": "PASSED",
+    "postgresRestartSmoke": "PASSED",
+    "serverRestartSmoke": "PASSED"
+  },
+  "realE2e": {
+    "realPostgres": true,
+    "realBuiltServer": true,
+    "realSdar": false,
+    "openWebUiToSdarVerticalSlice": false,
+    "assignedPhase": 11
+  },
+  "publication": {
+    "committed": true,
+    "pushed": true,
+    "draftPullRequestUpdated": true
+  },
+  "temporaryResourcesRemoved": true,
+  "blockers": []
+}

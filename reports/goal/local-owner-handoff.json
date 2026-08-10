@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "status": "BLOCKED_LOCAL_REVIEW",
+  "branch": "work/local-phase12-phase13-handoff",
+  "remoteFeatureShaAtStart": "61fec2fd04981b36cdd0794e927cf9c85f9b929a",
+  "verificationSourceHead": "719572c744da0a7f195d060b74e762860ff4fac7",
+  "localCommits": [
+    "2124f21cd495da2742681435402cc71bf2109189",
+    "5a0ad53adbf6ee24dcd201f1d2451a923f887c46",
+    "a93e953eebe1f342667a8e7005fc55c9ff3b2759",
+    "daad45c0ba801c48ae0483b29b2ce4ba45df50c1",
+    "3d3b5804ee4125b8f1645317c871c7fade5ea67b",
+    "719572c744da0a7f195d060b74e762860ff4fac7"
+  ],
+  "remoteWritePerformed": false,
+  "remoteCiForLocalHead": "NOT_RUN",
+  "pushUrlProtection": "NO_PUSH_ALLOWED",
+  "requiredBlockers": [
+    "native PostgreSQL",
+    "Docker and Compose",
+    "real Open WebUI 0.10.2",
+    "real SDAR at 667146a with Redis and MCP transport",
+    "current-head 26-scenario real E2E evidence",
+    "current-head container and SBOM evidence"
+  ],
+  "archiveIntegrity": "external delivery manifest and .sha256 companion",
+  "ownerMustReviewBeforePush": true,
+  "autoMergeRecommended": false,
+  "updatedAt": "2026-07-23T21:12:17+09:00"
+}

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "phase": 3,
+  "status": "COMPLETED",
+  "generatedAt": "2026-07-18T20:55:45+08:00",
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "headBeforePhaseCommit": "76f594fa6a5a5d4fc08965e4c5c2170a1991d935",
+  "phaseCommit": "34641c6d0a5d67667f6f1dc8b632ecde4119b3bf",
+  "pullRequest": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/1",
+  "dependency": {
+    "name": "@a2a-js/sdk",
+    "version": "1.0.0-beta.0",
+    "license": "Apache-2.0"
+  },
+  "delivered": {
+    "agentCardDiscovery": true,
+    "httpJson10Only": true,
+    "explicitEndpointOverride": true,
+    "sendMessageStream": true,
+    "sendMessage": true,
+    "getTask": true,
+    "cancelTask": true,
+    "strictMetadata": true,
+    "normalizedDtos": true,
+    "timeoutAndAbort": true
+  },
+  "tests": {
+    "unit": {
+      "suites": 3,
+      "passed": 16,
+      "failed": 0
+    },
+    "contract": {
+      "suites": 2,
+      "passed": 14,
+      "failed": 0
+    },
+    "integration": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "build": "PASSED",
+    "officialSdkHttpJsonMock": "PASSED",
+    "publicDeclarationAudit": "PASSED"
+  },
+  "realE2e": {
+    "realSdar": false,
+    "openWebUiVerticalSlice": false,
+    "assignedPhase": 11
+  },
+  "publication": {
+    "committed": true,
+    "pushed": true,
+    "draftPullRequestUpdated": true
+  },
+  "blockers": []
+}

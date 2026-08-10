@@ -1,0 +1,17 @@
+export { parseSdarA2aConfig } from "./config.js";
+export { createSdarA2aClient, type SdarA2aAdapterConfig } from "./client.js";
+export type {
+  FollowUpInput,
+  JsonValue,
+  NormalizedArtifact,
+  NormalizedMessage,
+  NormalizedPart,
+  NormalizedSendResult,
+  NormalizedStreamEvent,
+  NormalizedTask,
+  NormalizedTaskState,
+  OperationOptions,
+  SdarA2aClient,
+  SdarFollowUpAction,
+  SubmitTaskInput,
+} from "./types.js";
