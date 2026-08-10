@@ -1,0 +1,26 @@
+{
+  "phase": "P03",
+  "status": "PASSED_LOCAL_AWAITING_EVIDENCE_PUSH",
+  "implementationCommit": "21282a5632728c3995d40baa024261f729ad6af6",
+  "checks": {
+    "freshMigration": "PASSED",
+    "v01Upgrade": "PASSED",
+    "bindingPreserved": "PASSED",
+    "noOrphanBinding": "PASSED",
+    "activeTaskUnique": "PASSED",
+    "principalIsolation": "PASSED",
+    "requestIdempotency": "PASSED",
+    "restartRecovery": "PASSED",
+    "interruptDurability": "PASSED",
+    "agentCardSafeLkg": "PASSED",
+    "migrationLedger": "PASSED"
+  },
+  "tests": {
+    "unit": "35/35",
+    "contract": "30/30",
+    "integration": "41/41",
+    "migrations": "4/4"
+  },
+  "requiredSkips": 0,
+  "failedAttemptsRetained": 2
+}
