@@ -61,7 +61,11 @@ Open WebUI / OpenAI client     official AG-UI client
 - [x] 2026-08-11: P09 implemented unified Principal security policy,
       deny-by-default CORS, protocol-isolated rate limits, URL projection
       hardening, client-state nonauthority, and adversarial persistence gates.
-- [ ] P10-P12: run compatibility, persistence, official-client, and real E2E.
+- [x] 2026-08-11: P10 preserved the OpenAI/Open WebUI predecessor and completed
+      its real SDAR matrix.
+- [x] 2026-08-11: P11 connected production typed A2A observations, durable
+      Interrupt persistence, and the exact official AG-UI client real E2E.
+- [ ] P12: run both northbound protocols against the same fixed SDAR.
 - [ ] P13: produce the release candidate evidence set.
 - [ ] P14: merge latest `main`, run final gates, and open/update the PR. Do not
       merge it; the user's explicit authorization stops at PR delivery.

@@ -2,6 +2,7 @@
   "phase": "P11",
   "status": "PASSED_IMPLEMENTATION_PUBLISHED",
   "implementationCommit": "0abc0aa9c04e783832203db5adcd6d4ccfef5aab",
+  "evidenceCommit": "6ed6b2a5b08d26e9fcc96902276b2c1fb1e3dea3",
   "checks": {
     "officialClientPin": "PASSED_@AG_UI_CLIENT_0.0.57_HTTP_AGENT",
     "realPostSse": "PASSED_BUILT_SACS_REAL_NETWORK",

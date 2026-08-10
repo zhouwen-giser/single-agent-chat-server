@@ -81,7 +81,12 @@
       "evidenceCommit": "e892cec19f9e400e5c05f7b71c8c96867429f712",
       "remoteHead": "e892cec19f9e400e5c05f7b71c8c96867429f712"
     },
-    "P11": { "status": "pending" },
+    "P11": {
+      "status": "passed",
+      "implementationCommit": "0abc0aa9c04e783832203db5adcd6d4ccfef5aab",
+      "evidenceCommit": "6ed6b2a5b08d26e9fcc96902276b2c1fb1e3dea3",
+      "remoteHead": "6ed6b2a5b08d26e9fcc96902276b2c1fb1e3dea3"
+    },
     "P12": { "status": "pending" },
     "P13": { "status": "pending" },
     "P14": { "status": "pending" }
