@@ -78,7 +78,8 @@
         "8c8255f7713f09f7a1ecbe2b37dbdf6ed2ddec65",
         "397fff8f43f0ecd41187e3bdc4289218efe18f32"
       ],
-      "remoteHead": "397fff8f43f0ecd41187e3bdc4289218efe18f32"
+      "evidenceCommit": "e892cec19f9e400e5c05f7b71c8c96867429f712",
+      "remoteHead": "e892cec19f9e400e5c05f7b71c8c96867429f712"
     },
     "P11": { "status": "pending" },
     "P12": { "status": "pending" },
