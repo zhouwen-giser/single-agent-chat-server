@@ -1,0 +1,49 @@
+{
+  "phase": "P11",
+  "status": "PASSED_IMPLEMENTATION_PUBLISHED",
+  "implementationCommit": "0abc0aa9c04e783832203db5adcd6d4ccfef5aab",
+  "checks": {
+    "officialClientPin": "PASSED_@AG_UI_CLIENT_0.0.57_HTTP_AGENT",
+    "realPostSse": "PASSED_BUILT_SACS_REAL_NETWORK",
+    "capabilitySchema": "PASSED_AGENT_CAPABILITIES_SCHEMA_0.0.57",
+    "eventSchema": "PASSED_EVENT_SCHEMAS_0.0.57_ALL_EVENTS",
+    "runTextStateActivityCustom": "PASSED_REAL",
+    "interrupt": "PASSED_SDAR_PLAN_CONFIRMATION",
+    "resume": "PASSED_EXPLICIT_CONFIRM_PLAN",
+    "abortReconnect": "PASSED_SAME_TASK_NO_CANCEL_NO_DUPLICATE_BINDING",
+    "runIdempotencyReplay": "PASSED_SAME_TASK_ONE_BINDING",
+    "runIdempotencyConflict": "PASSED_RUN_ID_CONFLICT_NO_MUTATION",
+    "interruptPersistence": "PASSED_RESOLVED_FOR_EXACT_TASK",
+    "boundedRecovery": "PASSED_AUTHORIZED_GETTASK_NO_RESUBSCRIPTION",
+    "rawEvents": "PASSED_NONE",
+    "toolCalls": "PASSED_NONE",
+    "externalInternalThreadBoundary": "PASSED_PUBLIC_EXTERNAL_AUTH_INTERNAL",
+    "exactSdarSha": "PASSED_A9957C82C17CA01E77528F3817C03D86224AAF88_CLEAN",
+    "exactSacsSha": "PASSED_0ABC0AA9C04E783832203DB5ADCD6D4CCFEF5AAB",
+    "remoteCi": "PASSED_RUN_31437862565_QUALITY_AND_CONTAINER"
+  },
+  "tests": {
+    "unit": "77/77",
+    "contract": "57/57",
+    "postgresIntegration": "50/50",
+    "openAiPredecessor": "20/20",
+    "security": "9/9",
+    "localFixtureE2e": "1/1",
+    "architecture": "PASSED_59_SOURCE_FILES",
+    "migrations": "6/6",
+    "licenses": "PASSED_89_PRODUCTION_ENTRIES",
+    "smoke": "PASSED"
+  },
+  "realEvidence": {
+    "runStamp": "p11-head-1786400457717",
+    "taskId": "4222e69e-788b-4c41-a7f6-a894bdad8441",
+    "terminalState": "COMPLETED",
+    "statusRuns": 2,
+    "interruptReason": "sdar.plan_confirmation",
+    "idempotencyTaskBindings": 1,
+    "reconnectTaskBindings": 1,
+    "requiredSkips": 0
+  },
+  "failedAttemptsRetained": 3,
+  "rawSecretsCommitted": false
+}
