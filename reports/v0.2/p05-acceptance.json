@@ -1,0 +1,34 @@
+{
+  "phase": "P05",
+  "status": "PASSED",
+  "implementationCommit": "937862507c03af0dfd2a891fe6a2439dc4d713df",
+  "checks": {
+    "postAgUi": "PASSED",
+    "getAgUiCapabilities": "PASSED",
+    "officialRunAgentInput": "PASSED",
+    "officialEventEncoder": "PASSED",
+    "officialHttpAgentConsumes": "PASSED",
+    "independentServiceCredential": "PASSED",
+    "signedPrincipalMapping": "PASSED",
+    "protocolNeutralThreadBinding": "PASSED",
+    "contentNegotiation": "PASSED",
+    "malformedInputFailClosed": "PASSED",
+    "clientToolsRejected": "PASSED",
+    "runTextFinishLifecycle": "PASSED",
+    "safeRunError": "PASSED",
+    "disconnectObservationOnly": "PASSED",
+    "capabilitiesOfficialSchema": "PASSED"
+  },
+  "tests": {
+    "unit": "58/58",
+    "contract": "35/35",
+    "integration": "43/43",
+    "security": "8/8",
+    "localFixtureE2e": "1/1",
+    "architecture": "PASSED",
+    "migrations": "4/4",
+    "smoke": "PASSED"
+  },
+  "requiredSkips": 0,
+  "failedAttemptsRetained": 4
+}

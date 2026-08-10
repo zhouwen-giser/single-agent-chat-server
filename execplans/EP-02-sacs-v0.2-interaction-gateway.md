@@ -50,7 +50,9 @@ Open WebUI / OpenAI client     official AG-UI client
 - [x] 2026-08-10: P02 implemented the typed interaction event spine and OpenAI renderer.
 - [x] 2026-08-11: P03 added protocol-neutral persistence and migration `0004`.
 - [x] 2026-08-11: P04 implemented authorized, non-mutating query services.
-- [ ] P05-P09: implement AG-UI SSE, mapping, interrupts, recovery, and security.
+- [x] 2026-08-11: P05 implemented authenticated AG-UI HTTP/SSE and official
+      client compatibility.
+- [ ] P06-P09: implement mapping, interrupts, recovery, and security.
 - [ ] P10-P12: run compatibility, persistence, official-client, and real E2E.
 - [ ] P13: produce the release candidate evidence set.
 - [ ] P14: merge latest `main`, run final gates, and open/update the PR. Do not
@@ -106,6 +108,12 @@ and exact local/remote-head comparison. Required failures remain under
 - Query safety is strongest when an unbound explicit Task ID is rejected before
   client creation; tests therefore assert both zero mutation calls and zero
   A2A client construction on that path.
+
+- `@ag-ui/client@0.0.57` can consume a Fastify-injected Response through its
+  official `HttpAgent`; this supplies a deterministic client compatibility gate
+  before the later real network E2E.
+- Keep `AG_UI_SERVICE_KEY` independent from the OpenAI service key while the
+  frozen signed-principal header remains shared across protocol adapters.
 
 ## Validation
 
