@@ -52,7 +52,9 @@ Open WebUI / OpenAI client     official AG-UI client
 - [x] 2026-08-11: P04 implemented authorized, non-mutating query services.
 - [x] 2026-08-11: P05 implemented authenticated AG-UI HTTP/SSE and official
       client compatibility.
-- [ ] P06-P09: implement mapping, interrupts, recovery, and security.
+- [x] 2026-08-11: P06 implemented strict normalized A2A to interaction and
+      official AG-UI event projection.
+- [ ] P07-P09: implement interrupts, recovery, and security.
 - [ ] P10-P12: run compatibility, persistence, official-client, and real E2E.
 - [ ] P13: produce the release candidate evidence set.
 - [ ] P14: merge latest `main`, run final gates, and open/update the PR. Do not
@@ -114,6 +116,12 @@ and exact local/remote-head comparison. Required failures remain under
   before the later real network E2E.
 - Keep `AG_UI_SERVICE_KEY` independent from the OpenAI service key while the
   frozen signed-principal header remains shared across protocol adapters.
+
+- P06 keeps A2A normalization separate from AG-UI projection: Task identity and
+  dedupe are enforced before the official adapter constructs State, Activity,
+  Text, Custom, Interrupt, and Run events.
+- Constructing Custom values from the frozen public-field catalog is safer than
+  copying a normalized payload and trying to subtract forbidden fields later.
 
 ## Validation
 

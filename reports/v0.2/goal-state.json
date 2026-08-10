@@ -45,7 +45,10 @@
       "evidenceCommit": "02bade1f5c2f179788374281631503205ba4dfc1",
       "remoteHead": "02bade1f5c2f179788374281631503205ba4dfc1"
     },
-    "P06": { "status": "pending" },
+    "P06": {
+      "status": "passed",
+      "implementationCommit": "b3d53e1186dc0fa244910c0e6d75569bea32e963"
+    },
     "P07": { "status": "pending" },
     "P08": { "status": "pending" },
     "P09": { "status": "pending" },
