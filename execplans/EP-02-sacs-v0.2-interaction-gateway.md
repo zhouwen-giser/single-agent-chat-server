@@ -58,7 +58,9 @@ Open WebUI / OpenAI client     official AG-UI client
 - [x] 2026-08-11: P08 implemented durable Run idempotency, disconnect-only
       observation abort, crash recovery, authorized `getTask()` rebuild, and
       real PostgreSQL restart proof.
-- [ ] P09: implement security, identity, privacy, and negative gates.
+- [x] 2026-08-11: P09 implemented unified Principal security policy,
+      deny-by-default CORS, protocol-isolated rate limits, URL projection
+      hardening, client-state nonauthority, and adversarial persistence gates.
 - [ ] P10-P12: run compatibility, persistence, official-client, and real E2E.
 - [ ] P13: produce the release candidate evidence set.
 - [ ] P14: merge latest `main`, run final gates, and open/update the PR. Do not
