@@ -93,7 +93,16 @@
       "evidenceCommit": "a926c09f172f64255fb8a7ae593f806dd97d018f",
       "remoteHead": "a926c09f172f64255fb8a7ae593f806dd97d018f"
     },
-    "P13": { "status": "pending" },
+    "P13": {
+      "status": "passed",
+      "implementationCommit": "40e7ae4e2346bb932ccd7e6b89aea3793cc08c42",
+      "implementationCommits": [
+        "cf19d7286ff0cba0cb00f6bdb1cd562541227aa9",
+        "40e7ae4e2346bb932ccd7e6b89aea3793cc08c42"
+      ],
+      "evidenceCommit": "0218c7812d25d062a5ae9a29dfe6172d1199359e",
+      "remoteHead": "0218c7812d25d062a5ae9a29dfe6172d1199359e"
+    },
     "P14": { "status": "pending" }
   }
 }
