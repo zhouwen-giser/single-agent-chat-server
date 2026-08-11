@@ -104,8 +104,10 @@ Production license inventory passed for 89 entries.
 
 ## Final PR
 
-Pending creation from `feature/single-sdar-chat-entry-v0.1` to `main` after this
-evidence commit and its remote checks pass.
+[PR #11](https://github.com/zhouwen-giser/single-agent-chat-server/pull/11)
+is open and Ready for review from `feature/single-sdar-chat-entry-v0.1` to
+`main`. Push and pull-request quality/container checks passed. Codex did not
+merge it.
 
 ## Merge Proof
 

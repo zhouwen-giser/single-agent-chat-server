@@ -73,8 +73,10 @@ Open WebUI / OpenAI client     official AG-UI client
       Run error closure, passed all five real zero-skip gates, native
       PostgreSQL/full verification, hardened Docker/Compose, CycloneDX SBOM,
       secret/license gates, and exact-SHA remote CI.
-- [ ] P14: merge latest `main`, run final gates, and open/update the PR. Do not
-      merge it; the user's explicit authorization stops at PR delivery.
+- [x] 2026-08-11: P14 proved latest main ancestry, reran all exact-head real
+      and release gates, opened PR #11, waited for push and pull-request
+      quality/container checks, and marked it Ready. AC-22 remains pending the
+      user-controlled merge; no merge, tag, release, or deployment was done.
 
 ## Implementation sequence
 

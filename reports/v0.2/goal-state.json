@@ -103,6 +103,15 @@
       "evidenceCommit": "0218c7812d25d062a5ae9a29dfe6172d1199359e",
       "remoteHead": "0218c7812d25d062a5ae9a29dfe6172d1199359e"
     },
-    "P14": { "status": "pending" }
+    "P14": {
+      "status": "pr_ready_user_merge_pending",
+      "candidateCommit": "80ed0bb5532a86feff2e2a374db9d7990301e7a7",
+      "evidenceCommit": "b9269bcc613320d33671fd1055efefa2949c5b5d",
+      "remoteHead": "b9269bcc613320d33671fd1055efefa2949c5b5d",
+      "pullRequest": 11,
+      "pullRequestUrl": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/11",
+      "readyForReview": true,
+      "ac22": "pending_user_controlled_merge"
+    }
   }
 }

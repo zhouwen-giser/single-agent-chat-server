@@ -2,6 +2,10 @@
   "phase": "P14",
   "status": "READY_FOR_PR_AC22_USER_MERGE_PENDING",
   "candidateSha": "80ed0bb5532a86feff2e2a374db9d7990301e7a7",
+  "evidenceCommit": "b9269bcc613320d33671fd1055efefa2949c5b5d",
+  "evidenceCiRunId": 31451495721,
+  "pullRequestCiRunId": 31451710922,
+  "publicationIndexSecretScan": "PASSED_418_TRACKED_FILES",
   "latestMainSha": "6a159aa87883568c96f7190c211150843a4d8ad4",
   "mergeBase": "6a159aa87883568c96f7190c211150843a4d8ad4",
   "mainIsAncestorOfCandidate": true,
@@ -70,6 +74,14 @@
     "AC-21": "PASSED_LATEST_MAIN_ANCESTOR",
     "AC-22": "PENDING_USER_CONTROLLED_PR_MERGE"
   },
-  "pullRequest": "PENDING_CREATION",
+  "pullRequest": {
+    "number": 11,
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/11",
+    "base": "main",
+    "head": "feature/single-sdar-chat-entry-v0.1",
+    "state": "OPEN",
+    "readyForReview": true,
+    "mergeable": true
+  },
   "rawSecretsCommitted": false
 }
