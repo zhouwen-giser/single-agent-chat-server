@@ -1,21 +1,18 @@
 # Project status
 
-Status: `P13_CANDIDATE_PASSED_P14_PENDING`
+Status: `P14_FINAL_GATES_PASSED_PR_PENDING`
 
-SACS v0.2 Phase 13 passed at exact candidate
-`40e7ae4e2346bb932ccd7e6b89aea3793cc08c42` on
-`feature/single-sdar-chat-entry-v0.1`. Local and remote feature heads matched,
-and GitHub Actions run 31448260553 passed quality and container jobs.
+The final SACS v0.2 product candidate is
+`80ed0bb5532a86feff2e2a374db9d7990301e7a7`. Latest `origin/main`
+`6a159aa87883568c96f7190c211150843a4d8ad4` is already its ancestor, and the
+normal P14 merge check returned `Already up to date` without rewriting history.
 
-The candidate passed 78 unit, 57 contract, 9 adversarial security, 51 native
-PostgreSQL integration, one fixture E2E, 19 OpenAI contract, and 7 A2A contract
-tests. All five required real gates passed with zero skips using pip Open WebUI
-0.10.2, official `@ag-ui/client@0.0.57`, frozen SDAR `a9957c82...`, A2A SDK
-`1.0.0-beta.0`, PostgreSQL 16, Docker/Compose hardening, and a current
-CycloneDX 1.7 SBOM.
+All final local, native PostgreSQL, real pip Open WebUI, official AG-UI, fixed
+SDAR, Docker/Compose, license, secret, and CycloneDX SBOM gates passed with zero
+required skips. AC-01 through AC-21 are passed.
 
-AC-01 through AC-20 are passed. P14 still must merge the latest `origin/main`
-into the feature branch without rebase, rerun the exact-head real and release
-gates, publish final evidence, and create or update the pull request to `main`.
-AC-21 and AC-22 remain pending until those latest-main and ancestry proofs
-exist. Merge, tag, release, and deployment remain user-controlled.
+The remaining authorized work is to publish this P14 evidence, create the PR to
+`main`, wait for its required checks, and mark it Ready. AC-22 remains pending
+until the user merges that protected PR and the final candidate becomes an
+ancestor of `origin/main`. Codex will not merge, tag, release, or deploy without
+new user authorization.
