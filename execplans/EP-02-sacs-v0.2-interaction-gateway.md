@@ -65,7 +65,10 @@ Open WebUI / OpenAI client     official AG-UI client
       its real SDAR matrix.
 - [x] 2026-08-11: P11 connected production typed A2A observations, durable
       Interrupt persistence, and the exact official AG-UI client real E2E.
-- [ ] P12: run both northbound protocols against the same fixed SDAR.
+- [x] 2026-08-11: P12 ran real pip Open WebUI/OpenAI and official AG-UI
+      northbound paths against the same fixed SDAR, proved same-Task renderer
+      consistency and bounded-stream `getTask()` recovery, and retained all
+      material failed attempts.
 - [ ] P13: produce the release candidate evidence set.
 - [ ] P14: merge latest `main`, run final gates, and open/update the PR. Do not
       merge it; the user's explicit authorization stops at PR delivery.
@@ -148,6 +151,12 @@ and exact local/remote-head comparison. Required failures remain under
 - Docker may reassign a dynamically published host port after container restart;
   post-restart verification must rediscover `docker port` rather than reuse a
   stale test URL.
+
+- The real local SDAR test composition serializes background Goal/model cleanup.
+  Keep the combined northbound, same-Task consistency, and short-budget
+  observation scenarios as explicit zero-skip commands against one locked
+  environment; restarting only the exact SDAR test process isolates prior test
+  cleanup without substituting product dependencies or weakening assertions.
 
 ## Validation
 
