@@ -39,8 +39,40 @@ export interface FollowUpTurnContext extends TaskTurnContext {
   readonly action: SdarFollowUpAction;
   readonly data?: JsonValue;
 }
+
+export type TaskCoordinatorObservation =
+  | {
+      readonly source: "stream";
+      readonly value: NormalizedStreamEvent;
+      readonly fragments: readonly string[];
+    }
+  | {
+      readonly source: "task";
+      readonly value: NormalizedTask;
+      readonly fragments: readonly string[];
+    };
+
+export type TaskCoordinatorObserver = (
+  observation: TaskCoordinatorObservation,
+) => void;
+
+export type TaskCoordinatorRepository = Pick<
+  ChatPersistenceRepository,
+  | "claimRequest"
+  | "completeRequest"
+  | "abandonRequestClaim"
+  | "claimTaskSubmissionSlot"
+  | "claimTaskInteractionSlot"
+  | "releaseTaskSubmissionSlot"
+  | "findActiveTaskForChat"
+  | "findAuthorizedTask"
+  | "createTaskBinding"
+  | "updateTaskBinding"
+  | "recordEvent"
+>;
+
 export interface TaskCoordinatorOptions {
-  readonly repository: ChatPersistenceRepository;
+  readonly repository: TaskCoordinatorRepository;
   readonly getClient: () => Promise<SdarA2aClient>;
   readonly streamBudgetMs?: number;
   readonly pollingBudgetMs?: number;
@@ -73,6 +105,7 @@ export class SdarTaskCoordinator {
   async *submit(
     input: TaskTurnContext,
     callerSignal?: AbortSignal,
+    observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
     const requestHash = hashJson({
       chatId: input.chatId,
@@ -111,6 +144,13 @@ export class SdarTaskCoordinator {
         signal: callerSignal,
       });
       const observed = await this.observeTask(task, binding, true);
+      if (observed.publishable) {
+        observer?.({
+          source: "task",
+          value: task,
+          fragments: observed.fragments,
+        });
+      }
       for (const fragment of observed.fragments) yield fragment;
       return;
     }
@@ -174,12 +214,26 @@ export class SdarTaskCoordinator {
             assertSameTask(task, binding);
             const enriched = await this.observeTask(task, binding, true);
             binding = enriched.binding;
+            if (enriched.publishable) {
+              observer?.({
+                source: "task",
+                value: task,
+                fragments: enriched.fragments,
+              });
+            }
             const boundaryFragments =
               enriched.fragments.length > 0
                 ? enriched.fragments
                 : observed.fragments;
             for (const fragment of boundaryFragments) yield fragment;
             return;
+          }
+          if (observed.publishable) {
+            observer?.({
+              source: "stream",
+              value: event,
+              fragments: observed.fragments,
+            });
           }
           for (const fragment of observed.fragments) yield fragment;
           if (latestState !== undefined && isResponseBoundary(latestState))
@@ -198,7 +252,7 @@ export class SdarTaskCoordinator {
       }
       if (latestState !== undefined && isResponseBoundary(latestState)) return;
 
-      yield* this.pollTask(client, binding, callerSignal);
+      yield* this.pollTask(client, binding, callerSignal, observer);
     } finally {
       await this.options.repository.releaseTaskSubmissionSlot({
         chatId: input.chatId,
@@ -211,6 +265,7 @@ export class SdarTaskCoordinator {
   async *followUp(
     input: FollowUpTurnContext,
     callerSignal?: AbortSignal,
+    observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
     const binding = await this.options.repository.findActiveTaskForChat({
       chatId: input.chatId,
@@ -264,6 +319,13 @@ export class SdarTaskCoordinator {
         signal: callerSignal,
       });
       const observed = await this.observeTask(task, binding, true);
+      if (observed.publishable) {
+        observer?.({
+          source: "task",
+          value: task,
+          fragments: observed.fragments,
+        });
+      }
       for (const fragment of observed.fragments) yield fragment;
       return;
     }
@@ -310,11 +372,22 @@ export class SdarTaskCoordinator {
         resultTaskId: binding.sdarTaskId,
       });
       if (result.kind === "message") {
-        for (const fragment of renderMessage(result.message)) yield fragment;
+        const fragments = renderMessage(result.message);
+        if (fragments.length > 0) {
+          observer?.({ source: "stream", value: result, fragments });
+        }
+        for (const fragment of fragments) yield fragment;
         return;
       }
       assertSameTask(result.task, binding);
       const observed = await this.observeTask(result.task, binding, true);
+      if (observed.publishable) {
+        observer?.({
+          source: "task",
+          value: result.task,
+          fragments: observed.fragments,
+        });
+      }
       for (const fragment of observed.fragments) yield fragment;
     } finally {
       await this.options.repository.releaseTaskSubmissionSlot({
@@ -328,6 +401,7 @@ export class SdarTaskCoordinator {
   async *cancel(
     input: TaskTurnContext,
     callerSignal?: AbortSignal,
+    observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
     const binding = await this.options.repository.findActiveTaskForChat({
       chatId: input.chatId,
@@ -406,12 +480,53 @@ export class SdarTaskCoordinator {
     }
     assertSameTask(task, binding);
     const observed = await this.observeTask(task, binding, true);
+    if (observed.publishable) {
+      observer?.({
+        source: "task",
+        value: task,
+        fragments: observed.fragments,
+      });
+    }
     for (const fragment of observed.fragments) yield fragment;
     yield "This is the top-level SDAR Task state returned by cancelTask; it does not prove that every lower-level Provider has stopped.";
+  }
+  async *statusForTask(
+    input: {
+      readonly chatId: string;
+      readonly userId: string;
+      readonly taskId: string;
+    },
+    callerSignal?: AbortSignal,
+    observer?: TaskCoordinatorObserver,
+  ): AsyncGenerator<string> {
+    const binding = await this.options.repository.findAuthorizedTask({
+      openWebUiChatId: input.chatId,
+      userId: input.userId,
+      sdarTaskId: input.taskId,
+    });
+    if (binding === undefined) {
+      yield "The requested SDAR Task is not bound to this user and chat.";
+      return;
+    }
+    const client = await this.options.getClient();
+    const task = await client.getTask(binding.sdarTaskId, {
+      signal: callerSignal,
+    });
+    assertSameTask(task, binding);
+    const observed = await this.observeTask(task, binding, true);
+    if (observed.publishable) {
+      observer?.({
+        source: "task",
+        value: task,
+        fragments: observed.fragments,
+      });
+    }
+    for (const fragment of observed.fragments) yield fragment;
   }
   async *status(
     input: Pick<TaskTurnContext, "chatId" | "userId">,
     callerSignal?: AbortSignal,
+    observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
     const binding = await this.options.repository.findActiveTaskForChat(input);
     if (binding === undefined) {
@@ -423,6 +538,13 @@ export class SdarTaskCoordinator {
       signal: callerSignal,
     });
     const observed = await this.observeTask(task, binding, true);
+    if (observed.publishable) {
+      observer?.({
+        source: "task",
+        value: task,
+        fragments: observed.fragments,
+      });
+    }
     for (const fragment of observed.fragments) yield fragment;
   }
 
@@ -430,6 +552,7 @@ export class SdarTaskCoordinator {
     client: SdarA2aClient,
     initialBinding: TaskBinding,
     signal?: AbortSignal,
+    observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
     const startedAt = this.now();
     let binding = initialBinding;
@@ -439,6 +562,13 @@ export class SdarTaskCoordinator {
       const task = await client.getTask(binding.sdarTaskId, { signal });
       const observed = await this.observeTask(task, binding);
       binding = observed.binding;
+      if (observed.publishable) {
+        observer?.({
+          source: "task",
+          value: task,
+          fragments: observed.fragments,
+        });
+      }
       for (const fragment of observed.fragments) yield fragment;
       if (isResponseBoundary(task.state)) return;
     }
@@ -453,9 +583,11 @@ export class SdarTaskCoordinator {
     readonly binding?: TaskBinding;
     readonly task?: NormalizedTask;
     readonly fragments: readonly string[];
+    readonly publishable: boolean;
   }> {
     if (event.kind === "message") {
-      return { fragments: renderMessage(event.message) };
+      const fragments = renderMessage(event.message);
+      return { fragments, publishable: fragments.length > 0 };
     }
     if (event.kind === "artifact") {
       const binding = await this.ensureBinding(
@@ -475,6 +607,7 @@ export class SdarTaskCoordinator {
       return {
         binding,
         fragments: unique ? renderArtifact(event.artifact) : [],
+        publishable: unique,
       };
     }
     if (event.kind === "task") {
@@ -519,6 +652,7 @@ export class SdarTaskCoordinator {
         unique && accepted
           ? renderStatus(event.state, event.message, event.phaseMessage, event)
           : [],
+      publishable: unique && accepted,
     };
   }
 
@@ -526,7 +660,11 @@ export class SdarTaskCoordinator {
     task: NormalizedTask,
     binding: TaskBinding,
     forceRender = false,
-  ): Promise<{ readonly binding: TaskBinding; readonly fragments: string[] }> {
+  ): Promise<{
+    readonly binding: TaskBinding;
+    readonly fragments: string[];
+    readonly publishable: boolean;
+  }> {
     const hash = observationHash(task);
     const unique = await this.options.repository.recordEvent({
       taskId: task.taskId,
@@ -547,7 +685,7 @@ export class SdarTaskCoordinator {
     const accepted =
       updated.status === task.state && updated.lastEventHash === hash;
     if (!accepted || (!unique && !forceRender)) {
-      return { binding: updated, fragments: [] };
+      return { binding: updated, fragments: [], publishable: false };
     }
     return {
       binding: updated,
@@ -562,6 +700,7 @@ export class SdarTaskCoordinator {
           ? task.artifacts.flatMap(renderArtifact)
           : []),
       ],
+      publishable: true,
     };
   }
 

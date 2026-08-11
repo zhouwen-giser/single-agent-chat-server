@@ -1,6 +1,7 @@
 import {
   Role,
   TaskState,
+  type AgentCard,
   type Artifact,
   type Message,
   type Part,
@@ -11,6 +12,7 @@ import {
 
 import type {
   JsonValue,
+  NormalizedAgentCard,
   NormalizedArtifact,
   NormalizedMessage,
   NormalizedPart,
@@ -21,6 +23,9 @@ import type {
 } from "./types.js";
 
 const MAX_PARTS = 64;
+const MAX_HISTORY_MESSAGES = 100;
+const MAX_SKILLS = 128;
+const MAX_SKILL_VALUES = 64;
 const MAX_ARTIFACTS = 32;
 const MAX_TEXT_CHARS = 64 * 1024;
 const MAX_JSON_CHARS = 256 * 1024;
@@ -177,6 +182,53 @@ const normalizeStatus = (
   };
 };
 
+export function normalizeAgentCard(card: AgentCard): NormalizedAgentCard {
+  const skills = boundedArray(card.skills, "Agent Card skills", MAX_SKILLS).map(
+    (skill) => ({
+      id: requiredString(skill.id, "Agent Card skill ID", 256),
+      name: requiredString(skill.name, "Agent Card skill name", 256),
+      ...(skill.description.trim().length === 0
+        ? {}
+        : {
+            description: requiredString(
+              skill.description,
+              "Agent Card skill description",
+              4_000,
+            ),
+          }),
+      tags: boundedArray(
+        skill.tags,
+        "Agent Card skill tags",
+        MAX_SKILL_VALUES,
+      ).map((value) => requiredString(value, "Agent Card skill tag", 256)),
+      examples: boundedArray(
+        skill.examples,
+        "Agent Card skill examples",
+        MAX_SKILL_VALUES,
+      ).map((value) =>
+        requiredString(value, "Agent Card skill example", 4_000),
+      ),
+    }),
+  );
+  return {
+    name: requiredString(card.name, "Agent Card name", 256),
+    ...(card.description.trim().length === 0
+      ? {}
+      : {
+          description: requiredString(
+            card.description,
+            "Agent Card description",
+            4_000,
+          ),
+        }),
+    version: requiredString(card.version, "Agent Card version", 128),
+    protocolVersion: "1.0",
+    protocolBinding: "HTTP+JSON",
+    streaming: true,
+    skills,
+  };
+}
+
 export function normalizeTask(task: Task): NormalizedTask {
   const metadata = task.metadata as Record<string, unknown> | undefined;
   const taskId = requiredString(task.id, "A2A Task ID", 256);
@@ -188,6 +240,14 @@ export function normalizeTask(task: Task): NormalizedTask {
     "A2A Task artifacts",
     MAX_ARTIFACTS,
   ).map(normalizeArtifact);
+  const history = boundedArray(
+    task.history,
+    "A2A Task history",
+    MAX_HISTORY_MESSAGES,
+  ).map(normalizeMessage);
+  history.forEach((message) =>
+    assertMessageIdentity(message, taskId, contextId),
+  );
   const normalized: NormalizedTask = {
     taskId,
     contextId,
@@ -216,6 +276,7 @@ export function normalizeTask(task: Task): NormalizedTask {
       ? {}
       : { nextAction: metadataString(metadata, "nextAction", 512) }),
     artifacts,
+    history,
   };
   assertSerializedSize(normalized, "A2A Task", MAX_TASK_CHARS);
   return normalized;

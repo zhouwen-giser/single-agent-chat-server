@@ -11,7 +11,9 @@ Set these values in the shell or a non-committed `.env` file:
 
 ```text
 CHAT_SERVER_SERVICE_KEY=<at least 32 characters>
+AG_UI_SERVICE_KEY=<different value, at least 32 characters>
 OPENWEBUI_USER_JWT_SECRET=<same secret as Open WebUI forwarding>
+CHAT_CORS_ALLOW_ORIGINS=<optional exact browser origin; empty denies CORS>
 POSTGRES_PASSWORD=<strong database password>
 ```
 
@@ -45,6 +47,15 @@ SDAR_A2A_ENDPOINT_OVERRIDE=http://sdar:9999/a2a
 ```
 
 The override must be explicit; the adapter never rewrites `0.0.0.0` silently.
+
+## Connect an official AG-UI client
+
+Use `GET /ag-ui/capabilities` for the implemented profile and `POST /ag-ui` for
+HTTP/SSE Runs. Supply the distinct `AG_UI_SERVICE_KEY` bearer credential and
+the same validated signed-principal header policy used by the server. Do not
+reuse the OpenAI service key. The official client must treat a finished HTTP
+observation as bounded; reconnect by Run idempotency or an authorized status
+Run, never by inventing an A2A cursor.
 
 ## Stop and remove test data
 

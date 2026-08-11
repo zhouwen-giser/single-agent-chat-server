@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 
 const allowed = new Set(["Apache-2.0", "BSD-3-Clause", "ISC", "MIT"]);
+const allowedExpressions = new Set(["(Apache-2.0 AND BSD-3-Clause)"]);
 const pnpmEntry = process.env.npm_execpath;
 if (pnpmEntry === undefined) {
   throw new Error("Run the license gate through pnpm");
@@ -19,7 +20,9 @@ if (result.status !== 0) {
 }
 const inventory = JSON.parse(result.stdout);
 const detected = Object.keys(inventory).sort();
-const rejected = detected.filter((license) => !allowed.has(license));
+const rejected = detected.filter(
+  (license) => !allowed.has(license) && !allowedExpressions.has(license),
+);
 if (rejected.length > 0) {
   throw new Error(`Disallowed production licenses: ${rejected.join(", ")}`);
 }

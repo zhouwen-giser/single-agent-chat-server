@@ -1,0 +1,40 @@
+{
+  "phase": "P09",
+  "status": "PASSED_IMPLEMENTATION_PUBLISHED",
+  "implementationCommit": "45faac3cbf1102b0171ced4b4b16ae0dc4a7aec9",
+  "evidenceCommit": "6dcf966f75f2c4b483ea13ba8d8bb19f2541eb87",
+  "checks": {
+    "independentServiceCredentials": "PASSED_EXISTING_AND_REGRESSION",
+    "signedBoundedPrincipalJwt": "PASSED",
+    "plaintextIdentityDenied": "PASSED",
+    "clientStateIsNotAuthority": "PASSED",
+    "taskAuthorizationBeforeA2a": "PASSED_POSTGRESQL",
+    "crossPrincipalRunCollisionDenied": "PASSED_POSTGRESQL",
+    "protocolNamespacedRateLimits": "PASSED_ADVERSARIAL",
+    "corsDenyByDefault": "PASSED",
+    "corsExactOriginAllowlist": "PASSED",
+    "corsMethodAndHeaderAllowlist": "PASSED",
+    "corsCredentialsDisabled": "PASSED",
+    "requestEventDataBounds": "PASSED",
+    "redactionAndLowCardinalityTelemetry": "PASSED_EXISTING_AND_REGRESSION",
+    "rawAndToolProjectionDisabled": "PASSED",
+    "artifactUrlNeverFetched": "PASSED_ARCHITECTURE",
+    "localPrivateReservedAndMappedUrlRejected": "PASSED",
+    "trustedPrivateA2aBoundaryDocumented": "PASSED",
+    "secretScan": "PASSED_354_TRACKED_FILES"
+  },
+  "tests": {
+    "unit": "76/76",
+    "contract": "37/37",
+    "integration": "50/50",
+    "security": "9/9",
+    "localFixtureE2e": "1/1",
+    "architecture": "PASSED_59_SOURCE_FILES",
+    "migrations": "6/6",
+    "smoke": "PASSED"
+  },
+  "requiredSkips": 0,
+  "failedAttemptsRetained": 4,
+  "realSdarE2e": "NOT_CLAIMED_P11_P12",
+  "realOpenWebUiE2e": "NOT_CLAIMED_P12"
+}

@@ -1,0 +1,62 @@
+{
+  "phase": "P10",
+  "status": "PASSED_IMPLEMENTATION_PUBLISHED",
+  "implementationCommit": "397fff8f43f0ecd41187e3bdc4289218efe18f32",
+  "evidenceCommit": "e892cec19f9e400e5c05f7b71c8c96867429f712",
+  "implementationCommits": [
+    "e09c5b94abe618a2636986930864e170163c13bd",
+    "340dd5b953926cd17334e526eff495d889cf0d6e",
+    "8c8255f7713f09f7a1ecbe2b37dbdf6ed2ddec65",
+    "397fff8f43f0ecd41187e3bdc4289218efe18f32"
+  ],
+  "checks": {
+    "v01PredecessorRegression": "PASSED_20_OF_20_REAL_OPENAI_HTTP_ENTRY",
+    "realOpenWebUiVersion": "PASSED_PIP_0.10.2",
+    "realOpenWebUiModelDiscovery": "PASSED_SDAR_SINGLE_AGENT",
+    "signedOpenWebUiIdentity": "PASSED_TWO_DISTINCT_SIGNED_USERS",
+    "realOpenWebUiExactSacsSha": "PASSED_397FFF8F43F0ECD41187E3BDC4289218EFE18F32",
+    "exactSdarSha": "PASSED_A9957C82C17CA01E77528F3817C03D86224AAF88_CLEAN",
+    "agentCard": "PASSED_HTTP_JSON_1.0_STREAMING",
+    "officialSdkPin": "PASSED_1.0.0_BETA.0",
+    "streamAndSingleDone": "PASSED_TEXT_EVENT_STREAM_ONE_DONE",
+    "newTaskStatusResultHistory": "PASSED_REAL",
+    "planConfirmRejectRevise": "PASSED_REAL",
+    "provideInputDistinctPhase": "PASSED_REAL",
+    "pauseResumeDistinctPhase": "PASSED_REAL",
+    "topLevelCancelTask": "PASSED_REAL_CANCELED",
+    "completionTextAndJsonArtifact": "PASSED_REAL",
+    "capabilityGapProjection": "PASSED_REAL_REDACTED",
+    "restartRecovery": "PASSED_REAL_PERSISTED_BINDING",
+    "disconnectRecovery": "PASSED_REAL_GETTASK_AFTER_ABORT",
+    "utilityAndOrdinaryIsolation": "PASSED_ZERO_TASK_BINDINGS",
+    "crossUserIsolation": "PASSED_ZERO_CROSS_USER_TASK_BINDINGS",
+    "retryIdempotency": "PASSED_ONE_ROW_ONE_RESULT_TASK_ONE_BINDING",
+    "queryMutationIsolation": "PASSED_BINDING_COUNT_UNCHANGED",
+    "productionBoundary": "PASSED_NO_SDAR_MANAGEMENT_DB_OR_MCP_ACCESS"
+  },
+  "tests": {
+    "unit": "76/76",
+    "contract": "57/57",
+    "postgresIntegration": "50/50",
+    "openAiPredecessor": "20/20",
+    "security": "9/9",
+    "localFixtureE2e": "1/1",
+    "architecture": "PASSED_59_SOURCE_FILES",
+    "migrations": "6/6",
+    "licenses": "PASSED_89_PRODUCTION_ENTRIES",
+    "smoke": "PASSED"
+  },
+  "realEvidence": {
+    "strictScenarioRunId": "p10-head-1786397637491",
+    "normalQueryRunId": "p10-v6-1786397800323",
+    "requiredSkips": 0,
+    "ordinaryTaskBindings": 0,
+    "utilityTaskBindings": 0,
+    "retryIdempotencyRows": 1,
+    "retryDistinctTasks": 1,
+    "disconnectPersistedBindings": 1,
+    "crossUserTaskBindings": 0
+  },
+  "failedAttemptsRetained": 15,
+  "rawSecretsCommitted": false
+}

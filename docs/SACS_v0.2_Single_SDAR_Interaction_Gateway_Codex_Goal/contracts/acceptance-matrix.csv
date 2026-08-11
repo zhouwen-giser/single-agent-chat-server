@@ -1,0 +1,23 @@
+AC,scenario,phase,required_evidence
+AC-01,Phase13 merged main gate prevents early start,P00,phase13-merge-proof
+AC-02,OpenWebUI new SDAR task,P10/P12,real-openwebui-e2e
+AC-03,OpenWebUI status/result/history,P10/P12,real-openwebui-e2e
+AC-04,AG-UI run lifecycle,P05/P11,official-client-e2e
+AC-05,A2A status to AG-UI state,P06/P12,mapping-e2e
+AC-06,Artifact text/json mapping,P06/P12,mapping-e2e
+AC-07,plan confirmation interrupt/resume,P07/P12,real-sdar-interrupt-e2e
+AC-08,provide_input interrupt/resume,P07/P12,real-sdar-interrupt-e2e
+AC-09,paused interrupt/resume,P07/P12,real-sdar-interrupt-e2e
+AC-10,browser disconnect does not cancel task,P08/P12,disconnect-e2e
+AC-11,duplicate run does not duplicate task,P08,idempotency-integration
+AC-12,unbound taskId denied,P04/P09,security-test
+AC-13,capabilities from current Agent Card,P04/P12,agent-card-e2e
+AC-14,capability gap safe projection,P06/P12,real-sdar-e2e
+AC-15,no internal MCP as tool call,P06/P09,negative-contract-test
+AC-16,OpenAI and AG-UI same state semantics,P10/P11/P12,cross-protocol-consistency
+AC-17,PostgreSQL restart restores bindings,P03/P08,restart-integration
+AC-18,v0.1 upgrade preserves bindings,P03,upgrade-migration
+AC-19,real AG-UI client to SACS to SDAR,P11/P12,real-e2e
+AC-20,candidate Docker/Compose/SBOM exact HEAD,P13,release-report
+AC-21,feature contains latest main before merge,P14,merge-proof
+AC-22,final candidate ancestor of origin/main,P14,post-merge-proof

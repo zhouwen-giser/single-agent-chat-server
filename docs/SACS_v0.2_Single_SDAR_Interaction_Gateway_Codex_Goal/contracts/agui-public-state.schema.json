@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.sacs.local/v0.2/agui-public-state.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "conversation", "observation"],
+  "properties": {
+    "schemaVersion": {
+      "const": "io.sacs/agui-state/v0.2"
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "agentCardHash": {
+          "type": "string"
+        },
+        "capabilityCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "conversation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["threadId", "hasActiveTask"],
+      "properties": {
+        "threadId": {
+          "type": "string"
+        },
+        "hasActiveTask": {
+          "type": "boolean"
+        }
+      }
+    },
+    "task": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "taskId": {
+          "type": "string"
+        },
+        "contextId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "internalPhase": {
+          "type": "string"
+        },
+        "phaseMessage": {
+          "type": "string"
+        },
+        "errorCode": {
+          "type": "string"
+        },
+        "terminal": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "allowedActions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bounded", "endedBeforeTaskTerminal"],
+      "properties": {
+        "bounded": {
+          "type": "boolean"
+        },
+        "endedBeforeTaskTerminal": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

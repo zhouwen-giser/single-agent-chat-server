@@ -1,0 +1,35 @@
+{
+  "phase": "P06",
+  "status": "PASSED_PUBLISHED",
+  "implementationCommit": "b3d53e1186dc0fa244910c0e6d75569bea32e963",
+  "checks": {
+    "normalizedA2aToInteractionMapper": "PASSED",
+    "authorizedTaskIdentityLocked": "PASSED",
+    "taskBoundBeforeSnapshot": "PASSED",
+    "stateSnapshotBeforeDelta": "PASSED",
+    "activitySnapshotBeforeDelta": "PASSED",
+    "rfc6902StateDelta": "PASSED",
+    "publishedStatusAndPhase": "PASSED",
+    "artifactTextJsonReference": "PASSED",
+    "capabilityGapSafeProjection": "PASSED",
+    "phaseSpecificAllowedActions": "PASSED",
+    "inputRequiredOfficialInterrupt": "PASSED",
+    "boundedObservationRunFinish": "PASSED",
+    "customEventFieldCatalog": "PASSED",
+    "rawAndToolEventsAbsent": "PASSED",
+    "runIsNotTask": "PASSED",
+    "sharedOpenAiAgUiEventSemantics": "PASSED",
+    "typedEventAgUiHandler": "PASSED"
+  },
+  "tests": {
+    "unit": "63/63",
+    "contract": "35/35",
+    "integration": "43/43",
+    "security": "8/8",
+    "architecture": "PASSED_54_SOURCE_FILES",
+    "migrations": "4/4",
+    "smoke": "PASSED"
+  },
+  "requiredSkips": 0,
+  "failedAttemptsRetained": 3
+}

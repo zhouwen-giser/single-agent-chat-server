@@ -1,0 +1,42 @@
+{
+  "phase": "P08",
+  "status": "PASSED_IMPLEMENTATION_PUBLISHED",
+  "implementationCommit": "559794783f88a84fd9b8dee97aaa1b43978c62d4",
+  "evidenceCommit": "d1693e23591f1edd4cffdae2946471d865d93aef",
+  "checks": {
+    "durableAgUiRequestClaim": "PASSED",
+    "durableRunLifecycle": "PASSED",
+    "sameIdSameHashReplay": "PASSED",
+    "sameIdDifferentHashConflict": "PASSED",
+    "crashBeforeA2aSubmissionRecovery": "PASSED",
+    "crashAfterA2aSubmissionStableMessageId": "PASSED",
+    "duplicateRunSingleRemoteTaskIdentity": "PASSED",
+    "disconnectAbortsObservationOnly": "PASSED",
+    "disconnectCancelTaskCalls": "0",
+    "boundedStreamThenPolling": "PASSED_EXISTING_COORDINATOR",
+    "authorizedGetTaskRecovery": "PASSED",
+    "processRestartRepositoryRebuild": "PASSED",
+    "realPostgresRestartProbePreserved": "p08-restart-run|RUNNING|p08-restart-task|p08-restart-context|4",
+    "runIsNotTask": "PASSED",
+    "noEventCursorOrTaskResubscription": "PASSED",
+    "appendOnlyMigration0006": "PASSED",
+    "ac10DisconnectDoesNotCancel": "PASSED_INTEGRATION",
+    "ac11DuplicateRunNoDuplicateTask": "PASSED_INTEGRATION",
+    "ac17PostgresRestartRestoresBindings": "PASSED_REAL_RESTART_PROBE"
+  },
+  "tests": {
+    "unit": "70/70",
+    "contract": "37/37",
+    "integration": "49/49",
+    "p08FocusedIntegrationAfterPostgresRestart": "4/4",
+    "security": "8/8",
+    "localFixtureE2e": "1/1",
+    "architecture": "PASSED_58_SOURCE_FILES",
+    "migrations": "6/6",
+    "smoke": "PASSED"
+  },
+  "requiredSkips": 0,
+  "failedAttemptsRetained": 7,
+  "realSdarE2e": "NOT_CLAIMED_P11_P12",
+  "realOpenWebUiE2e": "NOT_CLAIMED_P12"
+}

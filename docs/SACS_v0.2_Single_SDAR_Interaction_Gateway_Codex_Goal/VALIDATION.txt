@@ -1,0 +1,12 @@
+TASK_PACKAGE_OK
+package_version=1.0.0
+phases=15
+acceptance_cases=22
+waiting_gate=mandatory
+current_sacs_status=IN_PROGRESS
+current_phase13=in_progress
+current_sacs_feature=085e456c9802462c5d0c2a8c2310cadbfa760a96
+current_sacs_main=3e5be7150e959006d4d152ba6d0d32ebc93ab419
+reference_sdar=a9957c82c17ca01e77528f3817c03d86224aaf88
+reference_agui_release=release/2026-08-07
+reference_agui_commit=338708ca8b57deda9c82d0329f30944ab4b0dea6

@@ -1,8 +1,20 @@
 import { randomUUID } from "node:crypto";
 import process from "node:process";
 
+import {
+  createInteractionAgUiRunHandler,
+  type AgUiRunHandler,
+} from "../../../packages/ag-ui-interaction-adapter/src/index.js";
 import { SdarTaskCoordinator } from "../../../packages/chat-runtime/src/index.js";
 import {
+  DurableAgUiRunService,
+  InterruptResumeService,
+  persistInterruptsBeforeRunFinish,
+  resumeRunToInteractionEvents,
+} from "../../../packages/interaction-runtime/src/index.js";
+import { InteractionQueryService } from "../../../packages/interaction-query/src/index.js";
+import {
+  AgUiTaskCoordinatorRepository,
   parsePersistenceConfig,
   setupPersistence,
   type PersistenceRuntime,
@@ -16,6 +28,10 @@ import { localFallbackChatModel } from "../../../src/agent/model.js";
 import type { ChatRunner, ChatRunnerResult } from "./api/openai-routes.js";
 import { buildServer } from "./bootstrap.js";
 import { createLazySdarClient } from "./chat/lazy-sdar-client.js";
+import {
+  createSdarAgUiInteractionSource,
+  createSdarAgUiTaskRecoverySource,
+} from "./chat/sdar-agui-runner.js";
 import { createSdarChatRunner } from "./chat/sdar-chat-runner.js";
 import { loadServerConfig } from "./config.js";
 import { instrumentChatModel } from "./observability/instrumented-chat-model.js";
@@ -41,6 +57,72 @@ try {
       throw error;
     }
   });
+  const chatModel = instrumentChatModel(localFallbackChatModel, telemetry);
+  const queryService = new InteractionQueryService(
+    activePersistence.interactionRepository,
+    getClient,
+  );
+  const agUiCoordinator = new SdarTaskCoordinator({
+    repository: new AgUiTaskCoordinatorRepository(
+      activePersistence.interactionRepository,
+    ),
+    getClient,
+    streamBudgetMs: config.streamBudgetMs,
+    pollingBudgetMs: config.pollingBudgetMs,
+    pollingIntervalMs: config.pollingIntervalMs,
+  });
+  const interruptResumeService = new InterruptResumeService({
+    repository: activePersistence.interactionRepository,
+    getClient,
+  });
+  const agUiInteractionSource = createSdarAgUiInteractionSource({
+    repository: activePersistence.interactionRepository,
+    checkpointer: activePersistence.checkpointer,
+    coordinator: agUiCoordinator,
+    queryService,
+    model: chatModel,
+  });
+  const agUiTaskRecoverySource =
+    createSdarAgUiTaskRecoverySource(agUiCoordinator);
+  const durableAgUiRunService = new DurableAgUiRunService({
+    repository: activePersistence.interactionRepository,
+    execute: (context) =>
+      persistInterruptsBeforeRunFinish(agUiInteractionSource(context), {
+        service: interruptResumeService,
+        principalId: context.principalId,
+        internalThreadId: context.threadId,
+      }),
+    recoverTask: (context, taskId) =>
+      persistInterruptsBeforeRunFinish(
+        agUiTaskRecoverySource(context, taskId),
+        {
+          service: interruptResumeService,
+          principalId: context.principalId,
+          internalThreadId: context.threadId,
+        },
+      ),
+  });
+  const runGeneralAgUi = createInteractionAgUiRunHandler((context) =>
+    durableAgUiRunService.run({
+      input: context.input,
+      principalId: context.principalId,
+      threadId: context.internalThreadId,
+      signal: context.signal,
+    }),
+  );
+  const runResumeAgUi = createInteractionAgUiRunHandler((context) =>
+    resumeRunToInteractionEvents({
+      service: interruptResumeService,
+      runInput: context.input,
+      principalId: context.principalId,
+      threadId: context.internalThreadId,
+      signal: context.signal,
+    }),
+  );
+  const runAgUi: AgUiRunHandler = (context) =>
+    (context.input.resume?.length ?? 0) > 0
+      ? runResumeAgUi(context)
+      : runGeneralAgUi(context);
   const coordinator = new SdarTaskCoordinator({
     repository: activePersistence.repository,
     getClient,
@@ -57,7 +139,8 @@ try {
       repository: activePersistence.repository,
       checkpointer: activePersistence.checkpointer,
       coordinator,
-      model: instrumentChatModel(localFallbackChatModel, telemetry),
+      queryService,
+      model: chatModel,
     }),
     async () => {
       telemetry.setActiveTasks(
@@ -72,6 +155,20 @@ try {
     readinessCheck: () => activePersistence.readiness(),
     resolveChatThread: (input) =>
       activePersistence.repository.getOrCreateThread(input),
+    resolveAgUiThread: async (input) => {
+      const principal =
+        await activePersistence.interactionRepository.resolvePrincipal({
+          issuer: "openwebui-jwt",
+          subject: input.userId,
+          role: input.userRole,
+        });
+      return activePersistence.interactionRepository.getOrCreateThread({
+        clientType: "ag_ui",
+        externalThreadId: input.externalThreadId,
+        principalId: principal.principalId,
+      });
+    },
+    runAgUi,
     checkpointer: activePersistence.checkpointer,
     runChat,
   });
@@ -114,7 +211,10 @@ function withActiveTaskRefresh(
 async function* refreshAfter(
   result: Exclude<ChatRunnerResult, string>,
   refresh: () => Promise<void>,
-): AsyncGenerator<string> {
+): AsyncGenerator<
+  | string
+  | import("../../../packages/interaction-contract/src/index.js").SdarInteractionEvent
+> {
   try {
     yield* result;
   } finally {

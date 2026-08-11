@@ -1,0 +1,117 @@
+{
+  "goalId": "SACS-V0.2-SINGLE-SDAR-INTERACTION-GATEWAY",
+  "status": "IN_PROGRESS",
+  "baseline": {
+    "mainSha": "6a159aa87883568c96f7190c211150843a4d8ad4",
+    "mainTree": "bd047752f44acf7fd4028bfa77916752f705d019",
+    "sdarSha": "a9957c82c17ca01e77528f3817c03d86224aaf88",
+    "aguiSha": "338708ca8b57deda9c82d0329f30944ab4b0dea6"
+  },
+  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "phases": {
+    "P00": {
+      "status": "passed",
+      "implementationCommit": "611c6584380398a6f3e00b680f1e6b0622b10f79",
+      "evidenceCommit": "62c89862133b856dabc155ddfa2a33497f2e1452",
+      "remoteHead": "62c89862133b856dabc155ddfa2a33497f2e1452"
+    },
+    "P01": {
+      "status": "passed",
+      "implementationCommit": "382854d4c06b9375b7c6eedb1fb70414ddf7ef78",
+      "evidenceCommit": "90a69f49cb068f6f19e1149d36a286baa7e381b6",
+      "remoteHead": "90a69f49cb068f6f19e1149d36a286baa7e381b6"
+    },
+    "P02": {
+      "status": "passed",
+      "implementationCommit": "9ba23949d122b1d2ab918cdb712f8a7aadaf89df",
+      "evidenceCommit": "2b1232b9c0dc60aed19dba269d348daac87143e4",
+      "remoteHead": "2b1232b9c0dc60aed19dba269d348daac87143e4"
+    },
+    "P03": {
+      "status": "passed",
+      "implementationCommit": "21282a5632728c3995d40baa024261f729ad6af6",
+      "evidenceCommit": "c2e7bc94b0095434619401f5322db5e1e06693ca",
+      "remoteHead": "c2e7bc94b0095434619401f5322db5e1e06693ca"
+    },
+    "P04": {
+      "status": "passed",
+      "implementationCommit": "09a600fd4677ac83248304da5086e77512735d65",
+      "evidenceCommit": "e6187ea28cd5dc98cc34044bd3ae50b9d6159299",
+      "remoteHead": "e6187ea28cd5dc98cc34044bd3ae50b9d6159299"
+    },
+    "P05": {
+      "status": "passed",
+      "implementationCommit": "937862507c03af0dfd2a891fe6a2439dc4d713df",
+      "evidenceCommit": "02bade1f5c2f179788374281631503205ba4dfc1",
+      "remoteHead": "02bade1f5c2f179788374281631503205ba4dfc1"
+    },
+    "P06": {
+      "status": "passed",
+      "implementationCommit": "b3d53e1186dc0fa244910c0e6d75569bea32e963",
+      "evidenceCommit": "4f47a131b30995b888a5baa33577279ea038bd0b",
+      "remoteHead": "4f47a131b30995b888a5baa33577279ea038bd0b"
+    },
+    "P07": {
+      "status": "passed",
+      "implementationCommit": "a7a3a84cb99af3e9731432cd3ddf7274802bd987",
+      "evidenceCommit": "35eba01d8108dfb6e0a929e3e17efa035157e712",
+      "remoteHead": "35eba01d8108dfb6e0a929e3e17efa035157e712"
+    },
+    "P08": {
+      "status": "passed",
+      "implementationCommit": "559794783f88a84fd9b8dee97aaa1b43978c62d4",
+      "evidenceCommit": "d1693e23591f1edd4cffdae2946471d865d93aef",
+      "remoteHead": "d1693e23591f1edd4cffdae2946471d865d93aef"
+    },
+    "P09": {
+      "status": "passed",
+      "implementationCommit": "45faac3cbf1102b0171ced4b4b16ae0dc4a7aec9",
+      "evidenceCommit": "6dcf966f75f2c4b483ea13ba8d8bb19f2541eb87",
+      "remoteHead": "6dcf966f75f2c4b483ea13ba8d8bb19f2541eb87"
+    },
+    "P10": {
+      "status": "passed",
+      "implementationCommit": "397fff8f43f0ecd41187e3bdc4289218efe18f32",
+      "implementationCommits": [
+        "e09c5b94abe618a2636986930864e170163c13bd",
+        "340dd5b953926cd17334e526eff495d889cf0d6e",
+        "8c8255f7713f09f7a1ecbe2b37dbdf6ed2ddec65",
+        "397fff8f43f0ecd41187e3bdc4289218efe18f32"
+      ],
+      "evidenceCommit": "e892cec19f9e400e5c05f7b71c8c96867429f712",
+      "remoteHead": "e892cec19f9e400e5c05f7b71c8c96867429f712"
+    },
+    "P11": {
+      "status": "passed",
+      "implementationCommit": "0abc0aa9c04e783832203db5adcd6d4ccfef5aab",
+      "evidenceCommit": "6ed6b2a5b08d26e9fcc96902276b2c1fb1e3dea3",
+      "remoteHead": "6ed6b2a5b08d26e9fcc96902276b2c1fb1e3dea3"
+    },
+    "P12": {
+      "status": "passed",
+      "implementationCommit": "fe2a116e69bc5626046ebe7090ae9cb97dbb8674",
+      "evidenceCommit": "a926c09f172f64255fb8a7ae593f806dd97d018f",
+      "remoteHead": "a926c09f172f64255fb8a7ae593f806dd97d018f"
+    },
+    "P13": {
+      "status": "passed",
+      "implementationCommit": "40e7ae4e2346bb932ccd7e6b89aea3793cc08c42",
+      "implementationCommits": [
+        "cf19d7286ff0cba0cb00f6bdb1cd562541227aa9",
+        "40e7ae4e2346bb932ccd7e6b89aea3793cc08c42"
+      ],
+      "evidenceCommit": "0218c7812d25d062a5ae9a29dfe6172d1199359e",
+      "remoteHead": "0218c7812d25d062a5ae9a29dfe6172d1199359e"
+    },
+    "P14": {
+      "status": "pr_ready_user_merge_pending",
+      "candidateCommit": "80ed0bb5532a86feff2e2a374db9d7990301e7a7",
+      "evidenceCommit": "b9269bcc613320d33671fd1055efefa2949c5b5d",
+      "remoteHead": "b9269bcc613320d33671fd1055efefa2949c5b5d",
+      "pullRequest": 11,
+      "pullRequestUrl": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/11",
+      "readyForReview": true,
+      "ac22": "pending_user_controlled_merge"
+    }
+  }
+}

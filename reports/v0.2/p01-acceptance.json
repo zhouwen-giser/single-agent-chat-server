@@ -1,0 +1,25 @@
+{
+  "phase": "P01",
+  "status": "PASSED_PUBLISHED",
+  "implementationCommit": "382854d4c06b9375b7c6eedb1fb70414ddf7ef78",
+  "checks": {
+    "officialRunAgentInput": "PASSED",
+    "officialEvents": "PASSED",
+    "officialInterruptResume": "PASSED",
+    "officialEncoder": "PASSED",
+    "httpSseProfile": "PASSED",
+    "runNotTask": "PASSED",
+    "rawDisabled": "PASSED",
+    "inferredToolsDisabled": "PASSED",
+    "singleA2aAdapter": "PASSED",
+    "openAiRegression": "PASSED",
+    "postgresRegression": "PASSED"
+  },
+  "tests": {
+    "unit": "31/31",
+    "contract": "30/30",
+    "integration": "36/36"
+  },
+  "requiredSkips": 0,
+  "failedAttemptsRetained": 1
+}

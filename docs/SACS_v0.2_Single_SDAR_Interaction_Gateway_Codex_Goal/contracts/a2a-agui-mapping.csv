@@ -1,0 +1,11 @@
+source,condition,interaction_event,agui_projection,notes
+A2A Message,assistant/public text,message.text,Text events,safe published text only
+A2A Task,first authorized observation,task.bound + task.snapshot,State Snapshot + Activity Snapshot,Run != Task
+A2A StatusUpdate,state/phase change,task.status_changed,State Delta + Activity Delta,sequence ordered
+A2A Artifact,text,artifact.text,Text events,dedupe/chunk safe
+A2A Artifact,JSON,artifact.data,CUSTOM sdar.artifact.data,bounded/redacted
+A2A Artifact,URL,artifact.reference,CUSTOM sdar.artifact.reference,no arbitrary server fetch
+Task metadata,capability gap,capability.gap,CUSTOM + state,public evidence only
+Task state,input-required,input.required,Interrupt,persist first
+Observation,budget ends nonterminal,observation.ended,CUSTOM + Run finish,must not cancel Task
+Exception,sanitized technical,run.error,RUN_ERROR,no stack/secret

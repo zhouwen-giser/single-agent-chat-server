@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.sacs.local/v0.2/goal-state.schema.json",
+  "type": "object",
+  "required": ["goalId", "status", "baseline", "branch", "phases"],
+  "properties": {
+    "goalId": {
+      "const": "SACS-V0.2-SINGLE-SDAR-INTERACTION-GATEWAY"
+    },
+    "status": {
+      "enum": [
+        "WAITING_FOR_SACS_PHASE13_MAIN",
+        "IN_PROGRESS",
+        "BLOCKED_ENVIRONMENT",
+        "AWAITING_PROTECTED_REVIEW",
+        "FAILED",
+        "COMPLETED"
+      ]
+    },
+    "baseline": {
+      "type": "object"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "phases": {
+      "type": "object",
+      "patternProperties": {
+        "^P(0[0-9]|1[0-4])$": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "enum": ["pending", "in_progress", "passed", "blocked", "failed"]
+            },
+            "implementationCommit": {
+              "type": "string"
+            },
+            "evidenceCommit": {
+              "type": "string"
+            },
+            "remoteHead": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

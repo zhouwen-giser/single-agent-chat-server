@@ -13,12 +13,14 @@ const serviceKey = "phase-13-fixture-service-key-32-bytes";
 const jwtSecret = "phase-13-fixture-jwt-secret-32-bytes";
 const config: ServerConfig = {
   serviceKey,
+  agUiServiceKey: "phase-5-ag-ui-service-key-at-least-32-characters",
   openWebUiUserJwtSecret: jwtSecret,
   host: "127.0.0.1",
   port: 3000,
   bodyLimitBytes: 16_384,
   requestTimeoutMs: 5_000,
   modelId: "sdar-single-agent",
+  corsAllowedOrigins: [],
   rateLimitMax: 60,
   rateLimitWindowMs: 60_000,
   maxMessages: 64,

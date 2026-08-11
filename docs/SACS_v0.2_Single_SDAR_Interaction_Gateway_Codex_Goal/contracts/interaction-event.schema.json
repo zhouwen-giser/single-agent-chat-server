@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.sacs.local/v0.2/interaction-event.schema.json",
+  "title": "SdarInteractionEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "eventType",
+    "occurredAt",
+    "runId",
+    "threadId",
+    "sequence",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "eventType": {
+      "enum": [
+        "run.started",
+        "task.bound",
+        "task.snapshot",
+        "task.status_changed",
+        "message.text",
+        "artifact.text",
+        "artifact.data",
+        "artifact.reference",
+        "input.required",
+        "capability.gap",
+        "allowed_actions.changed",
+        "observation.ended",
+        "run.finished",
+        "run.error"
+      ]
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "threadId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "contextId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "payload": {
+      "type": "object"
+    }
+  }
+}

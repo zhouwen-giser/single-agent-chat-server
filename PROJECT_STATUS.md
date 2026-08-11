@@ -1,17 +1,18 @@
 # Project status
 
-Status: `ACCEPTANCE_PASSED_PUBLICATION_PENDING`
+Status: `PR_READY_USER_MERGE_PENDING`
 
-Phase 13 local acceptance passed at source commit
-`085e456c9802462c5d0c2a8c2310cadbfa760a96` on
-`feature/single-sdar-chat-entry-v0.1`. The exact source commit has green push
-and pull-request CI. Required final gates passed with real PostgreSQL 16.9, pip
-Open WebUI 0.10.2, frozen SDAR `667146a`, Redis, real MCP transport, Docker,
-Compose, and a current CycloneDX SBOM.
+SACS v0.2 PR [#11](https://github.com/zhouwen-giser/single-agent-chat-server/pull/11)
+is open and Ready for review from `feature/single-sdar-chat-entry-v0.1` to
+`main`. The final product candidate is
+`80ed0bb5532a86feff2e2a374db9d7990301e7a7`; P14 evidence commit
+`b9269bcc613320d33671fd1055efefa2949c5b5d` passed push CI 31451495721 and PR
+CI 31451710922, including quality and container jobs.
 
-Counts: unit 31/31, contract 26/26, integration 36/36, fixture E2E 1/1, required
-real scenarios 26/26, security 8/8, OpenAI 19/19, and A2A 7/7.
+All authorized implementation, real E2E, persistence, security, Docker/Compose,
+SBOM, documentation, commit, push, and PR-Ready work is complete. AC-01 through
+AC-21 are passed. AC-22 remains pending until the user merges the protected PR
+and the final candidate becomes an ancestor of `origin/main`.
 
-The remaining publication step is to push this Phase 13 report commit, wait for
-its quality/container checks, update PR #1, and mark it Ready. Merge, tag, and
-release remain user-controlled and are not performed.
+Codex did not merge the PR and did not create a tag, GitHub Release, production
+deployment, or SDAR upstream change.

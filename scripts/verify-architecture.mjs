@@ -8,9 +8,25 @@ const packageJson = JSON.parse(
 if (packageJson.dependencies?.["@a2a-js/sdk"] !== "1.0.0-beta.0") {
   throw new Error("Frozen @a2a-js/sdk@1.0.0-beta.0 pin changed");
 }
+for (const [name, version] of Object.entries({
+  "@ag-ui/core": packageJson.dependencies?.["@ag-ui/core"],
+  "@ag-ui/encoder": packageJson.dependencies?.["@ag-ui/encoder"],
+  "@ag-ui/client": packageJson.devDependencies?.["@ag-ui/client"],
+})) {
+  if (version !== "0.0.57") {
+    throw new Error(`Frozen ${name}@0.0.57 pin changed`);
+  }
+}
+
 for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
   if (
-    /(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|agent.?mesh|agent.?registry|copilotkit|ag-ui|clickhouse)/iu.test(
+    dependency.startsWith("@ag-ui/") &&
+    !["@ag-ui/core", "@ag-ui/encoder"].includes(dependency)
+  ) {
+    throw new Error(`Out-of-bound production dependency: ${dependency}`);
+  }
+  if (
+    /(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|agent.?mesh|agent.?registry|copilotkit|clickhouse)/iu.test(
       dependency,
     )
   ) {
@@ -34,6 +50,16 @@ for (const file of files) {
     !name.startsWith("packages/sdar-a2a-adapter/")
   ) {
     violations.push(`${name}: official SDK import outside adapter`);
+  }
+  if (
+    /from ["']@ag-ui\/(?:core|encoder)["']/u.test(content) &&
+    !name.startsWith("packages/ag-ui-api-contract/") &&
+    !name.startsWith("packages/ag-ui-interaction-adapter/")
+  ) {
+    violations.push(`${name}: official AG-UI import outside protocol adapter`);
+  }
+  if (content.includes("@ag-ui/a2a")) {
+    violations.push(`${name}: experimental AG-UI A2A adapter is forbidden`);
   }
   if (
     /from ["']pg["']/u.test(content) &&

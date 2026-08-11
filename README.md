@@ -6,9 +6,12 @@ conversation continuity, bounded streaming, and safe translation of published
 A2A state.
 
 ```text
-Open WebUI -> /v1 -> thin LangGraph -> isolated official A2A SDK -> one SDAR
-                         |
-                     PostgreSQL
+Open WebUI -> /v1 --------\
+                           SdarInteractionEvent -> thin LangGraph
+AG-UI client -> /ag-ui ---/          |                 |
+                                  PostgreSQL   isolated official A2A SDK
+                                                       |
+                                                   one SDAR
 ```
 
 The service is deliberately not an SDAR manager, workflow engine, MCP client,
@@ -52,6 +55,11 @@ OpenAI-compatible routes are:
 - `GET /v1/models`
 - `POST /v1/chat/completions`
 
+The pinned official AG-UI `0.0.57` routes are:
+
+- `GET /ag-ui/capabilities`
+- `POST /ag-ui`
+
 Both `/v1/*` routes require the configured service bearer key and a valid
 `X-OpenWebUI-User-Jwt`. Chat requests also require stable Open WebUI chat and
 message IDs. See [API contract](docs/api-contract.md) and
@@ -75,14 +83,18 @@ public.
 
 ```bash
 pnpm verify:phase12       # hermetic quality and adversarial gate
+pnpm verify:ci            # CI-equivalent PostgreSQL and fixture gate
 pnpm test:e2e:fixture     # deterministic in-process fixture, not real E2E
 pnpm smoke                # built-server health/models/completion probe
-pnpm verify               # strict final gate; requires all real runtimes
+pnpm verify               # exact P13 candidate gate; requires real evidence and Docker
 ```
 
-`pnpm verify` intentionally fails unless native PostgreSQL, Docker, live Open
-WebUI, live SDAR, and current-head real-E2E evidence are configured. A skipped
-database suite or deterministic fixture never satisfies the real release gate.
+`pnpm verify` intentionally fails unless native PostgreSQL, Docker, and
+machine-readable current-head evidence from live Open WebUI, the official AG-UI
+client, and the fixed SDAR are configured. The evidence directory and generated
+SBOM output must be below ignored `.tmp`; every real gate must identify the
+exact local and remote candidate SHA. A skipped database suite or deterministic
+fixture never satisfies the real release gate.
 
 See [operations](docs/operations.md), [troubleshooting](docs/troubleshooting.md),
 [traceability](docs/traceability.md), and the current

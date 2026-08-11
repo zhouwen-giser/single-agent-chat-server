@@ -31,12 +31,14 @@ const chatHeaders = {
 const chatResponse = "thin graph response";
 const config: ServerConfig = {
   serviceKey,
+  agUiServiceKey: "phase-5-ag-ui-service-key-at-least-32-characters",
   openWebUiUserJwtSecret: jwtSecret,
   host: "127.0.0.1",
   port: 3000,
   bodyLimitBytes: 1024,
   requestTimeoutMs: 5000,
   modelId: "sdar-single-agent",
+  corsAllowedOrigins: [],
   rateLimitMax: 60,
   rateLimitWindowMs: 60_000,
   maxMessages: 64,
@@ -219,6 +221,7 @@ describe("OpenAI-compatible HTTP contracts", () => {
     expect(output).toContain("[REDACTED]");
     for (const secret of [
       serviceKey,
+      "phase-5-ag-ui-service-key-at-least-32-characters",
       signedIdentity,
       "private-prompt-value",
       "private-artifact-value",

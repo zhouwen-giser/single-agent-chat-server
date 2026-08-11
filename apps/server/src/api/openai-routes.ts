@@ -13,6 +13,11 @@ import {
   openAiError,
   SSE_CONTENT_TYPE,
 } from "../../../../packages/openai-api-contract/src/index.js";
+import {
+  isSdarInteractionEvent,
+  type SdarInteractionEvent,
+} from "../../../../packages/interaction-contract/src/index.js";
+import { renderInteractionEventForOpenAi } from "../../../../packages/openai-interaction-adapter/src/index.js";
 import type { ThreadBinding } from "../../../../packages/persistence/src/index.js";
 import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
 import {
@@ -37,10 +42,12 @@ export interface ChatRunnerContext {
   readonly identity: OpenWebUiIdentity;
   readonly openWebUi: OpenWebUiRequestContext;
   readonly threadId: string;
+  readonly runId: string;
   readonly signal?: AbortSignal;
 }
 
-export type ChatRunnerResult = string | AsyncIterable<string>;
+export type ChatRunnerResult =
+  string | AsyncIterable<string | SdarInteractionEvent>;
 export type ChatRunner = (
   context: ChatRunnerContext,
 ) => Promise<ChatRunnerResult> | ChatRunnerResult;
@@ -106,7 +113,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
   server.addHook("preHandler", async (request, reply) => {
     if (reply.sent) return;
     const decision = options.rateLimiter.consume(
-      requireOpenWebUiIdentity(request).userId,
+      `openai:${requireOpenWebUiIdentity(request).userId}`,
     );
     if (!decision.allowed) {
       await reply
@@ -197,6 +204,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
         identity,
         openWebUi,
         threadId: thread.threadId,
+        runId: id,
         signal: abortController.signal,
       });
     } catch (error) {
@@ -298,7 +306,17 @@ async function* toFragments(result: ChatRunnerResult): AsyncGenerator<string> {
     yield result;
     return;
   }
-  yield* result;
+  for await (const value of result as AsyncIterable<unknown>) {
+    if (typeof value === "string") {
+      yield value;
+      continue;
+    }
+    if (!isSdarInteractionEvent(value)) {
+      throw new Error("Chat runner emitted an invalid interaction event");
+    }
+    const fragment = renderInteractionEventForOpenAi(value);
+    if (fragment !== undefined) yield fragment;
+  }
 }
 
 async function* observeFragments(

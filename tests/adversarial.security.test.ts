@@ -26,12 +26,14 @@ const nowMilliseconds = 1_700_000_000_000;
 const nowSeconds = Math.floor(nowMilliseconds / 1000);
 const config: ServerConfig = {
   serviceKey,
+  agUiServiceKey: "phase-5-ag-ui-service-key-at-least-32-characters",
   openWebUiUserJwtSecret: jwtSecret,
   host: "127.0.0.1",
   port: 3000,
   bodyLimitBytes: 8_192,
   requestTimeoutMs: 5_000,
   modelId: "sdar-single-agent",
+  corsAllowedOrigins: [],
   rateLimitMax: 60,
   rateLimitWindowMs: 60_000,
   maxMessages: 64,
@@ -149,6 +151,18 @@ describe("Phase 12 adversarial hardening", () => {
             taskId: "different-task",
           },
         },
+      } as never),
+    ).toThrow("identity did not match");
+    expect(() =>
+      normalizeTask({
+        ...sdkTask(),
+        history: [
+          {
+            ...sdkTask().status.message,
+            messageId: "history-foreign",
+            taskId: "different-task",
+          },
+        ],
       } as never),
     ).toThrow("identity did not match");
     expect(() =>
@@ -401,8 +415,74 @@ describe("Phase 12 adversarial hardening", () => {
     ]);
     expect(updateTaskBinding).toHaveBeenCalledTimes(2);
   });
+  it("isolates rate-limit buckets by protocol and signed principal", async () => {
+    const server = buildServer({
+      config: { ...config, rateLimitMax: 1 },
+      now: () => nowMilliseconds,
+      resolveChatThread: async (input) => ({
+        threadId: "openai:" + input.userId + ":" + input.openWebUiChatId,
+        openWebUiChatId: input.openWebUiChatId,
+        userId: input.userId,
+        userRole: input.userRole,
+      }),
+      resolveAgUiThread: async (input) => ({
+        bindingId: "agui-rate-binding",
+        clientType: "ag_ui",
+        externalThreadId: input.externalThreadId,
+        principalId: input.userId,
+        threadId: "agui:" + input.userId + ":" + input.externalThreadId,
+      }),
+    });
+    const openAiHeaders = {
+      authorization: "Bearer " + serviceKey,
+      "x-openwebui-user-jwt": principalJwt("ag_ui:user-a"),
+    };
+    const agUiHeaders = {
+      authorization: "Bearer " + config.agUiServiceKey,
+      "x-openwebui-user-jwt": principalJwt("user-a"),
+    };
+
+    const openAiFirst = await server.inject({
+      method: "GET",
+      url: "/v1/models",
+      headers: openAiHeaders,
+    });
+    const agUiFirst = await server.inject({
+      method: "GET",
+      url: "/ag-ui/capabilities",
+      headers: agUiHeaders,
+    });
+    const openAiSecond = await server.inject({
+      method: "GET",
+      url: "/v1/models",
+      headers: openAiHeaders,
+    });
+    const agUiSecond = await server.inject({
+      method: "GET",
+      url: "/ag-ui/capabilities",
+      headers: agUiHeaders,
+    });
+
+    expect(openAiFirst.statusCode).toBe(200);
+    expect(agUiFirst.statusCode).toBe(200);
+    expect(openAiSecond.statusCode).toBe(429);
+    expect(agUiSecond.statusCode).toBe(429);
+    await server.close();
+  });
 });
 
+function principalJwt(subject: string): string {
+  return signJwt(
+    { alg: "HS256", typ: "JWT" },
+    {
+      iss: "open-webui",
+      sub: subject,
+      role: "user",
+      iat: nowSeconds - 1,
+      exp: nowSeconds + 299,
+    },
+  );
+}
 function authenticatedChatHeaders() {
   return {
     authorization: `Bearer ${serviceKey}`,

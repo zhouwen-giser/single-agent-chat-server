@@ -61,11 +61,12 @@ async function handle(path, rawBody, response) {
       const inputRequired =
         /phase11 input required/iu.test(requestText) &&
         !/device-17/iu.test(requestText);
-      const description = /phase11 capability gap/iu.test(requestText)
-        ? "PHASE11_CAPABILITY_GAP TEMPORARY_SKILL_GOAL:mcp.phase11/device_status"
-        : /phase11 delay/iu.test(requestText)
-          ? "PHASE11_DELAY TEMPORARY_SKILL_GOAL:mcp.phase11/device_status"
-          : "PHASE11_NORMAL TEMPORARY_SKILL_GOAL:mcp.phase11/device_status";
+      const description =
+        /(?:phase11 capability gap|PHASE11_GAP_BRANCH)/iu.test(requestText)
+          ? "PHASE11_CAPABILITY_GAP TEMPORARY_SKILL_GOAL:mcp.phase11/device_status"
+          : /phase11 delay/iu.test(requestText)
+            ? "PHASE11_DELAY TEMPORARY_SKILL_GOAL:mcp.phase11/device_status"
+            : "PHASE11_NORMAL TEMPORARY_SKILL_GOAL:mcp.phase11/device_status";
       respond(response, {
         title: "Phase 11 real A2A task",
         description,
@@ -75,6 +76,37 @@ async function handle(path, rawBody, response) {
         ...(inputRequired
           ? { clarificationQuestion: "Which device should be inspected?" }
           : {}),
+      });
+      return;
+    }
+    case "plan_user_goal_skill_goal_dag": {
+      const input = embeddedOperation(contents, operation);
+      const criteria = Array.isArray(input.contract?.criteria)
+        ? input.contract.criteria
+        : [];
+      respond(response, {
+        skillGoals: [
+          {
+            skillGoalId: `skill-goal-${String(input.contract?.goalId ?? "unknown")}`,
+            requiredResult: "Return a validated device status.",
+            capabilityNeeds: ["phase11-status"],
+            coveredCriterionIds: criteria.map(
+              (criterion) => criterion.criterionId,
+            ),
+            requiredEffectRefs: criteria.flatMap(
+              (criterion) => criterion.expectedEffectRefs ?? [],
+            ),
+            evidenceRequirements: criteria.flatMap(
+              (criterion) => criterion.evidenceRequirements ?? [],
+            ),
+            artifactRequirements: criteria.flatMap(
+              (criterion) => criterion.artifactRequirements ?? [],
+            ),
+            assumptions: [],
+            constraints: [],
+          },
+        ],
+        dependencies: [],
       });
       return;
     }
@@ -174,6 +206,61 @@ async function handle(path, rawBody, response) {
         decisionSummary: "The Phase 11 Skill requires no structured input.",
       });
       return;
+    case "plan_with_skill_usage_policy": {
+      const input = embeddedOperation(contents, operation);
+      const identity = input.workflowIdentity;
+      const delayed = String(input.goalContract?.description ?? "").includes(
+        "PHASE11_DELAY",
+      );
+      const outcomeNodeId = delayed ? "next" : "device";
+      respond(response, {
+        ...identity,
+        entryNodeId: "device",
+        exitNodeIds: ["result"],
+        nodes: [
+          {
+            nodeId: "device",
+            name: "Read device status",
+            type: "mcp_tool",
+            tool: { serverId: "mcp.phase11", toolName: "device_status" },
+            arguments: {
+              deviceId: "device-17",
+              ...(delayed ? { delayMs: 300 } : {}),
+            },
+          },
+          ...(delayed
+            ? [
+                {
+                  nodeId: "next",
+                  name: "Read device status after resume",
+                  type: "mcp_tool",
+                  tool: {
+                    serverId: "mcp.phase11",
+                    toolName: "device_status",
+                  },
+                  arguments: { deviceId: "device-17-after-resume" },
+                },
+              ]
+            : []),
+          {
+            nodeId: "result",
+            name: "Return governed result",
+            type: "result",
+            value: {
+              op: "ref",
+              path: ["nodes", outcomeNodeId, "data", "structuredContent"],
+            },
+          },
+        ],
+        edges: delayed
+          ? [
+              { sourceNodeId: "device", targetNodeId: "next" },
+              { sourceNodeId: "next", targetNodeId: "result" },
+            ]
+          : [{ sourceNodeId: "device", targetNodeId: "result" }],
+      });
+      return;
+    }
     case "task_initial_plan": {
       const input = embeddedOperation(contents, operation);
       const identity = input.workflowIdentity;
@@ -230,17 +317,27 @@ async function handle(path, rawBody, response) {
       respond(response, {
         ...source,
         version: Number(source.version) + 1,
-        entryNodeId: "result",
+        entryNodeId: "device",
         exitNodeIds: ["result"],
         nodes: [
+          {
+            nodeId: "device",
+            name: "Read device status for revised plan",
+            type: "mcp_tool",
+            tool: { serverId: "mcp.phase11", toolName: "device_status" },
+            arguments: { deviceId: "device-17-revised" },
+          },
           {
             nodeId: "result",
             name: "Return revised Phase 11 result",
             type: "result",
-            value: { op: "literal", value: "online" },
+            value: {
+              op: "ref",
+              path: ["nodes", "device", "data", "structuredContent"],
+            },
           },
         ],
-        edges: [],
+        edges: [{ sourceNodeId: "device", targetNodeId: "result" }],
       });
       return;
     }
@@ -334,11 +431,13 @@ function detectOperation(contents) {
   const operations = [
     "decide_task_intent",
     "formulate_goal",
+    "plan_user_goal_skill_goal_dag",
     "infer_missing_goal_input",
     "enhance_mcp_tool_metadata",
     "resolve_temporary_skill",
     "select_skill",
     "resolve_top_level_skill_input",
+    "plan_with_skill_usage_policy",
     "task_initial_plan",
     "natural_language_plan_revision",
     "process_workflow_result",

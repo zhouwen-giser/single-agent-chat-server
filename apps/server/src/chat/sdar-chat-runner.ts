@@ -2,23 +2,46 @@ import type { BaseCheckpointSaver } from "@langchain/langgraph";
 
 import type { ChatRunner, ChatRunnerContext } from "../api/openai-routes.js";
 import {
+  legacyChatResultToInteractionEvents,
+  type LegacyChatResult,
+} from "../../../../packages/interaction-runtime/src/index.js";
+import {
   SdarTaskCoordinator,
   type FollowUpTurnContext,
   type TaskTurnContext,
 } from "../../../../packages/chat-runtime/src/index.js";
 import type { ChatPersistenceRepository } from "../../../../packages/persistence/src/index.js";
+import {
+  resolveQueryIntent,
+  type InteractionQueryService,
+} from "../../../../packages/interaction-query/src/index.js";
 import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
 import type { StructuredChatModel } from "../../../../src/agent/model.js";
 import type { ActiveTaskSnapshot } from "../../../../src/agent/state.js";
 
 export function createSdarChatRunner(input: {
   readonly repository: ChatPersistenceRepository;
-  readonly checkpointer: BaseCheckpointSaver;
+  readonly checkpointer?: BaseCheckpointSaver;
   readonly coordinator: SdarTaskCoordinator;
+  readonly queryService?: InteractionQueryService;
   readonly model?: StructuredChatModel;
 }): ChatRunner {
   const graph = createSingleAgentChatGraph(input.model, input.checkpointer);
-  return async (context) => {
+  const runLegacy = async (
+    context: ChatRunnerContext,
+  ): Promise<LegacyChatResult> => {
+    const query =
+      context.openWebUi.utilityTask === undefined
+        ? resolveQueryIntent(context.userText)
+        : undefined;
+    if (query !== undefined && input.queryService !== undefined) {
+      return input.queryService.execute({
+        ...query,
+        principalId: context.identity.userId,
+        threadId: context.threadId,
+        signal: context.signal,
+      });
+    }
     const binding = await input.repository.findActiveTaskForChat({
       chatId: context.openWebUi.chatId,
       userId: context.identity.userId,
@@ -61,6 +84,11 @@ export function createSdarChatRunner(input: {
     }
     return renderGraphResult(result);
   };
+  return async (context) =>
+    legacyChatResultToInteractionEvents(await runLegacy(context), {
+      runId: context.runId,
+      threadId: context.threadId,
+    });
 }
 
 function toTaskTurn(context: ChatRunnerContext): TaskTurnContext {

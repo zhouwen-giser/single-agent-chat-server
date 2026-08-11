@@ -52,6 +52,24 @@ export interface NormalizedArtifact {
   readonly parts: readonly NormalizedPart[];
 }
 
+export interface NormalizedAgentSkill {
+  readonly id: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly tags: readonly string[];
+  readonly examples: readonly string[];
+}
+
+export interface NormalizedAgentCard {
+  readonly name: string;
+  readonly description?: string;
+  readonly version: string;
+  readonly protocolVersion: "1.0";
+  readonly protocolBinding: "HTTP+JSON";
+  readonly streaming: true;
+  readonly skills: readonly NormalizedAgentSkill[];
+}
+
 export interface NormalizedTask {
   readonly taskId: string;
   readonly contextId: string;
@@ -65,6 +83,7 @@ export interface NormalizedTask {
   readonly capabilityGap?: JsonValue;
   readonly nextAction?: string;
   readonly artifacts: readonly NormalizedArtifact[];
+  readonly history?: readonly NormalizedMessage[];
 }
 
 export type NormalizedSendResult =
@@ -120,6 +139,7 @@ export interface SdarA2aClient {
   readonly protocolBinding: "HTTP+JSON";
   readonly protocolVersion: "1.0";
   readonly endpoint: string;
+  readonly agentCard?: NormalizedAgentCard;
   submitTaskStream(
     input: SubmitTaskInput,
     options?: OperationOptions,

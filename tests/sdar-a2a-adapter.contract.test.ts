@@ -171,6 +171,21 @@ describe("official SDAR A2A adapter HTTP+JSON contract", () => {
       protocolBinding: "HTTP+JSON",
       protocolVersion: "1.0",
       endpoint: mock.endpoint,
+      agentCard: {
+        name: "Mock SDAR",
+        version: "0.0.0",
+        protocolBinding: "HTTP+JSON",
+        protocolVersion: "1.0",
+        streaming: true,
+        skills: [
+          {
+            id: "mock-workflow",
+            name: "Run mock workflow",
+            tags: ["mock"],
+            examples: ["run mock"],
+          },
+        ],
+      },
     });
 
     const wrongBinding = await startMock({ protocolBinding: "JSONRPC" });
@@ -377,6 +392,18 @@ function agentCard(input: {
     capabilities: { streaming: true, pushNotifications: false },
     defaultInputModes: ["text/plain"],
     defaultOutputModes: ["text/plain", "application/json"],
+    skills: [
+      {
+        id: "mock-workflow",
+        name: "Run mock workflow",
+        description: "Published mock capability",
+        tags: ["mock"],
+        examples: ["run mock"],
+        inputModes: ["text/plain"],
+        outputModes: ["text/plain", "application/json"],
+        securityRequirements: [],
+      },
+    ],
   };
 }
 
@@ -399,6 +426,7 @@ function taskJson(
       },
       timestamp: "2026-07-18T12:00:00Z",
     },
+    history: [],
     artifacts: withArtifact
       ? [
           {
