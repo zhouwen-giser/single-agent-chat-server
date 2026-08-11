@@ -1,0 +1,52 @@
+{
+  "phase": "P12",
+  "status": "PASSED_IMPLEMENTATION_PUBLISHED",
+  "implementationCommit": "fe2a116e69bc5626046ebe7090ae9cb97dbb8674",
+  "checks": {
+    "oneFixedSdar": "PASSED_CLEAN_A9957C82C17CA01E77528F3817C03D86224AAF88",
+    "sdarPackageVersion": "PASSED_1.4.1",
+    "a2aSdkPin": "PASSED_@A2A_JS_SDK_1.0.0_BETA.0",
+    "agentCard": "PASSED_HTTP_JSON_WIRE_1.0_STREAMING",
+    "explicitEndpointOverride": "PASSED_HTTP_127.0.0.1_9999_A2A",
+    "pipOpenWebUi": "PASSED_0.10.2_REAL_HTTP",
+    "openAiNorthbound": "PASSED_ZERO_SKIPS",
+    "officialAgUiNorthbound": "PASSED_@AG_UI_CLIENT_0.0.57_ZERO_SKIPS",
+    "sameTaskProtocolConsistency": "PASSED_TASK_SCOPED_INTERACTION_EVENTS",
+    "boundedObservation": "PASSED_OBSERVATION_ENDED_TASK_CONTINUES",
+    "getTaskRecovery": "PASSED_INPUT_REQUIRED_AWAITING_PLAN_CONFIRMATION",
+    "eventCursor": "PASSED_NONE",
+    "taskResubscription": "PASSED_NONE",
+    "rawEvents": "PASSED_NONE",
+    "toolCalls": "PASSED_NONE",
+    "exactSacsSha": "PASSED_FE2A116E69BC5626046EBE7090AE9CB97DBB8674",
+    "remoteCi": "PASSED_RUN_31443645287_QUALITY_AND_CONTAINER",
+    "browserEvidence": "NOT_CLAIMED_WINDOWS_SANDBOX_RUNTIME_UNAVAILABLE"
+  },
+  "tests": {
+    "unit": "77/77",
+    "contract": "57/57",
+    "security": "9/9",
+    "architecture": "PASSED_59_SOURCE_FILES",
+    "secretScan": "PASSED_394_TRACKED_FILES",
+    "northboundReal": "PASSED_ZERO_SKIPS",
+    "sameTaskConsistencyReal": "PASSED",
+    "longObservationReal": "PASSED"
+  },
+  "realEvidence": {
+    "northboundRunStamp": "p12-exact-fe2a116-northbound-1786406015578",
+    "agUiTaskId": "b2ff860e-15e8-4ae5-be2c-b1c40595ef28",
+    "agUiTerminalState": "COMPLETED",
+    "consistencyTaskId": "0d6db617-074d-4005-9c47-bcb9f9cd9607",
+    "consistencyContextId": "2e027e36-d488-4381-9cb6-f88115276b2b",
+    "consistencyHistoryMessages": 13,
+    "consistencyArtifacts": 1,
+    "longObservationTaskId": "e4d72c2e-fa2d-407f-9fb8-52a09f25334f",
+    "longObservationBoundary": "observation_ended",
+    "longObservationRecoveredState": "INPUT_REQUIRED",
+    "longObservationRecoveredPhase": "awaiting_plan_confirmation",
+    "longObservationCleanupState": "CANCELED",
+    "requiredSkips": 0
+  },
+  "failedAttemptsRetained": 5,
+  "rawSecretsCommitted": false
+}
