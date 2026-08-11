@@ -50,6 +50,7 @@ export interface InteractionEventFactoryOptions {
   readonly now?: () => Date;
   readonly nextId?: () => string;
   readonly maxTextCharacters?: number;
+  readonly initialSequence?: number;
 }
 
 const taskRequiredEventTypes = new Set<SdarInteractionEventType>([
@@ -65,7 +66,7 @@ const taskRequiredEventTypes = new Set<SdarInteractionEventType>([
 ]);
 
 export class InteractionEventFactory {
-  private sequence = 0;
+  private sequence: number;
   private readonly dedupeKeys = new Set<string>();
   private readonly now: () => Date;
   private readonly nextId: () => string;
@@ -78,6 +79,10 @@ export class InteractionEventFactory {
     this.now = options.now ?? (() => new Date());
     this.nextId = options.nextId ?? randomUUID;
     this.maxTextCharacters = options.maxTextCharacters ?? 16_000;
+    this.sequence = options.initialSequence ?? 0;
+    if (!Number.isInteger(this.sequence) || this.sequence < 0) {
+      throw new Error("initialSequence must be a non-negative integer");
+    }
   }
 
   create(

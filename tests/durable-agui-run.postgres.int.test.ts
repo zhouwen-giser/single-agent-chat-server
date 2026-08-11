@@ -122,6 +122,42 @@ describeWithPostgres("durable AG-UI Run recovery", () => {
     expect(conflict.at(-1)?.payload.code).toBe("run_id_conflict");
   });
 
+  it("closes an execution failure as a replayable safe ERROR Run", async () => {
+    let executeCount = 0;
+    const service = new DurableAgUiRunService({
+      repository,
+      execute: async function* () {
+        executeCount += 1;
+        yield* [];
+        throw new Error("private upstream failure");
+      },
+      recoverTask: () => {
+        throw new Error("No Task recovery was expected");
+      },
+    });
+
+    const first = await collect(service.run(context(runInput("run-error"))));
+    const replay = await collect(service.run(context(runInput("run-error"))));
+
+    expect(executeCount).toBe(1);
+    expect(first.map((event) => event.eventType)).toEqual([
+      "run.started",
+      "run.error",
+    ]);
+    expect(first.at(-1)?.payload).toEqual({
+      code: "interaction_error",
+      message: "The AG-UI run failed safely.",
+    });
+    expect(replay).toEqual(first);
+    const failedRun = await repository.findAuthorizedRun({
+      runId: "run-error",
+      principalId,
+      threadId,
+    });
+    expect(failedRun).toMatchObject({ status: "ERROR" });
+    expect(failedRun?.taskId).toBeUndefined();
+  });
+
   it("recovers a durable Run after a crash before A2A submission", async () => {
     const input = runInput("run-before-submit");
     const requestHash = hashJson(input as unknown as JsonValue);

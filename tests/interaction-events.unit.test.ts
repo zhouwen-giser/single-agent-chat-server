@@ -50,6 +50,23 @@ describe("unified interaction event spine", () => {
     ).toMatchObject({ taskId: "task-1", contextId: "context-1" });
   });
 
+  it("continues a persisted event sequence from an explicit offset", () => {
+    const factory = new InteractionEventFactory({
+      runId: "run-recovery",
+      threadId: "thread-recovery",
+      initialSequence: 7,
+    });
+    expect(factory.create("run.error", {})?.sequence).toBe(7);
+    expect(
+      () =>
+        new InteractionEventFactory({
+          runId: "run-invalid",
+          threadId: "thread-invalid",
+          initialSequence: -1,
+        }),
+    ).toThrow("initialSequence must be a non-negative integer");
+  });
+
   it("bounds and redacts public text", () => {
     expect(safePublicText("password=exposed value", 200)).toBe(
       "[REDACTED] value",

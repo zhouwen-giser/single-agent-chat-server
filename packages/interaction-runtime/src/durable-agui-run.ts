@@ -155,6 +155,40 @@ export class DurableAgUiRunService {
         yield event;
         if (context.signal.aborted) break;
       }
+    } catch {
+      if (!context.signal.aborted) {
+        const failureFactory = new InteractionEventFactory({
+          runId: context.input.runId,
+          threadId: context.input.threadId,
+          initialSequence: (events.at(-1)?.sequence ?? -1) + 1,
+        });
+        const failureEvents = [
+          ...(events.length === 0
+            ? [
+                failureFactory.create("run.started", {
+                  boundary: "bounded_interaction",
+                }),
+              ]
+            : []),
+          failureFactory.create("run.error", {
+            code: "interaction_error",
+            message: "The AG-UI run failed safely.",
+          }),
+        ].filter((event): event is SdarInteractionEvent => event !== undefined);
+        for (const event of failureEvents) {
+          events.push(event);
+          await this.options.repository.updateRunProgress({
+            runId: run.runId,
+            principalId: context.principalId,
+            lastSequence: event.sequence,
+            ...(latestTaskId === undefined ? {} : { taskId: latestTaskId }),
+            ...(latestContextId === undefined
+              ? {}
+              : { contextId: latestContextId }),
+          });
+          yield event;
+        }
+      }
     } finally {
       const submittedTaskId = await this.options.repository.findRequestResult({
         protocol: "ag_ui",
