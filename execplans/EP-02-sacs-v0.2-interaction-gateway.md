@@ -69,7 +69,10 @@ Open WebUI / OpenAI client     official AG-UI client
       northbound paths against the same fixed SDAR, proved same-Task renderer
       consistency and bounded-stream `getTask()` recovery, and retained all
       material failed attempts.
-- [ ] P13: produce the release candidate evidence set.
+- [x] 2026-08-11: P13 produced exact candidate `40e7ae4e`, repaired durable
+      Run error closure, passed all five real zero-skip gates, native
+      PostgreSQL/full verification, hardened Docker/Compose, CycloneDX SBOM,
+      secret/license gates, and exact-SHA remote CI.
 - [ ] P14: merge latest `main`, run final gates, and open/update the PR. Do not
       merge it; the user's explicit authorization stops at PR delivery.
 
@@ -157,6 +160,13 @@ and exact local/remote-head comparison. Required failures remain under
   observation scenarios as explicit zero-skip commands against one locked
   environment; restarting only the exact SDAR test process isolates prior test
   cleanup without substituting product dependencies or weakening assertions.
+- A non-abort exception from the durable AG-UI execution source must be
+  converted to a sanitized sequenced `run.error` before final persistence;
+  relying on `finally` alone leaves the post-finally `finishRun()` unreachable.
+- A fast local SDAR can reach `INPUT_REQUIRED` inside a nominally short
+  observation window. The bounded-stream proof therefore uses the minimum
+  legal 100 ms stream budget and zero polling budget, while retaining the
+  strict phase-specific Interrupt mapping.
 
 ## Validation
 

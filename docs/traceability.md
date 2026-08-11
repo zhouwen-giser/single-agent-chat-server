@@ -1,34 +1,36 @@
-# Requirement traceability
+# SACS v0.2 requirement traceability
 
-All required acceptance items were rerun at Phase 13 source commit
-`085e456c9802462c5d0c2a8c2310cadbfa760a96`. `Passed real` means the
-Open WebUI-to-SDAR scenario used live HTTP/SSE, the official SDK adapter, real
-PostgreSQL, and the exact frozen SDAR; it is not a fixture-only label.
+Phase 13 evidence is bound to candidate
+`40e7ae4e2346bb932ccd7e6b89aea3793cc08c42`. `Passed real` means live HTTP/SSE
+through the installed Open WebUI or official AG-UI client, the isolated official
+A2A adapter, a real PostgreSQL database, and the locked SDAR checkout. It is not
+a fixture-only label.
 
-| Acceptance                          | Primary executable evidence                     | Final evidence               |
-| ----------------------------------- | ----------------------------------------------- | ---------------------------- |
-| AC-01 model discovery               | OpenAI contract; live Open WebUI proxy          | Passed real                  |
-| AC-02 normal chat                   | graph/unit; OpenAI contract; chat DB audit      | Passed real; no Task binding |
-| AC-03 single A2A submission         | adapter contract; PostgreSQL audit              | Passed real; one Task        |
-| AC-04 status and phase SSE          | OpenAI SSE; published-event audit               | Passed real                  |
-| AC-05 bounded stream and `getTask`  | coordinator integration; event audit            | Passed real                  |
-| AC-06 status query isolation        | graph/unit; live status query                   | Passed real                  |
-| AC-07 plan actions                  | live confirm/reject/revise branches             | Passed real                  |
-| AC-08 `provide_input` identity      | adapter contract; distinct phase audit          | Passed real                  |
-| AC-09 top-level cancellation        | live `cancelTask()` branch                      | Passed real                  |
-| AC-10 result artifacts              | completed text+JSON Artifact audit              | Passed real                  |
-| AC-11 failure versus Capability Gap | safe publication; live gap branch               | Passed real                  |
-| AC-12 retry idempotency             | PostgreSQL idempotency claim audit              | Passed real                  |
-| AC-13 restart recovery              | process restart plus persisted binding          | Passed real                  |
-| AC-14 disconnect recovery           | bounded stream and `getTask` enrichment         | Passed real                  |
-| AC-15 utility isolation             | Open WebUI utility plus DB audit                | Passed real; no Task         |
-| AC-16 cross-user isolation          | two signed Open WebUI users                     | Passed real                  |
-| AC-17 signed identity               | forged JWT live request; security matrix        | Passed real                  |
-| AC-18 SDAR outage                   | stopped frozen runtime; readiness/binding audit | Passed real                  |
-| AC-19 no management/DB/MCP          | architecture gate across 42 files               | Passed                       |
-| AC-20 protocol and SDK pin          | live Agent Card; adapter contracts              | Passed real                  |
-| AC-21 explicit endpoint override    | hardened Docker shim route log                  | Passed real                  |
-| AC-22 Follow-up allowlist           | adapter/coordinator plus live branches          | Passed real                  |
+| Acceptance | Required scenario                              | P13 evidence                            | Status                   |
+| ---------- | ---------------------------------------------- | --------------------------------------- | ------------------------ |
+| AC-01      | Phase 13 merged-main gate prevents early start | P00 merge proof and retained history    | Passed                   |
+| AC-02      | OpenWebUI new SDAR Task                        | real Open WebUI matrix                  | Passed real              |
+| AC-03      | OpenWebUI status/result/history                | real status, history, text+JSON result  | Passed real              |
+| AC-04      | AG-UI Run lifecycle                            | official client typed SSE               | Passed real              |
+| AC-05      | A2A status to AG-UI state                      | Task-scoped interaction mapping         | Passed real              |
+| AC-06      | Artifact text/JSON mapping                     | same-Task artifact projection           | Passed real              |
+| AC-07      | plan confirmation Interrupt/Resume             | official client real interrupt          | Passed real              |
+| AC-08      | `provide_input` Interrupt/Resume               | phase-specific Open WebUI branch        | Passed real              |
+| AC-09      | paused Interrupt/Resume                        | explicit pause/resume branch            | Passed real              |
+| AC-10      | disconnect does not cancel Task                | abort/reconnect plus `getTask()`        | Passed real              |
+| AC-11      | duplicate Run does not duplicate Task          | durable PostgreSQL idempotency          | Passed native PostgreSQL |
+| AC-12      | unbound taskId denied                          | query/security tests                    | Passed                   |
+| AC-13      | current Agent Card capabilities                | locked live card and safe projection    | Passed real              |
+| AC-14      | Capability Gap safe projection                 | real gap branch                         | Passed real              |
+| AC-15      | no internal MCP as Tool Call                   | negative contracts and real event audit | Passed, zero Tool Calls  |
+| AC-16      | OpenAI and AG-UI same semantics                | Task `42d1b564...` consistency gate     | Passed real              |
+| AC-17      | PostgreSQL restart restores bindings           | P08 restart integration                 | Passed native PostgreSQL |
+| AC-18      | v0.1 upgrade preserves bindings                | append-only migration/upgrade gate      | Passed                   |
+| AC-19      | real AG-UI client to SACS to SDAR              | official `@ag-ui/client@0.0.57`         | Passed real              |
+| AC-20      | candidate Docker/Compose/SBOM exact HEAD       | image, hardened Compose, CycloneDX 1.7  | Passed exact head        |
+| AC-21      | feature contains latest main                   | P14 latest-main merge proof             | Pending P14              |
+| AC-22      | final candidate ancestor of origin/main        | P14 final publication proof             | Pending P14              |
 
-Detailed evidence is in
-[`reports/goal/13-final-acceptance.md`](../reports/goal/13-final-acceptance.md).
+Detailed P13 evidence is in
+[`reports/v0.2/p13-completion.md`](../reports/v0.2/p13-completion.md) and
+[`reports/v0.2/p13-acceptance.json`](../reports/v0.2/p13-acceptance.json).

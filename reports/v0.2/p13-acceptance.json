@@ -1,0 +1,80 @@
+{
+  "phase": "P13",
+  "status": "PASSED_CANDIDATE_AWAITING_P14",
+  "implementationCommits": [
+    "cf19d7286ff0cba0cb00f6bdb1cd562541227aa9",
+    "40e7ae4e2346bb932ccd7e6b89aea3793cc08c42"
+  ],
+  "candidateSha": "40e7ae4e2346bb932ccd7e6b89aea3793cc08c42",
+  "remoteCi": {
+    "runId": 31448260553,
+    "status": "PASSED",
+    "jobs": ["quality", "container"]
+  },
+  "tests": {
+    "unit": "78/78",
+    "contract": "57/57",
+    "security": "9/9",
+    "postgresIntegration": "51/51",
+    "fixtureE2e": "1/1",
+    "openAiContract": "19/19",
+    "a2aContract": "7/7",
+    "architecture": "PASSED_59_SOURCE_FILES",
+    "migrations": "PASSED_6_APPEND_ONLY",
+    "licenses": "PASSED_89_PRODUCTION_ENTRIES",
+    "secretScan": "PASSED_406_TRACKED_FILES"
+  },
+  "realEvidence": {
+    "requiredGates": 5,
+    "requiredSkips": 0,
+    "sdarSha": "a9957c82c17ca01e77528f3817c03d86224aaf88",
+    "agentCardSha256": "767ad28a1d0af8e99a19d85ed79cbdf8478d746710a7bfa3671c953b8f696e17",
+    "openWebUiVersion": "0.10.2",
+    "openWebUiRunId": "p13-40e7ae4-northbound",
+    "officialAgUiTaskId": "a00f10d4-a5bb-4653-9ced-d2f76896a1a3",
+    "consistencyTaskId": "42d1b564-c27b-4ed3-94da-d93ba9a24197",
+    "consistencyContextId": "bec0880d-477e-4cb2-a71f-6687608654fa",
+    "longObservationTaskId": "f78651cd-3675-4862-a317-63e91e05531d",
+    "longObservationRecoveredState": "INPUT_REQUIRED",
+    "longObservationInternalPhase": "awaiting_plan_confirmation",
+    "longObservationCleanupState": "CANCELED",
+    "rawEvents": false,
+    "toolCalls": false,
+    "eventCursor": false,
+    "taskResubscription": false
+  },
+  "supplyChain": {
+    "imageId": "sha256:26bd8ce9577669b7f061ffa7c59b8d4dc7a4049f4359ac1c0c76f6b380232f02",
+    "compose": "PASSED_READY_200_NONROOT_READONLY_CAP_DROP_ALL_NO_NEW_PRIVILEGES",
+    "migratedTables": 12,
+    "sbom": "CYCLONEDX_1.7",
+    "sbomComponents": 3718,
+    "sbomSha256": "2fb36bdbbd5fdc8986e706379b4230a8c3a25b44b85615776d455564071f0da0"
+  },
+  "acceptance": {
+    "AC-01": "PASSED_P00_MAIN_GATE",
+    "AC-02": "PASSED_REAL",
+    "AC-03": "PASSED_REAL",
+    "AC-04": "PASSED_REAL",
+    "AC-05": "PASSED_REAL",
+    "AC-06": "PASSED_REAL",
+    "AC-07": "PASSED_REAL",
+    "AC-08": "PASSED_REAL",
+    "AC-09": "PASSED_REAL",
+    "AC-10": "PASSED_REAL",
+    "AC-11": "PASSED_NATIVE_POSTGRES",
+    "AC-12": "PASSED_SECURITY",
+    "AC-13": "PASSED_REAL",
+    "AC-14": "PASSED_REAL",
+    "AC-15": "PASSED_NO_TOOL_CALLS",
+    "AC-16": "PASSED_SAME_INTERACTION_EVENTS",
+    "AC-17": "PASSED_NATIVE_POSTGRES_RESTART",
+    "AC-18": "PASSED_UPGRADE_MIGRATION",
+    "AC-19": "PASSED_REAL",
+    "AC-20": "PASSED_EXACT_HEAD",
+    "AC-21": "PENDING_P14_LATEST_MAIN",
+    "AC-22": "PENDING_P14_FINAL_ANCESTRY"
+  },
+  "failedAttemptsRetainedAfterEvidence": 69,
+  "rawSecretsCommitted": false
+}

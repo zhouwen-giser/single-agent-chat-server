@@ -1,5 +1,41 @@
 # Changelog
 
+## Unreleased — SACS v0.2 candidate
+
+### Added
+
+- A protocol-neutral, typed `SdarInteractionEvent` spine shared by the OpenAI
+  and official AG-UI northbound adapters.
+- Authenticated AG-UI HTTP/SSE capabilities and Run endpoints using official
+  `@ag-ui/core`, `@ag-ui/encoder`, and `@ag-ui/client` 0.0.57 contracts.
+- Durable PostgreSQL interaction Runs, requests, interrupts, Agent Card
+  snapshots, client thread bindings, crash recovery, and explicit Resume.
+- Safe Task status/history/artifact/capability queries that cannot create or
+  mutate SDAR Tasks.
+- Exact-head release orchestration for native PostgreSQL, five zero-skip real
+  gates, hardened Docker Compose, license/secret gates, and CycloneDX SBOM.
+
+### Fixed
+
+- Close a non-aborted AG-UI execution failure as a sanitized, replayable
+  `ERROR` Run instead of leaving durable state permanently `RUNNING`.
+- Preserve one Task identity across bounded observation, disconnect recovery,
+  duplicate Run attempts, and protocol projections.
+
+### Security
+
+- Keep OpenAI and AG-UI service credentials independent while enforcing the
+  same signed principal profile and protocol-isolated rate limits.
+- Reject client-authored Task state, unbound Task IDs, RAW A2A events, inferred
+  Tool Calls, unsafe URLs, oversized state/artifacts, and identity drift.
+
+### Candidate status
+
+Phase 13 exact candidate `40e7ae4e...` passed local, real, container,
+supply-chain, and remote CI gates. AC-21 and AC-22 remain pending for P14
+latest-main integration and final PR ancestry proof. No merge, tag, release, or
+deployment has been performed.
+
 ## 0.1.0 — acceptance passed, PR publication pending
 
 ### Added
