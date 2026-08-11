@@ -5,6 +5,8 @@ import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
+import { writeRealGateEvidence } from "./real-gate-evidence.mjs";
+
 const execFileAsync = promisify(execFile);
 const sdarRepository = required("P12_SDAR_REPOSITORY");
 const expectedSdarSha = required("P12_EXPECTED_SDAR_SHA");
@@ -38,21 +40,25 @@ const selected = card.supportedInterfaces?.find(
 );
 assert.ok(selected);
 
-process.stdout.write(
-  `${JSON.stringify({
-    status: "PASSED",
-    sdarRepository,
-    sdarSha: sha.trim(),
-    sdarClean: true,
-    sdarPackageVersion: sdarPackage.version,
-    a2aSdk: sacsPackage.dependencies["@a2a-js/sdk"],
-    agentCardSha256: createHash("sha256").update(cardBytes).digest("hex"),
-    protocolBinding: selected.protocolBinding,
-    protocolVersion: selected.protocolVersion,
-    streaming: true,
-    selectedEndpoint: selected.url,
-  })}\n`,
+const result = {
+  status: "PASSED",
+  sdarRepository,
+  sdarSha: sha.trim(),
+  sdarClean: true,
+  sdarPackageVersion: sdarPackage.version,
+  a2aSdk: sacsPackage.dependencies["@a2a-js/sdk"],
+  agentCardSha256: createHash("sha256").update(cardBytes).digest("hex"),
+  protocolBinding: selected.protocolBinding,
+  protocolVersion: selected.protocolVersion,
+  streaming: true,
+  selectedEndpoint: selected.url,
+};
+await writeRealGateEvidence(
+  "P12_SOURCE_LOCK_EVIDENCE_FILE",
+  "source-lock",
+  result,
 );
+process.stdout.write(`${JSON.stringify(result)}\n`);
 
 function directoryUrl(path) {
   const url = pathToFileURL(path.endsWith("\\") ? path : `${path}\\`);

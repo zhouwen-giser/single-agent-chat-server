@@ -46,5 +46,29 @@ user, chat, Task, prompt, Artifact, URL, or error-text labels.
 
 The production image is non-root and has a healthcheck. Compose uses a read-only
 filesystem, tmpfs for `/tmp`, all capabilities dropped, and
-`no-new-privileges`. Clean-start and cleanup must operate only on the project’s
+`no-new-privileges`. Clean-start and cleanup must operate only on the project's
 own Compose resources.
+
+`pnpm verify:compose` creates a uniquely prefixed `sacs-p13-*` project, waits
+for PostgreSQL migrations and HTTP readiness, verifies the runtime controls,
+then removes only that disposable project's containers, volume, and networks.
+It is an acceptance command, not a production shutdown command.
+
+## Known limitations and rollback
+
+- Exactly one fixed SDAR is supported. Its current A2A endpoint is
+  unauthenticated and must stay on a trusted isolated network.
+- A2A observation streams are bounded. Recovery uses `getTask()` polling; there
+  is no event cursor or arbitrary Task stream resubscription.
+- AG-UI RAW and Tool Call events are deliberately disabled. Internal SDAR/MCP
+  operations are not public tools.
+- Open WebUI and official AG-UI clients are independent northbound protocols;
+  neither is an authority for Task state.
+
+For an application rollback, retain the PostgreSQL volume, stop new traffic,
+and deploy the previously verified image with the same service credentials and
+SDAR endpoint. Migrations are append-only and have no automatic destructive
+down migration; confirm the older image understands the current schema before
+rollback. Never use `docker compose down --volumes` for a production rollback.
+If compatibility is uncertain, preserve the database and stop rather than
+resetting it.

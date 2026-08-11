@@ -61,7 +61,11 @@
     "test:p12:consistency:real": "pnpm build && node scripts/phase12-task-consistency.mjs",
     "test:p12:long:real": "pnpm build && node scripts/phase12-long-observation.mjs",
     "verify:phase12": "pnpm format:check && pnpm lint && pnpm lint:langgraph-json && pnpm typecheck && pnpm test:unit && pnpm test:contract && pnpm test:security && pnpm verify:architecture && pnpm build",
-    "verify": "node scripts/require-final-environment.mjs && pnpm verify:phase12 && pnpm test:integration && pnpm test:e2e && pnpm smoke && pnpm verify:migrations && pnpm verify:openai-api && pnpm verify:a2a && pnpm verify:workflows && pnpm verify:licenses && pnpm verify:secrets && pnpm docker:build && pnpm verify:container && pnpm generate:sbom"
+    "verify:ci": "pnpm verify:phase12 && pnpm test:integration && pnpm test:e2e:fixture && pnpm smoke && pnpm verify:migrations && pnpm verify:openai-api && pnpm verify:a2a && pnpm verify:workflows && pnpm verify:licenses && pnpm verify:secrets",
+    "verify:p13:real-evidence": "node scripts/phase13-real-evidence.mjs",
+    "verify:compose": "node scripts/phase13-compose.mjs",
+    "verify:phase13": "node scripts/require-phase13-environment.mjs && pnpm verify:ci && pnpm verify:p13:real-evidence && pnpm docker:build && pnpm verify:container && pnpm verify:compose && pnpm generate:sbom",
+    "verify": "pnpm verify:phase13"
   },
   "dependencies": {
     "@a2a-js/sdk": "1.0.0-beta.0",

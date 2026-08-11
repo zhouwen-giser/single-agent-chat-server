@@ -1,9 +1,24 @@
 import { spawn } from "node:child_process";
 
 const shared = process.env;
+const evidenceDirectory = shared.P13_REAL_EVIDENCE_DIR?.trim();
 const steps = [
-  ["source-lock", "scripts/phase12-source-lock.mjs", {}],
-  ["openwebui", "scripts/phase12-current-sdar-e2e.mjs", {}],
+  [
+    "source-lock",
+    "scripts/phase12-source-lock.mjs",
+    evidenceDirectory
+      ? {
+          P12_SOURCE_LOCK_EVIDENCE_FILE: `${evidenceDirectory}/source-lock.json`,
+        }
+      : {},
+  ],
+  [
+    "openwebui",
+    "scripts/phase12-current-sdar-e2e.mjs",
+    evidenceDirectory
+      ? { P12_OPENWEBUI_EVIDENCE_FILE: `${evidenceDirectory}/openwebui.json` }
+      : {},
+  ],
   [
     "official-ag-ui",
     "scripts/phase11-official-client-e2e.mjs",
@@ -13,6 +28,11 @@ const steps = [
       P11_PRINCIPAL_JWT_SECRET: shared.P12_PRINCIPAL_JWT_SECRET,
       P11_DATABASE_URL: shared.P12_DATABASE_URL,
       P11_RUN_STAMP: `${shared.P12_RUN_STAMP ?? `p12-${Date.now()}`}-official`,
+      ...(evidenceDirectory
+        ? {
+            P11_OFFICIAL_AGUI_EVIDENCE_FILE: `${evidenceDirectory}/official-ag-ui.json`,
+          }
+        : {}),
     },
   ],
 ];

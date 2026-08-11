@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 
+import { writeRealGateEvidence } from "./real-gate-evidence.mjs";
+
 const base = requiredEnvironment("P12_OPENWEBUI_URL");
 const runId = process.env.P12_RUN_STAMP ?? `p12-current-${Date.now()}`;
 const adminEmail = requiredEnvironment("P12_OPENWEBUI_EMAIL");
@@ -312,6 +314,7 @@ const isolatedStatus = await completion({
 });
 
 const evidence = {
+  status: "PASSED",
   runId,
   exactHead: process.env.P12_EXPECTED_SACS_SHA,
   models: {
@@ -426,6 +429,11 @@ assert.ok(retrySecond.text.length > 0);
 assert.match(disconnectRecovered.text, /awaiting_plan_confirmation/u);
 assert.match(isolatedStatus.text, /No Task is bound/u);
 
+await writeRealGateEvidence(
+  "P12_OPENWEBUI_EVIDENCE_FILE",
+  "openwebui",
+  evidence,
+);
 process.stdout.write(`${JSON.stringify(evidence, null, 2)}\n`);
 
 function requiredEnvironment(name) {

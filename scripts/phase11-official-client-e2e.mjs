@@ -6,6 +6,8 @@ import { AgentCapabilitiesSchema, EventSchemas, EventType } from "@ag-ui/core";
 import { HttpAgent } from "@ag-ui/client";
 import pg from "pg";
 
+import { writeRealGateEvidence } from "./real-gate-evidence.mjs";
+
 const baseUrl = process.env.P11_SACS_URL ?? "http://127.0.0.1:3000";
 const serviceKey = requiredEnvironment("P11_AG_UI_SERVICE_KEY");
 const jwtSecret = requiredEnvironment("P11_PRINCIPAL_JWT_SECRET");
@@ -178,24 +180,28 @@ try {
     { status: "RESOLVED", task_id: initialTask.taskId },
   ]);
 
-  process.stdout.write(
-    `${JSON.stringify({
-      status: "PASSED",
-      officialClient: "@ag-ui/client@0.0.57",
-      capabilitiesSchema: "AgentCapabilitiesSchema@0.0.57",
-      runEventSchema: "EventSchemas@0.0.57",
-      taskId: initialTask.taskId,
-      terminalState,
-      statusRuns: statusRuns + 1,
-      eventTypes: [...new Set(initial.events.map((event) => event.type))],
-      interruptReason: interrupt.reason,
-      resume: "PASSED",
-      runIdempotency: "PASSED",
-      abortReconnect: "PASSED",
-      rawEvents: false,
-      toolCalls: false,
-    })}\n`,
+  const result = {
+    status: "PASSED",
+    officialClient: "@ag-ui/client@0.0.57",
+    capabilitiesSchema: "AgentCapabilitiesSchema@0.0.57",
+    runEventSchema: "EventSchemas@0.0.57",
+    taskId: initialTask.taskId,
+    terminalState,
+    statusRuns: statusRuns + 1,
+    eventTypes: [...new Set(initial.events.map((event) => event.type))],
+    interruptReason: interrupt.reason,
+    resume: "PASSED",
+    runIdempotency: "PASSED",
+    abortReconnect: "PASSED",
+    rawEvents: false,
+    toolCalls: false,
+  };
+  await writeRealGateEvidence(
+    "P11_OFFICIAL_AGUI_EVIDENCE_FILE",
+    "official-ag-ui",
+    result,
   );
+  process.stdout.write(`${JSON.stringify(result)}\n`);
 } finally {
   await pool.end();
 }

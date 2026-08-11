@@ -3,9 +3,9 @@ import { readFile } from "node:fs/promises";
 const workflow = await readFile(".github/workflows/ci.yml", "utf8");
 for (const required of [
   "pnpm install --frozen-lockfile",
-  "pnpm verify:phase10",
-  "docker build",
-  "node scripts/verify-container.mjs",
+  "pnpm verify:ci",
+  "pnpm docker:build",
+  "pnpm verify:compose",
 ]) {
   if (!workflow.includes(required)) {
     throw new Error(`CI workflow is missing: ${required}`);

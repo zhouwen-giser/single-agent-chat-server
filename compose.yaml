@@ -20,7 +20,7 @@ services:
     build:
       context: .
       target: runtime
-    image: single-agent-chat-server:0.1.0
+    image: ${CHAT_SERVER_IMAGE:-single-agent-chat-server:0.1.0}
     init: true
     depends_on:
       postgres:
@@ -71,4 +71,4 @@ networks:
   backend:
     internal: true
   frontend:
-    name: single-agent-chat-frontend
+    name: ${CHAT_SERVER_FRONTEND_NETWORK:-single-agent-chat-frontend}

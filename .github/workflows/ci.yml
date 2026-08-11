@@ -36,7 +36,7 @@ jobs:
       - run: corepack enable && corepack prepare pnpm@11.13.1 --activate
       - run: pnpm install --frozen-lockfile
       - run: pnpm peers check
-      - run: pnpm verify:phase10
+      - run: pnpm verify:ci
 
   container:
     needs: quality
@@ -55,21 +55,12 @@ jobs:
           node-version: 22.14.0
       - run: corepack enable && corepack prepare pnpm@11.13.1 --activate
       - run: pnpm install --frozen-lockfile
-      - run: docker build --target runtime -t single-agent-chat-server:0.1.0 .
+      - run: pnpm docker:build
       - run: node scripts/verify-container.mjs
-      - run: docker compose up -d
-      - run: |
-          for attempt in $(seq 1 60); do
-            curl --fail --silent http://127.0.0.1:3000/ready && exit 0
-            sleep 2
-          done
-          docker compose logs
-          exit 1
+      - run: pnpm verify:compose
       - run: pnpm generate:sbom
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: cyclonedx-sbom
           path: reports/security/sbom.cdx.json
           if-no-files-found: error
-      - if: always()
-        run: docker compose down --volumes --remove-orphans

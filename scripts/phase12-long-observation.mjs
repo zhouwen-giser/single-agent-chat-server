@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 
+import { writeRealGateEvidence } from "./real-gate-evidence.mjs";
+
 import { HttpAgent } from "@ag-ui/client";
 import { EventSchemas, EventType } from "@ag-ui/core";
 
@@ -50,22 +52,26 @@ await run(controlBaseUrl, `${stamp}-cancel`, "cancel the task");
 const canceledTask = await client.getTask(task.taskId);
 assert.equal(canceledTask.state, "CANCELED");
 
-process.stdout.write(
-  `${JSON.stringify({
-    status: "PASSED",
-    officialClient: "@ag-ui/client@0.0.57",
-    a2aSdk: "@a2a-js/sdk@1.0.0-beta.0",
-    taskId: task.taskId,
-    initialObservationEnded: true,
-    taskContinuesAtBoundary: true,
-    recoveredWithGetTaskPolling: true,
-    recoveredState: recoveredTask.state,
-    recoveredInternalPhase: recoveredTask.internalPhase,
-    cleanupState: canceledTask.state,
-    eventCursor: false,
-    taskResubscription: false,
-  })}\n`,
+const result = {
+  status: "PASSED",
+  officialClient: "@ag-ui/client@0.0.57",
+  a2aSdk: "@a2a-js/sdk@1.0.0-beta.0",
+  taskId: task.taskId,
+  initialObservationEnded: true,
+  taskContinuesAtBoundary: true,
+  recoveredWithGetTaskPolling: true,
+  recoveredState: recoveredTask.state,
+  recoveredInternalPhase: recoveredTask.internalPhase,
+  cleanupState: canceledTask.state,
+  eventCursor: false,
+  taskResubscription: false,
+};
+await writeRealGateEvidence(
+  "P12_LONG_EVIDENCE_FILE",
+  "long-observation",
+  result,
 );
+process.stdout.write(`${JSON.stringify(result)}\n`);
 
 async function run(baseUrl, runId, message) {
   const events = [];

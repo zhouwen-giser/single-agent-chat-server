@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 
+import { writeRealGateEvidence } from "./real-gate-evidence.mjs";
+
 import { HttpAgent } from "@ag-ui/client";
 import { EventSchemas, EventType } from "@ag-ui/core";
 
@@ -132,23 +134,27 @@ assert.equal(
   false,
 );
 
-process.stdout.write(
-  `${JSON.stringify({
-    status: "PASSED",
-    officialClient: "@ag-ui/client@0.0.57",
-    a2aSdk: "@a2a-js/sdk@1.0.0-beta.0",
-    taskId: normalizedTask.taskId,
-    contextId: normalizedTask.contextId,
-    normalizedState: normalizedTask.state,
-    historyMessages: normalizedTask.history?.length ?? 0,
-    artifacts: normalizedTask.artifacts.length,
-    openAiInterpretation: "PASSED_SAME_INTERACTION_EVENTS",
-    agUiPublicState: "PASSED_SAME_INTERACTION_EVENTS",
-    normalizedA2aSource: "PASSED_AUTHORIZED_GET_TASK",
-    rawEvents: false,
-    toolCalls: false,
-  })}\n`,
+const result = {
+  status: "PASSED",
+  officialClient: "@ag-ui/client@0.0.57",
+  a2aSdk: "@a2a-js/sdk@1.0.0-beta.0",
+  taskId: normalizedTask.taskId,
+  contextId: normalizedTask.contextId,
+  normalizedState: normalizedTask.state,
+  historyMessages: normalizedTask.history?.length ?? 0,
+  artifacts: normalizedTask.artifacts.length,
+  openAiInterpretation: "PASSED_SAME_INTERACTION_EVENTS",
+  agUiPublicState: "PASSED_SAME_INTERACTION_EVENTS",
+  normalizedA2aSource: "PASSED_AUTHORIZED_GET_TASK",
+  rawEvents: false,
+  toolCalls: false,
+};
+await writeRealGateEvidence(
+  "P12_CONSISTENCY_EVIDENCE_FILE",
+  "same-task-consistency",
+  result,
 );
+process.stdout.write(`${JSON.stringify(result)}\n`);
 
 async function officialRun({ runId, message, resume }) {
   const events = [];
