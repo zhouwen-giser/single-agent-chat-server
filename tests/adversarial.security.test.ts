@@ -269,11 +269,13 @@ describe("Phase 12 adversarial hardening", () => {
 
   it("serializes mutating Follow-ups and abandons an unsent idempotency claim", async () => {
     const repository = repositoryStub({
-      findActiveTaskForChat: jest.fn(async () => ({
-        ...binding(),
-        status: "INPUT_REQUIRED",
-        pendingInput: { internalPhase: "awaiting_user_input" },
-      })),
+      listActiveTasksForChat: jest.fn(async () => [
+        {
+          ...binding(),
+          status: "INPUT_REQUIRED",
+          pendingInput: { internalPhase: "awaiting_user_input" },
+        },
+      ]),
       claimTaskInteractionSlot: jest.fn(async () => false),
     });
     const sendFollowUp = jest.fn();
@@ -305,10 +307,46 @@ describe("Phase 12 adversarial hardening", () => {
     expect(repository.abandonRequestClaim).toHaveBeenCalledTimes(1);
   });
 
+  it("clarifies ambiguous mutation and lists multi-Task status without A2A calls", async () => {
+    const first = { ...binding(), shortId: "task-one" };
+    const second = {
+      ...binding(),
+      bindingId: "binding-2",
+      sdarTaskId: "task-2",
+      sdarContextId: "context-2",
+      shortId: "task-two",
+    };
+    const repository = repositoryStub({
+      listActiveTasksForChat: jest.fn(async () => [first, second]),
+    });
+    const getClient = jest.fn<() => Promise<SdarA2aClient>>(async () => {
+      throw new Error("ambiguous local operation contacted SDAR");
+    });
+    const coordinator = new SdarTaskCoordinator({ repository, getClient });
+
+    const cancelOutput = await collect(
+      coordinator.cancel({
+        userText: "cancel it",
+        userId: "user-a",
+        chatId: "chat-a",
+        userMessageId: "ambiguous-cancel",
+      }),
+    );
+    const statusOutput = await collect(
+      coordinator.status({ userId: "user-a", chatId: "chat-a" }),
+    );
+
+    expect(cancelOutput.join("\n")).toContain("Name exactly one Task");
+    expect(statusOutput.join("\n")).toContain("task-one: WORKING");
+    expect(statusOutput.join("\n")).toContain("task-two: WORKING");
+    expect(getClient).not.toHaveBeenCalled();
+    expect(repository.claimTaskInteractionSlot).not.toHaveBeenCalled();
+  });
+
   it("does not render a stale observation that persistence rejected", async () => {
     const staleBinding = binding();
     const repository = repositoryStub({
-      findActiveTaskForChat: jest.fn(async () => staleBinding),
+      listActiveTasksForChat: jest.fn(async () => [staleBinding]),
       recordEvent: jest.fn(async () => true),
       updateTaskBinding: jest.fn(async () => ({
         ...staleBinding,
@@ -589,8 +627,10 @@ function repositoryStub(
     claimTaskSubmissionSlot: jest.fn(async () => true),
     claimTaskInteractionSlot: jest.fn(async () => true),
     releaseTaskSubmissionSlot: jest.fn(async () => undefined),
+    releaseTaskInteractionSlot: jest.fn(async () => undefined),
+    setFocusedTask: jest.fn(async () => undefined),
     findAuthorizedTask: jest.fn(async () => undefined),
-    findActiveTaskForChat: jest.fn(async () => currentBinding),
+    listActiveTasksForChat: jest.fn(async () => [currentBinding]),
     createTaskBinding: jest.fn(async () => currentBinding),
     recordEvent: jest.fn(async () => true),
     updateTaskBinding: jest.fn(

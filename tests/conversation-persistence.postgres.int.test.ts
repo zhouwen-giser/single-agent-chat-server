@@ -559,7 +559,7 @@ describeWithPostgres("protocol-neutral conversation persistence", () => {
         "SELECT version FROM chat_service.schema_migrations ORDER BY version",
       );
       expect(versions.rows.at(-1)?.version).toBe(
-        "0007_conversation_history.sql",
+        "0008_multi_task_directory.sql",
       );
     } finally {
       await rm(directory, { recursive: true, force: true });

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import type { Pool, PoolClient } from "pg";
 
@@ -17,7 +17,10 @@ export class ChatPersistenceRepository {
   constructor(
     private readonly pool: Pool,
     private readonly defaultLeaseMs: number,
-  ) {}
+    private readonly maxActiveTasksPerChat = 8,
+  ) {
+    assertActiveTaskLimit(maxActiveTasksPerChat);
+  }
 
   async countActiveTaskBindings(): Promise<number> {
     const result = await this.pool.query<{ count: string }>(`
@@ -106,28 +109,36 @@ export class ChatPersistenceRepository {
           "Chat thread is not authorized",
         );
       }
+      const threadId = requiredRow(thread.rows, "authorized thread").thread_id;
+      const shortId = await allocateShortId(client, threadId, input.sdarTaskId);
       try {
         const result = await client.query<TaskRow>(
           `
             INSERT INTO chat_service.conversation_task_binding(
               binding_id, thread_id, conversation_thread_id, sdar_task_id,
-              sdar_context_id, status
-            ) VALUES ($1, $2, $2, $3, $4, $5)
+              sdar_context_id, short_id, status, last_interacted_at
+            ) VALUES ($1, $2, $2, $3, $4, $5, $6, now())
             RETURNING *
           `,
           [
             randomUUID(),
-            requiredRow(thread.rows, "authorized thread").thread_id,
+            threadId,
             input.sdarTaskId,
             input.sdarContextId,
+            shortId,
             input.status,
           ],
         );
-        return mapTask(requiredRow(result.rows, "task binding insert"));
+        const binding = mapTask(
+          requiredRow(result.rows, "task binding insert"),
+        );
+        await upsertTaskFocus(client, threadId, binding.bindingId);
+        await upsertTaskReference(client, threadId, binding.bindingId);
+        return binding;
       } catch (error) {
         if (postgresCode(error) === "23505") {
           throw new PersistenceConflictError(
-            "The chat already has an active SDAR Task",
+            "The SDAR Task or generated short ID is already bound to this chat",
           );
         }
         throw error;
@@ -155,10 +166,12 @@ export class ChatPersistenceRepository {
     return result.rows[0] === undefined ? undefined : mapTask(result.rows[0]);
   }
 
-  async findActiveTaskForChat(input: {
+  async listActiveTasksForChat(input: {
     readonly chatId: string;
     readonly userId: string;
-  }): Promise<TaskBinding | undefined> {
+    readonly limit?: number;
+  }): Promise<readonly TaskBinding[]> {
+    const limit = validateDirectoryLimit(input.limit);
     const result = await this.pool.query<TaskRow>(
       `
         SELECT task.*
@@ -168,17 +181,147 @@ export class ChatPersistenceRepository {
         WHERE thread.openwebui_chat_id = $1
           AND thread.user_id = $2
           AND task.terminal_at IS NULL
+        ORDER BY task.last_interacted_at DESC NULLS LAST,
+                 task.created_at DESC,
+                 task.sdar_task_id ASC
+        LIMIT $3
+      `,
+      [input.chatId, input.userId, limit],
+    );
+    return result.rows.map(mapTask);
+  }
+
+  async listRecentTasksForChat(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly limit?: number;
+  }): Promise<readonly TaskBinding[]> {
+    const limit = validateDirectoryLimit(input.limit);
+    const result = await this.pool.query<TaskRow>(
+      `
+        SELECT task.*
+        FROM chat_service.conversation_task_binding task
+        JOIN chat_service.chat_thread_binding thread
+          ON thread.thread_id = task.thread_id
+        WHERE thread.openwebui_chat_id = $1
+          AND thread.user_id = $2
+          AND task.terminal_at IS NOT NULL
+        ORDER BY task.last_interacted_at DESC NULLS LAST,
+                 task.created_at DESC,
+                 task.sdar_task_id ASC
+        LIMIT $3
+      `,
+      [input.chatId, input.userId, limit],
+    );
+    return result.rows.map(mapTask);
+  }
+
+  async countActiveTasksForChat(input: {
+    readonly chatId: string;
+    readonly userId: string;
+  }): Promise<number> {
+    const result = await this.pool.query<{ count: string }>(
+      `
+        SELECT count(*)::text AS count
+        FROM chat_service.conversation_task_binding task
+        JOIN chat_service.chat_thread_binding thread
+          ON thread.thread_id = task.thread_id
+        WHERE thread.openwebui_chat_id = $1
+          AND thread.user_id = $2
+          AND task.terminal_at IS NULL
+      `,
+      [input.chatId, input.userId],
+    );
+    return Number(requiredRow(result.rows, "chat active task count").count);
+  }
+
+  async findFocusedTaskForChat(input: {
+    readonly chatId: string;
+    readonly userId: string;
+  }): Promise<TaskBinding | undefined> {
+    const result = await this.pool.query<TaskRow>(
+      `
+        SELECT task.*
+        FROM chat_service.conversation_task_focus focus
+        JOIN chat_service.conversation_task_binding task
+          ON task.conversation_thread_id = focus.conversation_thread_id
+         AND task.binding_id = focus.binding_id
+        JOIN chat_service.chat_thread_binding thread
+          ON thread.thread_id = focus.conversation_thread_id
+        WHERE thread.openwebui_chat_id = $1 AND thread.user_id = $2
       `,
       [input.chatId, input.userId],
     );
     return result.rows[0] === undefined ? undefined : mapTask(result.rows[0]);
+  }
+
+  async setFocusedTask(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+  }): Promise<void> {
+    const result = await this.pool.query(
+      `
+        INSERT INTO chat_service.conversation_task_focus(
+          conversation_thread_id, binding_id
+        )
+        SELECT task.conversation_thread_id, task.binding_id
+        FROM chat_service.conversation_task_binding task
+        JOIN chat_service.chat_thread_binding thread
+          ON thread.thread_id = task.thread_id
+        WHERE thread.openwebui_chat_id = $1 AND thread.user_id = $2
+          AND task.binding_id = $3
+        ON CONFLICT (conversation_thread_id)
+        DO UPDATE SET binding_id = EXCLUDED.binding_id, updated_at = now()
+      `,
+      [input.chatId, input.userId, input.bindingId],
+    );
+    if (result.rowCount !== 1) {
+      throw new PersistenceAuthorizationError("Task focus is not authorized");
+    }
+    await this.touchTaskReference(input);
+  }
+
+  async touchTaskReference(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+  }): Promise<void> {
+    const result = await this.pool.query(
+      `
+        WITH authorized AS (
+          UPDATE chat_service.conversation_task_binding task
+          SET last_interacted_at = now(), updated_at = now()
+          FROM chat_service.chat_thread_binding thread
+          WHERE thread.thread_id = task.thread_id
+            AND thread.openwebui_chat_id = $1 AND thread.user_id = $2
+            AND task.binding_id = $3
+          RETURNING task.conversation_thread_id, task.binding_id
+        )
+        INSERT INTO chat_service.conversation_task_reference(
+          conversation_thread_id, binding_id
+        )
+        SELECT conversation_thread_id, binding_id FROM authorized
+        ON CONFLICT (conversation_thread_id)
+        DO UPDATE SET binding_id = EXCLUDED.binding_id, updated_at = now()
+      `,
+      [input.chatId, input.userId, input.bindingId],
+    );
+    if (result.rowCount !== 1) {
+      throw new PersistenceAuthorizationError(
+        "Task reference is not authorized",
+      );
+    }
   }
   async listActiveBindings(): Promise<readonly TaskBinding[]> {
     const result = await this.pool.query<TaskRow>(
       `
         SELECT * FROM chat_service.conversation_task_binding
         WHERE terminal_at IS NULL
-        ORDER BY created_at
+        ORDER BY conversation_thread_id,
+                 last_interacted_at DESC NULLS LAST,
+                 created_at DESC,
+                 sdar_task_id ASC
       `,
     );
     return result.rows.map(mapTask);
@@ -439,14 +582,20 @@ export class ChatPersistenceRepository {
             OR thread.submission_lease_until <= now()
             OR thread.submission_lease_owner = $3
           )
-          AND NOT EXISTS (
-            SELECT 1
+          AND (
+            SELECT count(*)
             FROM chat_service.conversation_task_binding AS task
             WHERE task.thread_id = thread.thread_id
               AND task.terminal_at IS NULL
-          )
+          ) < $5
       `,
-      [input.chatId, input.userId, input.leaseOwner, leaseMs],
+      [
+        input.chatId,
+        input.userId,
+        input.leaseOwner,
+        leaseMs,
+        this.maxActiveTasksPerChat,
+      ],
     );
     return result.rowCount === 1;
   }
@@ -454,33 +603,53 @@ export class ChatPersistenceRepository {
   async claimTaskInteractionSlot(input: {
     readonly chatId: string;
     readonly userId: string;
+    readonly bindingId: string;
     readonly leaseOwner: string;
     readonly leaseMs?: number;
   }): Promise<boolean> {
     const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
     const result = await this.pool.query(
       `
-        UPDATE chat_service.chat_thread_binding AS thread
-        SET submission_lease_owner = $3,
-            submission_lease_until = now() + ($4::bigint * interval '1 millisecond'),
+        UPDATE chat_service.conversation_task_binding AS task
+        SET interaction_lease_owner = $4,
+            interaction_lease_until = now() + ($5::bigint * interval '1 millisecond'),
+            last_interacted_at = now(),
             updated_at = now()
-        WHERE thread.openwebui_chat_id = $1
+        FROM chat_service.chat_thread_binding AS thread
+        WHERE task.thread_id = thread.thread_id
+          AND thread.openwebui_chat_id = $1
           AND thread.user_id = $2
+          AND task.binding_id = $3
           AND (
-            thread.submission_lease_until IS NULL
-            OR thread.submission_lease_until <= now()
-            OR thread.submission_lease_owner = $3
-          )
-          AND EXISTS (
-            SELECT 1
-            FROM chat_service.conversation_task_binding AS task
-            WHERE task.thread_id = thread.thread_id
-              AND task.terminal_at IS NULL
+            task.interaction_lease_until IS NULL
+            OR task.interaction_lease_until <= now()
+            OR task.interaction_lease_owner = $4
           )
       `,
-      [input.chatId, input.userId, input.leaseOwner, leaseMs],
+      [input.chatId, input.userId, input.bindingId, input.leaseOwner, leaseMs],
     );
     return result.rowCount === 1;
+  }
+
+  async releaseTaskInteractionSlot(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    await this.pool.query(
+      `
+        UPDATE chat_service.conversation_task_binding AS task
+        SET interaction_lease_owner = NULL,
+            interaction_lease_until = NULL,
+            updated_at = now()
+        FROM chat_service.chat_thread_binding AS thread
+        WHERE task.thread_id = thread.thread_id
+          AND thread.openwebui_chat_id = $1 AND thread.user_id = $2
+          AND task.binding_id = $3 AND task.interaction_lease_owner = $4
+      `,
+      [input.chatId, input.userId, input.bindingId, input.leaseOwner],
+    );
   }
 
   async releaseTaskSubmissionSlot(input: {
@@ -525,10 +694,19 @@ export class ChatPersistenceRepository {
       WHERE submission_lease_until IS NOT NULL
         AND submission_lease_until <= now()
     `);
+    const releasedInteractionSlots = await this.pool.query(`
+      UPDATE chat_service.conversation_task_binding
+      SET interaction_lease_owner = NULL,
+          interaction_lease_until = NULL,
+          updated_at = now()
+      WHERE interaction_lease_until IS NOT NULL
+        AND interaction_lease_until <= now()
+    `);
     return {
       activeBindings: await this.listActiveBindings(),
       recoveredClaimCount: recovered.rowCount ?? 0,
       recoveredSubmissionSlotCount: releasedSubmissionSlots.rowCount ?? 0,
+      recoveredTaskInteractionSlotCount: releasedInteractionSlots.rowCount ?? 0,
     };
   }
 
@@ -562,11 +740,15 @@ interface TaskRow {
   readonly thread_id: string;
   readonly sdar_task_id: string;
   readonly sdar_context_id: string;
+  readonly short_id: string;
   readonly status: string;
   readonly pending_input_json: JsonValue | null;
   readonly last_status_timestamp: Date | null;
   readonly last_event_hash: string | null;
   readonly terminal_at: Date | null;
+  readonly last_interacted_at: Date | null;
+  readonly created_at: Date;
+  readonly updated_at: Date;
   readonly version: string | number;
 }
 
@@ -590,6 +772,7 @@ const mapTask = (row: TaskRow): TaskBinding => ({
   threadId: row.thread_id,
   sdarTaskId: row.sdar_task_id,
   sdarContextId: row.sdar_context_id,
+  shortId: row.short_id,
   status: row.status,
   ...(row.pending_input_json === null
     ? {}
@@ -603,6 +786,11 @@ const mapTask = (row: TaskRow): TaskBinding => ({
   ...(row.terminal_at === null
     ? {}
     : { terminalAt: row.terminal_at.toISOString() }),
+  ...(row.last_interacted_at === null
+    ? {}
+    : { lastInteractedAt: row.last_interacted_at.toISOString() }),
+  createdAt: row.created_at.toISOString(),
+  updatedAt: row.updated_at.toISOString(),
   version: Number(row.version),
 });
 
@@ -619,4 +807,75 @@ function postgresCode(error: unknown): string | undefined {
     return undefined;
   }
   return typeof error.code === "string" ? error.code : undefined;
+}
+
+function assertActiveTaskLimit(value: number): void {
+  if (!Number.isInteger(value) || value < 1 || value > 32) {
+    throw new Error("Active Task limit must be an integer from 1 to 32");
+  }
+}
+
+function validateDirectoryLimit(value: number | undefined): number {
+  const limit = value ?? 32;
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error("Task directory limit must be an integer from 1 to 100");
+  }
+  return limit;
+}
+
+async function allocateShortId(
+  client: PoolClient,
+  threadId: string,
+  taskId: string,
+): Promise<string> {
+  const existing = await client.query<{ short_id: string }>(
+    `SELECT short_id FROM chat_service.conversation_task_binding
+     WHERE conversation_thread_id = $1`,
+    [threadId],
+  );
+  const used = new Set(existing.rows.map((row) => row.short_id));
+  const normalized = taskId.toLowerCase().replace(/[^a-z0-9._:-]/gu, "");
+  const source = normalized.length === 0 ? taskId : normalized;
+  for (let length = Math.min(8, source.length); length <= source.length;) {
+    const candidate = source.slice(0, Math.min(length, 64));
+    if (candidate.length > 0 && !used.has(candidate)) return candidate;
+    if (length >= Math.min(source.length, 64)) break;
+    length = Math.min(length + 4, source.length, 64);
+  }
+  const digest = createHash("sha256").update(taskId).digest("hex").slice(0, 16);
+  const candidate = `${source.slice(0, 47)}-${digest}`;
+  if (!used.has(candidate)) return candidate;
+  throw new PersistenceConflictError(
+    "Task short ID collision requires the full SDAR Task ID",
+  );
+}
+
+async function upsertTaskFocus(
+  client: PoolClient,
+  threadId: string,
+  bindingId: string,
+): Promise<void> {
+  await client.query(
+    `INSERT INTO chat_service.conversation_task_focus(
+       conversation_thread_id, binding_id
+     ) VALUES ($1, $2)
+     ON CONFLICT (conversation_thread_id)
+     DO UPDATE SET binding_id = EXCLUDED.binding_id, updated_at = now()`,
+    [threadId, bindingId],
+  );
+}
+
+async function upsertTaskReference(
+  client: PoolClient,
+  threadId: string,
+  bindingId: string,
+): Promise<void> {
+  await client.query(
+    `INSERT INTO chat_service.conversation_task_reference(
+       conversation_thread_id, binding_id
+     ) VALUES ($1, $2)
+     ON CONFLICT (conversation_thread_id)
+     DO UPDATE SET binding_id = EXCLUDED.binding_id, updated_at = now()`,
+    [threadId, bindingId],
+  );
 }

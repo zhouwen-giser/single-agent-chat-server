@@ -7,7 +7,7 @@ import type { InteractionPersistenceRepository } from "../packages/persistence/s
 
 describe("AG-UI client state is not authority", () => {
   it("ignores injected Task, utility, and routing state", async () => {
-    const findActiveTask = jest.fn(async () => undefined);
+    const listActiveTasksForChat = jest.fn(async () => []);
     const classify = jest.fn(async () => ({ requestKind: "general_chat" }));
     const answer = jest.fn(async () => "server-owned safe response");
     const submit = jest.fn();
@@ -16,7 +16,7 @@ describe("AG-UI client state is not authority", () => {
     const cancel = jest.fn();
     const source = createSdarAgUiInteractionSource({
       repository: {
-        findActiveTask,
+        listActiveTasksForChat,
       } as unknown as InteractionPersistenceRepository,
       coordinator: {
         submit,
@@ -52,9 +52,10 @@ describe("AG-UI client state is not authority", () => {
       }),
     );
 
-    expect(findActiveTask).toHaveBeenCalledWith({
+    expect(listActiveTasksForChat).toHaveBeenCalledWith({
       principalId: "principal-1",
       threadId: "server-owned-thread",
+      limit: 2,
     });
     expect(classify).toHaveBeenCalledWith({
       userText: "hello",

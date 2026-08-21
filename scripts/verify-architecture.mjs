@@ -35,15 +35,6 @@ for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
 }
 
 const productionRoots = ["apps", "packages", "src"];
-const legacySingleTaskApiAllowlist = new Set([
-  "apps/server/src/chat/sdar-agui-runner.ts",
-  "apps/server/src/chat/sdar-chat-runner.ts",
-  "packages/chat-runtime/src/task-coordinator.ts",
-  "packages/interaction-query/src/index.ts",
-  "packages/persistence/src/agui-task-coordinator-repository.ts",
-  "packages/persistence/src/interaction-repository.ts",
-  "packages/persistence/src/repository.ts",
-]);
 const files = (
   await Promise.all(
     productionRoots.map((directory) => walk(join(root, directory))),
@@ -115,11 +106,8 @@ for (const file of files) {
   if (/\blocalFallbackChatModel\b/u.test(content)) {
     violations.push(`${name}: production use of a local chat fallback`);
   }
-  if (
-    /\bfindActiveTask(?:ForChat)?\b/u.test(content) &&
-    !legacySingleTaskApiAllowlist.has(name)
-  ) {
-    violations.push(`${name}: new use of a legacy implicit single-Task API`);
+  if (/\bfindActiveTask(?:ForChat)?\b/u.test(content)) {
+    violations.push(`${name}: legacy implicit single-Task API is forbidden`);
   }
   if (
     /process\.env\.(?:SDAR|MCP)|process\.env\[\s*["'](?:SDAR|MCP)/u.test(

@@ -42,10 +42,12 @@ export function createSdarChatRunner(input: {
         signal: context.signal,
       });
     }
-    const binding = await input.repository.findActiveTaskForChat({
+    const activeBindings = await input.repository.listActiveTasksForChat({
       chatId: context.openWebUi.chatId,
       userId: context.identity.userId,
+      limit: 2,
     });
+    const binding = activeBindings.length === 1 ? activeBindings[0] : undefined;
     const result = await graph.invoke(
       {
         messages: [{ role: "user", content: context.userText }],
@@ -58,7 +60,6 @@ export function createSdarChatRunner(input: {
       { configurable: { thread_id: context.threadId } },
     );
     if (result.requestKind === "new_task") {
-      if (binding !== undefined) return renderGraphResult(result);
       return input.coordinator.submit(toTaskTurn(context), context.signal);
     }
     if (result.requestKind === "status") {

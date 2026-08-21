@@ -12,11 +12,17 @@ import { parsePersistenceConfig } from "../packages/persistence/src/index.js";
 
 describe("secure operational controls", () => {
   it("bounds PostgreSQL connection and query timeouts", () => {
+    const defaults = parsePersistenceConfig({
+      DATABASE_URL: "postgresql://user:password@127.0.0.1:5432/chat",
+    });
+    expect(defaults.operationTimeoutMs).toBe(5_000);
+    expect(defaults.maxActiveTasksPerChat).toBe(8);
     expect(
       parsePersistenceConfig({
         DATABASE_URL: "postgresql://user:password@127.0.0.1:5432/chat",
-      }).operationTimeoutMs,
-    ).toBe(5_000);
+        CHAT_MAX_ACTIVE_TASKS_PER_CHAT: "3",
+      }).maxActiveTasksPerChat,
+    ).toBe(3);
     expect(() =>
       parsePersistenceConfig({
         DATABASE_URL: "postgresql://user:password@127.0.0.1:5432/chat",

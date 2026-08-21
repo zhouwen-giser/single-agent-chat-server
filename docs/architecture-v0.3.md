@@ -66,8 +66,10 @@ model for business routing, create an SDAR Task, or change Focus.
   last reference in deterministic priority order. P03's
   `conversation_message` and `conversation_summary` are server-authoritative
   and independent of LangGraph checkpoint retention.
-- `packages/task-directory`: Task summaries, selectors, and directory contract;
-  P05/P06 add repositories and deterministic resolution.
+- `packages/task-directory`: Task summaries, selectors, and directory contract.
+  P05 persists stable short IDs, Focus, last reference, deterministic active
+  and recent lists, and Task-level mutation leases; P06 adds deterministic
+  selector resolution.
 - `packages/request-result`: strict completed-result union; P08 adds persistence
   and replay.
 - `packages/chat-runtime`: shared explicit multi-Task coordinator.

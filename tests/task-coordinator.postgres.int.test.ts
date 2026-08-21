@@ -282,7 +282,7 @@ describeWithPostgres("bounded SDAR task coordination", () => {
 
     expect(output.join("\n")).toContain("explicit plan decision");
     expect(client.getCount).toBe(0);
-    const binding = await repository.findActiveTaskForChat({
+    const [binding] = await repository.listActiveTasksForChat({
       chatId: "chat-a",
       userId: "user-a",
     });
@@ -383,7 +383,7 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     );
 
     expect(output.join("\n")).toContain("Input rejected");
-    const binding = await repository.findActiveTaskForChat({
+    const [binding] = await repository.listActiveTasksForChat({
       chatId: "chat-a",
       userId: "user-a",
     });

@@ -64,7 +64,9 @@ export type TaskCoordinatorRepository = Pick<
   | "claimTaskSubmissionSlot"
   | "claimTaskInteractionSlot"
   | "releaseTaskSubmissionSlot"
-  | "findActiveTaskForChat"
+  | "releaseTaskInteractionSlot"
+  | "listActiveTasksForChat"
+  | "setFocusedTask"
   | "findAuthorizedTask"
   | "createTaskBinding"
   | "updateTaskBinding"
@@ -267,14 +269,25 @@ export class SdarTaskCoordinator {
     callerSignal?: AbortSignal,
     observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
-    const binding = await this.options.repository.findActiveTaskForChat({
+    const bindings = await this.options.repository.listActiveTasksForChat({
       chatId: input.chatId,
       userId: input.userId,
     });
-    if (binding === undefined) {
+    if (bindings.length === 0) {
       yield "There is no active SDAR Task for this user and chat.";
       return;
     }
+    if (bindings.length !== 1) {
+      yield renderAmbiguousTaskList(bindings);
+      return;
+    }
+    const binding = bindings[0];
+    if (binding === undefined) throw new Error("Active Task list changed");
+    await this.options.repository.setFocusedTask({
+      chatId: input.chatId,
+      userId: input.userId,
+      bindingId: binding.bindingId,
+    });
     const pending = pendingDetails(binding.pendingInput);
     if (
       !isFollowUpAllowed(input.action, binding.status, pending.internalPhase)
@@ -334,6 +347,7 @@ export class SdarTaskCoordinator {
       await this.options.repository.claimTaskInteractionSlot({
         chatId: input.chatId,
         userId: input.userId,
+        bindingId: binding.bindingId,
         leaseOwner,
       });
     if (!interactionSlot) {
@@ -390,9 +404,10 @@ export class SdarTaskCoordinator {
       }
       for (const fragment of observed.fragments) yield fragment;
     } finally {
-      await this.options.repository.releaseTaskSubmissionSlot({
+      await this.options.repository.releaseTaskInteractionSlot({
         chatId: input.chatId,
         userId: input.userId,
+        bindingId: binding.bindingId,
         leaseOwner,
       });
     }
@@ -403,14 +418,25 @@ export class SdarTaskCoordinator {
     callerSignal?: AbortSignal,
     observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
-    const binding = await this.options.repository.findActiveTaskForChat({
+    const bindings = await this.options.repository.listActiveTasksForChat({
       chatId: input.chatId,
       userId: input.userId,
     });
-    if (binding === undefined) {
+    if (bindings.length === 0) {
       yield "There is no active SDAR Task for this user and chat.";
       return;
     }
+    if (bindings.length !== 1) {
+      yield renderAmbiguousTaskList(bindings);
+      return;
+    }
+    const binding = bindings[0];
+    if (binding === undefined) throw new Error("Active Task list changed");
+    await this.options.repository.setFocusedTask({
+      chatId: input.chatId,
+      userId: input.userId,
+      bindingId: binding.bindingId,
+    });
     const requestHash = hashJson({
       chatId: input.chatId,
       userId: input.userId,
@@ -445,6 +471,7 @@ export class SdarTaskCoordinator {
         await this.options.repository.claimTaskInteractionSlot({
           chatId: input.chatId,
           userId: input.userId,
+          bindingId: binding.bindingId,
           leaseOwner,
         });
       if (!interactionSlot) {
@@ -471,9 +498,10 @@ export class SdarTaskCoordinator {
           resultTaskId: binding.sdarTaskId,
         });
       } finally {
-        await this.options.repository.releaseTaskSubmissionSlot({
+        await this.options.repository.releaseTaskInteractionSlot({
           chatId: input.chatId,
           userId: input.userId,
+          bindingId: binding.bindingId,
           leaseOwner,
         });
       }
@@ -508,6 +536,11 @@ export class SdarTaskCoordinator {
       yield "The requested SDAR Task is not bound to this user and chat.";
       return;
     }
+    await this.options.repository.setFocusedTask({
+      chatId: input.chatId,
+      userId: input.userId,
+      bindingId: binding.bindingId,
+    });
     const client = await this.options.getClient();
     const task = await client.getTask(binding.sdarTaskId, {
       signal: callerSignal,
@@ -528,11 +561,18 @@ export class SdarTaskCoordinator {
     callerSignal?: AbortSignal,
     observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
-    const binding = await this.options.repository.findActiveTaskForChat(input);
-    if (binding === undefined) {
+    const bindings =
+      await this.options.repository.listActiveTasksForChat(input);
+    if (bindings.length === 0) {
       yield "There is no active SDAR Task for this user and chat.";
       return;
     }
+    if (bindings.length !== 1) {
+      yield renderActiveTaskList(bindings);
+      return;
+    }
+    const binding = bindings[0];
+    if (binding === undefined) throw new Error("Active Task list changed");
     const client = await this.options.getClient();
     const task = await client.getTask(binding.sdarTaskId, {
       signal: callerSignal,
@@ -958,6 +998,26 @@ function renderArtifact(artifact: NormalizedArtifact): string[] {
     }
     return [];
   });
+}
+
+function renderAmbiguousTaskList(bindings: readonly TaskBinding[]): string {
+  return [
+    "More than one active SDAR Task matches this mutable operation. Name exactly one Task; nothing was sent.",
+    ...bindings.map(
+      (binding) =>
+        `- ${binding.shortId ?? binding.sdarTaskId}: ${binding.status}`,
+    ),
+  ].join("\n");
+}
+
+function renderActiveTaskList(bindings: readonly TaskBinding[]): string {
+  return [
+    "Multiple SDAR Tasks are active in this chat:",
+    ...bindings.map(
+      (binding) =>
+        `- ${binding.shortId ?? binding.sdarTaskId}: ${binding.status}`,
+    ),
+  ].join("\n");
 }
 
 function summarizeArtifact(artifact: NormalizedArtifact): JsonValue {

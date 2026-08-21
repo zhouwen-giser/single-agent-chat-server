@@ -15,6 +15,12 @@ const persistenceEnvironmentSchema = z.object({
     .min(1_000)
     .max(30 * 60_000)
     .default(60_000),
+  CHAT_MAX_ACTIVE_TASKS_PER_CHAT: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(32)
+    .default(8),
 });
 
 export interface PersistenceConfig {
@@ -22,6 +28,7 @@ export interface PersistenceConfig {
   readonly poolMax: number;
   readonly operationTimeoutMs: number;
   readonly idempotencyLeaseMs: number;
+  readonly maxActiveTasksPerChat: number;
 }
 
 export function parsePersistenceConfig(
@@ -33,5 +40,6 @@ export function parsePersistenceConfig(
     poolMax: parsed.DATABASE_POOL_MAX,
     operationTimeoutMs: parsed.DATABASE_OPERATION_TIMEOUT_MS,
     idempotencyLeaseMs: parsed.IDEMPOTENCY_LEASE_MS,
+    maxActiveTasksPerChat: parsed.CHAT_MAX_ACTIVE_TASKS_PER_CHAT,
   };
 }

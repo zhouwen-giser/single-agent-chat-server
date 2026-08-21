@@ -250,7 +250,7 @@ describe("deterministic interaction queries", () => {
     );
     const runner = createSdarChatRunner({
       repository: {
-        findActiveTaskForChat: async () => {
+        listActiveTasksForChat: async () => {
           legacyLookups += 1;
           throw new Error("query reached legacy Task lookup");
         },
@@ -314,7 +314,8 @@ function repositoryFixture(
 ): QueryRepository {
   return {
     findAuthorizedTask: async () => options.authorized,
-    findActiveTask: async () => options.active,
+    listActiveTasksForChat: async () =>
+      options.active === undefined ? [] : [options.active],
     listTaskBindings: async () => options.list ?? [],
     recordAuthorizedTaskObservation: async () =>
       options.authorized ?? options.active,

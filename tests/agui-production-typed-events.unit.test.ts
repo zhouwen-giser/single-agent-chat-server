@@ -28,7 +28,7 @@ describe("production AG-UI typed A2A path", () => {
     });
     const source = createSdarAgUiInteractionSource({
       repository: {
-        findActiveTask: jest.fn(async () => undefined),
+        listActiveTasksForChat: jest.fn(async () => []),
       } as unknown as InteractionPersistenceRepository,
       coordinator: { submit } as unknown as SdarTaskCoordinator,
       model: {

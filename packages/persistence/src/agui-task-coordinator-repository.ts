@@ -86,14 +86,30 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
   claimTaskInteractionSlot(input: {
     readonly chatId: string;
     readonly userId: string;
+    readonly bindingId: string;
     readonly leaseOwner: string;
     readonly leaseMs?: number;
   }): Promise<boolean> {
     return this.repository.claimTaskInteractionSlot({
       threadId: input.chatId,
       principalId: input.userId,
+      bindingId: input.bindingId,
       leaseOwner: input.leaseOwner,
       ...(input.leaseMs === undefined ? {} : { leaseMs: input.leaseMs }),
+    });
+  }
+
+  releaseTaskInteractionSlot(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    return this.repository.releaseTaskInteractionSlot({
+      threadId: input.chatId,
+      principalId: input.userId,
+      bindingId: input.bindingId,
+      leaseOwner: input.leaseOwner,
     });
   }
 
@@ -109,13 +125,27 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
     });
   }
 
-  findActiveTaskForChat(input: {
+  listActiveTasksForChat(input: {
     readonly chatId: string;
     readonly userId: string;
-  }): Promise<TaskBinding | undefined> {
-    return this.repository.findActiveTask({
+    readonly limit?: number;
+  }): Promise<readonly TaskBinding[]> {
+    return this.repository.listActiveTasksForChat({
       threadId: input.chatId,
       principalId: input.userId,
+      ...(input.limit === undefined ? {} : { limit: input.limit }),
+    });
+  }
+
+  setFocusedTask(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+  }): Promise<void> {
+    return this.repository.setFocusedTask({
+      threadId: input.chatId,
+      principalId: input.userId,
+      bindingId: input.bindingId,
     });
   }
 

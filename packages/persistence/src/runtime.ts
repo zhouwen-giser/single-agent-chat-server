@@ -41,10 +41,12 @@ export async function setupPersistence(
       repository: new ChatPersistenceRepository(
         pool,
         config.idempotencyLeaseMs,
+        config.maxActiveTasksPerChat,
       ),
       interactionRepository: new InteractionPersistenceRepository(
         pool,
         config.idempotencyLeaseMs,
+        config.maxActiveTasksPerChat,
       ),
       conversationRepository: new ConversationPersistenceRepository(pool),
       checkpointer: activeCheckpointer,

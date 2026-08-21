@@ -237,7 +237,8 @@ async function completion(
 
 function createServer(): FastifyInstance {
   const repository = {
-    findActiveTaskForChat: async () => activeBinding,
+    listActiveTasksForChat: async () =>
+      activeBinding === undefined ? [] : [activeBinding],
   } as unknown as ChatPersistenceRepository;
   const coordinator = {
     submit,

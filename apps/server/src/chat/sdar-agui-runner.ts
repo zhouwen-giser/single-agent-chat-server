@@ -53,10 +53,12 @@ export function createSdarAgUiInteractionSource(input: {
       return;
     }
 
-    const binding = await input.repository.findActiveTask({
+    const activeBindings = await input.repository.listActiveTasksForChat({
       principalId: context.principalId,
       threadId: context.threadId,
+      limit: 2,
     });
+    const binding = activeBindings.length === 1 ? activeBindings[0] : undefined;
     const graphResult = await graph.invoke(
       {
         messages: [{ role: "user", content: userText }],
@@ -69,7 +71,7 @@ export function createSdarAgUiInteractionSource(input: {
       { configurable: { thread_id: context.threadId } },
     );
 
-    if (graphResult.requestKind === "new_task" && binding === undefined) {
+    if (graphResult.requestKind === "new_task") {
       yield* coordinatorInteractionEvents(context, (observer) =>
         input.coordinator.submit(
           toTaskTurn(context, userText),

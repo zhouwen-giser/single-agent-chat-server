@@ -197,6 +197,8 @@ try {
       activeTaskBindings: reconciliation.activeBindings.length,
       recoveredIdempotencyClaims: reconciliation.recoveredClaimCount,
       recoveredSubmissionSlots: reconciliation.recoveredSubmissionSlotCount,
+      recoveredTaskInteractionSlots:
+        reconciliation.recoveredTaskInteractionSlotCount,
     },
     "persistence startup reconciliation complete",
   );
