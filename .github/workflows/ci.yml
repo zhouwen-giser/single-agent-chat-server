@@ -3,7 +3,10 @@ name: ci
 on:
   pull_request:
   push:
-    branches: [main, feature/single-sdar-chat-entry-v0.1]
+    branches:
+      - main
+      - feature/single-sdar-chat-entry-v0.1
+      - feature/sacs-v0.3-general-conversation-multitask
 
 permissions:
   contents: read

@@ -20,7 +20,7 @@ services:
     build:
       context: .
       target: runtime
-    image: ${CHAT_SERVER_IMAGE:-single-agent-chat-server:0.1.0}
+    image: ${CHAT_SERVER_IMAGE:-single-agent-chat-server:0.3.0}
     init: true
     depends_on:
       postgres:

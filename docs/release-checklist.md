@@ -1,60 +1,58 @@
-# v0.1.0 release checklist
+# v0.3.0 release-candidate checklist
 
-## Local source review
+## Source and product boundary
 
-- [x] Confirm `git diff --check` and the intended tracked diff.
-- [x] Review the complete feature-branch history and current boundary.
-- [x] Confirm no `.env`, credentials, runtime data, dependency tree, build
-      output, or VCS metadata is tracked.
-- [x] Confirm the product still serves one fixed SDAR only.
+- [x] Feature branch derives from verified execution-time `origin/main`.
+- [x] One fixed configured SDAR; no registry, mesh, endpoint selection, MCP,
+      SMPP, or Provider client in SACS.
+- [x] Frozen A2A 1.0 HTTP+JSON and SDK `1.0.0-beta.0` only.
+- [x] Real configured conversation model has no tools or request endpoint
+      authority and no production text/regex fallback.
+- [x] OpenAI and AG-UI share durable context, Task Directory, Focus, selector,
+      authorization, Coordinator, and `TASK | MESSAGE` result persistence.
+- [x] Internal `AUTH_REQUIRED` is absent and unexpected SDK auth state fails
+      closed without weakening northbound security.
 
-## Required final environment
+## Available exact-head gates
 
-- [x] PostgreSQL 16.9 with isolated databases.
-- [x] Docker daemon and Compose.
-- [x] Real pip Open WebUI 0.10.2 with signed user forwarding.
-- [x] Exact SDAR `667146a` plus isolated PostgreSQL, Redis, and real MCP
-      transport.
-- [x] Current-source-head real-E2E manifest covering all 26 required scenarios.
+- [x] format, lint, typecheck, build, architecture, workflow, migration,
+      license, and secret gates.
+- [x] unit, contract, security, PostgreSQL integration, OpenAI predecessor,
+      official AG-UI, and deterministic fixture suites with zero required
+      skips.
+- [x] production Docker build and non-root/read-only/capability-dropped
+      metadata.
+- [x] isolated Compose readiness, migration, and project-scoped cleanup.
+- [x] CycloneDX 1.7 SBOM generation.
+- [x] exact functional-head quality and container CI.
 
-## Commands
+## Blocked required real gates
 
-- [x] `pnpm install --frozen-lockfile`
-- [x] `pnpm peers check`
-- [x] `pnpm format:check`
-- [x] `pnpm lint`
-- [x] `pnpm typecheck`
-- [x] `pnpm test:unit`
-- [x] `pnpm test:contract`
-- [x] `pnpm test:integration` with zero skips
-- [x] `pnpm test:e2e`
-- [x] `pnpm test:security`
-- [x] `pnpm build`
-- [x] `pnpm smoke`
-- [x] `pnpm verify:migrations`
-- [x] `pnpm verify:architecture`
-- [x] `pnpm verify:openai-api`
-- [x] `pnpm verify:a2a`
-- [x] `pnpm verify:openwebui`
-- [x] `pnpm verify`
+- [ ] Genuine configured model multi-turn and strict TurnDecision evidence.
+- [ ] Current locked SDAR two-active-Task, focus, precise operation, bounded
+      recovery, disconnect, and domain-request evidence.
+- [ ] v0.2-to-v0.3 data upgrade plus SACS/PostgreSQL restart on the exact final
+      candidate using the genuine model configuration.
+- [ ] Combined endpoint/network evidence and zero-skip evidence aggregation.
+- [ ] P13 completion report, acceptance JSON, publication report, and exact
+      evidence-commit CI.
 
-## Container and supply chain
+The execution environment currently has no P13/model/SDAR variables or
+operator-reviewed safe Task requests. This is `BLOCKED_ENVIRONMENT`; supporting
+fixtures cannot check these boxes.
 
-- [x] Production Docker build.
-- [x] Non-root, read-only, healthcheck, all capabilities dropped,
-      `no-new-privileges`.
-- [x] Clean Compose PostgreSQL startup and migration apply.
-- [x] Compose cleanup left zero project resources.
-- [x] Explicit advertised `0.0.0.0` endpoint override selected the configured
-      route without silent rewrite.
-- [x] Current CycloneDX SBOM and production license gate.
-- [x] Secret-pattern scan and workflow static gate.
+## Final P14 closure after unblocking
 
-## Publication
+- [ ] Fetch latest `origin/main`, resolve source drift without rebase or
+      force-push, and rerun the complete exact-head `pnpm verify:v03` gate.
+- [ ] Confirm required skips are zero and local, remote branch, PR head, and all
+      evidence SHAs are identical.
+- [ ] Publish the final release report and machine-readable acceptance record.
+- [ ] Push `chore(p14): publish SACS v0.3 release candidate evidence` and wait
+      for exact-head quality/container CI.
+- [ ] Mark Draft PR #13 Ready only after every required gate passes.
+- [x] Preserve user control of merge; do not merge, tag, release, or deploy.
 
-- [x] Source and verifier fixes pushed to
-      `feature/single-sdar-chat-entry-v0.1`.
-- [x] Source commit `085e456` remote `quality` and `container` jobs passed.
-- [ ] Push the Phase 13 documentation commit and confirm its exact checks.
-- [ ] Update PR #1 and mark it Ready.
-- [ ] Do not auto-merge; merge/tag/release only with explicit user authorization.
+See [v0.3 qualification](release-candidate-v0.3.md),
+[traceability](traceability-v0.3.md), and the exact
+[environment blocker](../reports/v0.3/P13-blocked-environment.md).
