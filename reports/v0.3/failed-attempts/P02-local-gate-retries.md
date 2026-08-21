@@ -39,3 +39,14 @@ user-level store; the authorized rerun passed 89 production entries.
 All failed or incomplete attempts remain failures. No test, database-name
 guard, architecture boundary, license allowlist, or timeout was weakened to
 obtain a pass.
+
+## Exact-head container CI
+
+CI run `32476128883` passed quality but failed container job `96753033481` at
+`verify:compose`. P02 correctly made the model variables mandatory in Compose,
+while the hermetic Compose verifier still supplied only PostgreSQL and service
+credentials. The verifier now starts a short-lived host-side Chat Completions
+readiness fixture, injects its fixed internal address into the disposable
+Compose project, and closes it during cleanup. This fixture proves container
+configuration/readiness wiring only and is not represented as the P13 real
+model gate.

@@ -37,6 +37,7 @@
     "architectureProductionFiles": 66,
     "build": "PASSED",
     "composeConfig": "PASSED",
+    "composeRuntime": "PASSED",
     "license": "PASSED",
     "secret": "PASSED"
   },

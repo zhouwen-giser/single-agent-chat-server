@@ -34,17 +34,18 @@ Status: `PASSED_LOCAL`
 
 ## Tests
 
-| Command / gate                        | Environment                       | Result                                  | Required skips |
-| ------------------------------------- | --------------------------------- | --------------------------------------- | -------------: |
-| `pnpm test:unit`                      | local                             | 14 suites / 83 tests passed             |              0 |
-| `pnpm test:contract`                  | loopback-capable                  | 7 suites / 64 tests passed              |              0 |
-| `pnpm test:integration`               | isolated PostgreSQL 16.9          | 6 suites / 51 tests passed              |              0 |
-| `pnpm test:security`                  | local                             | 1 suite / 9 tests passed                |              0 |
-| format/lint/LangGraph/typecheck/build | local                             | passed                                  |              0 |
-| `pnpm verify:architecture`            | local                             | 66 production source files passed       |              0 |
-| `pnpm verify:licenses`                | package-store-capable             | 89 production entries, allowed SPDX set |              0 |
-| `pnpm verify:secrets`                 | local                             | passed                                  |              0 |
-| `docker compose config --quiet`       | explicit non-production variables | passed                                  |              0 |
+| Command / gate                        | Environment                       | Result                                   | Required skips |
+| ------------------------------------- | --------------------------------- | ---------------------------------------- | -------------: |
+| `pnpm test:unit`                      | local                             | 14 suites / 83 tests passed              |              0 |
+| `pnpm test:contract`                  | loopback-capable                  | 7 suites / 64 tests passed               |              0 |
+| `pnpm test:integration`               | isolated PostgreSQL 16.9          | 6 suites / 51 tests passed               |              0 |
+| `pnpm test:security`                  | local                             | 1 suite / 9 tests passed                 |              0 |
+| format/lint/LangGraph/typecheck/build | local                             | passed                                   |              0 |
+| `pnpm verify:architecture`            | local                             | 66 production source files passed        |              0 |
+| `pnpm verify:licenses`                | package-store-capable             | 89 production entries, allowed SPDX set  |              0 |
+| `pnpm verify:secrets`                 | local                             | passed                                   |              0 |
+| `docker compose config --quiet`       | explicit non-production variables | passed                                   |              0 |
+| `pnpm verify:compose`                 | disposable Compose project        | runtime/readiness/migration/cleanup pass |              0 |
 
 The P02 client tests use an injected local HTTP transport. This is valid for
 the P02 client/configuration gate and is not represented as a live model call.
