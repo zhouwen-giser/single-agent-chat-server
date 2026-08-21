@@ -52,9 +52,12 @@ import { installGracefulShutdown } from "./shutdown.js";
 let persistence: PersistenceRuntime | undefined;
 try {
   const config = loadServerConfig();
-  persistence = await setupPersistence(parsePersistenceConfig(process.env));
-  const activePersistence = persistence;
   const telemetry = new SecureTelemetry();
+  persistence = await setupPersistence(
+    parsePersistenceConfig(process.env),
+    telemetry,
+  );
+  const activePersistence = persistence;
   const getClient = createLazySdarClient(async () => {
     const discovery = telemetry.beginA2a("agent_card_discovery");
     try {

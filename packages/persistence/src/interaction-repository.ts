@@ -26,12 +26,17 @@ import type {
   TaskDirectorySnapshot,
   TaskSummary,
 } from "../../task-directory/src/index.js";
+import {
+  observePersistence,
+  type PersistenceObservationSink,
+} from "./observation.js";
 
 export class InteractionPersistenceRepository {
   constructor(
     private readonly pool: Pool,
     private readonly defaultLeaseMs: number,
     private readonly maxActiveTasksPerChat = 8,
+    private readonly observation?: PersistenceObservationSink,
   ) {
     assertActiveTaskLimit(maxActiveTasksPerChat);
   }
@@ -701,11 +706,12 @@ export class InteractionPersistenceRepository {
     readonly leaseMs?: number;
   }): Promise<InteractionRequestClaim> {
     const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
-    return this.transaction(async (client) => {
-      await assertThreadPrincipal(client, input.threadId, input.principalId);
-      const requestId = randomUUID();
-      const inserted = await client.query(
-        `
+    const claim = await this.transaction<InteractionRequestClaim>(
+      async (client) => {
+        await assertThreadPrincipal(client, input.threadId, input.principalId);
+        const requestId = randomUUID();
+        const inserted = await client.query(
+          `
           INSERT INTO chat_service.interaction_request(
             request_id, protocol, external_request_id, principal_id,
             thread_id, request_hash, status, lease_owner, lease_until
@@ -713,44 +719,44 @@ export class InteractionPersistenceRepository {
             now() + ($8::bigint * interval '1 millisecond'))
           ON CONFLICT DO NOTHING
         `,
-        [
-          requestId,
-          input.protocol,
-          input.externalRequestId,
-          input.principalId,
-          input.threadId,
-          input.requestHash,
-          input.leaseOwner,
-          leaseMs,
-        ],
-      );
-      if (inserted.rowCount === 1) return { outcome: "acquired", requestId };
+          [
+            requestId,
+            input.protocol,
+            input.externalRequestId,
+            input.principalId,
+            input.threadId,
+            input.requestHash,
+            input.leaseOwner,
+            leaseMs,
+          ],
+        );
+        if (inserted.rowCount === 1) return { outcome: "acquired", requestId };
 
-      const existing = await client.query<InteractionRequestRow>(
-        `
+        const existing = await client.query<InteractionRequestRow>(
+          `
           SELECT * FROM chat_service.interaction_request
           WHERE protocol = $1 AND external_request_id = $2
             AND principal_id = $3 AND thread_id = $4
           FOR UPDATE
         `,
-        [
-          input.protocol,
-          input.externalRequestId,
-          input.principalId,
-          input.threadId,
-        ],
-      );
-      const row = requiredRow(existing.rows, "interaction request lookup");
-      if (row.request_hash !== input.requestHash)
-        return { outcome: "conflict" };
-      if (row.status === "COMPLETED") {
-        return {
-          outcome: "replay",
-          result: mapCompletedRequestResult(row),
-        };
-      }
-      const recovered = await client.query(
-        `
+          [
+            input.protocol,
+            input.externalRequestId,
+            input.principalId,
+            input.threadId,
+          ],
+        );
+        const row = requiredRow(existing.rows, "interaction request lookup");
+        if (row.request_hash !== input.requestHash)
+          return { outcome: "conflict" };
+        if (row.status === "COMPLETED") {
+          return {
+            outcome: "replay",
+            result: mapCompletedRequestResult(row),
+          };
+        }
+        const recovered = await client.query(
+          `
           UPDATE chat_service.interaction_request
           SET lease_owner = $2,
               lease_until = now() + ($3::bigint * interval '1 millisecond'),
@@ -758,12 +764,22 @@ export class InteractionPersistenceRepository {
           WHERE request_id = $1 AND status = 'CLAIMED'
             AND (lease_until IS NULL OR lease_until <= now())
         `,
-        [row.request_id, input.leaseOwner, leaseMs],
+          [row.request_id, input.leaseOwner, leaseMs],
+        );
+        return recovered.rowCount === 1
+          ? { outcome: "acquired", requestId: row.request_id }
+          : { outcome: "in_progress" };
+      },
+    );
+    if (claim.outcome === "replay") {
+      observePersistence(() =>
+        this.observation?.recordRequestResult({
+          kind: claim.result.kind,
+          replay: true,
+        }),
       );
-      return recovered.rowCount === 1
-        ? { outcome: "acquired", requestId: row.request_id }
-        : { outcome: "in_progress" };
-    });
+    }
+    return claim;
   }
 
   async completeRequest(input: {
@@ -791,6 +807,12 @@ export class InteractionPersistenceRepository {
         "Interaction request completion conflict",
       );
     }
+    observePersistence(() =>
+      this.observation?.recordRequestResult({
+        kind: input.result.kind,
+        replay: false,
+      }),
+    );
   }
 
   async completeCoordinatorRequest(input: {
@@ -831,6 +853,12 @@ export class InteractionPersistenceRepository {
         "Interaction request completion conflict",
       );
     }
+    observePersistence(() =>
+      this.observation?.recordRequestResult({
+        kind: input.result.kind,
+        replay: false,
+      }),
+    );
   }
 
   async abandonCoordinatorRequest(input: {

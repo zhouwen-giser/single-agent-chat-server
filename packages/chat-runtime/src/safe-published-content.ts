@@ -1,8 +1,13 @@
 import type { JsonValue } from "../../persistence/src/index.js";
 
-const secretAssignment = /(password|secret|token|api[_-]?key)\s*[:=]\s*\S+/giu;
+const secretAssignment =
+  /(password|secret|token|api[_-]?key|x-api-key)\s*[:=]\s*\S+/giu;
 const secretJsonProperty =
-  /"(password|secret|token|api[_-]?key)"\s*:\s*"[^"]*"/giu;
+  /"(authorization|proxy-authorization|cookie|set-cookie|password|secret|token|api[_-]?key|x-api-key)"\s*:\s*"[^"]*"/giu;
+const sensitiveHeader =
+  /(^|\n)(authorization|proxy-authorization|cookie|set-cookie|x-api-key)\s*:\s*[^\r\n]*/giu;
+const databaseUrl =
+  /\b(postgres(?:ql)?|mysql|mongodb(?:\+srv)?):\/\/[^\s/@:]+:[^\s/@]+@/giu;
 
 export function safePublishedText(
   value: string | undefined,
@@ -41,6 +46,8 @@ export function boundedPublishedJson(value: JsonValue, limit = 4_000): string {
 
 function redactSecrets(value: string): string {
   return value
+    .replace(sensitiveHeader, "$1$2: [REDACTED]")
+    .replace(databaseUrl, "$1://[REDACTED]@")
     .replace(/Bearer\s+\S+/giu, "Bearer [REDACTED]")
     .replace(secretAssignment, "$1=[REDACTED]");
 }

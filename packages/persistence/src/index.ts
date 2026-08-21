@@ -23,6 +23,7 @@ export type {
   Principal,
 } from "./interaction-types.js";
 export { runMigrations, type AppliedMigration } from "./migrations.js";
+export type { PersistenceObservationSink } from "./observation.js";
 export {
   ChatPersistenceRepository,
   PersistenceAuthorizationError,

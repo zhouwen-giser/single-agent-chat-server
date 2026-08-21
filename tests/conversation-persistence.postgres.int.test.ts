@@ -71,7 +71,14 @@ describeWithPostgres("protocol-neutral conversation persistence", () => {
 
   it("deduplicates a stable external ID and rejects changed content", async () => {
     const identity = await createIdentity("dedupe");
-    const repository = conversationRepository();
+    const observations: Array<{
+      readonly protocol: "openai" | "ag_ui";
+      readonly role: "user" | "assistant";
+    }> = [];
+    const repository = new ConversationPersistenceRepository(pool, {
+      recordRequestResult: () => undefined,
+      recordConversationMessageDedup: (input) => observations.push(input),
+    });
     const input = {
       ...identity,
       protocol: "openai" as const,
@@ -97,6 +104,7 @@ describeWithPostgres("protocol-neutral conversation persistence", () => {
     await expect(repository.loadRecentMessages(identity)).resolves.toHaveLength(
       1,
     );
+    expect(observations).toEqual([{ protocol: "openai", role: "user" }]);
   });
 
   it("shares one Thread and deduplicates stable message IDs across protocols", async () => {

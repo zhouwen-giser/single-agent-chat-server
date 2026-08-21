@@ -21,6 +21,9 @@ const allowedAttributeKeys = new Set([
   "stream_kind",
   "budget_truncated",
   "summary_present",
+  "protocol",
+  "role",
+  "kind",
 ]);
 
 export function lowCardinalityAttributes(
@@ -50,6 +53,10 @@ export class SecureTelemetry {
   private readonly contextMessages: Pick<Histogram, "record">;
   private readonly ambiguousTaskReferences: Pick<Counter, "add">;
   private readonly unexpectedA2aAuthentication: Pick<Counter, "add">;
+  private readonly conversationModelRequests: Pick<Counter, "add">;
+  private readonly requestResults: Pick<Counter, "add">;
+  private readonly requestReplays: Pick<Counter, "add">;
+  private readonly conversationMessageDeduplications: Pick<Counter, "add">;
   private activeTasks = 0;
 
   constructor(
@@ -109,6 +116,20 @@ export class SecureTelemetry {
       safelyValue(() =>
         meter?.createCounter("a2a_unexpected_auth_required_total"),
       ) ?? noOpCounter;
+    this.conversationModelRequests =
+      safelyValue(() =>
+        meter?.createCounter("conversation_model_requests_total"),
+      ) ?? noOpCounter;
+    this.requestResults =
+      safelyValue(() => meter?.createCounter("request_result_total")) ??
+      noOpCounter;
+    this.requestReplays =
+      safelyValue(() => meter?.createCounter("request_replay_total")) ??
+      noOpCounter;
+    this.conversationMessageDeduplications =
+      safelyValue(() =>
+        meter?.createCounter("conversation_message_dedup_total"),
+      ) ?? noOpCounter;
     const activeTaskGauge = safelyValue(() =>
       meter?.createObservableGauge("chat_server.tasks.active"),
     );
@@ -144,6 +165,52 @@ export class SecureTelemetry {
 
   recordUnexpectedA2aAuthentication(): void {
     safely(() => this.unexpectedA2aAuthentication.add(1));
+  }
+
+  recordConversationModelRequest(
+    operation:
+      "decide_turn" | "answer_general" | "summarize" | "explain_result",
+    outcome:
+      | "ok"
+      | "timeout"
+      | "unavailable"
+      | "invalid_response"
+      | "invalid_output"
+      | "error",
+  ): void {
+    safely(() =>
+      this.conversationModelRequests.add(
+        1,
+        lowCardinalityAttributes({ operation, outcome }),
+      ),
+    );
+  }
+
+  recordRequestResult(input: {
+    readonly kind: "task" | "message";
+    readonly replay: boolean;
+  }): void {
+    const attributes = lowCardinalityAttributes({
+      kind: input.kind,
+    });
+    safely(() =>
+      (input.replay ? this.requestReplays : this.requestResults).add(
+        1,
+        attributes,
+      ),
+    );
+  }
+
+  recordConversationMessageDedup(input: {
+    readonly protocol: "openai" | "ag_ui";
+    readonly role: "user" | "assistant";
+  }): void {
+    safely(() =>
+      this.conversationMessageDeduplications.add(
+        1,
+        lowCardinalityAttributes(input),
+      ),
+    );
   }
 
   recordApi(input: {

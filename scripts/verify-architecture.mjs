@@ -26,7 +26,7 @@ for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
     throw new Error(`Out-of-bound production dependency: ${dependency}`);
   }
   if (
-    /(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|agent.?mesh|agent.?registry|copilotkit|clickhouse)/iu.test(
+    /(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|(?:^|[/@_-])smpp(?:$|[/@_-])|agent.?mesh|agent.?registry|copilotkit|clickhouse)/iu.test(
       dependency,
     )
   ) {
@@ -41,10 +41,17 @@ const files = (
   )
 ).flat();
 const violations = [];
+const sdarClientConstructionSites = [];
 for (const file of files) {
   if (extname(file) !== ".ts") continue;
   const name = relative(root, file).replaceAll("\\", "/");
   const content = await readFile(file, "utf8");
+  if (
+    !name.startsWith("packages/sdar-a2a-adapter/") &&
+    /\bcreateSdarA2aClient\s*\(/u.test(content)
+  ) {
+    sdarClientConstructionSites.push(name);
+  }
   if (
     content.includes("@a2a-js/sdk") &&
     !name.startsWith("packages/sdar-a2a-adapter/")
@@ -81,6 +88,13 @@ for (const file of files) {
     /from ["'](?:axios|undici|@modelcontextprotocol\/[^"']+)["']/u.test(content)
   ) {
     violations.push(`${name}: forbidden process or network client import`);
+  }
+  if (
+    /from ["'][^"']*(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|(?:^|[/@_-])smpp(?:$|[/@_-]))[^"']*["']/iu.test(
+      content,
+    )
+  ) {
+    violations.push(`${name}: direct SMPP or MCP import is forbidden`);
   }
   if (
     /["'`]\/(?:admin|internal|management|control|mcp|providers?|resources?|actions?)(?:\/|["'`])/iu.test(
@@ -183,6 +197,14 @@ for (const file of files) {
       violations.push(`${name}: forbidden protocol token ${forbidden}`);
     }
   }
+}
+if (
+  sdarClientConstructionSites.length !== 1 ||
+  sdarClientConstructionSites[0] !== "apps/server/src/main.ts"
+) {
+  violations.push(
+    `single fixed SDAR client construction required; found ${sdarClientConstructionSites.join(", ") || "none"}`,
+  );
 }
 
 const openAiRoute = await readFile(

@@ -9,6 +9,7 @@ import {
   SecureTelemetry,
 } from "../apps/server/src/observability/telemetry.js";
 import { FixedWindowRateLimiter } from "../apps/server/src/operations/rate-limiter.js";
+import { ConversationModelError } from "../packages/conversation-model/src/index.js";
 import { parsePersistenceConfig } from "../packages/persistence/src/index.js";
 import {
   UnexpectedA2aAuthenticationStateError,
@@ -204,6 +205,94 @@ describe("secure operational controls", () => {
       { name: "chat_server.ambiguous_task_reference", value: 1 },
     ]);
   });
+  it("classifies model, result, replay, and message-dedup outcomes without content", async () => {
+    const counters: Array<{
+      readonly name: string;
+      readonly value: number;
+      readonly attributes?: Readonly<Record<string, unknown>>;
+    }> = [];
+    const meter = {
+      createHistogram: () => ({ record: () => undefined }),
+      createCounter: (name: string) => ({
+        add: (value: number, attributes?: Record<string, unknown>) =>
+          counters.push({
+            name,
+            value,
+            ...(attributes === undefined ? {} : { attributes }),
+          }),
+      }),
+      createUpDownCounter: () => ({ add: () => undefined }),
+      createObservableGauge: () => ({ addCallback: () => undefined }),
+    } as unknown as Meter;
+    const telemetry = new SecureTelemetry({ meter });
+    const failingModel = instrumentChatModel(
+      {
+        decideTurn: async () => {
+          throw new ConversationModelError(
+            "CONVERSATION_MODEL_TIMEOUT",
+            "private model response",
+            true,
+          );
+        },
+        answerGeneral: async () => "unused",
+        summarize: async () => "unused",
+      },
+      telemetry,
+    );
+
+    await expect(
+      failingModel.decideTurn({
+        context: {
+          threadId: "private-thread",
+          messages: [],
+          activeTasks: [],
+          recentTerminalTasks: [],
+        },
+        currentUserText: "private prompt",
+      }),
+    ).rejects.toBeInstanceOf(ConversationModelError);
+    telemetry.recordConversationModelRequest(
+      "answer_general",
+      "invalid_output",
+    );
+    telemetry.recordRequestResult({ kind: "task", replay: false });
+    telemetry.recordRequestResult({ kind: "message", replay: true });
+    telemetry.recordConversationMessageDedup({
+      protocol: "ag_ui",
+      role: "assistant",
+    });
+
+    expect(counters).toEqual([
+      {
+        name: "conversation_model_requests_total",
+        value: 1,
+        attributes: { operation: "decide_turn", outcome: "timeout" },
+      },
+      {
+        name: "conversation_model_requests_total",
+        value: 1,
+        attributes: { operation: "answer_general", outcome: "invalid_output" },
+      },
+      {
+        name: "request_result_total",
+        value: 1,
+        attributes: { kind: "task" },
+      },
+      {
+        name: "request_replay_total",
+        value: 1,
+        attributes: { kind: "message" },
+      },
+      {
+        name: "conversation_message_dedup_total",
+        value: 1,
+        attributes: { protocol: "ag_ui", role: "assistant" },
+      },
+    ]);
+    expect(JSON.stringify(counters)).not.toMatch(
+      /private|thread|prompt|response/u,
+    );
+  });
   it("counts unexpected southbound authentication without attributes", async () => {
     const counters: Array<{
       readonly name: string;
@@ -271,8 +360,16 @@ describe("secure operational controls", () => {
       expect.arrayContaining([
         "req.headers.authorization",
         "req.headers.x-openwebui-user-jwt",
+        "req.headers.cookie",
+        "apiKey",
+        "connectionString",
+        "databaseUrl",
         "token",
         "prompt",
+        "response",
+        "messages",
+        "userText",
+        "contentText",
         "artifact",
         "body",
       ]),

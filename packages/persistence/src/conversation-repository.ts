@@ -12,6 +12,10 @@ import {
   PersistenceAuthorizationError,
   PersistenceConflictError,
 } from "./repository.js";
+import {
+  observePersistence,
+  type PersistenceObservationSink,
+} from "./observation.js";
 
 const MAX_CONTENT_CHARACTERS = 1_000_000;
 const MAX_SUMMARY_CHARACTERS = 60_000;
@@ -38,18 +42,25 @@ export type AssistantMessageReconciliation =
   | { readonly outcome: "missing" };
 
 export class ConversationPersistenceRepository {
-  constructor(private readonly pool: Pool) {}
+  constructor(
+    private readonly pool: Pool,
+    private readonly observation?: PersistenceObservationSink,
+  ) {}
 
-  ingestUserMessage(
+  async ingestUserMessage(
     input: ConversationMessageInput,
   ): Promise<ConversationMessageIngestResult> {
-    return this.insertMessage(input, "user");
+    const result = await this.insertMessage(input, "user");
+    this.observeDuplicate(result, input.protocol, "user");
+    return result;
   }
 
-  appendAssistantMessage(
+  async appendAssistantMessage(
     input: ConversationMessageInput,
   ): Promise<ConversationMessageIngestResult> {
-    return this.insertMessage(input, "assistant");
+    const result = await this.insertMessage(input, "assistant");
+    this.observeDuplicate(result, input.protocol, "assistant");
+    return result;
   }
 
   async reconcileAssistantMessage(
@@ -80,7 +91,25 @@ export class ConversationPersistenceRepository {
         "Assistant message reconciliation conflict",
       );
     }
+    observePersistence(() =>
+      this.observation?.recordConversationMessageDedup({
+        protocol: input.protocol,
+        role: "assistant",
+      }),
+    );
     return { outcome: "matched", message: mapConversationMessage(row) };
+  }
+
+  private observeDuplicate(
+    result: ConversationMessageIngestResult,
+    protocol: ConversationProtocol,
+    role: ConversationRole,
+  ): void {
+    if (result.outcome === "duplicate") {
+      observePersistence(() =>
+        this.observation?.recordConversationMessageDedup({ protocol, role }),
+      );
+    }
   }
 
   async loadRecentMessages(input: {

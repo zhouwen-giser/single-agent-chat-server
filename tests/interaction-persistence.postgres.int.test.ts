@@ -144,7 +144,14 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
   });
 
   it("atomically persists and replays a bounded Message result", async () => {
-    const repository = interactionRepository();
+    const observations: Array<{
+      readonly kind: "task" | "message";
+      readonly replay: boolean;
+    }> = [];
+    const repository = new InteractionPersistenceRepository(pool, 60_000, 8, {
+      recordRequestResult: (input) => observations.push(input),
+      recordConversationMessageDedup: () => undefined,
+    });
     const principal = await repository.resolvePrincipal({
       issuer: "sacs-test",
       subject: "message-result-user",
@@ -218,6 +225,11 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
     );
     expect(stored.rows[0]?.result_hash).toHaveLength(64);
     expect(stored.rows[0]?.result_message_json).toEqual(result.message);
+    expect(observations).toEqual([
+      { kind: "message", replay: false },
+      { kind: "message", replay: true },
+      { kind: "message", replay: true },
+    ]);
   });
 
   it("rejects COMPLETED requests with no result or both result variants", async () => {
