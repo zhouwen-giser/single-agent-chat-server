@@ -31,7 +31,14 @@ timestamps, URLs, identity drift, incompatible modes, unknown states, and more
 than 512 stream events. A nonterminal stream end uses bounded `getTask()`
 polling without cancellation.
 
-An explicit endpoint override is an operator configuration, never user input.
+The trusted single-SDAR profile accepts only an Agent Card and Skills with empty
+security requirements. `TASK_STATE_AUTH_REQUIRED` is not an internal Task
+state: it throws `UnexpectedA2aAuthenticationStateError` with the stable code
+`UNEXPECTED_A2A_AUTH_REQUIRED`, stops the operation before persistence or
+polling, and never creates a credential prompt or Interrupt.
+
+An explicit endpoint override is startup operator configuration, never user,
+model, Message, Artifact, or request input.
 It must remain on the configured SDAR origin. Any protocol or SDK upgrade
 requires a new ADR, adapter fixtures, adversarial regression, and real E2E.
 

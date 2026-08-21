@@ -42,7 +42,7 @@ strict `TASK | MESSAGE` completed-request result.
 - [x] P07: harden explicit multi-task coordination, Task identity, bounded
       optimistic merge, and concurrency contracts.
 - [x] P08: implement atomic `TASK | MESSAGE` result persistence and exact replay.
-- [ ] P09: implement trusted A2A fail-closed behavior.
+- [x] P09: implement trusted A2A fail-closed behavior.
 - [ ] P10-P11: integrate the shared application service with OpenAI and AG-UI.
 - [ ] P12: complete security, privacy, observability, and adversarial hardening.
 - [ ] P13: qualify real model, current SDAR, migration, restart, and network boundary.
@@ -76,6 +76,10 @@ exact local/remote comparison before the next phase begins.
   idempotency boundary for OpenAI and AG-UI. Complete status and the normalized
   `TASK | MESSAGE` payload atomically; replay Message text without consulting a
   changed Task, while Task replay must reauthorize the original Task/Context.
+- 2026-08-21: Treat any Agent Card security requirement or SDK
+  `TASK_STATE_AUTH_REQUIRED` as a southbound deployment mismatch. The latter
+  throws before Coordinator observation and is counted without attributes;
+  northbound keys, JWTs, rate limits, CORS, and Task authorization are unchanged.
 
 ## Discoveries
 

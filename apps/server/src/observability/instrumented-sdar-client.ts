@@ -2,6 +2,7 @@ import type {
   OperationOptions,
   SdarA2aClient,
 } from "../../../../packages/sdar-a2a-adapter/src/index.js";
+import { isUnexpectedA2aAuthenticationStateError } from "../../../../packages/sdar-a2a-adapter/src/index.js";
 
 import type { SecureTelemetry } from "./telemetry.js";
 
@@ -21,6 +22,7 @@ export function instrumentSdarClient(
         yield* client.submitTaskStream(input, options);
         timed.end(options?.signal?.aborted === true ? "aborted" : "ok");
       } catch (error) {
+        recordUnexpectedAuthentication(telemetry, error);
         timed.end(options?.signal?.aborted === true ? "aborted" : "error");
         throw error;
       } finally {
@@ -55,7 +57,17 @@ async function measure<T>(
     timed.end(options?.signal?.aborted === true ? "aborted" : "ok");
     return result;
   } catch (error) {
+    recordUnexpectedAuthentication(telemetry, error);
     timed.end(options?.signal?.aborted === true ? "aborted" : "error");
     throw error;
+  }
+}
+
+function recordUnexpectedAuthentication(
+  telemetry: SecureTelemetry,
+  error: unknown,
+): void {
+  if (isUnexpectedA2aAuthenticationStateError(error)) {
+    telemetry.recordUnexpectedA2aAuthentication();
   }
 }

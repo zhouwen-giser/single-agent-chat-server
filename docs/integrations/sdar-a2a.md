@@ -1,6 +1,6 @@
 # SDAR A2A client adapter
 
-Status: Phase 7 production interaction and terminal outcomes.
+Status: Phase 9 trusted single-SDAR fail-closed boundary.
 
 The package at packages/sdar-a2a-adapter is the only production boundary that
 imports the official A2A SDK. It pins @a2a-js/sdk 1.0.0-beta.0 (Apache-2.0) and
@@ -17,6 +17,13 @@ SDAR_A2A_ENDPOINT_OVERRIDE is optional and explicit. When present, the adapter
 copies the validated card, replaces the selected HTTP+JSON interface URL, and
 calls ClientFactory.createFromAgentCard. When absent, it uses the exact
 advertised URL. It never rewrites 0.0.0.0 or another host silently.
+
+The fixed SACS→SDAR link is an unauthenticated trusted-network profile. The
+Agent Card and every Skill must have empty security requirements. A required
+scheme fails client creation. If the SDK later publishes
+`TASK_STATE_AUTH_REQUIRED`, normalization throws the typed, sanitized
+`UNEXPECTED_A2A_AUTH_REQUIRED` deployment error before the Coordinator can
+persist state, poll, create an Interrupt, or request credentials.
 
 ## Exposed operations
 

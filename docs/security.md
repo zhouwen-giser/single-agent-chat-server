@@ -4,6 +4,12 @@ SACS is the external security boundary for the currently unauthenticated SDAR
 A2A endpoint. Deploy SACS and SDAR on a trusted isolated network; never publish
 the SDAR A2A endpoint directly.
 
+The southbound connection has no interactive credential flow. An Agent Card
+with authentication requirements or an SDK `TASK_STATE_AUTH_REQUIRED` result
+fails closed as `UNEXPECTED_A2A_AUTH_REQUIRED`; SACS never persists that value
+as Task state or asks a user to provide SDAR credentials. This does not weaken
+the northbound controls below.
+
 ## Identity and authorization
 
 - OpenAI and AG-UI use different service bearer credentials.

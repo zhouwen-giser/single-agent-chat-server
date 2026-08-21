@@ -28,6 +28,9 @@ operations. Metrics include API/chat/A2A latency, request counts, active HTTP
 and A2A streams, and active persisted Task bindings. Labels are restricted to
 small enumerations: route, status class, operation, outcome, and stream kind.
 User, chat, Task, message, and request identifiers are forbidden metric labels.
+The attribute-free counter `a2a_unexpected_auth_required_total` records an SDK
+auth-required state as a trusted-network deployment mismatch; it never labels
+the endpoint, Task, principal, credential, or error text.
 
 ## Limits and dependency health
 

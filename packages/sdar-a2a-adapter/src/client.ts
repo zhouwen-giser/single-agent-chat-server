@@ -106,6 +106,14 @@ function selectHttpJsonInterface(
   if (card.capabilities?.streaming !== true) {
     throw new Error("Agent Card does not advertise required streaming support");
   }
+  if (
+    card.securityRequirements.length > 0 ||
+    card.skills.some((skill) => skill.securityRequirements.length > 0)
+  ) {
+    throw new Error(
+      "Agent Card requires unsupported authentication for the trusted SDAR connection",
+    );
+  }
   if (!card.defaultInputModes.includes("text/plain")) {
     throw new Error("Agent Card does not accept required text/plain input");
   }

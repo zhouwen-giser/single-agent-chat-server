@@ -44,9 +44,10 @@ The model URL is mandatory and is fixed when the server starts. The model
 receives bounded conversational context and has no SACS tool, URL, database,
 A2A, MCP, Provider, or shell access. Do not point it at a user-supplied URL.
 
-The default SDAR URL inside Compose is `http://host.docker.internal:9999`.
-When SDAR is another container, attach the server to that trusted private
-network with a local Compose override and set:
+The default SDAR URL inside Compose is `http://sdar:9999` on the internal
+`single-agent-chat-sdar` network. Attach exactly the configured SDAR container
+to that network (or set `CHAT_SERVER_SDAR_NETWORK` to its existing internal
+network) and set, when its service name or endpoint differs:
 
 ```text
 SDAR_A2A_BASE_URL=http://sdar:9999
@@ -54,6 +55,10 @@ SDAR_A2A_ENDPOINT_OVERRIDE=http://sdar:9999/a2a
 ```
 
 The override must be explicit; the adapter never rewrites `0.0.0.0` silently.
+Do not route the unauthenticated A2A connection through the public `frontend`
+network or a host gateway. The server rejects Agent Cards that require an
+interactive authentication scheme because that indicates a protocol/deployment
+mismatch rather than a user action.
 
 ## Connect an official AG-UI client
 

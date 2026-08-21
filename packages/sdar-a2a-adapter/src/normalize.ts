@@ -21,6 +21,7 @@ import type {
   NormalizedTask,
   NormalizedTaskState,
 } from "./types.js";
+import { UnexpectedA2aAuthenticationStateError } from "./errors.js";
 
 const MAX_PARTS = 64;
 const MAX_HISTORY_MESSAGES = 100;
@@ -143,6 +144,9 @@ function inputRequestId(
   return snake ?? camel;
 }
 export function normalizeState(state: TaskState): NormalizedTaskState {
+  if (state === TaskState.TASK_STATE_AUTH_REQUIRED) {
+    throw new UnexpectedA2aAuthenticationStateError();
+  }
   const states: Record<number, NormalizedTaskState> = {
     [TaskState.TASK_STATE_UNSPECIFIED]: "UNSPECIFIED",
     [TaskState.TASK_STATE_SUBMITTED]: "SUBMITTED",
@@ -152,7 +156,6 @@ export function normalizeState(state: TaskState): NormalizedTaskState {
     [TaskState.TASK_STATE_CANCELED]: "CANCELED",
     [TaskState.TASK_STATE_INPUT_REQUIRED]: "INPUT_REQUIRED",
     [TaskState.TASK_STATE_REJECTED]: "REJECTED",
-    [TaskState.TASK_STATE_AUTH_REQUIRED]: "AUTH_REQUIRED",
   };
   return states[state] ?? "UNSPECIFIED";
 }

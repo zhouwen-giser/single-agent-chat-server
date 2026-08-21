@@ -49,6 +49,7 @@ export class SecureTelemetry {
   private readonly contextCharacters: Pick<Histogram, "record">;
   private readonly contextMessages: Pick<Histogram, "record">;
   private readonly ambiguousTaskReferences: Pick<Counter, "add">;
+  private readonly unexpectedA2aAuthentication: Pick<Counter, "add">;
   private activeTasks = 0;
 
   constructor(
@@ -104,6 +105,10 @@ export class SecureTelemetry {
       safelyValue(() =>
         meter?.createCounter("chat_server.ambiguous_task_reference"),
       ) ?? noOpCounter;
+    this.unexpectedA2aAuthentication =
+      safelyValue(() =>
+        meter?.createCounter("a2a_unexpected_auth_required_total"),
+      ) ?? noOpCounter;
     const activeTaskGauge = safelyValue(() =>
       meter?.createObservableGauge("chat_server.tasks.active"),
     );
@@ -135,6 +140,10 @@ export class SecureTelemetry {
 
   recordAmbiguousTaskReference(): void {
     safely(() => this.ambiguousTaskReferences.add(1));
+  }
+
+  recordUnexpectedA2aAuthentication(): void {
+    safely(() => this.unexpectedA2aAuthentication.add(1));
   }
 
   recordApi(input: {

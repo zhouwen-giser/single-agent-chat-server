@@ -85,6 +85,9 @@ model for business routing, create an SDAR Task, or change Focus.
   returned or polled Task is checked against both persisted Task and Context
   identity before Focus, persistence, observation, or publication.
 - `packages/sdar-a2a-adapter`: the only official A2A SDK boundary.
+  It maps no internal `AUTH_REQUIRED` state: the SDK enum throws a typed
+  deployment mismatch, and Agent Cards requiring authentication fail client
+  construction. Endpoint/Card selection exists only in startup configuration.
 
 OpenAI and AG-UI adapters must not copy any conversation, selector, focus,
 authorization, coordinator, or request-result implementation.

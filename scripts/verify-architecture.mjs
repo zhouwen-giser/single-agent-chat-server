@@ -115,6 +115,39 @@ for (const file of files) {
     );
   }
   if (
+    name !== "packages/sdar-a2a-adapter/src/errors.ts" &&
+    /["'`]AUTH_REQUIRED["'`]/u.test(content)
+  ) {
+    violations.push(`${name}: internal AUTH_REQUIRED Task state is forbidden`);
+  }
+  if (
+    name !== "packages/sdar-a2a-adapter/src/normalize.ts" &&
+    /TASK_STATE_AUTH_REQUIRED/u.test(content)
+  ) {
+    violations.push(
+      `${name}: SDK auth-required handling must stay inside normalization`,
+    );
+  }
+  for (const inputType of [
+    "SubmitTaskInput",
+    "FollowUpInput",
+    "TaskTurnContext",
+    "FollowUpTurnContext",
+  ]) {
+    const body = content.match(
+      new RegExp(`(?:interface|type)\\s+${inputType}[^\\{]*\\{([^}]*)\\}`, "u"),
+    )?.[1];
+    if (
+      /\b(?:endpoint|endpointOverride|baseUrl|agentCard)\??\s*:/u.test(
+        body ?? "",
+      )
+    ) {
+      violations.push(
+        `${name}: ${inputType} accepts request-level A2A routing`,
+      );
+    }
+  }
+  if (
     name === "packages/chat-runtime/src/task-coordinator.ts" &&
     (/\btargetTaskId\b/u.test(content) || /async \*status\s*\(/u.test(content))
   ) {

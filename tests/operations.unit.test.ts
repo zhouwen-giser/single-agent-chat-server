@@ -2,6 +2,7 @@ import type { Meter, Tracer } from "@opentelemetry/api";
 import { describe, expect, it } from "@jest/globals";
 
 import { instrumentChatModel } from "../apps/server/src/observability/instrumented-chat-model.js";
+import { instrumentSdarClient } from "../apps/server/src/observability/instrumented-sdar-client.js";
 import { createSecureLoggerOptions } from "../apps/server/src/observability/logging.js";
 import {
   lowCardinalityAttributes,
@@ -9,6 +10,10 @@ import {
 } from "../apps/server/src/observability/telemetry.js";
 import { FixedWindowRateLimiter } from "../apps/server/src/operations/rate-limiter.js";
 import { parsePersistenceConfig } from "../packages/persistence/src/index.js";
+import {
+  UnexpectedA2aAuthenticationStateError,
+  type SdarA2aClient,
+} from "../packages/sdar-a2a-adapter/src/index.js";
 
 describe("secure operational controls", () => {
   it("bounds PostgreSQL connection and query timeouts", () => {
@@ -197,6 +202,43 @@ describe("secure operational controls", () => {
 
     expect(counters).toEqual([
       { name: "chat_server.ambiguous_task_reference", value: 1 },
+    ]);
+  });
+  it("counts unexpected southbound authentication without attributes", async () => {
+    const counters: Array<{
+      readonly name: string;
+      readonly value: number;
+      readonly attributes?: Readonly<Record<string, unknown>>;
+    }> = [];
+    const meter = {
+      createHistogram: () => ({ record: () => undefined }),
+      createCounter: (name: string) => ({
+        add: (value: number, attributes?: Record<string, unknown>) =>
+          counters.push({
+            name,
+            value,
+            ...(attributes === undefined ? {} : { attributes }),
+          }),
+      }),
+      createUpDownCounter: () => ({ add: () => undefined }),
+      createObservableGauge: () => ({ addCallback: () => undefined }),
+    } as unknown as Meter;
+    const telemetry = new SecureTelemetry({ meter });
+    const rawClient = {
+      protocolBinding: "HTTP+JSON",
+      protocolVersion: "1.0",
+      endpoint: "http://sdar.test/a2a",
+      getTask: async () => {
+        throw new UnexpectedA2aAuthenticationStateError();
+      },
+    } as unknown as SdarA2aClient;
+
+    await expect(
+      instrumentSdarClient(rawClient, telemetry).getTask("task-a"),
+    ).rejects.toBeInstanceOf(UnexpectedA2aAuthenticationStateError);
+
+    expect(counters).toEqual([
+      { name: "a2a_unexpected_auth_required_total", value: 1 },
     ]);
   });
   it("enforces a fixed per-identity window and resets it", () => {

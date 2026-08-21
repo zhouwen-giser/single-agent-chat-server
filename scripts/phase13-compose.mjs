@@ -19,6 +19,7 @@ const environment = {
     process.env.CHAT_SERVER_IMAGE ?? "single-agent-chat-server:0.1.0",
   CHAT_SERVER_PUBLISHED_PORT: "0",
   CHAT_SERVER_FRONTEND_NETWORK: `${project}-frontend`,
+  CHAT_SERVER_SDAR_NETWORK: `${project}-sdar`,
   CHAT_SERVER_SERVICE_KEY: credential("openai"),
   AG_UI_SERVICE_KEY: credential("agui"),
   OPENWEBUI_USER_JWT_SECRET: credential("principal"),

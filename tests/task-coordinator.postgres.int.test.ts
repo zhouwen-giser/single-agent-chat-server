@@ -15,14 +15,15 @@ import {
   InteractionTaskCoordinatorRepository,
   runMigrations,
 } from "../packages/persistence/src/index.js";
-import type {
-  FollowUpInput,
-  NormalizedSendResult,
-  NormalizedStreamEvent,
-  NormalizedTask,
-  OperationOptions,
-  SdarA2aClient,
-  SubmitTaskInput,
+import {
+  UnexpectedA2aAuthenticationStateError,
+  type FollowUpInput,
+  type NormalizedSendResult,
+  type NormalizedStreamEvent,
+  type NormalizedTask,
+  type OperationOptions,
+  type SdarA2aClient,
+  type SubmitTaskInput,
 } from "../packages/sdar-a2a-adapter/src/index.js";
 
 const { Pool } = pg;
@@ -159,6 +160,40 @@ describeWithPostgres("bounded SDAR task coordination", () => {
        WHERE protocol = 'openai' AND external_request_id = 'message-a'`,
     );
     expect(stored.rows[0]).toEqual({ status: "CLAIMED", result_kind: null });
+  });
+
+  it("does not persist, poll, or create an interrupt for unexpected A2A auth", async () => {
+    const client = new UnexpectedAuthenticationClient();
+
+    await expect(
+      collect(coordinator(client).submit(turn())),
+    ).rejects.toMatchObject({
+      code: "UNEXPECTED_A2A_AUTH_REQUIRED",
+      statusCode: 502,
+    });
+
+    const state = await pool.query<{
+      readonly request_status: string;
+      readonly result_kind: string | null;
+      readonly task_count: string;
+      readonly interrupt_count: string;
+    }>(`
+      SELECT request.status AS request_status,
+             request.result_kind,
+             (SELECT count(*) FROM chat_service.conversation_task_binding)::text AS task_count,
+             (SELECT count(*) FROM chat_service.agui_interrupt_binding)::text AS interrupt_count
+      FROM chat_service.interaction_request request
+      WHERE request.protocol = 'openai'
+        AND request.external_request_id = 'message-a'
+    `);
+    expect(state.rows[0]).toEqual({
+      request_status: "CLAIMED",
+      result_kind: null,
+      task_count: "0",
+      interrupt_count: "0",
+    });
+    expect(client.submitCount).toBe(1);
+    expect(client.getCount).toBe(0);
   });
 
   it("streams Task status.message and phaseMessage as conversational deltas", async () => {
@@ -947,6 +982,20 @@ class DirectMessageFollowUpClient extends FakeClient {
         contextId: input.contextId,
       },
     };
+  }
+}
+
+class UnexpectedAuthenticationClient extends FakeClient {
+  constructor() {
+    super([]);
+  }
+
+  override async *submitTaskStream(): AsyncGenerator<NormalizedStreamEvent> {
+    this.submitCount += 1;
+    if (this.submitCount > 0) {
+      throw new UnexpectedA2aAuthenticationStateError();
+    }
+    yield { kind: "message", message: agentMessage("unreachable") };
   }
 }
 
