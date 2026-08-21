@@ -34,7 +34,7 @@ strict `TASK | MESSAGE` completed-request result.
 - [x] 2026-08-21: Diagnose exact-head CI's expired open-Interrupt fixture and
       replace only its stale absolute expiry with the established 2099 test date.
 - [x] P00: publish evidence, pass exact-head quality/container CI, and open Draft PR #12.
-- [ ] P01: freeze ADR, contracts, domain types, and architecture gates.
+- [x] P01: freeze ADR, contracts, domain types, and architecture gates; pass exact-head CI.
 - [ ] P02: implement the configured OpenAI-compatible conversation model.
 - [ ] P03-P04: persist and assemble durable bounded conversation context.
 - [ ] P05-P07: implement multi-task persistence, resolution, focus, and coordination.

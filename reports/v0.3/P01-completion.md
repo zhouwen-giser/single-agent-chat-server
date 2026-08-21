@@ -1,6 +1,6 @@
 # P01 completion
 
-Status: `LOCAL_COMPLETE_PUBLICATION_PENDING`
+Status: `PASSED_PUBLISHED`
 
 ## Identity
 
@@ -48,8 +48,9 @@ unchanged. The append-only compatibility strategy is frozen by ADR 0003.
 
 ## Acceptance criteria
 
-- AC-003: locally passed by ADR 0003, contracts, architecture gate, and tests.
-- AC-017 contract portion: locally passed; extra fields, illegal action, and
+- AC-003: passed by ADR 0003, contracts, architecture gate, tests, publication,
+  and exact-head quality/container CI.
+- AC-017 contract portion: passed; extra fields, illegal action, and
   multi-strategy selector are rejected by both JSON Schema and Zod.
 
 ## Security and privacy review

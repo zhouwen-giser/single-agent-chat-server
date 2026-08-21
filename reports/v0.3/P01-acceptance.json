@@ -1,10 +1,10 @@
 {
   "phase": "P01",
-  "status": "LOCAL_PASSED_PUBLICATION_PENDING",
+  "status": "PASSED_PUBLISHED",
   "observedAt": "2026-08-21T10:44:12.819Z",
   "acceptance": {
     "AC-003": {
-      "status": "PASSED_LOCAL",
+      "status": "PASSED",
       "evidence": [
         "docs/adr/0003-real-conversation-context-multitask.md",
         "contracts/v0.3",
@@ -13,7 +13,7 @@
       ]
     },
     "AC-017_CONTRACT": {
-      "status": "PASSED_LOCAL",
+      "status": "PASSED",
       "evidence": "tests/v03-contracts.contract.test.ts"
     }
   },
@@ -33,5 +33,12 @@
     "development": ["ajv@8.20.0"],
     "lockfileSha256": "81b87584144b96dea4bbd44a06a76f7d64711767a467bc2d0868c043f76b2c91"
   },
-  "publication": "PENDING"
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/12",
+    "candidateSha": "0aaf0cf53658df2a17f1238c128832a8fc70416a",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32474106024",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
 }
