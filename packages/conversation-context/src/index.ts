@@ -43,3 +43,23 @@ export interface ConversationContextBudget {
   readonly summaryTriggerCharacters: number;
   readonly maxTaskSummaryCharacters: number;
 }
+
+export { ConversationContextAssembler } from "./assembler.js";
+export { parseConversationContextBudget } from "./config.js";
+export {
+  ClientHistoryImporter,
+  type ClientHistoryImportResult,
+  type ClientHistoryMessage,
+  type ClientHistoryRole,
+} from "./importer.js";
+export type {
+  ConversationContextObservation,
+  ConversationContextObserver,
+  ConversationHistoryPort,
+  ConversationSummarizationModel,
+  TaskDirectoryPort,
+} from "./ports.js";
+export {
+  ConversationSummaryRefresher,
+  type ConversationSummaryRefreshResult,
+} from "./summarizer.js";

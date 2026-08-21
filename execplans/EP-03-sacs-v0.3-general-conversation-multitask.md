@@ -35,8 +35,8 @@ strict `TASK | MESSAGE` completed-request result.
       replace only its stale absolute expiry with the established 2099 test date.
 - [x] P00: publish evidence, pass exact-head quality/container CI, and open Draft PR #12.
 - [x] P01: freeze ADR, contracts, domain types, and architecture gates; pass exact-head CI.
-- [ ] P02: implement the configured OpenAI-compatible conversation model.
-- [ ] P03-P04: persist and assemble durable bounded conversation context.
+- [x] P02: implement the configured OpenAI-compatible conversation model.
+- [x] P03-P04: persist and assemble durable bounded conversation context.
 - [ ] P05-P07: implement multi-task persistence, resolution, focus, and coordination.
 - [ ] P08-P09: implement request-result union and trusted A2A fail-closed behavior.
 - [ ] P10-P11: integrate the shared application service with OpenAI and AG-UI.
@@ -59,6 +59,9 @@ exact local/remote comparison before the next phase begins.
 - 2026-08-21: Do not count the 50 environment-skipped PostgreSQL tests in
   `verify:ci` toward any v0.3 required gate. P03/P05/P08/P13 must run them on a
   real PostgreSQL service with zero required skips.
+- 2026-08-21: Measure the context budget against the exact untrusted model JSON
+  envelope and reserve the current user turn before adding durable history.
+  If the current turn alone cannot fit, fail explicitly instead of dropping it.
 
 ## Discoveries
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased — SACS v0.3 in progress
+
+### Added
+
+- A fixed, configured OpenAI-compatible conversation model client with strict
+  structured decisions, bounded calls, readiness, and no production fallback.
+- Protocol-neutral durable user/assistant history, optimistic summaries, stable
+  replay reconciliation, and deterministic bounded context assembly shared by
+  the future OpenAI and AG-UI application path.
+- Numeric-only context size/truncation telemetry and deployment controls for
+  recent-message, total-envelope, summary-trigger, and Task-summary budgets.
+
 ## Unreleased — SACS v0.2 candidate
 
 ### Added

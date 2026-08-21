@@ -24,7 +24,9 @@ input.
 Tune request/body/message/response, polling, connection-pool, and rate limits
 with the documented environment settings in `.env.example`. Browser CORS is
 deny-by-default; set `CHAT_CORS_ALLOW_ORIGINS` only to exact trusted origins.
-Supply secrets
+Conversation context defaults to 30 recent messages and a 60,000-character
+model-data envelope; its summary trigger and per-Task summary limit are
+independently configurable but validated against that envelope. Supply secrets
 through the deployment secret store, not image layers or Git.
 
 ## Observability
@@ -33,6 +35,8 @@ Logs contain request IDs, routes, status classes, durations, and bounded
 low-cardinality operation outcomes. They redact authorization, JWTs, prompts,
 bodies, messages, artifacts, and token-like fields. Metrics must not include
 user, chat, Task, prompt, Artifact, URL, or error-text labels.
+`chat_server.context.characters` and `chat_server.context.messages` record only
+numeric sizes plus boolean summary/truncation flags; they never record content.
 
 ## Recovery
 

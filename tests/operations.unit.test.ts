@@ -66,6 +66,14 @@ describe("secure operational controls", () => {
       telemetry.streamStarted("a2a");
       telemetry.streamEnded("a2a");
       telemetry.setActiveTasks(3);
+      telemetry.recordContext({
+        messageCount: 2,
+        characterCount: 128,
+        activeTaskCount: 1,
+        terminalTaskCount: 0,
+        summaryPresent: true,
+        budgetTruncated: false,
+      });
     }).not.toThrow();
   });
 
@@ -119,6 +127,53 @@ describe("secure operational controls", () => {
       },
     ]);
     expect(JSON.stringify(records)).not.toContain("private prompt");
+  });
+  it("records only bounded-context counts and low-cardinality flags", () => {
+    const records: {
+      readonly name: string;
+      readonly value: number;
+      readonly attributes?: Readonly<Record<string, unknown>>;
+    }[] = [];
+    const meter = {
+      createHistogram: (name: string) => ({
+        record: (value: number, attributes?: Record<string, unknown>) =>
+          records.push({
+            name,
+            value,
+            ...(attributes === undefined ? {} : { attributes }),
+          }),
+      }),
+      createCounter: () => ({ add: () => undefined }),
+      createUpDownCounter: () => ({ add: () => undefined }),
+      createObservableGauge: () => ({ addCallback: () => undefined }),
+    } as unknown as Meter;
+    new SecureTelemetry({ meter }).recordContext({
+      messageCount: 4,
+      characterCount: 512,
+      activeTaskCount: 2,
+      terminalTaskCount: 1,
+      summaryPresent: true,
+      budgetTruncated: false,
+    });
+
+    expect(records).toEqual([
+      {
+        name: "chat_server.context.characters",
+        value: 512,
+        attributes: {
+          budget_truncated: "false",
+          summary_present: "true",
+        },
+      },
+      {
+        name: "chat_server.context.messages",
+        value: 4,
+        attributes: {
+          budget_truncated: "false",
+          summary_present: "true",
+        },
+      },
+    ]);
   });
   it("enforces a fixed per-identity window and resets it", () => {
     let now = 1_000;

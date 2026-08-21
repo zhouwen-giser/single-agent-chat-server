@@ -59,10 +59,13 @@ model for business routing, create an SDAR Task, or change Focus.
 - `packages/conversation-model`: model port, strict TurnDecision contracts, and
   fixed OpenAI-compatible client with bounded timeout/retry/readiness. It has no
   tool surface and accepts no request-level endpoint.
-- `packages/conversation-context`: protocol-neutral conversation types; P03/P04
-  add persistence and bounded assembly. P03's `conversation_message` and
-  `conversation_summary` are server-authoritative and independent of LangGraph
-  checkpoint retention.
+- `packages/conversation-context`: protocol-neutral conversation types, stable
+  client-history reconciliation, bounded assembly, and optimistic rolling
+  summarization. Assembly reserves space for the current user turn, then uses
+  summary, newest non-overlapping messages, bounded Task summaries, Focus, and
+  last reference in deterministic priority order. P03's
+  `conversation_message` and `conversation_summary` are server-authoritative
+  and independent of LangGraph checkpoint retention.
 - `packages/task-directory`: Task summaries, selectors, and directory contract;
   P05/P06 add repositories and deterministic resolution.
 - `packages/request-result`: strict completed-result union; P08 adds persistence

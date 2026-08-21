@@ -13,6 +13,10 @@ import {
 import pg from "pg";
 
 import {
+  ClientHistoryImporter,
+  ConversationContextAssembler,
+} from "../packages/conversation-context/src/index.js";
+import {
   ConversationPersistenceRepository,
   InteractionPersistenceRepository,
   PersistenceAuthorizationError,
@@ -120,6 +124,13 @@ describeWithPostgres("protocol-neutral conversation persistence", () => {
     expect(recent.map(({ sequence }) => sequence)).toEqual([
       16, 17, 18, 19, 20,
     ]);
+    await expect(
+      repository.loadMessagesAfter({
+        ...identity,
+        afterSequence: 17,
+        limit: 2,
+      }),
+    ).resolves.toMatchObject([{ sequence: 18 }, { sequence: 19 }]);
   });
 
   it("persists the published A2A assistant text and interrupted boundary", async () => {
@@ -256,6 +267,159 @@ describeWithPostgres("protocol-neutral conversation persistence", () => {
         { role: "assistant", sequence: 2 },
       ],
     );
+  });
+
+  it("reconciles a repeated full client history without appending copies", async () => {
+    const identity = await createIdentity("full-history");
+    const repository = conversationRepository();
+    await repository.ingestUserMessage({
+      ...identity,
+      protocol: "openai",
+      externalMessageId: "full-history-user-1",
+      contentText: "first question",
+    });
+    await repository.appendAssistantMessage({
+      ...identity,
+      protocol: "openai",
+      externalMessageId: "full-history-assistant-1",
+      contentText: "server-published answer",
+    });
+    const importer = new ClientHistoryImporter(repository);
+    const input = {
+      ...identity,
+      protocol: "openai" as const,
+      requestId: "full-history-request-2",
+      currentUserExternalMessageId: "full-history-user-2",
+      messages: [
+        {
+          role: "user" as const,
+          externalMessageId: "full-history-user-1",
+          contentText: "first question",
+        },
+        {
+          role: "assistant" as const,
+          externalMessageId: "full-history-assistant-1",
+          contentText: "server-published answer",
+        },
+        { role: "user" as const, contentText: "second question" },
+      ],
+    };
+
+    const first = await importer.import(input);
+    const replay = await importer.import(input);
+
+    expect(first).toMatchObject({
+      insertedUsers: 1,
+      duplicateUsers: 1,
+      matchedAssistants: 1,
+    });
+    expect(replay).toMatchObject({
+      insertedUsers: 0,
+      duplicateUsers: 2,
+      matchedAssistants: 1,
+    });
+    await expect(
+      repository.loadRecentMessages(identity),
+    ).resolves.toMatchObject([
+      { role: "user", externalMessageId: "full-history-user-1" },
+      { role: "assistant", externalMessageId: "full-history-assistant-1" },
+      { role: "user", externalMessageId: "full-history-user-2" },
+    ]);
+  });
+
+  it("assembles identical summary, recent history, and Task context after restart", async () => {
+    const identity = await createIdentity("context-restart");
+    const repository = conversationRepository();
+    await repository.ingestUserMessage({
+      ...identity,
+      protocol: "openai",
+      externalMessageId: "restart-context-user-1",
+      contentText: "old question",
+    });
+    await repository.appendAssistantMessage({
+      ...identity,
+      protocol: "openai",
+      externalMessageId: "restart-context-assistant-1",
+      contentText: "old published answer",
+    });
+    await repository.saveSummary({
+      ...identity,
+      summary: "The earlier exchange established the old result.",
+      summarizedThroughSequence: 2,
+      expectedVersion: 0,
+    });
+    await repository.ingestUserMessage({
+      ...identity,
+      protocol: "ag_ui",
+      externalMessageId: "restart-context-user-2",
+      contentText: "new question",
+    });
+    await repository.appendAssistantMessage({
+      ...identity,
+      protocol: "ag_ui",
+      externalMessageId: "restart-context-assistant-2",
+      contentText: "new published answer",
+      taskId: "task-restart",
+    });
+    const current = await repository.ingestUserMessage({
+      ...identity,
+      protocol: "openai",
+      externalMessageId: "restart-context-current",
+      contentText: "continue from there",
+    });
+    const tasks = {
+      loadTaskDirectory: async () => ({
+        focusedTaskId: "task-restart",
+        activeTasks: [
+          {
+            bindingId: "binding-restart",
+            taskId: "task-restart",
+            contextId: "context-restart",
+            shortId: "restart1",
+            status: "WORKING",
+            summary: "published Task summary",
+            createdAt: "2026-08-21T00:00:00.000Z",
+            updatedAt: "2026-08-21T00:01:00.000Z",
+          },
+        ],
+        recentTerminalTasks: [],
+      }),
+    };
+    const budget = {
+      maxRecentMessages: 30,
+      maxContextCharacters: 60_000,
+      summaryTriggerCharacters: 45_000,
+      maxTaskSummaryCharacters: 1_000,
+    };
+
+    const beforeRestart = await new ConversationContextAssembler(
+      repository,
+      tasks,
+      budget,
+    ).assemble({
+      ...identity,
+      currentUserText: "continue from there",
+      currentUserMessageSequence: current.message.sequence,
+    });
+    const afterRestart = await new ConversationContextAssembler(
+      conversationRepository(),
+      tasks,
+      budget,
+    ).assemble({
+      ...identity,
+      currentUserText: "continue from there",
+      currentUserMessageSequence: current.message.sequence,
+    });
+
+    expect(afterRestart).toEqual(beforeRestart);
+    expect(afterRestart).toMatchObject({
+      summary: "The earlier exchange established the old result.",
+      summarizedThroughSequence: 2,
+      focusedTaskId: "task-restart",
+    });
+    expect(afterRestart.messages.map(({ sequence }) => sequence)).toEqual([
+      3, 4,
+    ]);
   });
 
   it("saves summaries with optimistic version and sequence checks", async () => {

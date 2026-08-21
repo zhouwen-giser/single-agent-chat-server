@@ -11,12 +11,16 @@ import {
   type UpDownCounter,
 } from "@opentelemetry/api";
 
+import type { ConversationContextObservation } from "../../../../packages/conversation-context/src/index.js";
+
 const allowedAttributeKeys = new Set([
   "operation",
   "outcome",
   "route",
   "status_class",
   "stream_kind",
+  "budget_truncated",
+  "summary_present",
 ]);
 
 export function lowCardinalityAttributes(
@@ -42,6 +46,8 @@ export class SecureTelemetry {
   private readonly a2aLatency: Pick<Histogram, "record">;
   private readonly requests: Pick<Counter, "add">;
   private readonly activeStreams: Pick<UpDownCounter, "add">;
+  private readonly contextCharacters: Pick<Histogram, "record">;
+  private readonly contextMessages: Pick<Histogram, "record">;
   private activeTasks = 0;
 
   constructor(
@@ -81,6 +87,18 @@ export class SecureTelemetry {
       safelyValue(() =>
         meter?.createUpDownCounter("chat_server.streams.active"),
       ) ?? noOpCounter;
+    this.contextCharacters =
+      safelyValue(() =>
+        meter?.createHistogram("chat_server.context.characters", {
+          unit: "{character}",
+        }),
+      ) ?? noOpHistogram;
+    this.contextMessages =
+      safelyValue(() =>
+        meter?.createHistogram("chat_server.context.messages", {
+          unit: "{message}",
+        }),
+      ) ?? noOpHistogram;
     const activeTaskGauge = safelyValue(() =>
       meter?.createObservableGauge("chat_server.tasks.active"),
     );
@@ -95,6 +113,19 @@ export class SecureTelemetry {
 
   setActiveTasks(count: number): void {
     this.activeTasks = Math.max(0, Math.floor(count));
+  }
+
+  recordContext(observation: ConversationContextObservation): void {
+    const attributes = lowCardinalityAttributes({
+      budget_truncated: String(observation.budgetTruncated),
+      summary_present: String(observation.summaryPresent),
+    });
+    safely(() =>
+      this.contextCharacters.record(observation.characterCount, attributes),
+    );
+    safely(() =>
+      this.contextMessages.record(observation.messageCount, attributes),
+    );
   }
 
   recordApi(input: {

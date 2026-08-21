@@ -117,6 +117,36 @@ export class ConversationPersistenceRepository {
     return result.rows.map(mapConversationMessage);
   }
 
+  async loadMessagesAfter(input: {
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly afterSequence: number;
+    readonly limit?: number;
+  }): Promise<readonly ConversationMessage[]> {
+    const limit = input.limit ?? 100;
+    if (!Number.isSafeInteger(input.afterSequence) || input.afterSequence < 0) {
+      throw new Error("Conversation sequence must be a nonnegative integer");
+    }
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new Error("Conversation message limit must be from 1 to 100");
+    }
+    const result = await this.pool.query<ConversationMessageRow>(
+      `
+        SELECT message.*
+        FROM chat_service.conversation_message AS message
+        JOIN chat_service.conversation_thread AS thread
+          ON thread.thread_id = message.thread_id
+        WHERE message.thread_id = $1
+          AND thread.principal_id = $2
+          AND message.sequence > $3
+        ORDER BY message.sequence ASC
+        LIMIT $4
+      `,
+      [input.threadId, input.principalId, input.afterSequence, limit],
+    );
+    return result.rows.map(mapConversationMessage);
+  }
+
   async markAssistantMessageTruncated(input: {
     readonly principalId: string;
     readonly threadId: string;
