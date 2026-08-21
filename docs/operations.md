@@ -64,6 +64,12 @@ for PostgreSQL migrations and HTTP readiness, verifies the runtime controls,
 then removes only that disposable project's containers, volume, and networks.
 It is an acceptance command, not a production shutdown command.
 
+The v0.3 exact-head real-model, real-SDAR, upgrade/restart, and network-boundary
+procedure is documented in [release-candidate-v0.3.md](release-candidate-v0.3.md).
+Its migration command accepts only the dedicated `single_agent_chat_phase4`
+database and a `sacs-v03-*` container name; this guard is part of the release
+boundary, not a configurable production operation.
+
 ## Known limitations and rollback
 
 - Exactly one fixed SDAR is supported. Its current A2A endpoint is
