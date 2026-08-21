@@ -46,7 +46,7 @@ strict `TASK | MESSAGE` completed-request result.
 - [x] P10: integrate durable multi-turn and multi-Task context through the
       shared application service into OpenAI/OpenWebUI.
 - [x] P11: integrate the same conversation application service into AG-UI.
-- [ ] P12: complete security, privacy, observability, and adversarial hardening.
+- [x] P12: complete security, privacy, observability, and adversarial hardening.
 - [ ] P13: qualify real model, current SDAR, migration, restart, and network boundary.
 - [ ] P14: close docs, container, CI, full gate, evidence, and Ready PR.
 
@@ -94,6 +94,13 @@ exact local/remote comparison before the next phase begins.
   not as permission to rewrite its completed-result discriminator. Exact
   `MESSAGE` replay wins over later Task state; `TASK` recovery uses that Run's
   persisted Task ID rather than Focus.
+- 2026-08-21: Emit model outcome, durable result/replay kind, and message-dedup
+  telemetry only at the adapter/persistence boundaries with fixed
+  low-cardinality attributes. Treat telemetry as best-effort so an exporter
+  failure cannot reverse or obscure a committed durable result.
+- 2026-08-21: Require one production SDAR client construction site in the
+  process entry point. The lazy cache accepts only an injected factory and
+  cannot independently parse another endpoint.
 
 ## Discoveries
 
@@ -146,6 +153,15 @@ PostgreSQL 16.9. The dedicated official-client/shared-runtime AG-UI gate passed
 migration/architecture/license/secret/smoke gates passed. Functional SHA
 `e03a8570ea0dd51b97c37ed1fc33c633c6f88ca0` passed exact-head CI run
 `32503356579` (quality `96837914040`, container `96838341355`).
+
+P12 authoritative local gate: `pnpm verify:phase12` passed 100 unit, 78
+contract, 89 integration, and build with zero required skip against isolated
+PostgreSQL 16.9. The dedicated adversarial/telemetry gate passed 146 tests;
+predecessor OpenAI passed 22, cumulative AG-UI passed 35, security 12, fixture
+E2E 1, and all migration/architecture/license/secret/smoke/image/container/SBOM
+gates passed. Functional SHA
+`928a56e7b9f77bb30dc7bd93a30787d79b65129c` passed exact-head CI run
+`32507942371` (quality `96852231590`, container `96852849256`).
 
 ## Outcomes
 

@@ -17,7 +17,7 @@ Status values are evidence-based. `Planned` is not acceptance.
 | AC-030–032 | P09   | trusted A2A and unexpected auth fail-closed               | P09 gates; CI run 32496491328                         | Passed  |
 | AC-033–034 | P10   | shared OpenAI integration                                 | P10 gates; CI run 32499909972                         | Passed  |
 | AC-035–036 | P11   | shared AG-UI integration                                  | P11 gates; CI run 32503356579                         | Passed  |
-| AC-037–038 | P12   | adversarial, privacy, telemetry hardening                 | P12 security gate                                     | Planned |
+| AC-037–038 | P12   | adversarial, privacy, telemetry hardening                 | P12 gates; CI run 32507942371                         | Passed  |
 | AC-039–042 | P13   | real model/SDAR/migration/restart/network                 | zero-fake real evidence                               | Planned |
 | AC-043–044 | P14   | full candidate, container, CI, Ready PR                   | exact-head release report                             | Planned |
 
