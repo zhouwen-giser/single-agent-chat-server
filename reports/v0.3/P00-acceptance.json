@@ -1,0 +1,49 @@
+{
+  "phase": "P00",
+  "status": "PASSED_PUBLISHED",
+  "observedAt": "2026-08-21T10:13:58.465Z",
+  "acceptance": {
+    "AC-001": {
+      "status": "PASSED",
+      "evidence": "reports/v0.3/P00-source-lock.json"
+    },
+    "AC-002": {
+      "status": "PASSED",
+      "evidence": "feature/sacs-v0.3-general-conversation-multitask at verified origin/main 25c923524bcddc5fffd37513766cf28c9f9c2cf4"
+    }
+  },
+  "baseline": {
+    "taskPackageValidation": "PASSED",
+    "frozenInstall": "PASSED",
+    "verifyCi": "PASSED_AFTER_LOOPBACK_SANDBOX_RERUN",
+    "verifyFull": "BLOCKED_ENVIRONMENT_TEST_DATABASE_URL_AND_P13_REAL_EVIDENCE",
+    "unit": { "passed": 78, "failed": 0, "skipped": 0 },
+    "contract": { "passed": 57, "failed": 0, "skipped": 0 },
+    "security": { "passed": 9, "failed": 0, "skipped": 0 },
+    "integration": { "passed": 1, "failed": 0, "skipped": 50 },
+    "fixtureE2e": { "passed": 1, "failed": 0, "skipped": 0 },
+    "postgresRerunAfterFixtureRepair": {
+      "postgres": "16.9-alpine",
+      "passed": 51,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "baselineDefects": [
+    {
+      "kind": "EXPIRED_TEST_FIXTURE",
+      "source": "tests/interaction-persistence.postgres.int.test.ts",
+      "productionSemanticsChanged": false,
+      "evidence": "reports/v0.3/failed-attempts/P00-expired-interrupt-fixture.md"
+    }
+  ],
+  "requiredReleaseGatesSatisfied": false,
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/12",
+    "candidateSha": "293189ff1c2cca3327e3c0fdab595b05160c83be",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32472547886",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
+}

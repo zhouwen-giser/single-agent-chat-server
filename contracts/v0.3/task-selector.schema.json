@@ -1,0 +1,18 @@
+{
+  "$id": "https://schemas.sacs.local/v0.3/task-selector.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TaskSelector",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "shortId": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "ordinal": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "reference": {
+      "enum": ["focused", "latest", "previous", "only_active"]
+    },
+    "summaryQuery": { "type": "string", "minLength": 1, "maxLength": 256 }
+  },
+  "minProperties": 1,
+  "maxProperties": 1
+}

@@ -22,6 +22,15 @@ PostgreSQL stores only local routing, recovery, and deduplication data.
   Task identifier.
 - `a2a_event_cache` deduplicates published A2A observations by Task and event
   hash. It is not an event cursor and does not imply Task resubscription.
+- `conversation_message` is the protocol-neutral, server-authoritative user and
+  assistant transcript. `(protocol, thread_id, external_message_id)` prevents
+  repeated client history from being appended again, while a Thread-owned
+  counter allocates a unique stable sequence under concurrent OpenAI/AG-UI
+  writes. Assistant rows contain only text actually published to the client and
+  record truncation when an observation was interrupted.
+- `conversation_summary` stores a bounded summary, the exact sequence it covers,
+  and an optimistic version. Original message rows are never deleted when a
+  summary advances.
 
 The schema contains no SDAR Goal, Plan, Skill, Action, Workflow, Provider, MCP
 Task, or Evidence records. SDAR remains authoritative for all of them.
@@ -39,6 +48,11 @@ Task, or Evidence records. SDAR remains authoritative for all of them.
 - Startup reconciliation lists active bindings and reclaims expired
   idempotency and submission leases. It does not contact SDAR or assume an A2A
   event cursor.
+- LangGraph checkpoints remain execution state, not the sole conversation
+  history. Message and summary recovery uses the protocol-neutral repository.
+- Client-supplied assistant history is reconciliation-only: it may match a
+  server-persisted message but cannot create or overwrite an assistant fact.
+  Only `user` and `assistant` roles can exist in the table.
 
 ## Operation
 
@@ -73,7 +87,11 @@ pnpm.cmd test:persistence
 The suite verifies empty and append-only upgrade migrations, checkpoint schema
 setup, concurrent claims, same-hash replay, different-hash conflict, expired
 lease recovery, process restart, user/chat isolation, event deduplication, and
-terminal monotonicity against real PostgreSQL. Phase 8 additionally verifies
-submission-lease serialization/expiry/startup recovery, stale-event rejection,
-database restart recovery in the same production process, and a production
-service restart against the same persisted database.
+terminal monotonicity against real PostgreSQL. The v0.3 conversation suite also
+verifies external-ID/content-hash deduplication, concurrent message sequence,
+published assistant text, interrupted output, restart loading, optimistic
+summary conflicts, system-role exclusion, and representative v0.2 upgrade with
+no invented history. Phase 8 additionally verifies submission-lease
+serialization/expiry/startup recovery, stale-event rejection, database restart
+recovery in the same production process, and a production service restart
+against the same persisted database.

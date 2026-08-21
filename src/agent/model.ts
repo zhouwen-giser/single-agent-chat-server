@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import type {
+  ConversationModel,
+  TurnDecision,
+} from "../../packages/conversation-model/src/index.js";
 import { followUpActions, requestKinds } from "./state.js";
 
 export const structuredTurnSchema = z
@@ -33,34 +37,57 @@ export interface StructuredChatModel {
   answer(input: { readonly userText: string }): Promise<string>;
 }
 
-/**
- * Stable local fallback until a configured chat-model backend is added.
- * It has no A2A, planning, workflow, tool, or MCP surface.
- */
-export const localFallbackChatModel: StructuredChatModel = {
-  async classify({ userText }) {
-    return {
-      requestKind: isExplicitTaskRequest(userText)
-        ? "new_task"
-        : "general_chat",
-    };
-  },
-  async answer({ userText }) {
-    const normalized = userText.trim();
-    if (/^(hi|hello|hey|你好|您好)[!！,.，。 ]*$/iu.test(normalized)) {
-      return "你好，我是单个 SDAR Agent 的聊天入口。你可以和我对话，或明确描述希望 SDAR 执行的任务。";
-    }
-    return "我已收到这条普通聊天消息。当前本地简化回答器未配置外部模型；如果你希望交给 SDAR 执行，请明确描述任务目标。";
-  },
+export function adaptConversationModel(
+  model: ConversationModel,
+): StructuredChatModel {
+  return {
+    async classify({ userText }) {
+      const decision = (await model.decideTurn({
+        context: emptyConversationContext,
+        currentUserText: userText,
+      })) as TurnDecision;
+      return legacyDecision(decision);
+    },
+    answer: ({ userText }) =>
+      model.answerGeneral({
+        context: emptyConversationContext,
+        currentUserText: userText,
+      }),
+  };
+}
+
+export const unavailableStructuredChatModel: StructuredChatModel = {
+  classify: unavailable,
+  answer: unavailable,
 };
-function isExplicitTaskRequest(userText: string): boolean {
-  const text = userText.trim();
-  return (
-    /^(?:please\s+)?(?:(?:ask\s+)?sdar\s+(?:to\s+)?|sdar\s*[:,-]\s*)?(?:execute|run|perform|complete|create|inspect|analyze|prepare|build|verify)\b/iu.test(
-      text,
-    ) ||
-    /^(?:请|请让\s*SDAR\s*)?(?:执行|完成|创建|检查|分析|准备|构建|验证)/u.test(
-      text,
-    )
-  );
+
+const emptyConversationContext = {
+  threadId: "legacy-graph-bridge",
+  messages: [],
+  activeTasks: [],
+  recentTerminalTasks: [],
+} as const;
+
+function legacyDecision(decision: TurnDecision): unknown {
+  switch (decision.kind) {
+    case "general_chat":
+    case "clarification":
+      return { requestKind: "general_chat" };
+    case "new_task":
+      return { requestKind: "new_task" };
+    case "list_tasks":
+    case "task_status":
+      return { requestKind: "status" };
+    case "task_follow_up":
+      return {
+        requestKind: "follow_up",
+        followUpAction: decision.action,
+      };
+    case "task_cancel":
+      return { requestKind: "cancel" };
+  }
+}
+
+async function unavailable(): Promise<never> {
+  throw new Error("Conversation model is not configured.");
 }

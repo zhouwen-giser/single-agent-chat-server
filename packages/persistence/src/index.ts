@@ -1,4 +1,10 @@
 export { CHECKPOINT_SCHEMA, createPostgresCheckpointer } from "./checkpoint.js";
+export {
+  ConversationPersistenceRepository,
+  type AssistantMessageReconciliation,
+  type ConversationMessageIngestResult,
+  type ConversationMessageInput,
+} from "./conversation-repository.js";
 export { parsePersistenceConfig, type PersistenceConfig } from "./config.js";
 export { hashJson } from "./hash.js";
 export { AgUiTaskCoordinatorRepository } from "./agui-task-coordinator-repository.js";

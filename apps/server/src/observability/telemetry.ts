@@ -114,7 +114,10 @@ export class SecureTelemetry {
     return this.begin("chat", this.chatLatency, {});
   }
 
-  beginLlm(operation: "classify" | "answer"): TimedOperation {
+  beginLlm(
+    operation:
+      "decide_turn" | "answer_general" | "summarize" | "explain_result",
+  ): TimedOperation {
     return this.begin("llm", this.llmLatency, { operation });
   }
 

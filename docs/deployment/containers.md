@@ -15,6 +15,9 @@ AG_UI_SERVICE_KEY=<different value, at least 32 characters>
 OPENWEBUI_USER_JWT_SECRET=<same secret as Open WebUI forwarding>
 CHAT_CORS_ALLOW_ORIGINS=<optional exact browser origin; empty denies CORS>
 POSTGRES_PASSWORD=<strong database password>
+CONVERSATION_MODEL_BASE_URL=http://model-gateway:8000/v1
+CONVERSATION_MODEL_NAME=<deployed model name>
+CONVERSATION_MODEL_API_KEY=<optional for a trusted private gateway>
 ```
 
 Then run:
@@ -36,6 +39,10 @@ containerized Open WebUI may join the `single-agent-chat-frontend` network and
 use `http://server:3000/v1`, or reach the loopback-published port through an
 explicit host gateway appropriate to its platform. Do not publish PostgreSQL or
 the unauthenticated SDAR A2A endpoint.
+
+The model URL is mandatory and is fixed when the server starts. The model
+receives bounded conversational context and has no SACS tool, URL, database,
+A2A, MCP, Provider, or shell access. Do not point it at a user-supplied URL.
 
 The default SDAR URL inside Compose is `http://host.docker.internal:9999`.
 When SDAR is another container, attach the server to that trusted private

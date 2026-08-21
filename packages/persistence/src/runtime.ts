@@ -3,6 +3,7 @@ import pg from "pg";
 
 import { createPostgresCheckpointer } from "./checkpoint.js";
 import type { PersistenceConfig } from "./config.js";
+import { ConversationPersistenceRepository } from "./conversation-repository.js";
 import { InteractionPersistenceRepository } from "./interaction-repository.js";
 import { runMigrations } from "./migrations.js";
 import { ChatPersistenceRepository } from "./repository.js";
@@ -12,6 +13,7 @@ const { Pool } = pg;
 export interface PersistenceRuntime {
   readonly repository: ChatPersistenceRepository;
   readonly interactionRepository: InteractionPersistenceRepository;
+  readonly conversationRepository: ConversationPersistenceRepository;
   readonly checkpointer: PostgresSaver;
   readiness(): Promise<boolean>;
   close(): Promise<void>;
@@ -44,6 +46,7 @@ export async function setupPersistence(
         pool,
         config.idempotencyLeaseMs,
       ),
+      conversationRepository: new ConversationPersistenceRepository(pool),
       checkpointer: activeCheckpointer,
       async readiness() {
         try {

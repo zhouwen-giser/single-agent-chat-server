@@ -1,0 +1,53 @@
+{
+  "$id": "https://schemas.sacs.local/v0.3/task-directory.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TaskDirectorySnapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["activeTasks", "recentTerminalTasks"],
+  "properties": {
+    "focusedTaskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "lastReferencedTaskId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "activeTasks": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/task" }
+    },
+    "recentTerminalTasks": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/task" }
+    }
+  },
+  "$defs": {
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bindingId",
+        "taskId",
+        "contextId",
+        "shortId",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "bindingId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "contextId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "shortId": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "status": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "internalPhase": { "type": "string", "maxLength": 256 },
+        "summary": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "terminalAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { createServer } from "node:http";
 
 const project =
   process.env.P13_COMPOSE_PROJECT_NAME ?? `sacs-p13-${process.pid}`;
 if (!/^sacs-p13-[a-z0-9-]+$/u.test(project)) {
   throw new Error("P13_COMPOSE_PROJECT_NAME must use the sacs-p13- prefix");
 }
+
+const modelFixture = createModelReadinessFixture();
+const modelFixturePort = await listen(modelFixture);
 
 const environment = {
   ...process.env,
@@ -19,6 +23,9 @@ const environment = {
   AG_UI_SERVICE_KEY: credential("agui"),
   OPENWEBUI_USER_JWT_SECRET: credential("principal"),
   POSTGRES_PASSWORD: credential("postgres"),
+  CONVERSATION_MODEL_BASE_URL: `http://host.docker.internal:${modelFixturePort}/v1`,
+  CONVERSATION_MODEL_NAME: "compose-readiness-fixture",
+  CONVERSATION_MODEL_API_KEY: "",
 };
 
 let result;
@@ -78,6 +85,7 @@ try {
   };
 } finally {
   dockerCompose(["down", "--volumes", "--remove-orphans"], false);
+  await close(modelFixture);
 }
 
 for (const [kind, args] of [
@@ -140,4 +148,43 @@ function credential(purpose) {
 
 function delay(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+function createModelReadinessFixture() {
+  return createServer((request, response) => {
+    request.resume();
+    response.setHeader("content-type", "application/json");
+    if (request.method !== "POST" || request.url !== "/v1/chat/completions") {
+      response.statusCode = 404;
+      response.end(JSON.stringify({ error: "not_found" }));
+      return;
+    }
+    response.end(
+      JSON.stringify({
+        id: "compose-readiness",
+        choices: [{ message: { role: "assistant", content: "OK" } }],
+      }),
+    );
+  });
+}
+
+function listen(server) {
+  return new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "0.0.0.0", () => {
+      server.off("error", reject);
+      const address = server.address();
+      if (address === null || typeof address === "string") {
+        reject(new Error("Compose model fixture has no TCP address"));
+        return;
+      }
+      resolve(address.port);
+    });
+  });
+}
+
+function close(server) {
+  return new Promise((resolve, reject) => {
+    server.close((error) => (error === undefined ? resolve() : reject(error)));
+  });
 }

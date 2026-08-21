@@ -35,6 +35,15 @@ for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
 }
 
 const productionRoots = ["apps", "packages", "src"];
+const legacySingleTaskApiAllowlist = new Set([
+  "apps/server/src/chat/sdar-agui-runner.ts",
+  "apps/server/src/chat/sdar-chat-runner.ts",
+  "packages/chat-runtime/src/task-coordinator.ts",
+  "packages/interaction-query/src/index.ts",
+  "packages/persistence/src/agui-task-coordinator-repository.ts",
+  "packages/persistence/src/interaction-repository.ts",
+  "packages/persistence/src/repository.ts",
+]);
 const files = (
   await Promise.all(
     productionRoots.map((directory) => walk(join(root, directory))),
@@ -69,9 +78,12 @@ for (const file of files) {
   }
   if (
     /\bfetch\s*\(/u.test(content) &&
-    !name.startsWith("packages/sdar-a2a-adapter/")
+    !name.startsWith("packages/sdar-a2a-adapter/") &&
+    !name.startsWith("packages/conversation-model/")
   ) {
-    violations.push(`${name}: network fetch outside the isolated A2A adapter`);
+    violations.push(
+      `${name}: network fetch outside the isolated A2A or conversation-model adapter`,
+    );
   }
   if (
     /from ["']node:child_process["']/u.test(content) ||
@@ -79,8 +91,35 @@ for (const file of files) {
   ) {
     violations.push(`${name}: forbidden process or network client import`);
   }
-  if (/["'`]\/(?:admin|internal|management|mcp)(?:\/|["'`])/iu.test(content)) {
+  if (
+    /["'`]\/(?:admin|internal|management|control|mcp|providers?|resources?|actions?)(?:\/|["'`])/iu.test(
+      content,
+    )
+  ) {
     violations.push(`${name}: forbidden management or MCP endpoint path`);
+  }
+  if (
+    /(?:Agent|Sdar)(?:Mesh|Registry|Router)|(?:Mesh|Registry|Router)(?:Agent|Sdar)/u.test(
+      content,
+    )
+  ) {
+    violations.push(`${name}: forbidden multi-SDAR discovery or routing type`);
+  }
+  if (
+    /from ["'][^"']*(?:test-support|test-fixtures|tests\/fixtures)[^"']*["']/u.test(
+      content,
+    )
+  ) {
+    violations.push(`${name}: production import from a test fixture`);
+  }
+  if (/\blocalFallbackChatModel\b/u.test(content)) {
+    violations.push(`${name}: production use of a local chat fallback`);
+  }
+  if (
+    /\bfindActiveTask(?:ForChat)?\b/u.test(content) &&
+    !legacySingleTaskApiAllowlist.has(name)
+  ) {
+    violations.push(`${name}: new use of a legacy implicit single-Task API`);
   }
   if (
     /process\.env\.(?:SDAR|MCP)|process\.env\[\s*["'](?:SDAR|MCP)/u.test(

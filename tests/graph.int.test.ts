@@ -1,10 +1,16 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { graph } from "../src/agent/graph.js";
+import { createSingleAgentChatGraph } from "../src/agent/graph.js";
+import type { StructuredChatModel } from "../src/agent/model.js";
+
+const fixtureModel: StructuredChatModel = {
+  classify: async () => ({ requestKind: "general_chat" }),
+  answer: async () => "fixture response",
+};
 
 describe("LangGraph compiled graph", () => {
   it("preserves input and appends a safe local response", async () => {
-    const result = await graph.invoke({
+    const result = await createSingleAgentChatGraph(fixtureModel).invoke({
       messages: ["hello"],
       utilityRequest: false,
     });

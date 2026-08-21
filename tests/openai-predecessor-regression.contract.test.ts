@@ -12,6 +12,7 @@ import type {
   ChatPersistenceRepository,
   TaskBinding,
 } from "../packages/persistence/src/index.js";
+import type { StructuredChatModel } from "../src/agent/model.js";
 
 const serviceKey = "p10-openai-service-key-at-least-32-characters";
 const jwtSecret = "p10-openwebui-jwt-secret-at-least-32-characters";
@@ -52,6 +53,12 @@ const cancel = jest.fn(() => fragments("cancel_task"));
 const executeQuery = jest.fn(
   async (input: { readonly intent: string }) => `query:${input.intent}`,
 );
+const fixtureModel: StructuredChatModel = {
+  classify: async ({ userText }) => ({
+    requestKind: userText.startsWith("Execute") ? "new_task" : "general_chat",
+  }),
+  answer: async () => "你好，我是单个 SDAR Agent 的测试聊天入口。",
+};
 
 describe("P10 OpenAI/OpenWebUI predecessor regression", () => {
   afterEach(async () => {
@@ -245,6 +252,7 @@ function createServer(): FastifyInstance {
     repository,
     coordinator,
     queryService,
+    model: fixtureModel,
   });
   return buildServer({
     config,

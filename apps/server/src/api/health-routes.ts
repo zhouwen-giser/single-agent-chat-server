@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from "fastify";
 
 export interface HealthRoutesOptions {
   readonly readinessCheck?: () => Promise<boolean>;
+  readonly conversationModelReadinessCheck?: () => Promise<boolean>;
 }
 
 export const registerHealthRoutes: FastifyPluginAsync<
@@ -13,10 +14,24 @@ export const registerHealthRoutes: FastifyPluginAsync<
       options.readinessCheck === undefined
         ? undefined
         : await options.readinessCheck();
-    if (postgres === false) {
+    const conversationModel =
+      options.conversationModelReadinessCheck === undefined
+        ? undefined
+        : await options.conversationModelReadinessCheck();
+    if (postgres === false || conversationModel === false) {
       return reply.code(503).send({
         status: "not_ready",
-        checks: { configuration: "ok", postgres: "unavailable" },
+        checks: {
+          configuration: "ok",
+          ...(postgres === undefined
+            ? {}
+            : { postgres: postgres ? "ok" : "unavailable" }),
+          ...(conversationModel === undefined
+            ? {}
+            : {
+                conversationModel: conversationModel ? "ok" : "unavailable",
+              }),
+        },
       });
     }
     return {
@@ -24,6 +39,7 @@ export const registerHealthRoutes: FastifyPluginAsync<
       checks: {
         configuration: "ok",
         ...(postgres === undefined ? {} : { postgres: "ok" }),
+        ...(conversationModel === undefined ? {} : { conversationModel: "ok" }),
       },
     };
   });

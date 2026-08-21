@@ -2,11 +2,14 @@ import { AIMessage } from "@langchain/core/messages";
 import { StateGraph, type BaseCheckpointSaver } from "@langchain/langgraph";
 
 import { classifyTurn } from "./classification.js";
-import { localFallbackChatModel, type StructuredChatModel } from "./model.js";
+import {
+  unavailableStructuredChatModel,
+  type StructuredChatModel,
+} from "./model.js";
 import { StateAnnotation } from "./state.js";
 
 export function createSingleAgentChatGraph(
-  model: StructuredChatModel = localFallbackChatModel,
+  model: StructuredChatModel = unavailableStructuredChatModel,
   checkpointer?: BaseCheckpointSaver,
 ) {
   const normalizeRequest = async (

@@ -3,8 +3,9 @@
 ## Health and startup
 
 - `/health` proves the process can serve HTTP.
-- `/ready` also checks PostgreSQL. SDAR discovery remains lazy, so a temporary
-  agent outage does not withdraw the otherwise healthy entrance.
+- `/ready` also checks PostgreSQL and the configured conversation model through
+  a cached, bounded probe. SDAR discovery remains lazy, so a temporary agent
+  outage does not withdraw the otherwise healthy entrance.
 - Migrations use a PostgreSQL advisory lock, SHA-256 checksums, and one
   transaction per append-only SQL file.
 - Startup reconciliation expires abandoned idempotency and interaction leases
@@ -13,9 +14,12 @@
 ## Configuration
 
 Required production values are `CHAT_SERVER_SERVICE_KEY`, `AG_UI_SERVICE_KEY`,
-`OPENWEBUI_USER_JWT_SECRET`, `DATABASE_URL`, and `SDAR_A2A_BASE_URL`. Use an
-explicit `SDAR_A2A_ENDPOINT_OVERRIDE` only for a validated but unusable
-container-advertised endpoint. Never derive it from user input.
+`OPENWEBUI_USER_JWT_SECRET`, `DATABASE_URL`, `SDAR_A2A_BASE_URL`,
+`CONVERSATION_MODEL_BASE_URL`, and `CONVERSATION_MODEL_NAME`. The model API key
+may be empty for a trusted private gateway. Use an explicit
+`SDAR_A2A_ENDPOINT_OVERRIDE` only for a validated but unusable
+container-advertised endpoint. Neither endpoint is ever derived from user
+input.
 
 Tune request/body/message/response, polling, connection-pool, and rate limits
 with the documented environment settings in `.env.example`. Browser CORS is
@@ -34,6 +38,8 @@ user, chat, Task, prompt, Artifact, URL, or error-text labels.
 
 - PostgreSQL outage: liveness stays up, readiness becomes 503, and the pool may
   recover without a process restart.
+- Conversation model configuration/outage: liveness stays up, readiness is 503,
+  and chat requests fail safely without regex or fixed-text fallback.
 - SDAR outage: the affected chat request returns a sanitized error; local
   binding and idempotency state remain authoritative.
 - A2A stream interruption/nonterminal end: bounded `getTask()` polling; never

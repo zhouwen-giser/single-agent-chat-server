@@ -29,6 +29,7 @@ export interface BuildServerOptions extends Pick<
   readonly config: ServerConfig;
   readonly logger?: FastifyServerOptions["logger"];
   readonly readinessCheck?: () => Promise<boolean>;
+  readonly conversationModelReadinessCheck?: () => Promise<boolean>;
   readonly telemetry?: SecureTelemetry;
   readonly resolveAgUiThread?: ResolveAgUiThread;
   readonly runAgUi?: AgUiRunHandler;
@@ -117,6 +118,12 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     ...(options.readinessCheck === undefined
       ? {}
       : { readinessCheck: options.readinessCheck }),
+    ...(options.conversationModelReadinessCheck === undefined
+      ? {}
+      : {
+          conversationModelReadinessCheck:
+            options.conversationModelReadinessCheck,
+        }),
   });
   void server.register(registerOpenAiRoutes, {
     prefix: "/v1",
