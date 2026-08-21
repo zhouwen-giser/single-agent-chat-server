@@ -548,6 +548,7 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
         "0004_interaction_gateway.sql",
         "0005_interrupt_resume.sql",
         "0006_durable_agui_runs.sql",
+        "0007_conversation_history.sql",
       ]);
     } finally {
       await rm(directory, { recursive: true, force: true });
