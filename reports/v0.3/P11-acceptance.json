@@ -1,0 +1,66 @@
+{
+  "phase": "P11",
+  "status": "PASSED_PUBLISHED",
+  "observedAt": "2026-08-21T16:34:33.720Z",
+  "acceptance": {
+    "AC-035": {
+      "status": "PASSED",
+      "evidence": [
+        "apps/server/src/chat/conversation-application-service.ts",
+        "apps/server/src/chat/sdar-agui-runner.ts",
+        "tests/agui-conversation.postgres.int.test.ts",
+        "tests/conversation-persistence.postgres.int.test.ts",
+        "tests/ag-ui-api.contract.test.ts"
+      ]
+    },
+    "AC-036": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/interaction-runtime/src/durable-agui-run.ts",
+        "tests/durable-agui-run.postgres.int.test.ts",
+        "tests/agui-multitask-interrupt.postgres.int.test.ts",
+        "tests/ag-ui-resume.contract.test.ts"
+      ]
+    }
+  },
+  "tests": {
+    "unit": { "passed": 99, "failed": 0, "skipped": 0 },
+    "contract": { "passed": 78, "failed": 0, "skipped": 0 },
+    "integration": { "passed": 89, "failed": 0, "skipped": 0 },
+    "agUiP11": { "passed": 35, "failed": 0, "skipped": 0 },
+    "openAiPredecessor": { "passed": 22, "failed": 0, "skipped": 0 },
+    "security": { "passed": 11, "failed": 0, "skipped": 0 },
+    "fixtureE2e": { "passed": 1, "failed": 0, "skipped": 0 },
+    "architectureProductionFiles": 74,
+    "migrationFiles": 9,
+    "build": "PASSED",
+    "license": "PASSED",
+    "secret": "PASSED",
+    "smoke": "PASSED"
+  },
+  "agUiIntegration": {
+    "officialClientVersion": "0.0.57",
+    "sharedApplicationService": true,
+    "officialMessageIdIngest": true,
+    "crossProtocolThread": true,
+    "crossProtocolDeduplication": true,
+    "crossPrincipalIsolation": true,
+    "actualAssistantOutputPersisted": true,
+    "partialOutputMarkedTruncated": true,
+    "messageOnlyFinishes": true,
+    "taskAssociatedMessageRemainsMessage": true,
+    "recoveryUsesRunTaskId": true,
+    "multipleTaskInterrupts": true,
+    "focusChangesInterruptAuthority": false
+  },
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/13",
+    "candidateSha": "e03a8570ea0dd51b97c37ed1fc33c633c6f88ca0",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32503356579",
+    "qualityJob": "96837914040",
+    "containerJob": "96838341355",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
+}

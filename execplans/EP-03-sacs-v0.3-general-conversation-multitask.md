@@ -45,7 +45,7 @@ strict `TASK | MESSAGE` completed-request result.
 - [x] P09: implement trusted A2A fail-closed behavior.
 - [x] P10: integrate durable multi-turn and multi-Task context through the
       shared application service into OpenAI/OpenWebUI.
-- [ ] P11: integrate the same conversation application service into AG-UI.
+- [x] P11: integrate the same conversation application service into AG-UI.
 - [ ] P12: complete security, privacy, observability, and adversarial hardening.
 - [ ] P13: qualify real model, current SDAR, migration, restart, and network boundary.
 - [ ] P14: close docs, container, CI, full gate, evidence, and Ready PR.
@@ -86,6 +86,14 @@ exact local/remote comparison before the next phase begins.
   to its client, but keep TurnDecision, context, Task selection, reference
   updates, and Coordinator dispatch in one protocol-neutral Conversation
   Application Service. This is the only layer that P11 may reuse for AG-UI.
+- 2026-08-21: Reconcile client bindings for the same signed principal and
+  external thread ID onto one internal Thread. Preserve per-protocol envelopes,
+  but reconcile stable message IDs against the shared server-authoritative
+  ledger so repeated cross-protocol history cannot duplicate context.
+- 2026-08-21: Treat an AG-UI Run's optional Task/context as recovery metadata,
+  not as permission to rewrite its completed-result discriminator. Exact
+  `MESSAGE` replay wins over later Task state; `TASK` recovery uses that Run's
+  persisted Task ID rather than Focus.
 
 ## Discoveries
 
@@ -130,6 +138,14 @@ passed 1, and migration/architecture/license/secret/smoke/workflow gates
 passed. Functional SHA `8515f2dde83e470ead695744d9a1f360f0c63bc3`
 passed exact-head CI run `32499909972` (quality `96826950287`, container
 `96827333827`).
+
+P11 authoritative local gate: `pnpm verify:phase11` passed 99 unit, 78
+contract, 89 integration, and build with zero required skip against isolated
+PostgreSQL 16.9. The dedicated official-client/shared-runtime AG-UI gate passed
+35 tests; predecessor OpenAI passed 22, security 11, fixture E2E 1, and all
+migration/architecture/license/secret/smoke gates passed. Functional SHA
+`e03a8570ea0dd51b97c37ed1fc33c633c6f88ca0` passed exact-head CI run
+`32503356579` (quality `96837914040`, container `96838341355`).
 
 ## Outcomes
 
