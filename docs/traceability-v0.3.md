@@ -11,7 +11,7 @@ Status values are evidence-based. `Planned` is not acceptance.
 | AC-007–009 | P03   | migration 0007 and shared conversation repository         | P03 gates; CI run 32478206127                         | Passed                            |
 | AC-010–012 | P04   | bounded context assembler and summarizer                  | P04 gates; CI run 32481037950                         | Passed                            |
 | AC-013–016 | P05   | multi-Task/focus/lease migration and repository           | P05 gates; CI run 32483598648                         | Passed                            |
-| AC-017–021 | P06   | strict TurnDecision, resolver, model-driven routing       | P06 unit/integration/full PostgreSQL gate             | Passed locally; CI pending        |
+| AC-017–021 | P06   | strict TurnDecision, resolver, model-driven routing       | P06 gates; CI run 32486976750                         | Passed                            |
 | AC-022–024 | P07   | explicit multi-Task coordinator                           | P07 contract/concurrency                              | Planned                           |
 | AC-025–029 | P08   | atomic TASK/MESSAGE result and replay                     | P08 PostgreSQL/call-count                             | Contract frozen; behavior planned |
 | AC-030–032 | P09   | trusted A2A and unexpected auth fail-closed               | P09 type/adapter/security                             | Planned                           |
