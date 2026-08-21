@@ -38,6 +38,15 @@ The thin graph runs with the PostgreSQL checkpointer. The user-message ID is
 preserved for idempotency, and a nonempty `X-OpenWebUI-Task` deterministically
 routes utility work locally without A2A.
 
+OpenAI and AG-UI share the protocol-neutral `interaction_request` store. An
+A2A-bound request completes with exactly one durable `TASK` or `MESSAGE`
+result. Repeating a message-only request returns the exact stored assistant
+text without another model, A2A, or Task query. Repeating a Task result first
+reauthorizes the original Task/Context binding and then observes current Task
+state. If an initial stream emits Message text before creating a Task, its
+durable result is the Task while the published Message text remains in the
+conversation transcript.
+
 ### Non-streaming
 
 The response uses `object=chat.completion`, one assistant choice,

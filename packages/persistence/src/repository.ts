@@ -3,7 +3,6 @@ import { createHash, randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 
 import type {
-  IdempotencyClaim,
   JsonValue,
   StartupReconciliation,
   TaskBinding,
@@ -156,7 +155,7 @@ export class ChatPersistenceRepository {
         SELECT task.*
         FROM chat_service.conversation_task_binding task
         JOIN chat_service.chat_thread_binding thread
-          ON thread.thread_id = task.thread_id
+          ON thread.thread_id = task.conversation_thread_id
         WHERE thread.openwebui_chat_id = $1
           AND thread.user_id = $2
           AND task.sdar_task_id = $3
@@ -177,7 +176,7 @@ export class ChatPersistenceRepository {
         SELECT task.*
         FROM chat_service.conversation_task_binding task
         JOIN chat_service.chat_thread_binding thread
-          ON thread.thread_id = task.thread_id
+          ON thread.thread_id = task.conversation_thread_id
         WHERE thread.openwebui_chat_id = $1
           AND thread.user_id = $2
           AND task.terminal_at IS NULL
@@ -202,7 +201,7 @@ export class ChatPersistenceRepository {
         SELECT task.*
         FROM chat_service.conversation_task_binding task
         JOIN chat_service.chat_thread_binding thread
-          ON thread.thread_id = task.thread_id
+          ON thread.thread_id = task.conversation_thread_id
         WHERE thread.openwebui_chat_id = $1
           AND thread.user_id = $2
           AND task.terminal_at IS NOT NULL
@@ -225,7 +224,7 @@ export class ChatPersistenceRepository {
         SELECT count(*)::text AS count
         FROM chat_service.conversation_task_binding task
         JOIN chat_service.chat_thread_binding thread
-          ON thread.thread_id = task.thread_id
+          ON thread.thread_id = task.conversation_thread_id
         WHERE thread.openwebui_chat_id = $1
           AND thread.user_id = $2
           AND task.terminal_at IS NULL
@@ -268,7 +267,7 @@ export class ChatPersistenceRepository {
         SELECT task.conversation_thread_id, task.binding_id
         FROM chat_service.conversation_task_binding task
         JOIN chat_service.chat_thread_binding thread
-          ON thread.thread_id = task.thread_id
+          ON thread.thread_id = task.conversation_thread_id
         WHERE thread.openwebui_chat_id = $1 AND thread.user_id = $2
           AND task.binding_id = $3
         ON CONFLICT (conversation_thread_id)
@@ -293,7 +292,7 @@ export class ChatPersistenceRepository {
           UPDATE chat_service.conversation_task_binding task
           SET last_interacted_at = now(), updated_at = now()
           FROM chat_service.chat_thread_binding thread
-          WHERE thread.thread_id = task.thread_id
+          WHERE thread.thread_id = task.conversation_thread_id
             AND thread.openwebui_chat_id = $1 AND thread.user_id = $2
             AND task.binding_id = $3
           RETURNING task.conversation_thread_id, task.binding_id
@@ -419,139 +418,6 @@ export class ChatPersistenceRepository {
     );
   }
 
-  async claimRequest(input: {
-    readonly idempotencyKey: string;
-    readonly userId: string;
-    readonly openWebUiChatId: string;
-    readonly requestHash: string;
-    readonly leaseOwner: string;
-    readonly leaseMs?: number;
-  }): Promise<IdempotencyClaim> {
-    const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
-    return this.transaction(async (client) => {
-      const inserted = await client.query(
-        `
-          INSERT INTO chat_service.request_idempotency(
-            idempotency_key, user_id, openwebui_chat_id, request_hash,
-            status, lease_owner, lease_until
-          ) VALUES ($1, $2, $3, $4, 'CLAIMED', $5,
-            now() + ($6::bigint * interval '1 millisecond'))
-          ON CONFLICT DO NOTHING
-        `,
-        [
-          input.idempotencyKey,
-          input.userId,
-          input.openWebUiChatId,
-          input.requestHash,
-          input.leaseOwner,
-          leaseMs,
-        ],
-      );
-      if (inserted.rowCount === 1) return { outcome: "acquired" };
-
-      const existing = await client.query<IdempotencyRow>(
-        `
-          SELECT * FROM chat_service.request_idempotency
-          WHERE idempotency_key = $1 AND user_id = $2 AND openwebui_chat_id = $3
-          FOR UPDATE
-        `,
-        [input.idempotencyKey, input.userId, input.openWebUiChatId],
-      );
-      const row = requiredRow(existing.rows, "idempotency claim lookup");
-      if (row.request_hash !== input.requestHash)
-        return { outcome: "conflict" };
-      if (row.status === "COMPLETED" && row.result_task_id !== null) {
-        return { outcome: "replay", resultTaskId: row.result_task_id };
-      }
-      if (row.lease_owner === input.leaseOwner) return { outcome: "acquired" };
-
-      const recovered = await client.query(
-        `
-          UPDATE chat_service.request_idempotency
-          SET lease_owner = $4,
-              lease_until = now() + ($5::bigint * interval '1 millisecond'),
-              updated_at = now()
-          WHERE idempotency_key = $1 AND user_id = $2 AND openwebui_chat_id = $3
-            AND status = 'CLAIMED'
-            AND (lease_until IS NULL OR lease_until <= now())
-        `,
-        [
-          input.idempotencyKey,
-          input.userId,
-          input.openWebUiChatId,
-          input.leaseOwner,
-          leaseMs,
-        ],
-      );
-      return recovered.rowCount === 1
-        ? { outcome: "acquired" }
-        : {
-            outcome: "in_progress",
-            ...(row.lease_until === null
-              ? {}
-              : { leaseUntil: row.lease_until.toISOString() }),
-          };
-    });
-  }
-
-  async completeRequest(input: {
-    readonly idempotencyKey: string;
-    readonly userId: string;
-    readonly openWebUiChatId: string;
-    readonly requestHash: string;
-    readonly leaseOwner: string;
-    readonly resultTaskId: string;
-  }): Promise<void> {
-    const result = await this.pool.query(
-      `
-        UPDATE chat_service.request_idempotency
-        SET status = 'COMPLETED', result_task_id = $6,
-            lease_owner = NULL, lease_until = NULL, updated_at = now()
-        WHERE idempotency_key = $1 AND user_id = $2 AND openwebui_chat_id = $3
-          AND request_hash = $4 AND lease_owner = $5 AND status = 'CLAIMED'
-      `,
-      [
-        input.idempotencyKey,
-        input.userId,
-        input.openWebUiChatId,
-        input.requestHash,
-        input.leaseOwner,
-        input.resultTaskId,
-      ],
-    );
-    if (result.rowCount !== 1) {
-      throw new PersistenceConflictError("Idempotency completion conflict");
-    }
-  }
-
-  async abandonRequestClaim(input: {
-    readonly idempotencyKey: string;
-    readonly userId: string;
-    readonly openWebUiChatId: string;
-    readonly requestHash: string;
-    readonly leaseOwner: string;
-  }): Promise<void> {
-    await this.pool.query(
-      `
-        DELETE FROM chat_service.request_idempotency
-        WHERE idempotency_key = $1
-          AND user_id = $2
-          AND openwebui_chat_id = $3
-          AND request_hash = $4
-          AND lease_owner = $5
-          AND status = 'CLAIMED'
-          AND result_task_id IS NULL
-      `,
-      [
-        input.idempotencyKey,
-        input.userId,
-        input.openWebUiChatId,
-        input.requestHash,
-        input.leaseOwner,
-      ],
-    );
-  }
-
   async recordEvent(input: {
     readonly taskId: string;
     readonly eventKind: string;
@@ -604,7 +470,7 @@ export class ChatPersistenceRepository {
           AND (
             SELECT count(*)
             FROM chat_service.conversation_task_binding AS task
-            WHERE task.thread_id = thread.thread_id
+            WHERE task.conversation_thread_id = thread.thread_id
               AND task.terminal_at IS NULL
           ) < $5
       `,
@@ -635,7 +501,7 @@ export class ChatPersistenceRepository {
             last_interacted_at = now(),
             updated_at = now()
         FROM chat_service.chat_thread_binding AS thread
-        WHERE task.thread_id = thread.thread_id
+        WHERE task.conversation_thread_id = thread.thread_id
           AND thread.openwebui_chat_id = $1
           AND thread.user_id = $2
           AND task.binding_id = $3
@@ -663,7 +529,7 @@ export class ChatPersistenceRepository {
             interaction_lease_until = NULL,
             updated_at = now()
         FROM chat_service.chat_thread_binding AS thread
-        WHERE task.thread_id = thread.thread_id
+        WHERE task.conversation_thread_id = thread.thread_id
           AND thread.openwebui_chat_id = $1 AND thread.user_id = $2
           AND task.binding_id = $3 AND task.interaction_lease_owner = $4
       `,
@@ -756,7 +622,8 @@ interface ThreadRow {
 
 interface TaskRow {
   readonly binding_id: string;
-  readonly thread_id: string;
+  readonly thread_id: string | null;
+  readonly conversation_thread_id: string;
   readonly sdar_task_id: string;
   readonly sdar_context_id: string;
   readonly short_id: string;
@@ -771,14 +638,6 @@ interface TaskRow {
   readonly version: string | number;
 }
 
-interface IdempotencyRow {
-  readonly request_hash: string;
-  readonly result_task_id: string | null;
-  readonly status: "CLAIMED" | "COMPLETED";
-  readonly lease_owner: string | null;
-  readonly lease_until: Date | null;
-}
-
 const mapThread = (row: ThreadRow): ThreadBinding => ({
   threadId: row.thread_id,
   openWebUiChatId: row.openwebui_chat_id,
@@ -788,7 +647,7 @@ const mapThread = (row: ThreadRow): ThreadBinding => ({
 
 const mapTask = (row: TaskRow): TaskBinding => ({
   bindingId: row.binding_id,
-  threadId: row.thread_id,
+  threadId: row.conversation_thread_id,
   sdarTaskId: row.sdar_task_id,
   sdarContextId: row.sdar_context_id,
   shortId: row.short_id,

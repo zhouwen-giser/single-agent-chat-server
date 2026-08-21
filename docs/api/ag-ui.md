@@ -56,10 +56,13 @@ different Task in the same Thread.
 
 ## Durable Run and reconnect
 
-A non-Resume request claims `(principal, internal thread, runId)` before
-execution. Reusing the same `runId` with identical validated input replays the
-durable result or queries its bound Task. Reusing it with changed input produces
-`RUN_ERROR` with `run_id_conflict` and performs no A2A mutation.
+A non-Resume request claims `(protocol, principal, internal thread, runId)` in
+the same protocol-neutral request store used by OpenAI. Reusing the same
+`runId` with identical validated input replays the exact durable `MESSAGE`
+result without A2A, or reauthorizes and queries its `TASK` result. Reusing it
+with changed input produces `RUN_ERROR` with `run_id_conflict` and performs no
+A2A mutation. Both variants use one shared Coordinator repository adapter;
+AG-UI does not maintain a second idempotency implementation.
 
 When a Run creates a Task, SACS uses the stable A2A message ID
 `${runId}:task`, persists the Task/context binding, and records it on the Run.

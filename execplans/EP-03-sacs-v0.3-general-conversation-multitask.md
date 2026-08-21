@@ -41,7 +41,8 @@ strict `TASK | MESSAGE` completed-request result.
       reference updates, and safe model-driven routing.
 - [x] P07: harden explicit multi-task coordination, Task identity, bounded
       optimistic merge, and concurrency contracts.
-- [ ] P08-P09: implement request-result union and trusted A2A fail-closed behavior.
+- [x] P08: implement atomic `TASK | MESSAGE` result persistence and exact replay.
+- [ ] P09: implement trusted A2A fail-closed behavior.
 - [ ] P10-P11: integrate the shared application service with OpenAI and AG-UI.
 - [ ] P12: complete security, privacy, observability, and adversarial hardening.
 - [ ] P13: qualify real model, current SDAR, migration, restart, and network boundary.
@@ -71,6 +72,10 @@ exact local/remote comparison before the next phase begins.
 - 2026-08-21: Existing-Task Coordinator operations accept only an explicit full
   Task ID. A mutation lease is scoped to its binding; every A2A Task result is
   checked against persisted Task and Context identity before any state change.
+- 2026-08-21: Use `interaction_request` as the single protocol-neutral
+  idempotency boundary for OpenAI and AG-UI. Complete status and the normalized
+  `TASK | MESSAGE` payload atomically; replay Message text without consulting a
+  changed Task, while Task replay must reauthorize the original Task/Context.
 
 ## Discoveries
 

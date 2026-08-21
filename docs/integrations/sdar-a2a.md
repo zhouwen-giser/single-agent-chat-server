@@ -46,12 +46,15 @@ The production server creates the SDK client lazily on the first SDAR-bound
 turn. PostgreSQL readiness and utility/local chat remain available when SDAR is
 temporarily unreachable; a failed discovery is not cached permanently.
 
-New-task submission claims the Open WebUI user-message ID before calling
-`sendMessageStream`. The first published Task/status/artifact event persists
-`taskId` and `contextId`, completes the idempotency record, and authorizes later
-status recovery only for the same signed user and Chat ID. Exact repeated
-events are cached and suppressed from progress streaming, while an explicit
-status query always renders its current authorized snapshot.
+New-task submission claims the protocol-neutral northbound request key before
+calling `sendMessageStream`. Completion stores exactly one normalized result.
+A Task result contains its `taskId` and `contextId`; a Message-only result
+contains the bounded Agent Message and exact rendered assistant text. Replaying
+the latter performs no A2A or `getTask` call. If a stream emits Message
+fragments before a Task appears, the fragments are still published and stored
+but the final request result is the Task. Exact repeated Task events are cached
+and suppressed from progress streaming, while an explicit status query always
+renders its current authorized snapshot.
 
 Published `status.message` text and `phaseMessage` become Markdown fragments.
 Terminal Artifact text is returned directly and JSON data is rendered in a
@@ -72,6 +75,11 @@ Follow-up uses the existing `taskId` and `contextId` through adapter
 `sendFollowUp`, which maps only to SDK `sendMessage`. Top-level cancellation
 uses adapter `cancelTask` and displays the exact returned Task state without
 inferring lower-level Provider shutdown.
+
+An A2A Follow-up may validly return a Task or a direct Agent Message. A direct
+Message completes the request as `MESSAGE`, retains the related Task identity,
+and is replayed exactly without refreshing a Task whose state may since have
+changed.
 
 The shared Coordinator accepts no implicit current-Task mutation. Follow-up and
 Cancel require an authorized full `taskId`, acquire only that binding's lease,

@@ -20,7 +20,7 @@ import {
   taskRequestId,
 } from "../packages/interaction-runtime/src/index.js";
 import {
-  AgUiTaskCoordinatorRepository,
+  InteractionTaskCoordinatorRepository,
   InteractionPersistenceRepository,
   hashJson,
   runMigrations,
@@ -395,7 +395,7 @@ function coordinator(
   client: SdarA2aClient,
 ): SdarTaskCoordinator {
   return new SdarTaskCoordinator({
-    repository: new AgUiTaskCoordinatorRepository(repository),
+    repository: new InteractionTaskCoordinatorRepository(repository, "ag_ui"),
     getClient: async () => client,
     pollingBudgetMs: 0,
   });

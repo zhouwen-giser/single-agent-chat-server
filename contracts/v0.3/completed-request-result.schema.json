@@ -26,7 +26,83 @@
           "maxLength": 256
         },
         "contextId": { "type": "string", "minLength": 1, "maxLength": 256 },
-        "message": { "type": "object" },
+        "message": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["messageId", "role", "parts"],
+          "properties": {
+            "messageId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "taskId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "contextId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "role": { "const": "AGENT" },
+            "parts": {
+              "type": "array",
+              "maxItems": 64,
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["kind", "mediaType", "text"],
+                    "properties": {
+                      "kind": { "const": "text" },
+                      "mediaType": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "text": { "type": "string", "maxLength": 65536 }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["kind", "mediaType", "data"],
+                    "properties": {
+                      "kind": { "const": "data" },
+                      "mediaType": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "data": {}
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["kind", "mediaType", "url"],
+                    "properties": {
+                      "kind": { "const": "url" },
+                      "mediaType": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "url": {
+                        "type": "string",
+                        "pattern": "^https?://",
+                        "maxLength": 2048
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
         "renderedText": { "type": "string", "maxLength": 65536 }
       }
     }

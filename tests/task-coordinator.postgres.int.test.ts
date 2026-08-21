@@ -11,6 +11,8 @@ import pg from "pg";
 import { SdarTaskCoordinator } from "../packages/chat-runtime/src/index.js";
 import {
   ChatPersistenceRepository,
+  InteractionPersistenceRepository,
+  InteractionTaskCoordinatorRepository,
   runMigrations,
 } from "../packages/persistence/src/index.js";
 import type {
@@ -31,6 +33,14 @@ const describeWithPostgres =
 describeWithPostgres("bounded SDAR task coordination", () => {
   const pool = new Pool({ connectionString, max: 4 });
   const repository = new ChatPersistenceRepository(pool, 60_000);
+  const interactionRepository = new InteractionPersistenceRepository(
+    pool,
+    60_000,
+  );
+  const coordinatorRepository = new InteractionTaskCoordinatorRepository(
+    interactionRepository,
+    "openai",
+  );
 
   beforeAll(async () => {
     const database = await pool.query<{ database_name: string }>(
@@ -45,8 +55,13 @@ describeWithPostgres("bounded SDAR task coordination", () => {
       TRUNCATE TABLE
         chat_service.a2a_event_cache,
         chat_service.request_idempotency,
+        chat_service.interaction_request,
+        chat_service.interaction_run,
         chat_service.conversation_task_binding,
-        chat_service.chat_thread_binding
+        chat_service.client_thread_binding,
+        chat_service.chat_thread_binding,
+        chat_service.conversation_thread,
+        chat_service.principal
       CASCADE
     `);
     await repository.getOrCreateThread({
@@ -62,11 +77,88 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     const client = new FakeClient([
       { kind: "message", message: agentMessage("immediate answer") },
     ]);
-    const output = await collect(coordinator(client).submit(turn()));
+    const runtime = coordinator(client);
+    const output = await collect(runtime.submit(turn()));
+    const [replay, concurrentReplay] = await Promise.all([
+      collect(runtime.submit(turn())),
+      collect(runtime.submit(turn())),
+    ]);
 
     expect(output).toEqual(["immediate answer"]);
+    expect(replay).toEqual(output);
+    expect(concurrentReplay).toEqual(output);
     expect(await repository.listActiveBindings()).toEqual([]);
     expect(client.submitCount).toBe(1);
+    expect(client.getCount).toBe(0);
+    const threadId = await interactionRepository.resolveInternalThreadId({
+      clientType: "openwebui",
+      externalThreadId: "chat-a",
+      principalId: "user-a",
+    });
+    await expect(
+      interactionRepository.findRequestResult({
+        protocol: "openai",
+        externalRequestId: "message-a",
+        principalId: "user-a",
+        threadId,
+      }),
+    ).resolves.toMatchObject({
+      kind: "message",
+      messageId: "agent-message",
+      renderedText: "immediate answer",
+    });
+  });
+
+  it("keeps TASK precedence when a stream publishes Message before Task", async () => {
+    const client = new FakeClient(
+      [
+        { kind: "message", message: agentMessage("preparing") },
+        { kind: "task", task: task("WORKING", "task created") },
+      ],
+      [task("WORKING", "current task")],
+    );
+    const runtime = coordinator(client);
+
+    await collect(runtime.submit(turn()));
+    await collect(runtime.submit(turn()));
+
+    const threadId = await interactionRepository.resolveInternalThreadId({
+      clientType: "openwebui",
+      externalThreadId: "chat-a",
+      principalId: "user-a",
+    });
+    await expect(
+      interactionRepository.findRequestResult({
+        protocol: "openai",
+        externalRequestId: "message-a",
+        principalId: "user-a",
+        threadId,
+      }),
+    ).resolves.toEqual({
+      kind: "task",
+      taskId: "task-a",
+      contextId: "context-a",
+    });
+    expect(client.submitCount).toBe(1);
+    expect(client.getCount).toBe(1);
+  });
+
+  it("does not complete a request when the stream has no valid result", async () => {
+    const client = new FakeClient([]);
+
+    await expect(collect(coordinator(client).submit(turn()))).rejects.toThrow(
+      "before publishing a Task binding",
+    );
+
+    const stored = await pool.query<{
+      readonly status: string;
+      readonly result_kind: string | null;
+    }>(
+      `SELECT status, result_kind
+       FROM chat_service.interaction_request
+       WHERE protocol = 'openai' AND external_request_id = 'message-a'`,
+    );
+    expect(stored.rows[0]).toEqual({ status: "CLAIMED", result_kind: null });
   });
 
   it("streams Task status.message and phaseMessage as conversational deltas", async () => {
@@ -418,6 +510,23 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     expect(client.followUps).toHaveLength(1);
   });
 
+  it("replays a direct Follow-up Message exactly without getTask", async () => {
+    await seedBinding("INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+    });
+    const client = new DirectMessageFollowUpClient("input accepted directly");
+    const runtime = coordinator(client);
+    const input = { ...turn(), action: "provide_input" as const };
+
+    const first = await collect(runtime.followUp(input));
+    const replay = await collect(runtime.followUp(input));
+
+    expect(first).toEqual(["input accepted directly"]);
+    expect(replay).toEqual(first);
+    expect(client.followUps).toHaveLength(1);
+    expect(client.getCount).toBe(0);
+  });
+
   it("does not repeat the same top-level cancellation", async () => {
     await seedBinding("WORKING");
     const client = new InteractiveClient(task("CANCELED", "canceled"));
@@ -722,7 +831,7 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     > = {},
   ): SdarTaskCoordinator {
     return new SdarTaskCoordinator({
-      repository,
+      repository: coordinatorRepository,
       getClient: async () => client,
       pollingBudgetMs: 0,
       ...overrides,
@@ -815,6 +924,29 @@ class InteractiveClient extends FakeClient {
   override async cancelTask(): Promise<NormalizedTask> {
     this.cancelCount += 1;
     return this.returnedTask;
+  }
+}
+
+class DirectMessageFollowUpClient extends FakeClient {
+  readonly followUps: FollowUpInput[] = [];
+
+  constructor(private readonly text: string) {
+    super([]);
+  }
+
+  override async sendFollowUp(
+    input: FollowUpInput,
+  ): Promise<NormalizedSendResult> {
+    this.followUps.push(input);
+    return {
+      kind: "message",
+      message: {
+        ...agentMessage(this.text),
+        messageId: "follow-up-message",
+        taskId: input.taskId,
+        contextId: input.contextId,
+      },
+    };
   }
 }
 

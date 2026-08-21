@@ -74,8 +74,10 @@ model for business routing, create an SDAR Task, or change Focus.
   summary, or the sole active Task. Ambiguous mutations stop locally and emit a
   content-free `ambiguous_task_reference` counter; untargeted status renders
   the complete active directory.
-- `packages/request-result`: strict completed-result union; P08 adds persistence
-  and replay.
+- `packages/request-result`: strict completed-result union. A completed request
+  contains exactly one bounded `TASK` or `MESSAGE` result. `MESSAGE` parts are
+  normalized text, data, or HTTP(S) URL values; opaque SDK objects and raw
+  protocol payloads are rejected.
 - `packages/chat-runtime`: shared explicit multi-Task coordinator.
   Follow-up and Cancel require a full authorized `taskId`; status refresh also
   targets one Task, while `listTaskStatuses` is read-only. Mutations lease only
@@ -86,3 +88,20 @@ model for business routing, create an SDAR Task, or change Focus.
 
 OpenAI and AG-UI adapters must not copy any conversation, selector, focus,
 authorization, coordinator, or request-result implementation.
+
+## Completed request results
+
+Both northbound protocols use the same `interaction_request` repository and
+the same `InteractionTaskCoordinatorRepository`. Completion writes the request
+state, normalized result, rendered assistant text, and result hash in one
+database transaction. PostgreSQL constraints reject a completed row with no
+result, both result variants, or an incomplete variant.
+
+A completed `MESSAGE` replays the exact stored rendered text without calling
+the model, A2A, or `getTask`. A completed `TASK` first reauthorizes the stored
+principal/thread/Task/Context tuple and may then refresh the Task through
+`getTask`. If an initial A2A stream publishes Message fragments and later
+creates a Task, the durable result is `TASK`; the earlier fragments remain
+observable conversation events. A stream that ends without either a valid
+Agent Message or Task remains claimed for bounded recovery rather than
+inventing a result.

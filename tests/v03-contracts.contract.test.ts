@@ -206,6 +206,26 @@ describe("SACS v0.3 frozen domain contracts", () => {
         renderedText: "conflict",
       },
       { kind: "message", messageId: "message-1", renderedText: "missing" },
+      {
+        ...messageResult,
+        message: {
+          ...messageResult.message,
+          parts: [{ kind: "raw", mediaType: "application/octet-stream" }],
+        },
+      },
+      {
+        ...messageResult,
+        message: {
+          ...messageResult.message,
+          parts: [
+            {
+              kind: "text",
+              mediaType: "text/plain",
+              text: "x".repeat(65_537),
+            },
+          ],
+        },
+      },
     ]) {
       expectBothInvalid(
         invalid,

@@ -3,6 +3,10 @@ import { createHash, randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 
 import {
+  parseCompletedRequestResult,
+  type CompletedRequestResult,
+} from "../../request-result/src/index.js";
+import {
   PersistenceAuthorizationError,
   PersistenceConflictError,
 } from "./repository.js";
@@ -94,6 +98,33 @@ export class InteractionPersistenceRepository {
         requiredRow(inserted.rows, "client thread insert"),
       );
     });
+  }
+
+  async resolveInternalThreadId(input: {
+    readonly clientType: ClientType;
+    readonly externalThreadId: string;
+    readonly principalId: string;
+  }): Promise<string> {
+    const result = await this.pool.query<{
+      readonly internal_thread_id: string;
+    }>(
+      `SELECT binding.internal_thread_id
+       FROM chat_service.client_thread_binding binding
+       JOIN chat_service.conversation_thread thread
+         ON thread.thread_id = binding.internal_thread_id
+       WHERE binding.client_type = $1
+         AND binding.external_thread_id = $2
+         AND binding.principal_id = $3
+         AND thread.principal_id = $3`,
+      [input.clientType, input.externalThreadId, input.principalId],
+    );
+    const row = result.rows[0];
+    if (row === undefined) {
+      throw new PersistenceAuthorizationError(
+        "Client Thread is not authorized for principal",
+      );
+    }
+    return row.internal_thread_id;
   }
 
   async createTaskBinding(input: {
@@ -700,9 +731,7 @@ export class InteractionPersistenceRepository {
       if (row.status === "COMPLETED") {
         return {
           outcome: "replay",
-          ...(row.result_task_id === null
-            ? {}
-            : { resultTaskId: row.result_task_id }),
+          result: mapCompletedRequestResult(row),
         };
       }
       const recovered = await client.query(
@@ -726,22 +755,21 @@ export class InteractionPersistenceRepository {
     readonly requestId: string;
     readonly principalId: string;
     readonly leaseOwner: string;
-    readonly resultTaskId?: string;
+    readonly result: CompletedRequestResult;
   }): Promise<void> {
+    const resultValue = requestResultColumns(input.result);
     const result = await this.pool.query(
       `
         UPDATE chat_service.interaction_request
         SET status = 'COMPLETED', lease_owner = NULL, lease_until = NULL,
-            result_task_id = $4, updated_at = now()
+            result_kind = $4, result_task_id = $5, result_context_id = $6,
+            result_message_id = $7, result_related_task_id = $8,
+            result_message_json = $9, result_rendered_text = $10,
+            result_hash = $11, updated_at = now()
         WHERE request_id = $1 AND principal_id = $2
           AND lease_owner = $3 AND status = 'CLAIMED'
       `,
-      [
-        input.requestId,
-        input.principalId,
-        input.leaseOwner,
-        input.resultTaskId ?? null,
-      ],
+      [input.requestId, input.principalId, input.leaseOwner, ...resultValue],
     );
     if (result.rowCount !== 1) {
       throw new PersistenceConflictError(
@@ -757,13 +785,17 @@ export class InteractionPersistenceRepository {
     readonly threadId: string;
     readonly requestHash: string;
     readonly leaseOwner: string;
-    readonly resultTaskId: string;
+    readonly result: CompletedRequestResult;
   }): Promise<void> {
+    const resultValue = requestResultColumns(input.result);
     const result = await this.pool.query(
       `
         UPDATE chat_service.interaction_request
-        SET status = 'COMPLETED', result_task_id = $7,
-            lease_owner = NULL, lease_until = NULL, updated_at = now()
+        SET status = 'COMPLETED', lease_owner = NULL, lease_until = NULL,
+            result_kind = $7, result_task_id = $8, result_context_id = $9,
+            result_message_id = $10, result_related_task_id = $11,
+            result_message_json = $12, result_rendered_text = $13,
+            result_hash = $14, updated_at = now()
         WHERE protocol = $1 AND external_request_id = $2
           AND principal_id = $3 AND thread_id = $4
           AND request_hash = $5 AND lease_owner = $6
@@ -776,7 +808,7 @@ export class InteractionPersistenceRepository {
         input.threadId,
         input.requestHash,
         input.leaseOwner,
-        input.resultTaskId,
+        ...resultValue,
       ],
     );
     if (result.rowCount !== 1) {
@@ -800,7 +832,7 @@ export class InteractionPersistenceRepository {
         WHERE protocol = $1 AND external_request_id = $2
           AND principal_id = $3 AND thread_id = $4
           AND request_hash = $5 AND lease_owner = $6
-          AND status = 'CLAIMED' AND result_task_id IS NULL
+          AND status = 'CLAIMED' AND result_kind IS NULL
       `,
       [
         input.protocol,
@@ -818,18 +850,17 @@ export class InteractionPersistenceRepository {
     readonly externalRequestId: string;
     readonly principalId: string;
     readonly threadId: string;
-  }): Promise<string | undefined> {
-    const result = await this.pool.query<{
-      readonly result_task_id: string | null;
-    }>(
+  }): Promise<CompletedRequestResult | undefined> {
+    const result = await this.pool.query<InteractionRequestRow>(
       `
-        SELECT request.result_task_id
+        SELECT request.*
         FROM chat_service.interaction_request request
         JOIN chat_service.conversation_thread thread
           ON thread.thread_id = request.thread_id
         WHERE request.protocol = $1 AND request.external_request_id = $2
           AND request.principal_id = $3 AND request.thread_id = $4
           AND thread.principal_id = $3
+          AND request.status = 'COMPLETED'
       `,
       [
         input.protocol,
@@ -838,7 +869,8 @@ export class InteractionPersistenceRepository {
         input.threadId,
       ],
     );
-    return result.rows[0]?.result_task_id ?? undefined;
+    const row = result.rows[0];
+    return row === undefined ? undefined : mapCompletedRequestResult(row);
   }
 
   async startOrGetRun(input: {
@@ -1487,7 +1519,14 @@ interface InteractionRequestRow {
   readonly request_id: string;
   readonly request_hash: string;
   readonly status: "CLAIMED" | "COMPLETED" | "FAILED";
+  readonly result_kind: "TASK" | "MESSAGE" | null;
   readonly result_task_id: string | null;
+  readonly result_context_id: string | null;
+  readonly result_message_id: string | null;
+  readonly result_related_task_id: string | null;
+  readonly result_message_json: JsonValue | null;
+  readonly result_rendered_text: string | null;
+  readonly result_hash: string | null;
 }
 
 interface InteractionRunRow {
@@ -1574,6 +1613,84 @@ function preserveCurrentTaskBinding(
   }
   return (
     Date.parse(incomingTimestamp) < Date.parse(current.lastStatusTimestamp)
+  );
+}
+
+type RequestResultColumns = readonly [
+  resultKind: "TASK" | "MESSAGE",
+  taskIdColumn: string | null,
+  resultContextId: string | null,
+  resultMessageId: string | null,
+  resultRelatedTaskId: string | null,
+  resultMessageJson: string | null,
+  resultRenderedText: string | null,
+  resultHash: string,
+];
+
+function requestResultColumns(
+  value: CompletedRequestResult,
+): RequestResultColumns {
+  const result = parseCompletedRequestResult(value);
+  if (
+    result.kind === "message" &&
+    result.message.messageId !== result.messageId
+  ) {
+    throw new PersistenceConflictError(
+      "Completed Message result changed Message identity",
+    );
+  }
+  const hash = createHash("sha256")
+    .update(JSON.stringify(result))
+    .digest("hex");
+  return result.kind === "task"
+    ? ["TASK", result.taskId, result.contextId, null, null, null, null, hash]
+    : [
+        "MESSAGE",
+        null,
+        result.contextId ?? null,
+        result.messageId,
+        result.relatedTaskId ?? null,
+        JSON.stringify(result.message),
+        result.renderedText,
+        hash,
+      ];
+}
+
+function mapCompletedRequestResult(
+  row: InteractionRequestRow,
+): CompletedRequestResult {
+  if (
+    row.result_kind === "TASK" &&
+    row.result_task_id !== null &&
+    row.result_context_id !== null
+  ) {
+    return parseCompletedRequestResult({
+      kind: "task",
+      taskId: row.result_task_id,
+      contextId: row.result_context_id,
+    });
+  }
+  if (
+    row.result_kind === "MESSAGE" &&
+    row.result_message_id !== null &&
+    row.result_message_json !== null &&
+    row.result_rendered_text !== null
+  ) {
+    return parseCompletedRequestResult({
+      kind: "message",
+      messageId: row.result_message_id,
+      ...(row.result_related_task_id === null
+        ? {}
+        : { relatedTaskId: row.result_related_task_id }),
+      ...(row.result_context_id === null
+        ? {}
+        : { contextId: row.result_context_id }),
+      message: row.result_message_json,
+      renderedText: row.result_rendered_text,
+    });
+  }
+  throw new PersistenceConflictError(
+    "Completed interaction request has no valid result",
   );
 }
 

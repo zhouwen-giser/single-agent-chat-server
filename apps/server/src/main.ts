@@ -13,7 +13,7 @@ import {
   resumeRunToInteractionEvents,
 } from "../../../packages/interaction-runtime/src/index.js";
 import {
-  AgUiTaskCoordinatorRepository,
+  InteractionTaskCoordinatorRepository,
   parsePersistenceConfig,
   setupPersistence,
   type PersistenceRuntime,
@@ -85,8 +85,9 @@ try {
   );
   const assembleContext = contextAssembler.assemble.bind(contextAssembler);
   const agUiCoordinator = new SdarTaskCoordinator({
-    repository: new AgUiTaskCoordinatorRepository(
+    repository: new InteractionTaskCoordinatorRepository(
       activePersistence.interactionRepository,
+      "ag_ui",
     ),
     getClient,
     streamBudgetMs: config.streamBudgetMs,
@@ -151,15 +152,19 @@ try {
       ? runResumeAgUi(context)
       : runGeneralAgUi(context);
   const coordinator = new SdarTaskCoordinator({
-    repository: activePersistence.repository,
+    repository: new InteractionTaskCoordinatorRepository(
+      activePersistence.interactionRepository,
+      "openai",
+    ),
     getClient,
     streamBudgetMs: config.streamBudgetMs,
     pollingBudgetMs: config.pollingBudgetMs,
     pollingIntervalMs: config.pollingIntervalMs,
   });
-  const reconciliation = await persistence.repository.reconcileStartup({
-    leaseOwner: randomUUID(),
-  });
+  const reconciliation =
+    await activePersistence.interactionRepository.reconcileStartup({
+      leaseOwner: randomUUID(),
+    });
   telemetry.setActiveTasks(reconciliation.activeBindings.length);
   const runChat = withActiveTaskRefresh(
     createSdarChatRunner({

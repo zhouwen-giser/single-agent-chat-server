@@ -9,11 +9,11 @@ import {
   boundedPublishedJson,
   safePublishedText,
 } from "../packages/chat-runtime/src/safe-published-content.js";
-import { SdarTaskCoordinator } from "../packages/chat-runtime/src/task-coordinator.js";
-import type {
-  ChatPersistenceRepository,
-  TaskBinding,
-} from "../packages/persistence/src/index.js";
+import {
+  SdarTaskCoordinator,
+  type TaskCoordinatorRepository,
+} from "../packages/chat-runtime/src/task-coordinator.js";
+import type { TaskBinding } from "../packages/persistence/src/index.js";
 import { normalizeTask } from "../packages/sdar-a2a-adapter/src/normalize.js";
 import type {
   NormalizedTask,
@@ -689,7 +689,7 @@ function binding(): TaskBinding {
 
 function repositoryStub(
   overrides: Readonly<Record<string, unknown>> = {},
-): ChatPersistenceRepository & Readonly<Record<string, jest.Mock>> {
+): TaskCoordinatorRepository & Readonly<Record<string, jest.Mock>> {
   const currentBinding = binding();
   return {
     claimRequest: jest.fn(async () => ({ outcome: "acquired" })),
@@ -713,7 +713,7 @@ function repositoryStub(
       }),
     ),
     ...overrides,
-  } as unknown as ChatPersistenceRepository &
+  } as unknown as TaskCoordinatorRepository &
     Readonly<Record<string, jest.Mock>>;
 }
 

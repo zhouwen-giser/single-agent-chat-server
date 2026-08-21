@@ -19,10 +19,12 @@ PostgreSQL stores only local routing, recovery, and deduplication data.
   and optimistic version.
 - `conversation_task_focus` and `conversation_task_reference` use same-thread
   composite foreign keys, so Focus and last reference cannot cross a Thread.
-- `request_idempotency` serializes message submission by key, user, and chat.
-  The request hash prevents reuse with different content; a lease permits
-  recovery after an interrupted process; completed claims replay the original
-  Task identifier.
+- `interaction_request` is the protocol-neutral OpenAI/AG-UI idempotency store.
+  It serializes a request by protocol, principal, Thread, key, and request hash;
+  a lease permits bounded recovery after an interrupted process. A completed
+  row contains exactly one normalized `TASK` or `MESSAGE` result plus a
+  SHA-256 result hash. The older OpenAI-only request API is not used by the
+  production Coordinator.
 - `a2a_event_cache` deduplicates published A2A observations by Task and event
   hash. It is not an event cursor and does not imply Task resubscription.
 - `conversation_message` is the protocol-neutral, server-authoritative user and
@@ -49,7 +51,12 @@ Task, or Evidence records. SDAR remains authoritative for all of them.
   `terminal_at` is set, later stale nonterminal updates cannot clear it or roll
   the persisted status backward.
 - Duplicate same-hash claims are either reported as in progress or replay the
-  completed result. A different hash for the same key is a conflict.
+  exact completed result. A different hash for the same key is a conflict.
+- Request completion and the full result union are committed in one update.
+  Database constraints reject `COMPLETED` without a result, both result kinds,
+  unbounded rendered text, or malformed Message JSON. A `MESSAGE` replay never
+  queries a potentially changed Task; a `TASK` replay is authorized against
+  the original Task and Context before refresh.
 - Older published observations cannot overwrite a newer persisted observation;
   optimistic versions still advance so callers can detect concurrent writes.
 - Startup reconciliation lists every active binding and reclaims expired
@@ -105,7 +112,9 @@ limits, Task-level lease isolation, terminal counting, and v0.2 migration.
 The P07 coordinator suite verifies explicit A/B/C targeting, read-only listing,
 same-Task serialization, cross-Task mutation parallelism, status during another
 Task mutation, Task/Context mismatch rejection, and bounded stale-write merge.
-Phase 8 additionally verifies submission-lease
-serialization/expiry/startup recovery, stale-event rejection, database restart
-recovery in the same production process, and a production service restart
-against the same persisted database.
+The P08 suite verifies atomic `TASK | MESSAGE` completion, exact message-only
+replay without another A2A call, Message-then-Task precedence, direct Follow-up
+Message replay without `getTask`, invalid-result rejection, and representative
+upgrade backfill. It also retains submission-lease serialization/expiry/startup
+recovery, stale-event rejection, database restart recovery in the same
+production process, and service restart against the same persisted database.

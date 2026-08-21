@@ -10,7 +10,7 @@ import pg from "pg";
 
 import { SdarTaskCoordinator } from "../packages/chat-runtime/src/index.js";
 import {
-  AgUiTaskCoordinatorRepository,
+  InteractionTaskCoordinatorRepository,
   InteractionPersistenceRepository,
   runMigrations,
 } from "../packages/persistence/src/index.js";
@@ -89,7 +89,7 @@ describeWithPostgres("P09 persistence authorization", () => {
 
     let clientCreations = 0;
     const coordinator = new SdarTaskCoordinator({
-      repository: new AgUiTaskCoordinatorRepository(repository),
+      repository: new InteractionTaskCoordinatorRepository(repository, "ag_ui"),
       getClient: async () => {
         clientCreations += 1;
         throw new Error("A2A must not be constructed for an unbound Task");

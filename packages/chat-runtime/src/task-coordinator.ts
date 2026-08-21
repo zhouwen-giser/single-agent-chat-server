@@ -16,6 +16,7 @@ import {
   type JsonValue,
   type TaskBinding,
 } from "../../persistence/src/index.js";
+import type { CompletedRequestResult } from "../../request-result/src/index.js";
 import {
   boundedPublishedJson,
   safePublishedText,
@@ -60,11 +61,8 @@ export type TaskCoordinatorObserver = (
   observation: TaskCoordinatorObservation,
 ) => void;
 
-export type TaskCoordinatorRepository = Pick<
+type TaskCoordinatorTaskStore = Pick<
   ChatPersistenceRepository,
-  | "claimRequest"
-  | "completeRequest"
-  | "abandonRequestClaim"
   | "claimTaskSubmissionSlot"
   | "claimTaskInteractionSlot"
   | "releaseTaskSubmissionSlot"
@@ -76,6 +74,38 @@ export type TaskCoordinatorRepository = Pick<
   | "updateTaskBinding"
   | "recordEvent"
 >;
+
+export type TaskCoordinatorRequestClaim =
+  | { readonly outcome: "acquired" }
+  | { readonly outcome: "in_progress"; readonly leaseUntil?: string }
+  | { readonly outcome: "replay"; readonly result: CompletedRequestResult }
+  | { readonly outcome: "conflict" };
+
+export type TaskCoordinatorRepository = TaskCoordinatorTaskStore & {
+  claimRequest(input: {
+    readonly idempotencyKey: string;
+    readonly userId: string;
+    readonly openWebUiChatId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+    readonly leaseMs?: number;
+  }): Promise<TaskCoordinatorRequestClaim>;
+  completeRequest(input: {
+    readonly idempotencyKey: string;
+    readonly userId: string;
+    readonly openWebUiChatId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+    readonly result: CompletedRequestResult;
+  }): Promise<void>;
+  abandonRequestClaim(input: {
+    readonly idempotencyKey: string;
+    readonly userId: string;
+    readonly openWebUiChatId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+  }): Promise<void>;
+};
 
 export interface TaskCoordinatorOptions {
   readonly repository: TaskCoordinatorRepository;
@@ -137,13 +167,20 @@ export class SdarTaskCoordinator {
     }
 
     if (claim.outcome === "replay") {
+      if (claim.result.kind === "message") {
+        yield* replayMessageResult(claim.result, observer);
+        return;
+      }
       const client = await this.options.getClient();
       const binding = await this.options.repository.findAuthorizedTask({
         openWebUiChatId: input.chatId,
         userId: input.userId,
-        sdarTaskId: claim.resultTaskId,
+        sdarTaskId: claim.result.taskId,
       });
-      if (binding === undefined) {
+      if (
+        binding === undefined ||
+        binding.sdarContextId !== claim.result.contextId
+      ) {
         throw new Error("Idempotency replay has no authorized Task binding");
       }
       const task = await client.getTask(binding.sdarTaskId, {
@@ -176,8 +213,10 @@ export class SdarTaskCoordinator {
       const client = await this.options.getClient();
       let binding: TaskBinding | undefined;
       let latestState: NormalizedTaskState | undefined;
-      let sawMessage = false;
+      let latestMessageResult: CompletedRequestResult | undefined;
+      const bufferedUnboundFragments: string[] = [];
       let completedClaim = false;
+      let streamEndedNormally = false;
       const streamController = new AbortController();
       const streamTimer = setTimeout(
         () => streamController.abort(new Error("chat stream budget elapsed")),
@@ -199,7 +238,17 @@ export class SdarTaskCoordinator {
           const observed = await this.observeEvent(event, input, binding);
           binding = observed.binding ?? binding;
           latestState = eventState(event) ?? latestState;
-          sawMessage ||= event.kind === "message";
+          if (
+            event.kind === "message" &&
+            event.message.role === "AGENT" &&
+            observed.fragments.length > 0
+          ) {
+            bufferedUnboundFragments.push(...observed.fragments);
+            latestMessageResult = messageRequestResult(
+              event.message,
+              bufferedUnboundFragments,
+            );
+          }
           if (binding !== undefined && !completedClaim) {
             await this.options.repository.completeRequest({
               idempotencyKey: input.userMessageId,
@@ -207,7 +256,7 @@ export class SdarTaskCoordinator {
               openWebUiChatId: input.chatId,
               requestHash,
               leaseOwner,
-              resultTaskId: binding.sdarTaskId,
+              result: taskRequestResult(binding),
             });
             completedClaim = true;
           }
@@ -232,6 +281,9 @@ export class SdarTaskCoordinator {
               enriched.fragments.length > 0
                 ? enriched.fragments
                 : observed.fragments;
+            for (const fragment of bufferedUnboundFragments.splice(0)) {
+              yield fragment;
+            }
             for (const fragment of boundaryFragments) yield fragment;
             return;
           }
@@ -242,10 +294,15 @@ export class SdarTaskCoordinator {
               fragments: observed.fragments,
             });
           }
+          if (binding === undefined && event.kind === "message") continue;
+          for (const fragment of bufferedUnboundFragments.splice(0)) {
+            yield fragment;
+          }
           for (const fragment of observed.fragments) yield fragment;
           if (latestState !== undefined && isResponseBoundary(latestState))
             return;
         }
+        streamEndedNormally = true;
       } catch (error) {
         if (!signal.aborted) throw error;
       } finally {
@@ -254,7 +311,18 @@ export class SdarTaskCoordinator {
 
       if (binding === undefined) {
         if (callerSignal?.aborted === true) return;
-        if (sawMessage) return;
+        if (streamEndedNormally && latestMessageResult !== undefined) {
+          await this.options.repository.completeRequest({
+            idempotencyKey: input.userMessageId,
+            userId: input.userId,
+            openWebUiChatId: input.chatId,
+            requestHash,
+            leaseOwner,
+            result: latestMessageResult,
+          });
+          for (const fragment of bufferedUnboundFragments) yield fragment;
+          return;
+        }
         throw new Error("SDAR stream ended before publishing a Task binding");
       }
       if (latestState !== undefined && isResponseBoundary(latestState)) return;
@@ -317,8 +385,15 @@ export class SdarTaskCoordinator {
       return;
     }
 
-    const client = await this.options.getClient();
     if (claim.outcome === "replay") {
+      if (claim.result.kind === "message") {
+        assertRelatedMessageResult(claim.result, binding);
+        await this.focusTask(input, binding);
+        yield* replayMessageResult(claim.result, observer);
+        return;
+      }
+      assertTaskResult(claim.result, binding);
+      const client = await this.options.getClient();
       const task = await client.getTask(binding.sdarTaskId, {
         signal: callerSignal,
       });
@@ -336,6 +411,7 @@ export class SdarTaskCoordinator {
       return;
     }
 
+    const client = await this.options.getClient();
     const interactionSlot =
       await this.options.repository.claimTaskInteractionSlot({
         chatId: input.chatId,
@@ -370,17 +446,22 @@ export class SdarTaskCoordinator {
         },
         { signal: callerSignal },
       );
-      await this.options.repository.completeRequest({
-        idempotencyKey: input.userMessageId,
-        userId: input.userId,
-        openWebUiChatId: input.chatId,
-        requestHash,
-        leaseOwner,
-        resultTaskId: binding.sdarTaskId,
-      });
       if (result.kind === "message") {
-        await this.focusTask(input, binding);
         const fragments = renderMessage(result.message);
+        const messageResult = messageRequestResult(
+          result.message,
+          fragments,
+          binding,
+        );
+        await this.options.repository.completeRequest({
+          idempotencyKey: input.userMessageId,
+          userId: input.userId,
+          openWebUiChatId: input.chatId,
+          requestHash,
+          leaseOwner,
+          result: messageResult,
+        });
+        await this.focusTask(input, binding);
         if (fragments.length > 0) {
           observer?.({ source: "stream", value: result, fragments });
         }
@@ -388,6 +469,14 @@ export class SdarTaskCoordinator {
         return;
       }
       assertSameTask(result.task, binding);
+      await this.options.repository.completeRequest({
+        idempotencyKey: input.userMessageId,
+        userId: input.userId,
+        openWebUiChatId: input.chatId,
+        requestHash,
+        leaseOwner,
+        result: taskRequestResult(binding),
+      });
       await this.focusTask(input, binding);
       const observed = await this.observeTask(result.task, binding, true);
       if (observed.publishable) {
@@ -444,6 +533,10 @@ export class SdarTaskCoordinator {
     const client = await this.options.getClient();
     let task: NormalizedTask;
     if (claim.outcome === "replay") {
+      if (claim.result.kind !== "task") {
+        throw new Error("Cancellation replay did not contain a Task result");
+      }
+      assertTaskResult(claim.result, binding);
       task = await client.getTask(binding.sdarTaskId, {
         signal: callerSignal,
       });
@@ -470,13 +563,14 @@ export class SdarTaskCoordinator {
         task = await client.cancelTask(binding.sdarTaskId, {
           signal: callerSignal,
         });
+        assertSameTask(task, binding);
         await this.options.repository.completeRequest({
           idempotencyKey: input.userMessageId,
           userId: input.userId,
           openWebUiChatId: input.chatId,
           requestHash,
           leaseOwner,
-          resultTaskId: binding.sdarTaskId,
+          result: taskRequestResult(binding),
         });
       } finally {
         await this.options.repository.releaseTaskInteractionSlot({
@@ -972,6 +1066,81 @@ function renderMessage(message: NormalizedMessage): string[] {
         )
       : [],
   );
+}
+
+function taskRequestResult(binding: TaskBinding): CompletedRequestResult {
+  return {
+    kind: "task",
+    taskId: binding.sdarTaskId,
+    contextId: binding.sdarContextId,
+  };
+}
+
+function messageRequestResult(
+  message: NormalizedMessage,
+  fragments: readonly string[],
+  relatedTask?: TaskBinding,
+): CompletedRequestResult {
+  const renderedText = fragments.join("");
+  if (renderedText.length > 65_536) {
+    throw new Error("Rendered Message result exceeds the persistence budget");
+  }
+  return {
+    kind: "message",
+    messageId: message.messageId,
+    ...(relatedTask === undefined
+      ? {}
+      : {
+          relatedTaskId: relatedTask.sdarTaskId,
+          contextId: relatedTask.sdarContextId,
+        }),
+    message,
+    renderedText,
+  };
+}
+
+async function* replayMessageResult(
+  result: Extract<CompletedRequestResult, { readonly kind: "message" }>,
+  observer?: TaskCoordinatorObserver,
+): AsyncGenerator<string> {
+  const fragments =
+    result.renderedText.length === 0 ? [] : [result.renderedText];
+  if (fragments.length > 0) {
+    observer?.({
+      source: "stream",
+      value: { kind: "message", message: result.message },
+      fragments,
+    });
+  }
+  for (const fragment of fragments) yield fragment;
+}
+
+function assertTaskResult(
+  result: Extract<CompletedRequestResult, { readonly kind: "task" }>,
+  binding: TaskBinding,
+): void {
+  if (
+    result.taskId !== binding.sdarTaskId ||
+    result.contextId !== binding.sdarContextId
+  ) {
+    throw new Error("Completed request changed Task identity");
+  }
+}
+
+function assertRelatedMessageResult(
+  result: Extract<CompletedRequestResult, { readonly kind: "message" }>,
+  binding: TaskBinding,
+): void {
+  if (
+    result.relatedTaskId !== binding.sdarTaskId ||
+    result.contextId !== binding.sdarContextId ||
+    (result.message.taskId !== undefined &&
+      result.message.taskId !== binding.sdarTaskId) ||
+    (result.message.contextId !== undefined &&
+      result.message.contextId !== binding.sdarContextId)
+  ) {
+    throw new Error("Completed Message result changed Task identity");
+  }
 }
 
 function renderArtifact(artifact: NormalizedArtifact): string[] {

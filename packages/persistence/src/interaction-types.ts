@@ -1,4 +1,5 @@
 import type { JsonValue } from "./types.js";
+import type { CompletedRequestResult } from "../../request-result/src/index.js";
 
 export type InteractionProtocol = "openai" | "ag_ui";
 export type ClientType = "openwebui" | "ag_ui";
@@ -80,5 +81,5 @@ export interface AgentCardSnapshot {
 export type InteractionRequestClaim =
   | { readonly outcome: "acquired"; readonly requestId: string }
   | { readonly outcome: "in_progress" }
-  | { readonly outcome: "replay"; readonly resultTaskId?: string }
+  | { readonly outcome: "replay"; readonly result: CompletedRequestResult }
   | { readonly outcome: "conflict" };

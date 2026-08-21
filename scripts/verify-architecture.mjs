@@ -109,6 +109,11 @@ for (const file of files) {
   if (/\bfindActiveTask(?:ForChat)?\b/u.test(content)) {
     violations.push(`${name}: legacy implicit single-Task API is forbidden`);
   }
+  if (/\bresultTaskId\b/u.test(content)) {
+    violations.push(
+      `${name}: completed requests require a TASK/MESSAGE result`,
+    );
+  }
   if (
     name === "packages/chat-runtime/src/task-coordinator.ts" &&
     (/\btargetTaskId\b/u.test(content) || /async \*status\s*\(/u.test(content))
