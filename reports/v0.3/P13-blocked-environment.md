@@ -27,6 +27,30 @@ PostgreSQL 16.14 is reachable in the isolated
 exact candidate CI run succeeded. Those available services do not substitute
 for the missing real model and SDAR.
 
+## Continuation environment re-audit
+
+At `2026-08-21T18:41:30.877Z`, a second environment audit still found no
+`P13_*`, `CONVERSATION_MODEL_*`, `SDAR_A2A_*`, or `OPENAI_*` variable names.
+The candidate gate therefore continued to fail closed at
+`P13_EXPECTED_SACS_SHA` before making any real request.
+
+The audit did discover an unconfigured loopback A2A endpoint at
+`http://127.0.0.1:10999`. Its public Agent Card advertises A2A 1.0 HTTP+JSON
+streaming and only the effectful `embodied.move` capability, with an explicit
+`confirmation_required` limitation. It was not used as P13 evidence because:
+
+- no operator selected two safe, non-destructive requests for that capability;
+- no genuine model endpoint exists for the required SACS execution;
+- the adjacent SDAR checkout is at `382c7090dfefca7f8792326b315ff6709bcc9956`,
+  while its recorded `origin/main` is
+  `2275bc52759914bc80113358a9083e6f00d59e6d`, and the checkout contains
+  substantial pre-existing tracked and untracked user work;
+- no authoritative evidence ties the running endpoint to a clean, locked SDAR
+  and SMPP source pair.
+
+The upstream checkout was inspected read-only and left untouched. A reachable
+endpoint is not treated as qualified merely because it returns an Agent Card.
+
 ## Evidence
 
 ```text

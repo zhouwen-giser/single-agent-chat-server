@@ -15,6 +15,15 @@ current SDAR, and safe operator-reviewed request configuration documented in
 `P13-blocked-environment.md`. The complete `pnpm verify:v03` command correctly
 stops before tests when that environment is absent.
 
+A continuation audit at `2026-08-21T18:41:30.877Z` confirmed that latest
+`origin/main` remains `0211157e8652cc0ae933a1eea9294cf665b4da38` and is an
+ancestor of the clean SACS candidate. It also found a loopback A2A endpoint,
+but its only advertised capability is effectful movement requiring
+confirmation, and it cannot be tied to a clean, locked current SDAR/SMPP source
+pair. The endpoint was therefore not substituted for the missing P13
+configuration or operator-approved requests. See the P13 report for the exact
+read-only findings.
+
 ## Work completed despite blocker
 
 - Aligned the private product/package, default image tag, Compose, OCI label,

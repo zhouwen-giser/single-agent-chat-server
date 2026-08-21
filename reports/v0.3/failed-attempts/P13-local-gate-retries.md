@@ -26,3 +26,14 @@ then produced image manifest
 `bebdae2d4006cfcb776e7c366699dcacee507c342c0fc3d391848b0938a3202a`.
 
 None of these retries is counted as real-model or real-SDAR evidence.
+
+## Continuation endpoint-discovery attempt
+
+A continuation audit found `http://127.0.0.1:10999` listening and returning an
+A2A 1.0 Agent Card. The card exposes only `embodied.move` with a
+`confirmation_required` limitation. The endpoint was not exercised: no two
+operator-reviewed safe requests were supplied, no genuine model endpoint was
+configured, and the running service could not be tied to a clean locked SDAR
+and SMPP source pair. The nearby SDAR checkout also contains substantial
+pre-existing user changes, which were preserved. This discovery is blocker
+diagnosis only and is not counted as real evidence.
