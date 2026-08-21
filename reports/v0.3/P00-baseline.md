@@ -48,6 +48,15 @@ license, and secret gates. PostgreSQL suites reported 50 skipped tests because
 `TEST_DATABASE_URL` was absent; this is baseline evidence only and does not
 satisfy any v0.3 real/PostgreSQL release gate.
 
+The first exact-head Draft PR run and its failed-job rerun exposed a deterministic
+pre-existing test-fixture time bomb: `interaction-persistence.postgres.int.test.ts`
+created an allegedly open Interrupt with an absolute expiry of
+`2026-08-12T00:00:00.000Z`. Main CI last passed on 2026-08-11, but any real
+PostgreSQL run after that expiry correctly returned no open Interrupt. P00 changes
+only the test fixture to the already-established non-expiring test value
+`2099-01-01T00:00:00.000Z`; production semantics are unchanged. Evidence is
+retained under `reports/v0.3/failed-attempts/P00-expired-interrupt-fixture.md`.
+
 ## GitHub baseline
 
 - Main CI workflow run `31453095580` completed successfully at exact main SHA

@@ -21,8 +21,22 @@
     "contract": { "passed": 57, "failed": 0, "skipped": 0 },
     "security": { "passed": 9, "failed": 0, "skipped": 0 },
     "integration": { "passed": 1, "failed": 0, "skipped": 50 },
-    "fixtureE2e": { "passed": 1, "failed": 0, "skipped": 0 }
+    "fixtureE2e": { "passed": 1, "failed": 0, "skipped": 0 },
+    "postgresRerunAfterFixtureRepair": {
+      "postgres": "16.9-alpine",
+      "passed": 51,
+      "failed": 0,
+      "skipped": 0
+    }
   },
+  "baselineDefects": [
+    {
+      "kind": "EXPIRED_TEST_FIXTURE",
+      "source": "tests/interaction-persistence.postgres.int.test.ts",
+      "productionSemanticsChanged": false,
+      "evidence": "reports/v0.3/failed-attempts/P00-expired-interrupt-fixture.md"
+    }
+  ],
   "requiredReleaseGatesSatisfied": false,
   "publication": "PENDING"
 }

@@ -282,7 +282,7 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
       internalPhase: "awaiting_user_input",
       reason: "sdar.input_required",
       inputRequestId: "input-request-1",
-      expiresAt: "2026-08-12T00:00:00.000Z",
+      expiresAt: "2099-01-01T00:00:00.000Z",
     });
 
     const restartedRepository = interactionRepository();

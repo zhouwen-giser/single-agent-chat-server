@@ -31,6 +31,8 @@ strict `TASK | MESSAGE` completed-request result.
 - [x] 2026-08-21: Refresh and lock SACS, SDAR, and SMPP `origin/main` sources.
 - [x] 2026-08-21: Complete frozen install and authoritative `verify:ci` baseline.
 - [x] 2026-08-21: Create the requested feature branch from exact verified main.
+- [x] 2026-08-21: Diagnose exact-head CI's expired open-Interrupt fixture and
+      replace only its stale absolute expiry with the established 2099 test date.
 - [ ] P00: publish evidence and open the Draft PR.
 - [ ] P01: freeze ADR, contracts, domain types, and architecture gates.
 - [ ] P02: implement the configured OpenAI-compatible conversation model.
@@ -68,6 +70,9 @@ exact local/remote comparison before the next phase begins.
 - Existing SACS `verify` intentionally fails before running when P13 real
   environment variables are absent; the v0.3 gate must preserve that fail-closed
   behavior while adding explicit real-model variables.
+- Main's last green CI ran one day before a hard-coded Interrupt test expiry.
+  Current exact-head PostgreSQL CI correctly treats that row as expired; this is
+  a baseline test-data defect, not a v0.3 production regression.
 
 ## Validation
 

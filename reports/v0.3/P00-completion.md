@@ -13,6 +13,8 @@ Status: `LOCAL_COMPLETE_PUBLICATION_PENDING`
   and the successful authoritative rerun.
 - Created the specified feature branch directly from verified latest main.
 - Created the v0.3 living ExecPlan, Goal state, source lock, and P00 evidence.
+- Repaired a pre-existing absolute-date test fixture that expired after main's
+  last green CI; production Interrupt expiry behavior remains unchanged.
 
 ## Tests
 
@@ -22,6 +24,7 @@ Status: `LOCAL_COMPLETE_PUBLICATION_PENDING`
 | task package validation                               | passed, 46 entries                              |                                                                                       0 |
 | `pnpm install --frozen-lockfile`                      | passed                                          |                                                                                       0 |
 | `pnpm verify:ci` (authoritative loopback-capable run) | passed                                          | 50 PostgreSQL tests, classified environment-only and not accepted as v0.3 gate evidence |
+| PostgreSQL 16.9 `pnpm test:integration`               | passed, 6 suites / 51 tests                     |                                                                                       0 |
 | `pnpm verify`                                         | blocked by missing P13 environment before tests |                                                                          not applicable |
 
 ## Acceptance
