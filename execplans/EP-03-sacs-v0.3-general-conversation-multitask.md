@@ -175,6 +175,15 @@ SDAR variables or operator-reviewed safe requests exist in the execution
 environment, so AC-039 through AC-042 have not been claimed and no fixture is
 substituted.
 
+P14 preparation SHA `630a630cda050e72b9cab1e798b87f4d9d4d7a83`
+aligns package/image/SBOM metadata to 0.3.0, updates final operator and release
+documentation, and adds explicit v0.3 push CI. The complete available local
+`verify:ci`, image, container, Compose, and SBOM gates passed; exact push CI
+`32513481057` and PR CI `32513485570` both passed quality and container jobs.
+Latest `origin/main` `0211157e8652cc0ae933a1eea9294cf665b4da38` is
+already an ancestor. Final P14 evidence and PR Ready remain blocked by the same
+unsatisfied P13 genuine-environment gates.
+
 ## Outcomes
 
 In progress. Completion requires all AC-001 through AC-044, zero required skip,

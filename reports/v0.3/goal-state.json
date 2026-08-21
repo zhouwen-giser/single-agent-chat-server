@@ -27,7 +27,8 @@
     "P10": ["8515f2dde83e470ead695744d9a1f360f0c63bc3"],
     "P11": ["e03a8570ea0dd51b97c37ed1fc33c633c6f88ca0"],
     "P12": ["928a56e7b9f77bb30dc7bd93a30787d79b65129c"],
-    "P13": ["3a3abbd983db0480f668ce674759210915085198"]
+    "P13": ["3a3abbd983db0480f668ce674759210915085198"],
+    "P14_PREPARATION": ["630a630cda050e72b9cab1e798b87f4d9d4d7a83"]
   },
   "requiredGates": {
     "baseline": "PASSED",
