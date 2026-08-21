@@ -8,7 +8,7 @@ Status values are evidence-based. `Planned` is not acceptance.
 | AC-002     | P00   | protected feature branch                                  | Draft PR #12 and P00 publication                      | Passed                            |
 | AC-003     | P01   | ADR 0003; conversation/context/directory/result contracts | contract suite, architecture gate, CI run 32474106024 | Passed                            |
 | AC-004–006 | P02   | configured fixed model adapter/readiness/no fallback      | P02 gates; CI run 32476742719                         | Passed                            |
-| AC-007–009 | P03   | migration 0007 and shared conversation repository         | P03 PostgreSQL/upgrade/restart                        | Passed locally; CI pending        |
+| AC-007–009 | P03   | migration 0007 and shared conversation repository         | P03 gates; CI run 32478206127                         | Passed                            |
 | AC-010–012 | P04   | bounded context assembler and summarizer                  | P04 unit/PostgreSQL                                   | Planned                           |
 | AC-013–016 | P05   | multi-Task/focus/lease migration and repository           | P05 migration/PostgreSQL                              | Planned                           |
 | AC-017–021 | P06   | strict TurnDecision and deterministic resolver            | P01 strict schema passed; P06 resolver tests pending  | AC-017 contract passed            |

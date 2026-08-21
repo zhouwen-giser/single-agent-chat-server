@@ -1,12 +1,15 @@
 # P03 completion
 
-Status: `PASSED_LOCAL`
+Status: `PASSED_PUBLISHED`
 
 ## Identity
 
 - Phase: P03
 - Start SHA: `61b43cfe33998d281560ab9f6f7704831c422027`
 - Timestamp UTC: `2026-08-21T11:36:57.666Z`
+- Published candidate SHA: `0cb938b72101a0b550c7a5a0eeca1a4fef315da2`
+- Exact-head CI: run `32478206127`; quality `96758849400`; container
+  `96759157656`; all passed.
 
 ## Scope completed
 

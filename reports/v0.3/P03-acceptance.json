@@ -1,10 +1,10 @@
 {
   "phase": "P03",
-  "status": "PASSED_LOCAL",
-  "observedAt": "2026-08-21T11:36:57.666Z",
+  "status": "PASSED_PUBLISHED",
+  "observedAt": "2026-08-21T11:42:24.777Z",
   "acceptance": {
     "AC-007": {
-      "status": "PASSED_LOCAL",
+      "status": "PASSED",
       "evidence": [
         "migrations/0007_conversation_history.sql",
         "packages/persistence/src/conversation-repository.ts",
@@ -12,14 +12,14 @@
       ]
     },
     "AC-008": {
-      "status": "PASSED_LOCAL",
+      "status": "PASSED",
       "evidence": [
         "packages/persistence/src/conversation-repository.ts",
         "tests/conversation-persistence.postgres.int.test.ts"
       ]
     },
     "AC-009": {
-      "status": "PASSED_LOCAL",
+      "status": "PASSED",
       "evidence": "tests/conversation-persistence.postgres.int.test.ts"
     }
   },
@@ -43,7 +43,11 @@
     "v02Upgrade": "PASSED"
   },
   "publication": {
-    "status": "PENDING",
-    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/12"
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/12",
+    "candidateSha": "0cb938b72101a0b550c7a5a0eeca1a4fef315da2",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32478206127",
+    "quality": "PASSED",
+    "container": "PASSED"
   }
 }
