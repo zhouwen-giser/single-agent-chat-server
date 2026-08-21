@@ -23,6 +23,7 @@ import {
   parseConversationModelConfig,
 } from "../../../packages/conversation-model/src/index.js";
 import {
+  ClientHistoryImporter,
   ConversationContextAssembler,
   parseConversationContextBudget,
 } from "../../../packages/conversation-context/src/index.js";
@@ -84,6 +85,9 @@ try {
     telemetry,
   );
   const assembleContext = contextAssembler.assemble.bind(contextAssembler);
+  const historyImporter = new ClientHistoryImporter(
+    activePersistence.conversationRepository,
+  );
   const agUiCoordinator = new SdarTaskCoordinator({
     repository: new InteractionTaskCoordinatorRepository(
       activePersistence.interactionRepository,
@@ -173,6 +177,7 @@ try {
       coordinator,
       model: chatModel,
       assembleContext,
+      importHistory: historyImporter.import.bind(historyImporter),
       onClassificationError: (error) => {
         if (error === "ambiguous_task_reference") {
           telemetry.recordAmbiguousTaskReference();
@@ -210,6 +215,12 @@ try {
     runAgUi,
     checkpointer: activePersistence.checkpointer,
     runChat,
+    persistAssistantMessage: async (input) => {
+      await activePersistence.conversationRepository.appendAssistantMessage({
+        ...input,
+        protocol: "openai",
+      });
+    },
   });
   server.addHook("onClose", async () => activePersistence.close());
   installGracefulShutdown(server);

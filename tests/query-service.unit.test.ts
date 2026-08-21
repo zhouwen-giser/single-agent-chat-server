@@ -263,6 +263,7 @@ describe("deterministic interaction queries", () => {
 
     const result = await runner({
       userText: "列出这个会话的任务",
+      clientMessages: [{ role: "user", contentText: "列出这个会话的任务" }],
       identity: {
         userId: "principal-1",
         role: "user",

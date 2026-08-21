@@ -184,6 +184,29 @@ for (const file of files) {
     }
   }
 }
+
+const openAiRoute = await readFile(
+  join(root, "apps/server/src/api/openai-routes.ts"),
+  "utf8",
+);
+if (
+  /createSingleAgentChatGraph|classifyTurn|SdarTaskCoordinator/u.test(
+    openAiRoute,
+  )
+) {
+  violations.push(
+    "apps/server/src/api/openai-routes.ts: OpenAI adapter bypasses ConversationApplicationService",
+  );
+}
+const openAiRunner = await readFile(
+  join(root, "apps/server/src/chat/sdar-chat-runner.ts"),
+  "utf8",
+);
+if (!/ConversationApplicationService/u.test(openAiRunner)) {
+  violations.push(
+    "apps/server/src/chat/sdar-chat-runner.ts: shared ConversationApplicationService is required",
+  );
+}
 if (violations.length > 0) {
   throw new Error(`Architecture gate failed:\n${violations.join("\n")}`);
 }

@@ -56,6 +56,12 @@ model for business routing, create an SDAR Task, or change Focus.
 
 ## Package boundaries
 
+- `apps/server/src/chat/conversation-application-service.ts`: the shared
+  conversation application boundary. It owns context preparation, the thin
+  graph invocation, deterministic Task resolution/reference updates, and
+  explicit Coordinator dispatch. Northbound runners translate protocol
+  envelopes and render results; they do not classify or route independently.
+
 - `packages/conversation-model`: model port, strict TurnDecision contracts, and
   fixed OpenAI-compatible client with bounded timeout/retry/readiness. It has no
   tool surface and accepts no request-level endpoint.

@@ -161,6 +161,7 @@ function runnerFixture(input: {
       sequence += 1;
       return runner({
         userText,
+        clientMessages: [{ role: "user", contentText: userText }],
         identity: {
           userId: "principal-p06",
           role: "user",

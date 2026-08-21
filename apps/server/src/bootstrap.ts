@@ -24,7 +24,12 @@ import { registerCorsPolicy } from "./security/cors.js";
 
 export interface BuildServerOptions extends Pick<
   OpenAiRoutesOptions,
-  "now" | "nextId" | "runChat" | "resolveChatThread" | "checkpointer"
+  | "now"
+  | "nextId"
+  | "runChat"
+  | "resolveChatThread"
+  | "checkpointer"
+  | "persistAssistantMessage"
 > {
   readonly config: ServerConfig;
   readonly logger?: FastifyServerOptions["logger"];
@@ -134,6 +139,9 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     ...(options.now === undefined ? {} : { now: options.now }),
     ...(options.nextId === undefined ? {} : { nextId: options.nextId }),
     ...(options.runChat === undefined ? {} : { runChat: options.runChat }),
+    ...(options.persistAssistantMessage === undefined
+      ? {}
+      : { persistAssistantMessage: options.persistAssistantMessage }),
     ...(options.checkpointer === undefined
       ? {}
       : { checkpointer: options.checkpointer }),

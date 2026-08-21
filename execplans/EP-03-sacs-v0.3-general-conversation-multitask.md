@@ -43,7 +43,8 @@ strict `TASK | MESSAGE` completed-request result.
       optimistic merge, and concurrency contracts.
 - [x] P08: implement atomic `TASK | MESSAGE` result persistence and exact replay.
 - [x] P09: implement trusted A2A fail-closed behavior.
-- [ ] P10-P11: integrate the shared application service with OpenAI and AG-UI.
+- [ ] P10-P11: integrate the shared application service with OpenAI and AG-UI
+      (P10 OpenAI path implemented; publication pending).
 - [ ] P12: complete security, privacy, observability, and adversarial hardening.
 - [ ] P13: qualify real model, current SDAR, migration, restart, and network boundary.
 - [ ] P14: close docs, container, CI, full gate, evidence, and Ready PR.
@@ -80,6 +81,10 @@ exact local/remote comparison before the next phase begins.
   `TASK_STATE_AUTH_REQUIRED` as a southbound deployment mismatch. The latter
   throws before Coordinator observation and is counted without attributes;
   northbound keys, JWTs, rate limits, CORS, and Task authorization are unchanged.
+- 2026-08-21: Keep OpenAI transport responsible for the text actually emitted
+  to its client, but keep TurnDecision, context, Task selection, reference
+  updates, and Coordinator dispatch in one protocol-neutral Conversation
+  Application Service. This is the only layer that P11 may reuse for AG-UI.
 
 ## Discoveries
 
