@@ -1,0 +1,62 @@
+{
+  "phase": "P10",
+  "status": "PASSED_PUBLISHED",
+  "observedAt": "2026-08-21T15:55:13.224Z",
+  "acceptance": {
+    "AC-033": {
+      "status": "PASSED",
+      "evidence": [
+        "apps/server/src/chat/conversation-application-service.ts",
+        "tests/openai-conversation.postgres.int.test.ts",
+        "tests/openai-api.contract.test.ts",
+        "tests/task-resolution.int.test.ts"
+      ]
+    },
+    "AC-034": {
+      "status": "PASSED",
+      "evidence": [
+        "tests/openai-predecessor-regression.contract.test.ts",
+        "tests/openai-api.contract.test.ts",
+        "tests/local-fixture.e2e.test.ts"
+      ]
+    }
+  },
+  "tests": {
+    "unit": { "passed": 99, "failed": 0, "skipped": 0 },
+    "contract": { "passed": 76, "failed": 0, "skipped": 0 },
+    "integration": { "passed": 85, "failed": 0, "skipped": 0 },
+    "openAiPredecessor": { "passed": 22, "failed": 0, "skipped": 0 },
+    "openAiPostgresVertical": { "passed": 2, "failed": 0, "skipped": 0 },
+    "security": { "passed": 11, "failed": 0, "skipped": 0 },
+    "fixtureE2e": { "passed": 1, "failed": 0, "skipped": 0 },
+    "architectureProductionFiles": 74,
+    "migrationFiles": 9,
+    "build": "PASSED",
+    "license": "PASSED",
+    "secret": "PASSED",
+    "smoke": "PASSED",
+    "workflowStatic": "PASSED"
+  },
+  "openAiIntegration": {
+    "sharedApplicationService": true,
+    "fullHistoryImport": true,
+    "historyDeduplication": true,
+    "twoTurnContextRestored": true,
+    "multipleActiveTasks": true,
+    "shortIdReferences": true,
+    "ambiguousMutationCallsA2a": false,
+    "actualAssistantOutputPersisted": true,
+    "disconnectCancelsTask": false,
+    "utilityMutatesBusinessState": false
+  },
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/13",
+    "candidateSha": "8515f2dde83e470ead695744d9a1f360f0c63bc3",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32499909972",
+    "qualityJob": "96826950287",
+    "containerJob": "96827333827",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
+}

@@ -15,7 +15,7 @@ Status values are evidence-based. `Planned` is not acceptance.
 | AC-022–024 | P07   | explicit multi-Task coordinator and bounded merge         | P07 gates; CI run 32489959546                         | Passed  |
 | AC-025–029 | P08   | atomic TASK/MESSAGE result and replay                     | P08 gates; CI run 32493711915                         | Passed  |
 | AC-030–032 | P09   | trusted A2A and unexpected auth fail-closed               | P09 gates; CI run 32496491328                         | Passed  |
-| AC-033–034 | P10   | shared OpenAI integration                                 | predecessor and v0.3 E2E                              | Planned |
+| AC-033–034 | P10   | shared OpenAI integration                                 | P10 gates; CI run 32499909972                         | Passed  |
 | AC-035–036 | P11   | shared AG-UI integration                                  | official client/restart                               | Planned |
 | AC-037–038 | P12   | adversarial, privacy, telemetry hardening                 | P12 security gate                                     | Planned |
 | AC-039–042 | P13   | real model/SDAR/migration/restart/network                 | zero-fake real evidence                               | Planned |

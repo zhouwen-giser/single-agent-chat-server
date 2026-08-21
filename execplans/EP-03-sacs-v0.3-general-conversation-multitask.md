@@ -43,8 +43,9 @@ strict `TASK | MESSAGE` completed-request result.
       optimistic merge, and concurrency contracts.
 - [x] P08: implement atomic `TASK | MESSAGE` result persistence and exact replay.
 - [x] P09: implement trusted A2A fail-closed behavior.
-- [ ] P10-P11: integrate the shared application service with OpenAI and AG-UI
-      (P10 OpenAI path implemented; publication pending).
+- [x] P10: integrate durable multi-turn and multi-Task context through the
+      shared application service into OpenAI/OpenWebUI.
+- [ ] P11: integrate the same conversation application service into AG-UI.
 - [ ] P12: complete security, privacy, observability, and adversarial hardening.
 - [ ] P13: qualify real model, current SDAR, migration, restart, and network boundary.
 - [ ] P14: close docs, container, CI, full gate, evidence, and Ready PR.
@@ -120,6 +121,15 @@ P09 authoritative local gate: `pnpm verify:phase9` passed 99 unit, 70 contract,
 scan, Docker build, and isolated Compose verification also passed. Functional
 SHA `fc05c96b654a82ba64df2611935c2dfffa0408be` passed exact-head CI run
 `32496491328` (quality `96816017831`, container `96816442562`).
+
+P10 authoritative local gate: `pnpm verify:phase10` passed 99 unit, 76
+contract, 85 integration, and build with zero required skip against isolated
+PostgreSQL 16.9. The predecessor suite passed 22 tests, the dedicated durable
+OpenAI PostgreSQL vertical passed 2 tests, security passed 11, fixture E2E
+passed 1, and migration/architecture/license/secret/smoke/workflow gates
+passed. Functional SHA `8515f2dde83e470ead695744d9a1f360f0c63bc3`
+passed exact-head CI run `32499909972` (quality `96826950287`, container
+`96827333827`).
 
 ## Outcomes
 
