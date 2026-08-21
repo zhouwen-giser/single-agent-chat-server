@@ -42,5 +42,7 @@ origin unless an operator explicitly supplies a same-origin endpoint override.
 Detailed decisions and component designs:
 
 - [ADR-0001](adr/0001-single-sdar-and-a2a-baseline.md)
+- [SACS v0.3 target architecture](architecture-v0.3.md)
+- [ADR-0003](adr/0003-real-conversation-context-multitask.md)
 - [Thin chat graph](architecture/thin-chat-graph.md)
 - [PostgreSQL persistence](architecture/postgresql-persistence.md)

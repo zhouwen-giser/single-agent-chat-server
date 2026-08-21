@@ -1,0 +1,86 @@
+{
+  "$id": "https://schemas.sacs.local/v0.3/turn-decision.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TurnDecision",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": { "kind": { "const": "general_chat" } }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "taskText"],
+      "properties": {
+        "kind": { "const": "new_task" },
+        "taskText": { "type": "string", "minLength": 1, "maxLength": 32768 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "includeTerminal"],
+      "properties": {
+        "kind": { "const": "list_tasks" },
+        "includeTerminal": { "type": "boolean" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "task_status" },
+        "selector": {
+          "$ref": "https://schemas.sacs.local/v0.3/task-selector.schema.json"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "selector", "action", "text"],
+      "properties": {
+        "kind": { "const": "task_follow_up" },
+        "selector": {
+          "$ref": "https://schemas.sacs.local/v0.3/task-selector.schema.json"
+        },
+        "action": {
+          "enum": [
+            "confirm_plan",
+            "reject_plan",
+            "revise_plan",
+            "patch_goal",
+            "cancel_goal",
+            "provide_input",
+            "pause",
+            "resume"
+          ]
+        },
+        "text": { "type": "string", "minLength": 1, "maxLength": 32768 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "selector"],
+      "properties": {
+        "kind": { "const": "task_cancel" },
+        "selector": {
+          "$ref": "https://schemas.sacs.local/v0.3/task-selector.schema.json"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "question"],
+      "properties": {
+        "kind": { "const": "clarification" },
+        "question": { "type": "string", "minLength": 1, "maxLength": 4000 }
+      }
+    }
+  ]
+}

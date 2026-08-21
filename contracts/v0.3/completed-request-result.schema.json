@@ -1,0 +1,34 @@
+{
+  "$id": "https://schemas.sacs.local/v0.3/completed-request-result.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CompletedRequestResult",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "taskId", "contextId"],
+      "properties": {
+        "kind": { "const": "task" },
+        "taskId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "contextId": { "type": "string", "minLength": 1, "maxLength": 256 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "messageId", "message", "renderedText"],
+      "properties": {
+        "kind": { "const": "message" },
+        "messageId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "relatedTaskId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "message": { "type": "object" },
+        "renderedText": { "type": "string", "maxLength": 65536 }
+      }
+    }
+  ]
+}
