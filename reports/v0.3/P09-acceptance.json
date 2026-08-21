@@ -1,0 +1,66 @@
+{
+  "phase": "P09",
+  "status": "PASSED_PUBLISHED",
+  "observedAt": "2026-08-21T15:17:14.037Z",
+  "acceptance": {
+    "AC-030": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/sdar-a2a-adapter/src/client.ts",
+        "tests/recovery.unit.test.ts",
+        "tests/sdar-a2a-adapter.contract.test.ts"
+      ]
+    },
+    "AC-031": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/sdar-a2a-adapter/src/errors.ts",
+        "packages/sdar-a2a-adapter/src/normalize.ts",
+        "tests/sdar-a2a-adapter.contract.test.ts"
+      ]
+    },
+    "AC-032": {
+      "status": "PASSED",
+      "evidence": [
+        "tests/task-coordinator.postgres.int.test.ts",
+        "tests/operations.unit.test.ts",
+        "docs/security.md"
+      ]
+    }
+  },
+  "tests": {
+    "unit": { "passed": 99, "failed": 0, "skipped": 0 },
+    "contract": { "passed": 70, "failed": 0, "skipped": 0 },
+    "integration": { "passed": 83, "failed": 0, "skipped": 0 },
+    "postgresIntegration": { "passed": 78, "failed": 0, "skipped": 0 },
+    "security": { "passed": 11, "failed": 0, "skipped": 0 },
+    "architectureProductionFiles": 73,
+    "migrationFiles": 9,
+    "build": "PASSED",
+    "license": "PASSED",
+    "secret": "PASSED",
+    "dockerBuild": "PASSED",
+    "compose": "PASSED"
+  },
+  "trustedA2aPolicy": {
+    "internalAuthRequiredState": false,
+    "unexpectedSdkAuthRequired": "FAIL_CLOSED",
+    "agentCardSecurityRequirementsAccepted": false,
+    "interactiveCredentialFlow": false,
+    "processScopedClient": true,
+    "requestRoutingInjectionAccepted": false,
+    "unexpectedAuthMetricAttributes": 0,
+    "northboundAuthenticationPreserved": true,
+    "composeSdarNetworkInternal": true
+  },
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/13",
+    "candidateSha": "fc05c96b654a82ba64df2611935c2dfffa0408be",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32496491328",
+    "qualityJob": "96816017831",
+    "containerJob": "96816442562",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
+}

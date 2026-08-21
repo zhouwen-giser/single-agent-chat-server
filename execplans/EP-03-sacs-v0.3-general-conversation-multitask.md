@@ -109,6 +109,13 @@ scan also passed. Functional SHA `2aef667e3f7e9e9552bf98975f54cbf134cda0f6`
 passed exact-head CI run `32493711915` (quality `96807094991`, container
 `96807552281`).
 
+P09 authoritative local gate: `pnpm verify:phase9` passed 99 unit, 70 contract,
+83 integration, and build with zero required skip against isolated PostgreSQL
+16.9. Security 11, architecture 73 files, migrations 9, licenses 89, secret
+scan, Docker build, and isolated Compose verification also passed. Functional
+SHA `fc05c96b654a82ba64df2611935c2dfffa0408be` passed exact-head CI run
+`32496491328` (quality `96816017831`, container `96816442562`).
+
 ## Outcomes
 
 In progress. Completion requires all AC-001 through AC-044, zero required skip,
