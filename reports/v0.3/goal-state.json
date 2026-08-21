@@ -1,0 +1,30 @@
+{
+  "goal": "SACS v0.3 general conversation, durable context and multi-task chat",
+  "status": "IN_PROGRESS",
+  "currentPhase": "P00",
+  "baseSha": "25c923524bcddc5fffd37513766cf28c9f9c2cf4",
+  "branch": "feature/sacs-v0.3-general-conversation-multitask",
+  "phaseCommits": {},
+  "requiredGates": {
+    "baseline": "PASSED",
+    "unit": "PENDING",
+    "contract": "PENDING",
+    "postgres": "PENDING",
+    "security": "PENDING",
+    "openai": "PENDING",
+    "agui": "PENDING",
+    "realModel": "PENDING",
+    "realSdar": "PENDING",
+    "migrationUpgrade": "PENDING",
+    "restartRecovery": "PENDING",
+    "container": "PENDING",
+    "prReady": "PENDING"
+  },
+  "blockers": [
+    {
+      "phase": "P13",
+      "kind": "ENVIRONMENT_NOT_YET_CONFIGURED",
+      "detail": "TEST_DATABASE_URL and exact-head real model/SDAR evidence variables are absent; implementation proceeds before the real gate."
+    }
+  ]
+}

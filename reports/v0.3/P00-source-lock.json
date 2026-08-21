@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-08-21T10:13:58.465Z",
+  "sourcePriority": [
+    "single-agent-chat-server origin/main",
+    "skill-driven-agent-runtime origin/main public A2A contract",
+    "sdar-mcp-provider-platform origin/main downstream semantics",
+    "SACS v0.3 task package constraints"
+  ],
+  "repositories": {
+    "sacs": {
+      "repository": "https://github.com/zhouwen-giser/single-agent-chat-server",
+      "branch": "main",
+      "commit": "25c923524bcddc5fffd37513766cf28c9f9c2cf4",
+      "tree": "51cde785ceed2023ea1a9c7b7b882dfef3847c19",
+      "version": "0.1.0",
+      "purpose": "product repository"
+    },
+    "sdar": {
+      "repository": "https://github.com/zhouwen-giser/skill-driven-agent-runtime.git",
+      "branch": "main",
+      "commit": "2275bc52759914bc80113358a9083e6f00d59e6d",
+      "tree": "df4520d92f558ff3fa75cf7b86755d148433ceb5",
+      "version": "1.4.1",
+      "purpose": "read-only A2A authority"
+    },
+    "smpp": {
+      "repository": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform.git",
+      "branch": "main",
+      "commit": "f8c37e6a2ecdc859e56910803197ec938b9a807a",
+      "tree": "ace835d13c45ee2391e7b7ebcda5edd19566d70b",
+      "version": "0.1.0",
+      "purpose": "read-only downstream Provider/Resource/Action semantics"
+    }
+  },
+  "runtime": {
+    "node": "v22.23.1",
+    "pnpm": "11.13.1",
+    "corepack": "0.34.6",
+    "git": "2.34.1",
+    "dockerClient": "29.6.1",
+    "psqlClient": "14.23"
+  },
+  "sacsDependencies": {
+    "a2aSdk": "@a2a-js/sdk@1.0.0-beta.0",
+    "agUiCore": "@ag-ui/core@0.0.57",
+    "langgraph": "@langchain/langgraph@1.4.8",
+    "postgresClient": "pg@8.22.0",
+    "zod": "zod@4.4.3",
+    "lockfileSha256": "6980e48560508ee474ef9c86a5b3ddef3cea0bc29f4adf438ade79ee3e79f7c1"
+  },
+  "migrations": [
+    {
+      "path": "migrations/0001_initial_persistence.sql",
+      "sha256": "7345a7b5778b6f6c2d888263b84849a78b8f4facd68bca5eca8fba3d5a95a975"
+    },
+    {
+      "path": "migrations/0002_events_and_recovery.sql",
+      "sha256": "179af2eec27f5ef27b66e6b57ce01742e986790682c7690962a2226d0414439d"
+    },
+    {
+      "path": "migrations/0003_submission_lease.sql",
+      "sha256": "54d793c4c64c0c8b17d9a42e4444c68aad55d01ad89ce89548c33b2264064485"
+    },
+    {
+      "path": "migrations/0004_interaction_gateway.sql",
+      "sha256": "0f1f6a66b0d1910acf612f0eceaaed6f7ba061b94499c788c067b570989b45ca"
+    },
+    {
+      "path": "migrations/0005_interrupt_resume.sql",
+      "sha256": "debdedf869186e39aa73c096b88dab49f60708563ff539f39556aa6065ac8ac7"
+    },
+    {
+      "path": "migrations/0006_durable_agui_runs.sql",
+      "sha256": "fba6c71d73bee278be5a6ed6dc7bcc651626d84208078b9fe3f28dfbee13b77a"
+    }
+  ],
+  "a2aBaseline": {
+    "specPatch": "1.0.1",
+    "wire": "1.0",
+    "binding": "HTTP+JSON",
+    "sdk": "@a2a-js/sdk@1.0.0-beta.0",
+    "agentCardPath": "/.well-known/agent-card.json",
+    "taskEndpointPath": "/a2a",
+    "securitySchemes": {},
+    "securityRequirements": [],
+    "streaming": true,
+    "operations": ["sendMessageStream", "sendMessage", "getTask", "cancelTask"],
+    "publishedTaskMetadata": [
+      "internalPhase",
+      "userId",
+      "errorCode",
+      "capabilityGap",
+      "nextAction",
+      "io.sdar/interaction"
+    ],
+    "followUpActions": [
+      "confirm_plan",
+      "reject_plan",
+      "revise_plan",
+      "patch_goal",
+      "cancel_goal",
+      "provide_input",
+      "pause",
+      "resume"
+    ],
+    "authorityFiles": [
+      "third_party/a2a-1.0.1-baseline.json",
+      "packages/a2a-adapter/src/compatibility.ts",
+      "packages/a2a-adapter/src/http-endpoint.ts",
+      "packages/a2a-adapter/src/task-mapping.ts",
+      "packages/a2a-adapter/src/task-service-executor.ts"
+    ]
+  },
+  "taskPackage": {
+    "path": "/home/zhouwen/下载/SACS_v0.3_General_Conversation_Multi_Task_Codex_Goal.zip",
+    "validation": "TASK_PACKAGE_VALID files=46"
+  }
+}
