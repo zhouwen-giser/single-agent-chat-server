@@ -26,7 +26,8 @@
     "P09": ["fc05c96b654a82ba64df2611935c2dfffa0408be"],
     "P10": ["8515f2dde83e470ead695744d9a1f360f0c63bc3"],
     "P11": ["e03a8570ea0dd51b97c37ed1fc33c633c6f88ca0"],
-    "P12": ["928a56e7b9f77bb30dc7bd93a30787d79b65129c"]
+    "P12": ["928a56e7b9f77bb30dc7bd93a30787d79b65129c"],
+    "P13": ["3a3abbd983db0480f668ce674759210915085198"]
   },
   "requiredGates": {
     "baseline": "PASSED",
@@ -47,7 +48,7 @@
     {
       "phase": "P13",
       "kind": "ENVIRONMENT_NOT_YET_CONFIGURED",
-      "detail": "Exact-head real model/SDAR evidence variables are absent; implementation proceeds before the P13 real gate."
+      "detail": "Exact-head real model/SDAR variables and operator-approved safe current-SDAR requests are absent. Functional SHA 3a3abbd983db0480f668ce674759210915085198 and CI 32511015976 passed, but AC-039 through AC-042 remain BLOCKED_ENVIRONMENT without fixture substitution."
     }
   ]
 }

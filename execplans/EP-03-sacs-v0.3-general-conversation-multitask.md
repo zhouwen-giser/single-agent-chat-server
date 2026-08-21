@@ -163,6 +163,18 @@ gates passed. Functional SHA
 `928a56e7b9f77bb30dc7bd93a30787d79b65129c` passed exact-head CI run
 `32507942371` (quality `96852231590`, container `96852849256`).
 
+P13 functional candidate `3a3abbd983db0480f668ce674759210915085198`
+adds fail-closed exact-head real-model/current-SDAR, migration/restart, and
+network-boundary drivers plus the complete `verify:v03` command. Its available
+local gates passed 100 unit, 78 contract, 89 PostgreSQL integration, 22
+predecessor, 12 security, 35 AG-UI, and 146 dedicated acceptance tests, with
+build/architecture/license/secret/image/container/Compose/SBOM gates also
+passing. Exact-head CI run `32511015976` passed quality job `96861907391` and
+container job `96862547655`. P13 remains `BLOCKED_ENVIRONMENT`: no P13/model/
+SDAR variables or operator-reviewed safe requests exist in the execution
+environment, so AC-039 through AC-042 have not been claimed and no fixture is
+substituted.
+
 ## Outcomes
 
 In progress. Completion requires all AC-001 through AC-044, zero required skip,
