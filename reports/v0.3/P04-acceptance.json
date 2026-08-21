@@ -1,10 +1,10 @@
 {
   "phase": "P04",
-  "status": "PASSED_LOCAL",
+  "status": "PASSED_PUBLISHED",
   "observedAt": "2026-08-21T12:03:03.015Z",
   "acceptance": {
     "AC-010": {
-      "status": "PASSED_LOCAL",
+      "status": "PASSED",
       "evidence": [
         "packages/conversation-context/src/assembler.ts",
         "tests/conversation-context.unit.test.ts",
@@ -12,7 +12,7 @@
       ]
     },
     "AC-011": {
-      "status": "PASSED_LOCAL",
+      "status": "PASSED",
       "evidence": [
         "packages/conversation-context/src/importer.ts",
         "packages/persistence/src/conversation-repository.ts",
@@ -20,7 +20,7 @@
       ]
     },
     "AC-012": {
-      "status": "PASSED_LOCAL",
+      "status": "PASSED",
       "evidence": [
         "packages/conversation-context/src/config.ts",
         "packages/conversation-context/src/summarizer.ts",
@@ -49,7 +49,12 @@
     "bodyMetricsOrLogs": false
   },
   "publication": {
-    "status": "PENDING",
-    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/12"
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/13",
+    "candidateSha": "8177411eb2d1265b3898a0876daaf8be14044260",
+    "functionalSha": "192b5f7e170843e9add7ca471bf1179c75ccf697",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32481037950",
+    "quality": "PASSED",
+    "container": "PASSED"
   }
 }

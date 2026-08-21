@@ -1,7 +1,7 @@
 {
   "goal": "SACS v0.3 general conversation, durable context and multi-task chat",
   "status": "IN_PROGRESS",
-  "currentPhase": "P04",
+  "currentPhase": "P05",
   "baseSha": "25c923524bcddc5fffd37513766cf28c9f9c2cf4",
   "branch": "feature/sacs-v0.3-general-conversation-multitask",
   "phaseCommits": {
@@ -14,7 +14,11 @@
       "4eca15c69e9de9d1bb2896656d5045162900734a",
       "ed81bbe8bb73b7b88d7c53947b6b173a29c62ca4"
     ],
-    "P03": ["0cb938b72101a0b550c7a5a0eeca1a4fef315da2"]
+    "P03": ["0cb938b72101a0b550c7a5a0eeca1a4fef315da2"],
+    "P04": [
+      "192b5f7e170843e9add7ca471bf1179c75ccf697",
+      "8177411eb2d1265b3898a0876daaf8be14044260"
+    ]
   },
   "requiredGates": {
     "baseline": "PASSED",
@@ -28,14 +32,14 @@
     "realSdar": "PENDING",
     "migrationUpgrade": "PASSED_CURRENT_HEAD",
     "restartRecovery": "PASSED_CURRENT_HEAD",
-    "container": "PENDING",
+    "container": "PASSED_CURRENT_HEAD",
     "prReady": "PENDING"
   },
   "blockers": [
     {
       "phase": "P13",
       "kind": "ENVIRONMENT_NOT_YET_CONFIGURED",
-      "detail": "TEST_DATABASE_URL and exact-head real model/SDAR evidence variables are absent; implementation proceeds before the real gate."
+      "detail": "Exact-head real model/SDAR evidence variables are absent; implementation proceeds before the P13 real gate."
     }
   ]
 }

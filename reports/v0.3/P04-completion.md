@@ -1,12 +1,16 @@
 # P04 completion
 
-Status: `PASSED_LOCAL`
+Status: `PASSED_PUBLISHED`
 
 ## Identity
 
 - Phase: P04
 - Start SHA: `dea27ec58ff3b482a81d6295c30f1ee9cdca7fc2`
 - Timestamp UTC: `2026-08-21T12:03:03.015Z`
+- Functional SHA: `192b5f7e170843e9add7ca471bf1179c75ccf697`
+- Published candidate SHA: `8177411eb2d1265b3898a0876daaf8be14044260`
+- Exact-head CI: run `32481037950`; quality `96767244477`; container
+  `96767589710`; all passed.
 
 ## Scope completed
 
@@ -76,6 +80,5 @@ Status: `PASSED_LOCAL`
 
 ## Follow-up
 
-- Publication requires the semantic commit, branch push, and exact-head CI.
 - P05 will replace the placeholder Task Directory port with multi-Task binding,
   Focus, last-reference, and Task-level lease persistence.
