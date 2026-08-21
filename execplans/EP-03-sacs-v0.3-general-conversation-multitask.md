@@ -98,6 +98,13 @@ security 9, fixture E2E 1, architecture/build/smoke/migration/OpenAI/A2A/
 workflow/license/secret gates. PostgreSQL tests remained environment-skipped and
 are not release evidence.
 
+P08 authoritative local gate: `pnpm verify:phase8` passed 97 unit, 66 contract,
+82 integration, and build with zero required skip against isolated PostgreSQL
+16.9. Security 11, architecture 72 files, migrations 9, licenses 89, and secret
+scan also passed. Functional SHA `2aef667e3f7e9e9552bf98975f54cbf134cda0f6`
+passed exact-head CI run `32493711915` (quality `96807094991`, container
+`96807552281`).
+
 ## Outcomes
 
 In progress. Completion requires all AC-001 through AC-044, zero required skip,

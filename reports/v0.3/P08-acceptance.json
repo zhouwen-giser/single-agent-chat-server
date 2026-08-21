@@ -1,0 +1,70 @@
+{
+  "phase": "P08",
+  "status": "PASSED_PUBLISHED",
+  "observedAt": "2026-08-21T14:47:31.557Z",
+  "acceptance": {
+    "AC-025": {
+      "status": "PASSED",
+      "evidence": [
+        "migrations/0009_request_result_union.sql",
+        "packages/chat-runtime/src/task-coordinator.ts",
+        "tests/task-coordinator.postgres.int.test.ts"
+      ]
+    },
+    "AC-026": {
+      "status": "PASSED",
+      "evidence": ["tests/task-coordinator.postgres.int.test.ts"]
+    },
+    "AC-027": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/chat-runtime/src/task-coordinator.ts",
+        "tests/task-coordinator.postgres.int.test.ts"
+      ]
+    },
+    "AC-028": {
+      "status": "PASSED",
+      "evidence": ["tests/task-coordinator.postgres.int.test.ts"]
+    },
+    "AC-029": {
+      "status": "PASSED",
+      "evidence": [
+        "migrations/0009_request_result_union.sql",
+        "tests/interaction-persistence.postgres.int.test.ts"
+      ]
+    }
+  },
+  "tests": {
+    "unit": { "passed": 97, "failed": 0, "skipped": 0 },
+    "contract": { "passed": 66, "failed": 0, "skipped": 0 },
+    "integration": { "passed": 82, "failed": 0, "skipped": 0 },
+    "postgresIntegration": { "passed": 77, "failed": 0, "skipped": 0 },
+    "security": { "passed": 11, "failed": 0, "skipped": 0 },
+    "architectureProductionFiles": 72,
+    "migrationFiles": 9,
+    "build": "PASSED",
+    "license": "PASSED",
+    "secret": "PASSED"
+  },
+  "requestResultPolicy": {
+    "strictTaskOrMessageUnion": true,
+    "completionAndResultAtomic": true,
+    "messageReplayCallsA2a": false,
+    "messageReplayCallsGetTask": false,
+    "taskReplayReauthorizesOriginalBinding": true,
+    "messageThenTaskResult": "TASK",
+    "openAiAndAgUiUseUnifiedRepository": true,
+    "completedWithoutResultRejected": true,
+    "conflictingResultsRejected": true
+  },
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/13",
+    "candidateSha": "2aef667e3f7e9e9552bf98975f54cbf134cda0f6",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32493711915",
+    "qualityJob": "96807094991",
+    "containerJob": "96807552281",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
+}
