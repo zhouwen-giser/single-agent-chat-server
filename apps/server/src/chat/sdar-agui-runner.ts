@@ -19,46 +19,47 @@ import {
   type SdarTaskScope,
 } from "../../../../packages/interaction-contract/src/index.js";
 import type { NormalizedTaskState } from "../../../../packages/sdar-a2a-adapter/src/index.js";
-import type { InteractionPersistenceRepository } from "../../../../packages/persistence/src/index.js";
-import {
-  resolveQueryIntent,
-  type InteractionQueryService,
-} from "../../../../packages/interaction-query/src/index.js";
+import type {
+  InteractionPersistenceRepository,
+  TaskBinding,
+} from "../../../../packages/persistence/src/index.js";
+import type { ConversationContext } from "../../../../packages/conversation-context/src/index.js";
 import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
+import type { ClassificationError } from "../../../../src/agent/classification.js";
 import type { StructuredChatModel } from "../../../../src/agent/model.js";
-import type { ActiveTaskSnapshot } from "../../../../src/agent/state.js";
 
 export function createSdarAgUiInteractionSource(input: {
   readonly repository: InteractionPersistenceRepository;
   readonly checkpointer?: BaseCheckpointSaver;
   readonly coordinator: SdarTaskCoordinator;
-  readonly queryService?: InteractionQueryService;
   readonly model?: StructuredChatModel;
+  readonly onClassificationError?: (error: ClassificationError) => void;
+  readonly assembleContext?: (input: {
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly currentUserText: string;
+  }) => Promise<ConversationContext>;
 }): DurableAgUiEventSource {
-  const graph = createSingleAgentChatGraph(input.model, input.checkpointer);
+  const graph = createSingleAgentChatGraph(
+    input.model,
+    input.checkpointer,
+    input.onClassificationError,
+  );
   return async function* run(context) {
     const userText = lastUserText(context.input);
-    const query = resolveQueryIntent(userText);
-    if (query !== undefined && input.queryService !== undefined) {
-      const result = await input.queryService.execute({
-        ...query,
-        principalId: context.principalId,
-        threadId: context.threadId,
-        signal: context.signal,
-      });
-      yield* legacyChatResultToInteractionEvents(result, {
-        runId: context.input.runId,
-        threadId: context.input.threadId,
-      });
-      return;
-    }
-
     const activeBindings = await input.repository.listActiveTasksForChat({
       principalId: context.principalId,
       threadId: context.threadId,
-      limit: 2,
+      limit: 32,
     });
-    const binding = activeBindings.length === 1 ? activeBindings[0] : undefined;
+    const conversationContext =
+      input.assembleContext === undefined
+        ? fallbackContext(context.threadId, activeBindings)
+        : await input.assembleContext({
+            principalId: context.principalId,
+            threadId: context.threadId,
+            currentUserText: userText,
+          });
     const graphResult = await graph.invoke(
       {
         messages: [{ role: "user", content: userText }],
@@ -66,7 +67,7 @@ export function createSdarAgUiInteractionSource(input: {
         userId: context.principalId,
         openWebUiChatId: context.input.threadId,
         utilityRequest: false,
-        ...(binding === undefined ? {} : { activeTask: toActiveTask(binding) }),
+        conversationContext,
       },
       { configurable: { thread_id: context.threadId } },
     );
@@ -74,14 +75,45 @@ export function createSdarAgUiInteractionSource(input: {
     if (graphResult.requestKind === "new_task") {
       yield* coordinatorInteractionEvents(context, (observer) =>
         input.coordinator.submit(
-          toTaskTurn(context, userText),
+          toTaskTurn(context, graphResult.taskText ?? userText),
           context.signal,
           observer,
         ),
       );
       return;
     }
+    if (graphResult.requestKind === "list_tasks") {
+      yield* legacyChatResultToInteractionEvents(
+        renderTaskDirectory(
+          conversationContext,
+          graphResult.includeTerminalTasks,
+        ),
+        { runId: context.input.runId, threadId: context.input.threadId },
+      );
+      return;
+    }
     if (graphResult.requestKind === "status") {
+      if (graphResult.targetTaskId !== undefined) {
+        const targetTaskId = graphResult.targetTaskId;
+        await touchResolvedTask(
+          input.repository,
+          context.principalId,
+          context.threadId,
+          targetTaskId,
+        );
+        yield* coordinatorInteractionEvents(context, (observer) =>
+          input.coordinator.statusForTask(
+            {
+              chatId: context.threadId,
+              userId: context.principalId,
+              taskId: targetTaskId,
+            },
+            context.signal,
+            observer,
+          ),
+        );
+        return;
+      }
       yield* coordinatorInteractionEvents(context, (observer) =>
         input.coordinator.status(
           { chatId: context.threadId, userId: context.principalId },
@@ -96,9 +128,22 @@ export function createSdarAgUiInteractionSource(input: {
       graphResult.requestKind === "follow_up" &&
       followUpAction !== undefined
     ) {
+      if (graphResult.targetTaskId !== undefined) {
+        await touchResolvedTask(
+          input.repository,
+          context.principalId,
+          context.threadId,
+          graphResult.targetTaskId,
+        );
+      }
       yield* coordinatorInteractionEvents(context, (observer) =>
         input.coordinator.followUp(
-          toFollowUpTurn(context, userText, followUpAction),
+          {
+            ...toFollowUpTurn(context, userText, followUpAction),
+            ...(graphResult.targetTaskId === undefined
+              ? {}
+              : { targetTaskId: graphResult.targetTaskId }),
+          },
           context.signal,
           observer,
         ),
@@ -106,9 +151,22 @@ export function createSdarAgUiInteractionSource(input: {
       return;
     }
     if (graphResult.requestKind === "cancel") {
+      if (graphResult.targetTaskId !== undefined) {
+        await touchResolvedTask(
+          input.repository,
+          context.principalId,
+          context.threadId,
+          graphResult.targetTaskId,
+        );
+      }
       yield* coordinatorInteractionEvents(context, (observer) =>
         input.coordinator.cancel(
-          toTaskTurn(context, userText),
+          {
+            ...toTaskTurn(context, userText),
+            ...(graphResult.targetTaskId === undefined
+              ? {}
+              : { targetTaskId: graphResult.targetTaskId }),
+          },
           context.signal,
           observer,
         ),
@@ -269,40 +327,61 @@ function toFollowUpTurn(
   return { ...toTaskTurn(context, userText), action };
 }
 
-function toActiveTask(binding: {
-  readonly sdarTaskId: string;
-  readonly sdarContextId: string;
-  readonly status: string;
-  readonly pendingInput?: unknown;
-}): ActiveTaskSnapshot {
-  const status = ["SUBMITTED", "WORKING", "INPUT_REQUIRED"].includes(
-    binding.status,
-  )
-    ? (binding.status as ActiveTaskSnapshot["status"])
-    : "WORKING";
-  const internalPhase = readInternalPhase(binding.pendingInput);
+function fallbackContext(
+  threadId: string,
+  activeBindings: readonly TaskBinding[],
+): ConversationContext {
   return {
-    taskId: binding.sdarTaskId,
-    contextId: binding.sdarContextId,
-    status,
-    ...(internalPhase === undefined ? {} : { internalPhase }),
+    threadId,
+    messages: [],
+    activeTasks: activeBindings.map((binding) => ({
+      bindingId: binding.bindingId,
+      taskId: binding.sdarTaskId,
+      contextId: binding.sdarContextId,
+      shortId: binding.shortId ?? binding.sdarTaskId.slice(0, 64),
+      status: binding.status,
+      createdAt: binding.createdAt ?? "1970-01-01T00:00:00.000Z",
+      updatedAt: binding.updatedAt ?? "1970-01-01T00:00:00.000Z",
+    })),
+    recentTerminalTasks: [],
   };
 }
 
-function readInternalPhase(
-  value: unknown,
-): ActiveTaskSnapshot["internalPhase"] | undefined {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    return undefined;
-  }
-  const phase = (value as { readonly internalPhase?: unknown }).internalPhase;
+function renderTaskDirectory(
+  context: ConversationContext,
+  includeTerminal: boolean,
+): string {
+  const tasks = [
+    ...context.activeTasks,
+    ...(includeTerminal ? context.recentTerminalTasks : []),
+  ];
+  if (tasks.length === 0) return "No Tasks are bound to this conversation.";
   return [
-    "awaiting_plan_confirmation",
-    "awaiting_user_input",
-    "paused",
-  ].includes(typeof phase === "string" ? phase : "")
-    ? (phase as ActiveTaskSnapshot["internalPhase"])
-    : undefined;
+    "Tasks in this conversation:",
+    ...tasks.map(
+      (task, index) =>
+        `${index + 1}. ${task.shortId}: ${task.status}${task.summary === undefined ? "" : ` — ${task.summary}`}`,
+    ),
+  ].join("\n");
+}
+
+async function touchResolvedTask(
+  repository: InteractionPersistenceRepository,
+  principalId: string,
+  threadId: string,
+  taskId: string,
+): Promise<void> {
+  const binding = await repository.findAuthorizedTask({
+    principalId,
+    threadId,
+    sdarTaskId: taskId,
+  });
+  if (binding === undefined) return;
+  await repository.touchTaskReference({
+    principalId,
+    threadId,
+    bindingId: binding.bindingId,
+  });
 }
 
 function lastUserText(input: {

@@ -33,6 +33,7 @@ export interface TaskTurnContext {
   readonly userId: string;
   readonly chatId: string;
   readonly userMessageId: string;
+  readonly targetTaskId?: string;
 }
 
 export interface FollowUpTurnContext extends TaskTurnContext {
@@ -269,10 +270,13 @@ export class SdarTaskCoordinator {
     callerSignal?: AbortSignal,
     observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
-    const bindings = await this.options.repository.listActiveTasksForChat({
-      chatId: input.chatId,
-      userId: input.userId,
-    });
+    const bindings =
+      input.targetTaskId === undefined
+        ? await this.options.repository.listActiveTasksForChat({
+            chatId: input.chatId,
+            userId: input.userId,
+          })
+        : await this.authorizedTarget(input, input.targetTaskId);
     if (bindings.length === 0) {
       yield "There is no active SDAR Task for this user and chat.";
       return;
@@ -283,11 +287,6 @@ export class SdarTaskCoordinator {
     }
     const binding = bindings[0];
     if (binding === undefined) throw new Error("Active Task list changed");
-    await this.options.repository.setFocusedTask({
-      chatId: input.chatId,
-      userId: input.userId,
-      bindingId: binding.bindingId,
-    });
     const pending = pendingDetails(binding.pendingInput);
     if (
       !isFollowUpAllowed(input.action, binding.status, pending.internalPhase)
@@ -331,6 +330,7 @@ export class SdarTaskCoordinator {
       const task = await client.getTask(binding.sdarTaskId, {
         signal: callerSignal,
       });
+      await this.focusTask(input, binding);
       const observed = await this.observeTask(task, binding, true);
       if (observed.publishable) {
         observer?.({
@@ -385,6 +385,7 @@ export class SdarTaskCoordinator {
         leaseOwner,
         resultTaskId: binding.sdarTaskId,
       });
+      await this.focusTask(input, binding);
       if (result.kind === "message") {
         const fragments = renderMessage(result.message);
         if (fragments.length > 0) {
@@ -418,10 +419,13 @@ export class SdarTaskCoordinator {
     callerSignal?: AbortSignal,
     observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
-    const bindings = await this.options.repository.listActiveTasksForChat({
-      chatId: input.chatId,
-      userId: input.userId,
-    });
+    const bindings =
+      input.targetTaskId === undefined
+        ? await this.options.repository.listActiveTasksForChat({
+            chatId: input.chatId,
+            userId: input.userId,
+          })
+        : await this.authorizedTarget(input, input.targetTaskId);
     if (bindings.length === 0) {
       yield "There is no active SDAR Task for this user and chat.";
       return;
@@ -432,11 +436,6 @@ export class SdarTaskCoordinator {
     }
     const binding = bindings[0];
     if (binding === undefined) throw new Error("Active Task list changed");
-    await this.options.repository.setFocusedTask({
-      chatId: input.chatId,
-      userId: input.userId,
-      bindingId: binding.bindingId,
-    });
     const requestHash = hashJson({
       chatId: input.chatId,
       userId: input.userId,
@@ -507,6 +506,7 @@ export class SdarTaskCoordinator {
       }
     }
     assertSameTask(task, binding);
+    await this.focusTask(input, binding);
     const observed = await this.observeTask(task, binding, true);
     if (observed.publishable) {
       observer?.({
@@ -536,16 +536,12 @@ export class SdarTaskCoordinator {
       yield "The requested SDAR Task is not bound to this user and chat.";
       return;
     }
-    await this.options.repository.setFocusedTask({
-      chatId: input.chatId,
-      userId: input.userId,
-      bindingId: binding.bindingId,
-    });
     const client = await this.options.getClient();
     const task = await client.getTask(binding.sdarTaskId, {
       signal: callerSignal,
     });
     assertSameTask(task, binding);
+    await this.focusTask(input, binding);
     const observed = await this.observeTask(task, binding, true);
     if (observed.publishable) {
       observer?.({
@@ -613,6 +609,29 @@ export class SdarTaskCoordinator {
       if (isResponseBoundary(task.state)) return;
     }
     yield "SDAR is still working. This chat response is ending without cancellation; ask for status to continue.";
+  }
+
+  private async authorizedTarget(
+    input: Pick<TaskTurnContext, "chatId" | "userId">,
+    taskId: string,
+  ): Promise<readonly TaskBinding[]> {
+    const binding = await this.options.repository.findAuthorizedTask({
+      openWebUiChatId: input.chatId,
+      userId: input.userId,
+      sdarTaskId: taskId,
+    });
+    return binding === undefined ? [] : [binding];
+  }
+
+  private async focusTask(
+    input: Pick<TaskTurnContext, "chatId" | "userId">,
+    binding: TaskBinding,
+  ): Promise<void> {
+    await this.options.repository.setFocusedTask({
+      chatId: input.chatId,
+      userId: input.userId,
+      bindingId: binding.bindingId,
+    });
   }
 
   private async observeEvent(
@@ -765,15 +784,20 @@ export class SdarTaskCoordinator {
       userId: turn.userId,
       sdarTaskId: taskId,
     });
-    if (existing !== undefined) return existing;
+    if (existing !== undefined) {
+      await this.focusTask(turn, existing);
+      return existing;
+    }
     try {
-      return await this.options.repository.createTaskBinding({
+      const created = await this.options.repository.createTaskBinding({
         openWebUiChatId: turn.chatId,
         userId: turn.userId,
         sdarTaskId: taskId,
         sdarContextId: contextId,
         status: state,
       });
+      await this.focusTask(turn, created);
+      return created;
     } catch (error) {
       if (!(error instanceof PersistenceConflictError)) throw error;
       const raced = await this.options.repository.findAuthorizedTask({
@@ -782,6 +806,7 @@ export class SdarTaskCoordinator {
         sdarTaskId: taskId,
       });
       if (raced === undefined) throw error;
+      await this.focusTask(turn, raced);
       return raced;
     }
   }

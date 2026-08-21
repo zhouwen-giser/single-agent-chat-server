@@ -32,7 +32,10 @@ describe("production AG-UI typed A2A path", () => {
       } as unknown as InteractionPersistenceRepository,
       coordinator: { submit } as unknown as SdarTaskCoordinator,
       model: {
-        classify: jest.fn(async () => ({ requestKind: "new_task" })),
+        decideTurn: jest.fn(async () => ({
+          kind: "new_task",
+          taskText: "execute phase 11",
+        })),
         answer: jest.fn(async () => "unused"),
       },
     });

@@ -181,6 +181,24 @@ describe("secure operational controls", () => {
       },
     ]);
   });
+  it("records ambiguous Task references without identity attributes", () => {
+    const counters: Array<{ readonly name: string; readonly value: number }> =
+      [];
+    const meter = {
+      createHistogram: () => ({ record: () => undefined }),
+      createCounter: (name: string) => ({
+        add: (value: number) => counters.push({ name, value }),
+      }),
+      createUpDownCounter: () => ({ add: () => undefined }),
+      createObservableGauge: () => ({ addCallback: () => undefined }),
+    } as unknown as Meter;
+
+    new SecureTelemetry({ meter }).recordAmbiguousTaskReference();
+
+    expect(counters).toEqual([
+      { name: "chat_server.ambiguous_task_reference", value: 1 },
+    ]);
+  });
   it("enforces a fixed per-identity window and resets it", () => {
     let now = 1_000;
     const limiter = new FixedWindowRateLimiter(2, 10_000, () => now);

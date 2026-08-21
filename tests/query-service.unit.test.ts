@@ -242,21 +242,23 @@ describe("deterministic interaction queries", () => {
     ).toBe(0);
   });
 
-  it("executes an explicit query before the graph or legacy Task lookup", async () => {
-    let legacyLookups = 0;
-    const queryService = new InteractionQueryService(
-      repositoryFixture({ list: [taskBinding()] }),
-      async () => clientFixture().client,
-    );
+  it("routes a Task list through model decision and the authorized directory", async () => {
+    let directoryLookups = 0;
     const runner = createSdarChatRunner({
       repository: {
         listActiveTasksForChat: async () => {
-          legacyLookups += 1;
-          throw new Error("query reached legacy Task lookup");
+          directoryLookups += 1;
+          return [taskBinding()];
         },
       } as unknown as ChatPersistenceRepository,
       coordinator: {} as SdarTaskCoordinator,
-      queryService,
+      model: {
+        decideTurn: async () => ({
+          kind: "list_tasks",
+          includeTerminal: false,
+        }),
+        answer: async () => "unused",
+      },
     });
 
     const result = await runner({
@@ -281,7 +283,7 @@ describe("deterministic interaction queries", () => {
       if (typeof event !== "string") eventTypes.push(event.eventType);
     }
 
-    expect(legacyLookups).toBe(0);
+    expect(directoryLookups).toBe(1);
     expect(eventTypes).toEqual(["run.started", "message.text", "run.finished"]);
   });
   it("lists only local authorized bindings without touching A2A", async () => {

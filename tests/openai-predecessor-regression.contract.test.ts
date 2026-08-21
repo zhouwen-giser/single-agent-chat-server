@@ -7,7 +7,6 @@ import { buildServer } from "../apps/server/src/bootstrap.js";
 import type { ServerConfig } from "../apps/server/src/config.js";
 import { createSdarChatRunner } from "../apps/server/src/chat/sdar-chat-runner.js";
 import type { SdarTaskCoordinator } from "../packages/chat-runtime/src/index.js";
-import type { InteractionQueryService } from "../packages/interaction-query/src/index.js";
 import type {
   ChatPersistenceRepository,
   TaskBinding,
@@ -54,9 +53,7 @@ const executeQuery = jest.fn(
   async (input: { readonly intent: string }) => `query:${input.intent}`,
 );
 const fixtureModel: StructuredChatModel = {
-  classify: async ({ userText }) => ({
-    requestKind: userText.startsWith("Execute") ? "new_task" : "general_chat",
-  }),
+  decideTurn: async ({ currentUserText }) => decisionFor(currentUserText),
   answer: async () => "你好，我是单个 SDAR Agent 的测试聊天入口。",
 };
 
@@ -85,17 +82,11 @@ describe("P10 OpenAI/OpenWebUI predecessor regression", () => {
       const response = await completion(prompt, intent.length % 2 === 0);
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toContain(`query:${intent}`);
+      expect(response.body).toContain("单个 SDAR Agent");
       if (intent.length % 2 === 0) {
         expect(response.body.match(/data: \[DONE\]/gu)).toHaveLength(1);
       }
-      expect(executeQuery).toHaveBeenCalledWith(
-        expect.objectContaining({
-          intent,
-          principalId: "p10-user",
-          threadId: "p10-user:p10-chat",
-        }),
-      );
+      expect(executeQuery).not.toHaveBeenCalled();
       expect(submit).not.toHaveBeenCalled();
       expect(followUp).not.toHaveBeenCalled();
       expect(cancel).not.toHaveBeenCalled();
@@ -239,6 +230,8 @@ function createServer(): FastifyInstance {
   const repository = {
     listActiveTasksForChat: async () =>
       activeBinding === undefined ? [] : [activeBinding],
+    findAuthorizedTask: async () => activeBinding,
+    touchTaskReference: async () => undefined,
   } as unknown as ChatPersistenceRepository;
   const coordinator = {
     submit,
@@ -246,13 +239,9 @@ function createServer(): FastifyInstance {
     followUp,
     cancel,
   } as unknown as SdarTaskCoordinator;
-  const queryService = {
-    execute: executeQuery,
-  } as unknown as InteractionQueryService;
   const runChat = createSdarChatRunner({
     repository,
     coordinator,
-    queryService,
     model: fixtureModel,
   });
   return buildServer({
@@ -278,6 +267,32 @@ function binding(statusValue: string, internalPhase?: string): TaskBinding {
     ...(internalPhase === undefined ? {} : { pendingInput: { internalPhase } }),
     version: 1,
   };
+}
+
+function decisionFor(text: string): unknown {
+  if (text.startsWith("Execute")) return { kind: "new_task", taskText: text };
+  const followUpAction = new Map<string, string>([
+    ["pause", "pause"],
+    ["cancel the goal", "cancel_goal"],
+    ["确认", "confirm_plan"],
+    ["reject", "reject_plan"],
+    ["revise the plan", "revise_plan"],
+    ["patch the goal", "patch_goal"],
+    ["device-17", "provide_input"],
+    ["resume", "resume"],
+  ]).get(text);
+  if (followUpAction !== undefined) {
+    return {
+      kind: "task_follow_up",
+      selector: { reference: "only_active" },
+      action: followUpAction,
+      text,
+    };
+  }
+  if (text === "cancel the task") {
+    return { kind: "task_cancel", selector: { reference: "only_active" } };
+  }
+  return { kind: "general_chat" };
 }
 
 async function* fragments(value: string): AsyncGenerator<string> {

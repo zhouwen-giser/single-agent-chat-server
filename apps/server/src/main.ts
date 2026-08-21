@@ -12,7 +12,6 @@ import {
   persistInterruptsBeforeRunFinish,
   resumeRunToInteractionEvents,
 } from "../../../packages/interaction-runtime/src/index.js";
-import { InteractionQueryService } from "../../../packages/interaction-query/src/index.js";
 import {
   AgUiTaskCoordinatorRepository,
   parsePersistenceConfig,
@@ -23,6 +22,10 @@ import {
   OpenAiCompatibleConversationModel,
   parseConversationModelConfig,
 } from "../../../packages/conversation-model/src/index.js";
+import {
+  ConversationContextAssembler,
+  parseConversationContextBudget,
+} from "../../../packages/conversation-context/src/index.js";
 import {
   createSdarA2aClient,
   parseSdarA2aConfig,
@@ -74,10 +77,13 @@ try {
     conversationModel === undefined
       ? undefined
       : adaptConversationModel(conversationModel);
-  const queryService = new InteractionQueryService(
+  const contextAssembler = new ConversationContextAssembler(
+    activePersistence.conversationRepository,
     activePersistence.interactionRepository,
-    getClient,
+    parseConversationContextBudget(process.env),
+    telemetry,
   );
+  const assembleContext = contextAssembler.assemble.bind(contextAssembler);
   const agUiCoordinator = new SdarTaskCoordinator({
     repository: new AgUiTaskCoordinatorRepository(
       activePersistence.interactionRepository,
@@ -95,8 +101,13 @@ try {
     repository: activePersistence.interactionRepository,
     checkpointer: activePersistence.checkpointer,
     coordinator: agUiCoordinator,
-    queryService,
     model: chatModel,
+    assembleContext,
+    onClassificationError: (error) => {
+      if (error === "ambiguous_task_reference") {
+        telemetry.recordAmbiguousTaskReference();
+      }
+    },
   });
   const agUiTaskRecoverySource =
     createSdarAgUiTaskRecoverySource(agUiCoordinator);
@@ -155,8 +166,13 @@ try {
       repository: activePersistence.repository,
       checkpointer: activePersistence.checkpointer,
       coordinator,
-      queryService,
       model: chatModel,
+      assembleContext,
+      onClassificationError: (error) => {
+        if (error === "ambiguous_task_reference") {
+          telemetry.recordAmbiguousTaskReference();
+        }
+      },
     }),
     async () => {
       telemetry.setActiveTasks(

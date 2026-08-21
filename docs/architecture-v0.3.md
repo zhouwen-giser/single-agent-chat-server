@@ -68,8 +68,12 @@ model for business routing, create an SDAR Task, or change Focus.
   and independent of LangGraph checkpoint retention.
 - `packages/task-directory`: Task summaries, selectors, and directory contract.
   P05 persists stable short IDs, Focus, last reference, deterministic active
-  and recent lists, and Task-level mutation leases; P06 adds deterministic
-  selector resolution.
+  and recent lists, and Task-level mutation leases. P06 resolves only the
+  model's schema-valid selector against that bounded directory: full Task ID,
+  unique short ID, stable ordinal, Focus, latest/previous, unique bounded
+  summary, or the sole active Task. Ambiguous mutations stop locally and emit a
+  content-free `ambiguous_task_reference` counter; untargeted status renders
+  the complete active directory.
 - `packages/request-result`: strict completed-result union; P08 adds persistence
   and replay.
 - `packages/chat-runtime`: shared explicit multi-Task coordinator.

@@ -48,6 +48,7 @@ export class SecureTelemetry {
   private readonly activeStreams: Pick<UpDownCounter, "add">;
   private readonly contextCharacters: Pick<Histogram, "record">;
   private readonly contextMessages: Pick<Histogram, "record">;
+  private readonly ambiguousTaskReferences: Pick<Counter, "add">;
   private activeTasks = 0;
 
   constructor(
@@ -99,6 +100,10 @@ export class SecureTelemetry {
           unit: "{message}",
         }),
       ) ?? noOpHistogram;
+    this.ambiguousTaskReferences =
+      safelyValue(() =>
+        meter?.createCounter("chat_server.ambiguous_task_reference"),
+      ) ?? noOpCounter;
     const activeTaskGauge = safelyValue(() =>
       meter?.createObservableGauge("chat_server.tasks.active"),
     );
@@ -126,6 +131,10 @@ export class SecureTelemetry {
     safely(() =>
       this.contextMessages.record(observation.messageCount, attributes),
     );
+  }
+
+  recordAmbiguousTaskReference(): void {
+    safely(() => this.ambiguousTaskReferences.add(1));
   }
 
   recordApi(input: {

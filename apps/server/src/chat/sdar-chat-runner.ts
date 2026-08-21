@@ -10,44 +10,48 @@ import {
   type FollowUpTurnContext,
   type TaskTurnContext,
 } from "../../../../packages/chat-runtime/src/index.js";
-import type { ChatPersistenceRepository } from "../../../../packages/persistence/src/index.js";
-import {
-  resolveQueryIntent,
-  type InteractionQueryService,
-} from "../../../../packages/interaction-query/src/index.js";
+import type {
+  ChatPersistenceRepository,
+  TaskBinding,
+} from "../../../../packages/persistence/src/index.js";
+import type { ConversationContext } from "../../../../packages/conversation-context/src/index.js";
 import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
+import type { ClassificationError } from "../../../../src/agent/classification.js";
 import type { StructuredChatModel } from "../../../../src/agent/model.js";
-import type { ActiveTaskSnapshot } from "../../../../src/agent/state.js";
 
 export function createSdarChatRunner(input: {
   readonly repository: ChatPersistenceRepository;
   readonly checkpointer?: BaseCheckpointSaver;
   readonly coordinator: SdarTaskCoordinator;
-  readonly queryService?: InteractionQueryService;
   readonly model?: StructuredChatModel;
+  readonly onClassificationError?: (error: ClassificationError) => void;
+  readonly assembleContext?: (input: {
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly currentUserText: string;
+  }) => Promise<ConversationContext>;
 }): ChatRunner {
-  const graph = createSingleAgentChatGraph(input.model, input.checkpointer);
+  const graph = createSingleAgentChatGraph(
+    input.model,
+    input.checkpointer,
+    input.onClassificationError,
+  );
   const runLegacy = async (
     context: ChatRunnerContext,
   ): Promise<LegacyChatResult> => {
-    const query =
-      context.openWebUi.utilityTask === undefined
-        ? resolveQueryIntent(context.userText)
-        : undefined;
-    if (query !== undefined && input.queryService !== undefined) {
-      return input.queryService.execute({
-        ...query,
-        principalId: context.identity.userId,
-        threadId: context.threadId,
-        signal: context.signal,
-      });
-    }
     const activeBindings = await input.repository.listActiveTasksForChat({
       chatId: context.openWebUi.chatId,
       userId: context.identity.userId,
-      limit: 2,
+      limit: 32,
     });
-    const binding = activeBindings.length === 1 ? activeBindings[0] : undefined;
+    const conversationContext =
+      input.assembleContext === undefined
+        ? fallbackContext(context.threadId, activeBindings)
+        : await input.assembleContext({
+            principalId: context.identity.userId,
+            threadId: context.threadId,
+            currentUserText: context.userText,
+          });
     const result = await graph.invoke(
       {
         messages: [{ role: "user", content: context.userText }],
@@ -55,14 +59,37 @@ export function createSdarChatRunner(input: {
         userId: context.identity.userId,
         openWebUiChatId: context.openWebUi.chatId,
         utilityRequest: context.openWebUi.utilityTask !== undefined,
-        ...(binding === undefined ? {} : { activeTask: toActiveTask(binding) }),
+        conversationContext,
       },
       { configurable: { thread_id: context.threadId } },
     );
     if (result.requestKind === "new_task") {
-      return input.coordinator.submit(toTaskTurn(context), context.signal);
+      return input.coordinator.submit(
+        {
+          ...toTaskTurn(context),
+          userText: result.taskText ?? context.userText,
+        },
+        context.signal,
+      );
+    }
+    if (result.requestKind === "list_tasks") {
+      return renderTaskDirectory(
+        conversationContext,
+        result.includeTerminalTasks,
+      );
     }
     if (result.requestKind === "status") {
+      if (result.targetTaskId !== undefined) {
+        await touchResolvedTask(input.repository, context, result.targetTaskId);
+        return input.coordinator.statusForTask(
+          {
+            chatId: context.openWebUi.chatId,
+            userId: context.identity.userId,
+            taskId: result.targetTaskId,
+          },
+          context.signal,
+        );
+      }
       return input.coordinator.status(
         {
           chatId: context.openWebUi.chatId,
@@ -75,13 +102,32 @@ export function createSdarChatRunner(input: {
       if (result.followUpAction === undefined) {
         return "No safe SDAR Follow-up action could be determined; nothing was sent.";
       }
+      if (result.targetTaskId !== undefined) {
+        await touchResolvedTask(input.repository, context, result.targetTaskId);
+      }
       return input.coordinator.followUp(
-        toFollowUpTurn(context, result.followUpAction),
+        {
+          ...toFollowUpTurn(context, result.followUpAction),
+          ...(result.targetTaskId === undefined
+            ? {}
+            : { targetTaskId: result.targetTaskId }),
+        },
         context.signal,
       );
     }
     if (result.requestKind === "cancel") {
-      return input.coordinator.cancel(toTaskTurn(context), context.signal);
+      if (result.targetTaskId !== undefined) {
+        await touchResolvedTask(input.repository, context, result.targetTaskId);
+      }
+      return input.coordinator.cancel(
+        {
+          ...toTaskTurn(context),
+          ...(result.targetTaskId === undefined
+            ? {}
+            : { targetTaskId: result.targetTaskId }),
+        },
+        context.signal,
+      );
     }
     return renderGraphResult(result);
   };
@@ -90,6 +136,62 @@ export function createSdarChatRunner(input: {
       runId: context.runId,
       threadId: context.threadId,
     });
+}
+
+function fallbackContext(
+  threadId: string,
+  activeBindings: readonly TaskBinding[],
+): ConversationContext {
+  return {
+    threadId,
+    messages: [],
+    activeTasks: activeBindings.map((binding) => ({
+      bindingId: binding.bindingId,
+      taskId: binding.sdarTaskId,
+      contextId: binding.sdarContextId,
+      shortId: binding.shortId ?? binding.sdarTaskId.slice(0, 64),
+      status: binding.status,
+      createdAt: binding.createdAt ?? "1970-01-01T00:00:00.000Z",
+      updatedAt: binding.updatedAt ?? "1970-01-01T00:00:00.000Z",
+    })),
+    recentTerminalTasks: [],
+  };
+}
+
+function renderTaskDirectory(
+  context: ConversationContext,
+  includeTerminal: boolean,
+): string {
+  const tasks = [
+    ...context.activeTasks,
+    ...(includeTerminal ? context.recentTerminalTasks : []),
+  ];
+  if (tasks.length === 0) return "No Tasks are bound to this conversation.";
+  return [
+    "Tasks in this conversation:",
+    ...tasks.map(
+      (task, index) =>
+        `${index + 1}. ${task.shortId}: ${task.status}${task.summary === undefined ? "" : ` — ${task.summary}`}`,
+    ),
+  ].join("\n");
+}
+
+async function touchResolvedTask(
+  repository: ChatPersistenceRepository,
+  context: ChatRunnerContext,
+  taskId: string,
+): Promise<void> {
+  const binding = await repository.findAuthorizedTask({
+    openWebUiChatId: context.openWebUi.chatId,
+    userId: context.identity.userId,
+    sdarTaskId: taskId,
+  });
+  if (binding === undefined) return;
+  await repository.touchTaskReference({
+    chatId: context.openWebUi.chatId,
+    userId: context.identity.userId,
+    bindingId: binding.bindingId,
+  });
 }
 
 function toTaskTurn(context: ChatRunnerContext): TaskTurnContext {
@@ -106,41 +208,6 @@ function toFollowUpTurn(
   action: FollowUpTurnContext["action"],
 ): FollowUpTurnContext {
   return { ...toTaskTurn(context), action };
-}
-function toActiveTask(binding: {
-  readonly sdarTaskId: string;
-  readonly sdarContextId: string;
-  readonly status: string;
-  readonly pendingInput?: unknown;
-}): ActiveTaskSnapshot {
-  const status = ["SUBMITTED", "WORKING", "INPUT_REQUIRED"].includes(
-    binding.status,
-  )
-    ? (binding.status as ActiveTaskSnapshot["status"])
-    : "WORKING";
-  const internalPhase = readInternalPhase(binding.pendingInput);
-  return {
-    taskId: binding.sdarTaskId,
-    contextId: binding.sdarContextId,
-    status,
-    ...(internalPhase === undefined ? {} : { internalPhase }),
-  };
-}
-
-function readInternalPhase(
-  value: unknown,
-): ActiveTaskSnapshot["internalPhase"] | undefined {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    return undefined;
-  }
-  const phase = (value as { readonly internalPhase?: unknown }).internalPhase;
-  return [
-    "awaiting_plan_confirmation",
-    "awaiting_user_input",
-    "paused",
-  ].includes(typeof phase === "string" ? phase : "")
-    ? (phase as ActiveTaskSnapshot["internalPhase"])
-    : undefined;
 }
 function renderGraphResult(result: {
   readonly messages: readonly { readonly content: unknown }[];

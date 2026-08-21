@@ -8,7 +8,7 @@ import type { InteractionPersistenceRepository } from "../packages/persistence/s
 describe("AG-UI client state is not authority", () => {
   it("ignores injected Task, utility, and routing state", async () => {
     const listActiveTasksForChat = jest.fn(async () => []);
-    const classify = jest.fn(async () => ({ requestKind: "general_chat" }));
+    const decideTurn = jest.fn(async () => ({ kind: "general_chat" }));
     const answer = jest.fn(async () => "server-owned safe response");
     const submit = jest.fn();
     const status = jest.fn();
@@ -24,7 +24,7 @@ describe("AG-UI client state is not authority", () => {
         followUp,
         cancel,
       } as unknown as SdarTaskCoordinator,
-      model: { classify, answer },
+      model: { decideTurn, answer },
     });
 
     const events = await collect(
@@ -55,13 +55,14 @@ describe("AG-UI client state is not authority", () => {
     expect(listActiveTasksForChat).toHaveBeenCalledWith({
       principalId: "principal-1",
       threadId: "server-owned-thread",
-      limit: 2,
+      limit: 32,
     });
-    expect(classify).toHaveBeenCalledWith({
-      userText: "hello",
-      hasActiveTask: false,
-    });
-    expect(answer).toHaveBeenCalledWith({ userText: "hello" });
+    expect(decideTurn).toHaveBeenCalledWith(
+      expect.objectContaining({ currentUserText: "hello" }),
+    );
+    expect(answer).toHaveBeenCalledWith(
+      expect.objectContaining({ currentUserText: "hello" }),
+    );
     expect(submit).not.toHaveBeenCalled();
     expect(status).not.toHaveBeenCalled();
     expect(followUp).not.toHaveBeenCalled();

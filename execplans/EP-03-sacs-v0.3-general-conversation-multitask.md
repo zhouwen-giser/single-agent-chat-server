@@ -37,7 +37,9 @@ strict `TASK | MESSAGE` completed-request result.
 - [x] P01: freeze ADR, contracts, domain types, and architecture gates; pass exact-head CI.
 - [x] P02: implement the configured OpenAI-compatible conversation model.
 - [x] P03-P04: persist and assemble durable bounded conversation context.
-- [ ] P05-P07: implement multi-task persistence, resolution, focus, and coordination.
+- [x] P05-P06: implement multi-task persistence, deterministic resolution,
+      reference updates, and safe model-driven routing.
+- [ ] P07: harden explicit multi-task coordination and concurrency contracts.
 - [ ] P08-P09: implement request-result union and trusted A2A fail-closed behavior.
 - [ ] P10-P11: integrate the shared application service with OpenAI and AG-UI.
 - [ ] P12: complete security, privacy, observability, and adversarial hardening.
@@ -62,6 +64,9 @@ exact local/remote comparison before the next phase begins.
 - 2026-08-21: Measure the context budget against the exact untrusted model JSON
   envelope and reserve the current user turn before adding durable history.
   If the current turn alone cannot fit, fail explicitly instead of dropping it.
+- 2026-08-21: Treat a schema-valid model selector only as a candidate. Local
+  deterministic code resolves and authorizes it; ambiguous mutable operations
+  return candidates, increment a low-cardinality counter, and never call A2A.
 
 ## Discoveries
 

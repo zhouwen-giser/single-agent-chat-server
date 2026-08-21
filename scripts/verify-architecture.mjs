@@ -110,6 +110,15 @@ for (const file of files) {
     violations.push(`${name}: legacy implicit single-Task API is forbidden`);
   }
   if (
+    (name === "apps/server/src/main.ts" ||
+      name.startsWith("apps/server/src/chat/")) &&
+    /interaction-query|resolveQueryIntent/u.test(content)
+  ) {
+    violations.push(
+      `${name}: legacy regex query routing cannot bypass TurnDecision`,
+    );
+  }
+  if (
     /process\.env\.(?:SDAR|MCP)|process\.env\[\s*["'](?:SDAR|MCP)/u.test(
       content,
     )

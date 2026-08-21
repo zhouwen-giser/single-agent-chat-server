@@ -343,6 +343,71 @@ describe("Phase 12 adversarial hardening", () => {
     expect(repository.claimTaskInteractionSlot).not.toHaveBeenCalled();
   });
 
+  it("updates Focus only after an explicit A2A operation succeeds", async () => {
+    const authorized = binding();
+    const failedRepository = repositoryStub({
+      findAuthorizedTask: jest.fn(async () => authorized),
+    });
+    const failedClient = {
+      protocolBinding: "HTTP+JSON",
+      protocolVersion: "1.0",
+      endpoint: "http://sdar.test/a2a",
+      cancelTask: jest.fn(async () => {
+        throw new Error("SDAR unavailable");
+      }),
+    } as unknown as SdarA2aClient;
+    const failedCoordinator = new SdarTaskCoordinator({
+      repository: failedRepository,
+      getClient: async () => failedClient,
+    });
+
+    await expect(
+      collect(
+        failedCoordinator.cancel({
+          userText: "cancel task-1",
+          userId: "user-a",
+          chatId: "chat-a",
+          userMessageId: "cancel-focus-failure",
+          targetTaskId: "task-1",
+        }),
+      ),
+    ).rejects.toThrow("SDAR unavailable");
+    expect(failedRepository.setFocusedTask).not.toHaveBeenCalled();
+
+    const setFocusedTask = jest.fn(async () => undefined);
+    const successfulRepository = repositoryStub({
+      findAuthorizedTask: jest.fn(async () => authorized),
+      setFocusedTask,
+    });
+    const getTask = jest.fn(async () => normalizedTask());
+    const successfulCoordinator = new SdarTaskCoordinator({
+      repository: successfulRepository,
+      getClient: async () =>
+        ({
+          protocolBinding: "HTTP+JSON",
+          protocolVersion: "1.0",
+          endpoint: "http://sdar.test/a2a",
+          getTask,
+        }) as unknown as SdarA2aClient,
+    });
+
+    await collect(
+      successfulCoordinator.statusForTask({
+        userId: "user-a",
+        chatId: "chat-a",
+        taskId: "task-1",
+      }),
+    );
+    expect(setFocusedTask).toHaveBeenCalledWith({
+      chatId: "chat-a",
+      userId: "user-a",
+      bindingId: "binding-1",
+    });
+    expect(getTask.mock.invocationCallOrder[0]).toBeLessThan(
+      setFocusedTask.mock.invocationCallOrder[0] ?? 0,
+    );
+  });
+
   it("does not render a stale observation that persistence rejected", async () => {
     const staleBinding = binding();
     const repository = repositoryStub({

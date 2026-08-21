@@ -4,7 +4,7 @@ import { createSingleAgentChatGraph } from "../src/agent/graph.js";
 import type { StructuredChatModel } from "../src/agent/model.js";
 
 const fixtureModel: StructuredChatModel = {
-  classify: async () => ({ requestKind: "general_chat" }),
+  decideTurn: async () => ({ kind: "general_chat" }),
   answer: async () => "fixture response",
 };
 
