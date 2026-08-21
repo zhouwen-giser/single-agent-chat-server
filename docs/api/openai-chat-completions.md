@@ -56,12 +56,15 @@ Client disconnect aborts only this HTTP observation. It never maps to
 `cancelTask`. A later status request can resume observation through the
 persisted user/chat/Task binding and `getTask`.
 
-## Active Task interaction
+## Multi-Task interaction
 
-A status turn refreshes the authorized binding with `getTask` and never sends a
-Task Message. Explicit plan decisions, requested user input, pause/resume, goal
-patch/cancel actions, and top-level Task cancellation are phase-gated before an
-A2A operation. Ordinary text at plan confirmation never implies approval.
+An untargeted status turn lists every active Task in deterministic order. A
+targeted status refreshes only its authorized binding with `getTask` and never
+sends a Task Message. Explicit plan decisions, requested user input,
+pause/resume, goal patch/cancel actions, and top-level Task cancellation must
+resolve to one full Task ID and are phase-gated before A2A. Mutations of one
+Task serialize; another Task in the same Chat remains independently available.
+Ordinary text at plan confirmation never implies approval.
 
 Streaming protocol failures produce a generic safe delta and still terminate
 with the standard stop chunk and `[DONE]`; internal endpoints, tokens, and

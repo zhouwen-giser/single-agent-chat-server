@@ -114,35 +114,32 @@ export function createSdarAgUiInteractionSource(input: {
         );
         return;
       }
-      yield* coordinatorInteractionEvents(context, (observer) =>
-        input.coordinator.status(
-          { chatId: context.threadId, userId: context.principalId },
-          context.signal,
-          observer,
-        ),
+      yield* coordinatorInteractionEvents(context, () =>
+        input.coordinator.listTaskStatuses({
+          chatId: context.threadId,
+          userId: context.principalId,
+        }),
       );
       return;
     }
     const followUpAction = graphResult.followUpAction;
     if (
       graphResult.requestKind === "follow_up" &&
-      followUpAction !== undefined
+      followUpAction !== undefined &&
+      graphResult.targetTaskId !== undefined
     ) {
-      if (graphResult.targetTaskId !== undefined) {
-        await touchResolvedTask(
-          input.repository,
-          context.principalId,
-          context.threadId,
-          graphResult.targetTaskId,
-        );
-      }
+      const targetTaskId = graphResult.targetTaskId;
+      await touchResolvedTask(
+        input.repository,
+        context.principalId,
+        context.threadId,
+        targetTaskId,
+      );
       yield* coordinatorInteractionEvents(context, (observer) =>
         input.coordinator.followUp(
           {
             ...toFollowUpTurn(context, userText, followUpAction),
-            ...(graphResult.targetTaskId === undefined
-              ? {}
-              : { targetTaskId: graphResult.targetTaskId }),
+            taskId: targetTaskId,
           },
           context.signal,
           observer,
@@ -151,21 +148,25 @@ export function createSdarAgUiInteractionSource(input: {
       return;
     }
     if (graphResult.requestKind === "cancel") {
-      if (graphResult.targetTaskId !== undefined) {
-        await touchResolvedTask(
-          input.repository,
-          context.principalId,
-          context.threadId,
-          graphResult.targetTaskId,
+      if (graphResult.targetTaskId === undefined) {
+        yield* legacyChatResultToInteractionEvents(
+          "No unique SDAR Task could be determined; no cancellation was sent.",
+          { runId: context.input.runId, threadId: context.input.threadId },
         );
+        return;
       }
+      const targetTaskId = graphResult.targetTaskId;
+      await touchResolvedTask(
+        input.repository,
+        context.principalId,
+        context.threadId,
+        targetTaskId,
+      );
       yield* coordinatorInteractionEvents(context, (observer) =>
         input.coordinator.cancel(
           {
             ...toTaskTurn(context, userText),
-            ...(graphResult.targetTaskId === undefined
-              ? {}
-              : { targetTaskId: graphResult.targetTaskId }),
+            taskId: targetTaskId,
           },
           context.signal,
           observer,
@@ -323,7 +324,7 @@ function toFollowUpTurn(
   context: Parameters<DurableAgUiEventSource>[0],
   userText: string,
   action: FollowUpTurnContext["action"],
-): FollowUpTurnContext {
+): Omit<FollowUpTurnContext, "taskId"> {
   return { ...toTaskTurn(context, userText), action };
 }
 

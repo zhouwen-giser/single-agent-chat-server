@@ -244,6 +244,38 @@ describePostgres("P05 multi-Task directory, focus, and leases", () => {
     ).resolves.toBe(true);
   });
 
+  it("rereads an optimistic conflict and preserves a newer terminal observation", async () => {
+    const repository = new InteractionPersistenceRepository(pool, 60_000, 8);
+    const { principalId, threadId } = await createThread(
+      repository,
+      "optimistic",
+    );
+    const original = await createTask(
+      repository,
+      principalId,
+      threadId,
+      "optimistic-task",
+    );
+    await repository.updateTaskBinding({
+      bindingId: original.bindingId,
+      expectedVersion: original.version,
+      status: "COMPLETED",
+      lastStatusTimestamp: "2026-08-21T12:00:00.000Z",
+      terminal: true,
+    });
+
+    const stale = await repository.updateTaskBinding({
+      bindingId: original.bindingId,
+      expectedVersion: original.version,
+      status: "WORKING",
+      lastStatusTimestamp: "2026-08-21T11:59:00.000Z",
+      terminal: false,
+    });
+
+    expect(stale).toMatchObject({ status: "COMPLETED" });
+    expect(stale.terminalAt).toBeDefined();
+  });
+
   it("upgrades a complete v0.2 schema and removes the one-active index", async () => {
     await resetSchema();
     await pool.query("CREATE SCHEMA chat_service");

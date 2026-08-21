@@ -77,6 +77,11 @@ model for business routing, create an SDAR Task, or change Focus.
 - `packages/request-result`: strict completed-result union; P08 adds persistence
   and replay.
 - `packages/chat-runtime`: shared explicit multi-Task coordinator.
+  Follow-up and Cancel require a full authorized `taskId`; status refresh also
+  targets one Task, while `listTaskStatuses` is read-only. Mutations lease only
+  the selected binding, so different Tasks progress concurrently. Every
+  returned or polled Task is checked against both persisted Task and Context
+  identity before Focus, persistence, observation, or publication.
 - `packages/sdar-a2a-adapter`: the only official A2A SDK boundary.
 
 OpenAI and AG-UI adapters must not copy any conversation, selector, focus,

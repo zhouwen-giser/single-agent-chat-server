@@ -72,7 +72,7 @@ describe("P06 model decision and Task reference integration", () => {
     );
     expect(followUp).toHaveBeenCalledWith(
       expect.objectContaining({
-        targetTaskId: bravo.taskId,
+        taskId: bravo.taskId,
         action: "confirm_plan",
       }),
       undefined,

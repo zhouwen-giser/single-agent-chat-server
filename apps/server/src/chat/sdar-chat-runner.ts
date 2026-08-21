@@ -90,41 +90,36 @@ export function createSdarChatRunner(input: {
           context.signal,
         );
       }
-      return input.coordinator.status(
-        {
-          chatId: context.openWebUi.chatId,
-          userId: context.identity.userId,
-        },
-        context.signal,
-      );
+      return input.coordinator.listTaskStatuses({
+        chatId: context.openWebUi.chatId,
+        userId: context.identity.userId,
+      });
     }
     if (result.requestKind === "follow_up") {
-      if (result.followUpAction === undefined) {
+      if (
+        result.followUpAction === undefined ||
+        result.targetTaskId === undefined
+      ) {
         return "No safe SDAR Follow-up action could be determined; nothing was sent.";
       }
-      if (result.targetTaskId !== undefined) {
-        await touchResolvedTask(input.repository, context, result.targetTaskId);
-      }
+      await touchResolvedTask(input.repository, context, result.targetTaskId);
       return input.coordinator.followUp(
         {
           ...toFollowUpTurn(context, result.followUpAction),
-          ...(result.targetTaskId === undefined
-            ? {}
-            : { targetTaskId: result.targetTaskId }),
+          taskId: result.targetTaskId,
         },
         context.signal,
       );
     }
     if (result.requestKind === "cancel") {
-      if (result.targetTaskId !== undefined) {
-        await touchResolvedTask(input.repository, context, result.targetTaskId);
+      if (result.targetTaskId === undefined) {
+        return "No unique SDAR Task could be determined; no cancellation was sent.";
       }
+      await touchResolvedTask(input.repository, context, result.targetTaskId);
       return input.coordinator.cancel(
         {
           ...toTaskTurn(context),
-          ...(result.targetTaskId === undefined
-            ? {}
-            : { targetTaskId: result.targetTaskId }),
+          taskId: result.targetTaskId,
         },
         context.signal,
       );
@@ -206,7 +201,7 @@ function toTaskTurn(context: ChatRunnerContext): TaskTurnContext {
 function toFollowUpTurn(
   context: ChatRunnerContext,
   action: FollowUpTurnContext["action"],
-): FollowUpTurnContext {
+): Omit<FollowUpTurnContext, "taskId"> {
   return { ...toTaskTurn(context), action };
 }
 function renderGraphResult(result: {

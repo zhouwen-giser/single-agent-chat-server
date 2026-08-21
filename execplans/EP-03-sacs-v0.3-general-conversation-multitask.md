@@ -39,7 +39,8 @@ strict `TASK | MESSAGE` completed-request result.
 - [x] P03-P04: persist and assemble durable bounded conversation context.
 - [x] P05-P06: implement multi-task persistence, deterministic resolution,
       reference updates, and safe model-driven routing.
-- [ ] P07: harden explicit multi-task coordination and concurrency contracts.
+- [x] P07: harden explicit multi-task coordination, Task identity, bounded
+      optimistic merge, and concurrency contracts.
 - [ ] P08-P09: implement request-result union and trusted A2A fail-closed behavior.
 - [ ] P10-P11: integrate the shared application service with OpenAI and AG-UI.
 - [ ] P12: complete security, privacy, observability, and adversarial hardening.
@@ -67,6 +68,9 @@ exact local/remote comparison before the next phase begins.
 - 2026-08-21: Treat a schema-valid model selector only as a candidate. Local
   deterministic code resolves and authorizes it; ambiguous mutable operations
   return candidates, increment a low-cardinality counter, and never call A2A.
+- 2026-08-21: Existing-Task Coordinator operations accept only an explicit full
+  Task ID. A mutation lease is scoped to its binding; every A2A Task result is
+  checked against persisted Task and Context identity before any state change.
 
 ## Discoveries
 

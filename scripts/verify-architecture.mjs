@@ -110,6 +110,14 @@ for (const file of files) {
     violations.push(`${name}: legacy implicit single-Task API is forbidden`);
   }
   if (
+    name === "packages/chat-runtime/src/task-coordinator.ts" &&
+    (/\btargetTaskId\b/u.test(content) || /async \*status\s*\(/u.test(content))
+  ) {
+    violations.push(
+      `${name}: existing-Task Coordinator operations require explicit taskId`,
+    );
+  }
+  if (
     (name === "apps/server/src/main.ts" ||
       name.startsWith("apps/server/src/chat/")) &&
     /interaction-query|resolveQueryIntent/u.test(content)

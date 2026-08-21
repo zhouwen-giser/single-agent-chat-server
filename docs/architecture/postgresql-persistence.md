@@ -44,8 +44,10 @@ Task, or Evidence records. SDAR remains authoritative for all of them.
 - A Thread may contain multiple nonterminal Tasks. The deterministic directory
   orders active Tasks first, then by last interaction, creation time, and Task
   ID. The configurable active limit defaults to eight.
-- Task updates use optimistic versions. Once `terminal_at` is set, later stale
-  nonterminal updates cannot clear it or roll the persisted status backward.
+- Task updates use optimistic versions. A conflict performs at most three
+  reread/merge attempts; a newer timestamp or terminal row wins. Once
+  `terminal_at` is set, later stale nonterminal updates cannot clear it or roll
+  the persisted status backward.
 - Duplicate same-hash claims are either reported as in progress or replay the
   completed result. A different hash for the same key is a conflict.
 - Older published observations cannot overwrite a newer persisted observation;
@@ -100,6 +102,9 @@ summary conflicts, system-role exclusion, and representative v0.2 upgrade with
 no invented history. The P05 suite verifies three concurrent active bindings,
 same-thread Focus enforcement, collision-safe short IDs, configurable active
 limits, Task-level lease isolation, terminal counting, and v0.2 migration.
+The P07 coordinator suite verifies explicit A/B/C targeting, read-only listing,
+same-Task serialization, cross-Task mutation parallelism, status during another
+Task mutation, Task/Context mismatch rejection, and bounded stale-write merge.
 Phase 8 additionally verifies submission-lease
 serialization/expiry/startup recovery, stale-event rejection, database restart
 recovery in the same production process, and a production service restart

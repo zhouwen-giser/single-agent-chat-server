@@ -269,13 +269,11 @@ describe("Phase 12 adversarial hardening", () => {
 
   it("serializes mutating Follow-ups and abandons an unsent idempotency claim", async () => {
     const repository = repositoryStub({
-      listActiveTasksForChat: jest.fn(async () => [
-        {
-          ...binding(),
-          status: "INPUT_REQUIRED",
-          pendingInput: { internalPhase: "awaiting_user_input" },
-        },
-      ]),
+      findAuthorizedTask: jest.fn(async () => ({
+        ...binding(),
+        status: "INPUT_REQUIRED",
+        pendingInput: { internalPhase: "awaiting_user_input" },
+      })),
       claimTaskInteractionSlot: jest.fn(async () => false),
     });
     const sendFollowUp = jest.fn();
@@ -298,6 +296,7 @@ describe("Phase 12 adversarial hardening", () => {
         userId: "user-a",
         chatId: "chat-a",
         userMessageId: "message-follow-up",
+        taskId: "task-1",
         action: "provide_input",
       }),
     );
@@ -307,7 +306,7 @@ describe("Phase 12 adversarial hardening", () => {
     expect(repository.abandonRequestClaim).toHaveBeenCalledTimes(1);
   });
 
-  it("clarifies ambiguous mutation and lists multi-Task status without A2A calls", async () => {
+  it("lists multi-Task status and rejects an unauthorized explicit target without A2A", async () => {
     const first = { ...binding(), shortId: "task-one" };
     const second = {
       ...binding(),
@@ -330,13 +329,14 @@ describe("Phase 12 adversarial hardening", () => {
         userId: "user-a",
         chatId: "chat-a",
         userMessageId: "ambiguous-cancel",
+        taskId: "task-unknown",
       }),
     );
     const statusOutput = await collect(
-      coordinator.status({ userId: "user-a", chatId: "chat-a" }),
+      coordinator.listTaskStatuses({ userId: "user-a", chatId: "chat-a" }),
     );
 
-    expect(cancelOutput.join("\n")).toContain("Name exactly one Task");
+    expect(cancelOutput.join("\n")).toContain("not bound");
     expect(statusOutput.join("\n")).toContain("task-one: WORKING");
     expect(statusOutput.join("\n")).toContain("task-two: WORKING");
     expect(getClient).not.toHaveBeenCalled();
@@ -368,7 +368,7 @@ describe("Phase 12 adversarial hardening", () => {
           userId: "user-a",
           chatId: "chat-a",
           userMessageId: "cancel-focus-failure",
-          targetTaskId: "task-1",
+          taskId: "task-1",
         }),
       ),
     ).rejects.toThrow("SDAR unavailable");
@@ -411,7 +411,7 @@ describe("Phase 12 adversarial hardening", () => {
   it("does not render a stale observation that persistence rejected", async () => {
     const staleBinding = binding();
     const repository = repositoryStub({
-      listActiveTasksForChat: jest.fn(async () => [staleBinding]),
+      findAuthorizedTask: jest.fn(async () => staleBinding),
       recordEvent: jest.fn(async () => true),
       updateTaskBinding: jest.fn(async () => ({
         ...staleBinding,
@@ -436,7 +436,13 @@ describe("Phase 12 adversarial hardening", () => {
     });
 
     await expect(
-      collect(coordinator.status({ chatId: "chat-a", userId: "user-a" })),
+      collect(
+        coordinator.statusForTask({
+          chatId: "chat-a",
+          userId: "user-a",
+          taskId: "task-1",
+        }),
+      ),
     ).resolves.toEqual([]);
   });
 

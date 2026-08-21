@@ -73,6 +73,11 @@ Follow-up uses the existing `taskId` and `contextId` through adapter
 uses adapter `cancelTask` and displays the exact returned Task state without
 inferring lower-level Provider shutdown.
 
+The shared Coordinator accepts no implicit current-Task mutation. Follow-up and
+Cancel require an authorized full `taskId`, acquire only that binding's lease,
+and compare both Task and Context identity on every A2A Task result. Status and
+directory listing do not acquire mutation leases.
+
 FAILED tasks with published `capabilityGap`, `CAPABILITY_GAP`, or
 `internalPhase=capability_gap` are distinguished from ordinary business
 failure. Published error codes are allowlisted, text and Artifact content are

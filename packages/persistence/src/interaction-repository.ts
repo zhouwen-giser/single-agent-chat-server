@@ -414,8 +414,10 @@ export class InteractionPersistenceRepository {
     readonly lastEventHash?: string;
     readonly terminal: boolean;
   }): Promise<TaskBinding> {
-    const result = await this.pool.query<InteractionTaskRow>(
-      `
+    let expectedVersion = input.expectedVersion;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const result = await this.pool.query<InteractionTaskRow>(
+        `
         UPDATE chat_service.conversation_task_binding
         SET status = CASE
               WHEN terminal_at IS NULL AND (
@@ -462,20 +464,39 @@ export class InteractionPersistenceRepository {
         WHERE binding_id = $1 AND version = $2
         RETURNING *
       `,
-      [
-        input.bindingId,
-        input.expectedVersion,
-        input.status,
-        input.pendingInput ?? null,
-        input.lastStatusTimestamp ?? null,
-        input.lastEventHash ?? null,
-        input.terminal,
-      ],
-    );
-    if (result.rowCount !== 1) {
-      throw new PersistenceConflictError("Task binding version conflict");
+        [
+          input.bindingId,
+          expectedVersion,
+          input.status,
+          input.pendingInput ?? null,
+          input.lastStatusTimestamp ?? null,
+          input.lastEventHash ?? null,
+          input.terminal,
+        ],
+      );
+      if (result.rowCount === 1) {
+        return mapInteractionTask(
+          requiredRow(result.rows, "Task binding update"),
+        );
+      }
+      const reread = await this.pool.query<InteractionTaskRow>(
+        `SELECT * FROM chat_service.conversation_task_binding
+         WHERE binding_id = $1`,
+        [input.bindingId],
+      );
+      const current = reread.rows[0];
+      if (current === undefined) {
+        throw new PersistenceConflictError("Task binding no longer exists");
+      }
+      const binding = mapInteractionTask(current);
+      if (preserveCurrentTaskBinding(binding, input.lastStatusTimestamp)) {
+        return binding;
+      }
+      expectedVersion = binding.version;
     }
-    return mapInteractionTask(requiredRow(result.rows, "Task binding update"));
+    throw new PersistenceConflictError(
+      "Task binding version conflict after bounded retries",
+    );
   }
 
   async recordEvent(input: {
@@ -1539,6 +1560,22 @@ const mapInteractionTask = (row: InteractionTaskRow): TaskBinding => ({
   updatedAt: row.updated_at.toISOString(),
   version: Number(row.version),
 });
+
+function preserveCurrentTaskBinding(
+  current: TaskBinding,
+  incomingTimestamp: string | undefined,
+): boolean {
+  if (current.terminalAt !== undefined) return true;
+  if (
+    incomingTimestamp === undefined ||
+    current.lastStatusTimestamp === undefined
+  ) {
+    return false;
+  }
+  return (
+    Date.parse(incomingTimestamp) < Date.parse(current.lastStatusTimestamp)
+  );
+}
 
 const mapPrincipal = (row: PrincipalRow): Principal => ({
   principalId: row.principal_id,

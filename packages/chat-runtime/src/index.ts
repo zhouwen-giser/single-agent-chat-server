@@ -1,5 +1,6 @@
 export {
   SdarTaskCoordinator,
+  type ExistingTaskTurnContext,
   type FollowUpTurnContext,
   type TaskCoordinatorOptions,
   type TaskCoordinatorObservation,

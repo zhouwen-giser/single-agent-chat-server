@@ -43,7 +43,16 @@ only the current HTTP observation; it does not imply `cancelTask`.
 `GET /ag-ui/capabilities` returns an object validated by the official
 `AgentCapabilitiesSchema`. It describes AG-UI transport and interaction
 features; SDAR business capabilities remain authoritative in the current Agent
-Card and are queried through the interaction query service.
+Card and are queried as a new natural-language request to the fixed SDAR A2A
+client.
+
+## Multi-Task targeting
+
+AG-UI uses the same bounded Conversation Context, TurnDecision, deterministic
+Task resolver, and Coordinator contract as the OpenAI endpoint. Follow-up and
+Cancel always pass one locally authorized full `taskId`; untargeted status lists
+all active Tasks. A Task mutation lease never blocks status or a mutation of a
+different Task in the same Thread.
 
 ## Durable Run and reconnect
 
