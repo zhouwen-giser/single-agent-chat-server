@@ -207,6 +207,20 @@ if (!/ConversationApplicationService/u.test(openAiRunner)) {
     "apps/server/src/chat/sdar-chat-runner.ts: shared ConversationApplicationService is required",
   );
 }
+const agUiRunner = await readFile(
+  join(root, "apps/server/src/chat/sdar-agui-runner.ts"),
+  "utf8",
+);
+if (/createSingleAgentChatGraph|classifyTurn/u.test(agUiRunner)) {
+  violations.push(
+    "apps/server/src/chat/sdar-agui-runner.ts: AG-UI adapter bypasses ConversationApplicationService",
+  );
+}
+if (!/ConversationApplicationService/u.test(agUiRunner)) {
+  violations.push(
+    "apps/server/src/chat/sdar-agui-runner.ts: shared ConversationApplicationService is required",
+  );
+}
 if (violations.length > 0) {
   throw new Error(`Architecture gate failed:\n${violations.join("\n")}`);
 }

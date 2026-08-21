@@ -36,18 +36,6 @@ export class ChatPersistenceRepository {
     readonly userRole: string;
   }): Promise<ThreadBinding> {
     return this.transaction(async (client) => {
-      const result = await client.query<ThreadRow>(
-        `
-          INSERT INTO chat_service.chat_thread_binding(
-            thread_id, openwebui_chat_id, user_id, user_role
-          ) VALUES ($1, $2, $3, $4)
-          ON CONFLICT (openwebui_chat_id, user_id)
-          DO UPDATE SET user_role = EXCLUDED.user_role, updated_at = now()
-          RETURNING thread_id, openwebui_chat_id, user_id, user_role
-        `,
-        [randomUUID(), input.openWebUiChatId, input.userId, input.userRole],
-      );
-      const thread = mapThread(requiredRow(result.rows, "thread upsert"));
       const principal = await client.query<{ principal_id: string }>(
         `
           INSERT INTO chat_service.principal(principal_id, issuer, subject, role)
@@ -62,6 +50,41 @@ export class ChatPersistenceRepository {
         principal.rows,
         "principal upsert",
       ).principal_id;
+      await client.query(
+        `SELECT principal_id FROM chat_service.principal
+         WHERE principal_id = $1 FOR UPDATE`,
+        [principalId],
+      );
+      const shared = await client.query<{ internal_thread_id: string }>(
+        `SELECT binding.internal_thread_id
+         FROM chat_service.client_thread_binding binding
+         JOIN chat_service.conversation_thread conversation
+           ON conversation.thread_id = binding.internal_thread_id
+         WHERE binding.external_thread_id = $1
+           AND binding.principal_id = $2
+           AND conversation.principal_id = $2
+         ORDER BY CASE binding.client_type
+           WHEN 'openwebui' THEN 0 ELSE 1 END, binding.created_at
+         LIMIT 1`,
+        [input.openWebUiChatId, principalId],
+      );
+      const result = await client.query<ThreadRow>(
+        `
+          INSERT INTO chat_service.chat_thread_binding(
+            thread_id, openwebui_chat_id, user_id, user_role
+          ) VALUES ($1, $2, $3, $4)
+          ON CONFLICT (openwebui_chat_id, user_id)
+          DO UPDATE SET user_role = EXCLUDED.user_role, updated_at = now()
+          RETURNING thread_id, openwebui_chat_id, user_id, user_role
+        `,
+        [
+          shared.rows[0]?.internal_thread_id ?? randomUUID(),
+          input.openWebUiChatId,
+          input.userId,
+          input.userRole,
+        ],
+      );
+      const thread = mapThread(requiredRow(result.rows, "thread upsert"));
       await client.query(
         `
           INSERT INTO chat_service.conversation_thread(thread_id, principal_id)

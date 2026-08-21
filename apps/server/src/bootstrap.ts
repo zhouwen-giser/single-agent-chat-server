@@ -10,6 +10,7 @@ import type { AgUiRunHandler } from "../../../packages/ag-ui-interaction-adapter
 import { openAiError } from "../../../packages/openai-api-contract/src/index.js";
 import {
   registerAgUiRoutes,
+  type AgUiRoutesOptions,
   type ResolveAgUiThread,
 } from "./api/ag-ui-routes.js";
 import { registerHealthRoutes } from "./api/health-routes.js";
@@ -38,6 +39,7 @@ export interface BuildServerOptions extends Pick<
   readonly telemetry?: SecureTelemetry;
   readonly resolveAgUiThread?: ResolveAgUiThread;
   readonly runAgUi?: AgUiRunHandler;
+  readonly persistAgUiAssistantMessages?: AgUiRoutesOptions["persistAssistantMessages"];
   readonly rateLimiter?: FixedWindowRateLimiter;
 }
 
@@ -117,6 +119,11 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     rateLimiter,
     resolveThread: options.resolveAgUiThread ?? unavailableAgUiThread,
     ...(options.runAgUi === undefined ? {} : { runAgUi: options.runAgUi }),
+    ...(options.persistAgUiAssistantMessages === undefined
+      ? {}
+      : {
+          persistAssistantMessages: options.persistAgUiAssistantMessages,
+        }),
     ...(options.now === undefined ? {} : { now: options.now }),
   });
   void server.register(registerHealthRoutes, {

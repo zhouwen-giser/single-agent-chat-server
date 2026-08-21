@@ -17,6 +17,7 @@ import {
   ConversationContextAssembler,
 } from "../packages/conversation-context/src/index.js";
 import {
+  ChatPersistenceRepository,
   ConversationPersistenceRepository,
   InteractionPersistenceRepository,
   PersistenceAuthorizationError,
@@ -96,6 +97,80 @@ describeWithPostgres("protocol-neutral conversation persistence", () => {
     await expect(repository.loadRecentMessages(identity)).resolves.toHaveLength(
       1,
     );
+  });
+
+  it("shares one Thread and deduplicates stable message IDs across protocols", async () => {
+    const interaction = new InteractionPersistenceRepository(pool, 60_000);
+    const principal = await interaction.resolvePrincipal({
+      issuer: "openwebui-jwt",
+      subject: "cross-protocol-user",
+      role: "user",
+    });
+    const agUi = await interaction.getOrCreateThread({
+      clientType: "ag_ui",
+      externalThreadId: "cross-protocol-thread",
+      principalId: principal.principalId,
+    });
+    const openAi = await new ChatPersistenceRepository(
+      pool,
+      60_000,
+    ).getOrCreateThread({
+      openWebUiChatId: "cross-protocol-thread",
+      userId: "cross-protocol-user",
+      userRole: "user",
+    });
+    const reboundAgUi = await interaction.getOrCreateThread({
+      clientType: "ag_ui",
+      externalThreadId: "cross-protocol-thread",
+      principalId: principal.principalId,
+    });
+
+    expect(openAi.threadId).toBe(agUi.threadId);
+    expect(reboundAgUi.threadId).toBe(agUi.threadId);
+
+    const openAiFirst = await new ChatPersistenceRepository(
+      pool,
+      60_000,
+    ).getOrCreateThread({
+      openWebUiChatId: "openai-first-thread",
+      userId: "openai-first-user",
+      userRole: "user",
+    });
+    const openAiFirstPrincipal = await interaction.resolvePrincipal({
+      issuer: "openwebui-jwt",
+      subject: "openai-first-user",
+      role: "user",
+    });
+    const agUiSecond = await interaction.getOrCreateThread({
+      clientType: "ag_ui",
+      externalThreadId: "openai-first-thread",
+      principalId: openAiFirstPrincipal.principalId,
+    });
+    expect(agUiSecond.threadId).toBe(openAiFirst.threadId);
+
+    const repository = conversationRepository();
+    const first = await repository.ingestUserMessage({
+      principalId: principal.principalId,
+      threadId: agUi.threadId,
+      protocol: "openai",
+      externalMessageId: "shared-user-message",
+      contentText: "shared protocol-neutral turn",
+    });
+    const duplicate = await repository.ingestUserMessage({
+      principalId: principal.principalId,
+      threadId: agUi.threadId,
+      protocol: "ag_ui",
+      externalMessageId: "shared-user-message",
+      contentText: "shared protocol-neutral turn",
+    });
+
+    expect(duplicate).toEqual({ outcome: "duplicate", message: first.message });
+    await expect(
+      repository.loadRecentMessages({
+        principalId: principal.principalId,
+        threadId: agUi.threadId,
+      }),
+    ).resolves.toHaveLength(1);
   });
 
   it("allocates a unique stable Thread sequence under concurrency", async () => {

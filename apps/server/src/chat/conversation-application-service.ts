@@ -3,6 +3,7 @@ import type { BaseCheckpointSaver } from "@langchain/langgraph";
 import {
   SdarTaskCoordinator,
   type FollowUpTurnContext,
+  type TaskCoordinatorObserver,
   type TaskTurnContext,
 } from "../../../../packages/chat-runtime/src/index.js";
 import type {
@@ -43,7 +44,9 @@ export interface ConversationApplicationTurn {
   readonly chatId: string;
   readonly threadId: string;
   readonly userMessageId: string;
+  readonly currentUserExternalMessageId?: string;
   readonly utilityRequest: boolean;
+  readonly coordinatorObserver?: TaskCoordinatorObserver;
   readonly signal?: AbortSignal;
 }
 
@@ -96,13 +99,17 @@ export class ConversationApplicationService {
       { configurable: { thread_id: turn.threadId } },
     );
     if (result.requestKind === "new_task") {
-      return this.options.coordinator.submit(
-        {
-          ...toTaskTurn(turn),
-          userText: result.taskText ?? turn.userText,
-        },
-        turn.signal,
-      );
+      const input = {
+        ...toTaskTurn(turn),
+        userText: result.taskText ?? turn.userText,
+      };
+      return turn.coordinatorObserver === undefined
+        ? this.options.coordinator.submit(input, turn.signal)
+        : this.options.coordinator.submit(
+            input,
+            turn.signal,
+            turn.coordinatorObserver,
+          );
     }
     if (result.requestKind === "list_tasks") {
       return renderTaskDirectory(
@@ -113,14 +120,18 @@ export class ConversationApplicationService {
     if (result.requestKind === "status") {
       if (result.targetTaskId !== undefined) {
         await this.touchResolvedTask(turn, result.targetTaskId);
-        return this.options.coordinator.statusForTask(
-          {
-            chatId: turn.chatId,
-            userId: turn.userId,
-            taskId: result.targetTaskId,
-          },
-          turn.signal,
-        );
+        const input = {
+          chatId: turn.chatId,
+          userId: turn.userId,
+          taskId: result.targetTaskId,
+        };
+        return turn.coordinatorObserver === undefined
+          ? this.options.coordinator.statusForTask(input, turn.signal)
+          : this.options.coordinator.statusForTask(
+              input,
+              turn.signal,
+              turn.coordinatorObserver,
+            );
       }
       return this.options.coordinator.listTaskStatuses({
         chatId: turn.chatId,
@@ -135,23 +146,31 @@ export class ConversationApplicationService {
         return "No safe SDAR Follow-up action could be determined; nothing was sent.";
       }
       await this.touchResolvedTask(turn, result.targetTaskId);
-      return this.options.coordinator.followUp(
-        {
-          ...toFollowUpTurn(turn, result.followUpAction),
-          taskId: result.targetTaskId,
-        },
-        turn.signal,
-      );
+      const input = {
+        ...toFollowUpTurn(turn, result.followUpAction),
+        taskId: result.targetTaskId,
+      };
+      return turn.coordinatorObserver === undefined
+        ? this.options.coordinator.followUp(input, turn.signal)
+        : this.options.coordinator.followUp(
+            input,
+            turn.signal,
+            turn.coordinatorObserver,
+          );
     }
     if (result.requestKind === "cancel") {
       if (result.targetTaskId === undefined) {
         return "No unique SDAR Task could be determined; no cancellation was sent.";
       }
       await this.touchResolvedTask(turn, result.targetTaskId);
-      return this.options.coordinator.cancel(
-        { ...toTaskTurn(turn), taskId: result.targetTaskId },
-        turn.signal,
-      );
+      const input = { ...toTaskTurn(turn), taskId: result.targetTaskId };
+      return turn.coordinatorObserver === undefined
+        ? this.options.coordinator.cancel(input, turn.signal)
+        : this.options.coordinator.cancel(
+            input,
+            turn.signal,
+            turn.coordinatorObserver,
+          );
     }
     return renderGraphResult(result);
   }
@@ -164,7 +183,8 @@ export class ConversationApplicationService {
       threadId: turn.threadId,
       protocol: turn.protocol,
       requestId: turn.userMessageId,
-      currentUserExternalMessageId: turn.userMessageId,
+      currentUserExternalMessageId:
+        turn.currentUserExternalMessageId ?? turn.userMessageId,
       messages: turn.clientMessages,
     });
     const activeBindings = await this.options.repository.listActiveTasksForChat(

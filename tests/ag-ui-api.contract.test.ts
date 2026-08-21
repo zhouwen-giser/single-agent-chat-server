@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 
-import { afterEach, describe, expect, it } from "@jest/globals";
+import { afterEach, describe, expect, it, jest } from "@jest/globals";
 import {
   AgentCapabilitiesSchema,
   EventSchemas,
@@ -13,7 +13,10 @@ import type { FastifyInstance } from "fastify";
 
 import { buildServer } from "../apps/server/src/bootstrap.js";
 import type { ServerConfig } from "../apps/server/src/config.js";
-import { createTextAgUiRunHandler } from "../packages/ag-ui-interaction-adapter/src/index.js";
+import {
+  createTextAgUiRunHandler,
+  type AgUiRunHandler,
+} from "../packages/ag-ui-interaction-adapter/src/index.js";
 
 const openAiServiceKey = "phase-5-openai-service-key-at-least-32-characters";
 const agUiServiceKey = "phase-5-ag-ui-service-key-at-least-32-characters";
@@ -207,12 +210,92 @@ describe("AG-UI HTTP/SSE endpoint", () => {
     expect(response.body).not.toContain("private");
     expect(response.body).not.toContain("stack");
   });
+
+  it("persists exactly the assistant deltas published through official SSE", async () => {
+    const persist = jest.fn(async () => undefined);
+    const server = createServer("published AG-UI answer", [], persist);
+
+    const response = await server.inject({
+      method: "POST",
+      url: "/ag-ui",
+      headers: { ...headers, accept: "text/event-stream" },
+      payload: runInput(),
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(persist).toHaveBeenCalledWith({
+      principalId: "principal-1",
+      internalThreadId: "internal-thread-1",
+      runInput: runInput(),
+      messages: [
+        {
+          externalMessageId: "run-1:assistant",
+          contentText: "published AG-UI answer",
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it("marks already published assistant deltas truncated after a safe failure", async () => {
+    const persist = jest.fn(async () => undefined);
+    const partialRun: AgUiRunHandler = async function* (context) {
+      yield EventSchemas.parse({
+        type: EventType.RUN_STARTED,
+        threadId: context.input.threadId,
+        runId: context.input.runId,
+      });
+      yield EventSchemas.parse({
+        type: EventType.TEXT_MESSAGE_START,
+        messageId: "partial-assistant",
+        role: "assistant",
+      });
+      yield EventSchemas.parse({
+        type: EventType.TEXT_MESSAGE_CONTENT,
+        messageId: "partial-assistant",
+        delta: "published before failure",
+      });
+      throw new Error("private failure detail");
+    };
+    const server = createServer("unused", [], persist, partialRun);
+
+    const response = await server.inject({
+      method: "POST",
+      url: "/ag-ui",
+      headers: { ...headers, accept: "text/event-stream" },
+      payload: runInput(),
+    });
+
+    expect(decodeEvents(response.body).map(({ type }) => type)).toEqual([
+      EventType.RUN_STARTED,
+      EventType.TEXT_MESSAGE_START,
+      EventType.TEXT_MESSAGE_CONTENT,
+      EventType.RUN_ERROR,
+    ]);
+    expect(response.body).not.toContain("private failure detail");
+    expect(persist).toHaveBeenCalledWith({
+      principalId: "principal-1",
+      internalThreadId: "internal-thread-1",
+      runInput: runInput(),
+      messages: [
+        {
+          externalMessageId: "partial-assistant",
+          contentText: "published before failure",
+        },
+      ],
+      truncated: true,
+    });
+  });
 });
 
 function createServer(
   answer:
     string | ((input: { readonly userText: string }) => Promise<string>) = "ok",
   resolved: Array<Record<string, string>> = [],
+  persistAgUiAssistantMessages?: Parameters<
+    typeof buildServer
+  >[0]["persistAgUiAssistantMessages"],
+  runAgUiOverride?: AgUiRunHandler,
 ): FastifyInstance {
   const answerFunction =
     typeof answer === "string" ? async () => answer : answer;
@@ -236,7 +319,10 @@ function createServer(
       };
     },
     runChat: async () => "openai remains isolated",
-    runAgUi: createTextAgUiRunHandler(answerFunction),
+    runAgUi: runAgUiOverride ?? createTextAgUiRunHandler(answerFunction),
+    ...(persistAgUiAssistantMessages === undefined
+      ? {}
+      : { persistAgUiAssistantMessages }),
   });
   servers.push(server);
   return server;

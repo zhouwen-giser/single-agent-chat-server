@@ -11,6 +11,7 @@ import {
   InterruptResumeService,
   persistInterruptsBeforeRunFinish,
   resumeRunToInteractionEvents,
+  taskRequestId,
 } from "../../../packages/interaction-runtime/src/index.js";
 import {
   InteractionTaskCoordinatorRepository,
@@ -108,6 +109,7 @@ try {
     coordinator: agUiCoordinator,
     model: chatModel,
     assembleContext,
+    importHistory: historyImporter.import.bind(historyImporter),
     onClassificationError: (error) => {
       if (error === "ambiguous_task_reference") {
         telemetry.recordAmbiguousTaskReference();
@@ -213,6 +215,36 @@ try {
       });
     },
     runAgUi,
+    persistAgUiAssistantMessages: async (input) => {
+      const run =
+        await activePersistence.interactionRepository.findAuthorizedRun({
+          runId: input.runInput.runId,
+          principalId: input.principalId,
+          threadId: input.internalThreadId,
+        });
+      const resumeInterruptId = input.runInput.resume?.[0]?.interruptId;
+      const interrupt =
+        run?.taskId !== undefined || resumeInterruptId === undefined
+          ? undefined
+          : await activePersistence.interactionRepository.findInterrupt({
+              interruptId: resumeInterruptId,
+              principalId: input.principalId,
+              threadId: input.internalThreadId,
+            });
+      const taskId = run?.taskId ?? interrupt?.taskId;
+      for (const message of input.messages) {
+        await activePersistence.conversationRepository.appendAssistantMessage({
+          principalId: input.principalId,
+          threadId: input.internalThreadId,
+          protocol: "ag_ui",
+          externalMessageId: message.externalMessageId,
+          requestId: taskRequestId(input.runInput.runId),
+          contentText: message.contentText,
+          ...(taskId === undefined ? {} : { taskId }),
+          truncated: input.truncated,
+        });
+      }
+    },
     checkpointer: activePersistence.checkpointer,
     runChat,
     persistAssistantMessage: async (input) => {

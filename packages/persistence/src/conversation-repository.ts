@@ -64,17 +64,11 @@ export class ConversationPersistenceRepository {
         FROM chat_service.conversation_message AS message
         JOIN chat_service.conversation_thread AS thread
           ON thread.thread_id = message.thread_id
-        WHERE message.protocol = $1
-          AND message.thread_id = $2
-          AND message.external_message_id = $3
-          AND thread.principal_id = $4
+        WHERE message.thread_id = $1
+          AND message.external_message_id = $2
+          AND thread.principal_id = $3
       `,
-      [
-        input.protocol,
-        input.threadId,
-        input.externalMessageId,
-        input.principalId,
-      ],
+      [input.threadId, input.externalMessageId, input.principalId],
     );
     const row = result.rows[0];
     if (row === undefined) return { outcome: "missing" };
@@ -310,10 +304,9 @@ export class ConversationPersistenceRepository {
       const existing = await client.query<ConversationMessageRow>(
         `
           SELECT * FROM chat_service.conversation_message
-          WHERE protocol = $1 AND thread_id = $2
-            AND external_message_id = $3
+          WHERE thread_id = $1 AND external_message_id = $2
         `,
-        [input.protocol, input.threadId, externalMessageId],
+        [input.threadId, externalMessageId],
       );
       const existingRow = existing.rows[0];
       if (existingRow !== undefined) {

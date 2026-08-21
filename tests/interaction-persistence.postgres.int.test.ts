@@ -58,7 +58,7 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
     await pool.end();
   });
 
-  it("creates protocol-neutral principals and isolated client thread bindings", async () => {
+  it("shares cross-protocol Threads while isolating principals", async () => {
     const repository = interactionRepository();
     const first = await repository.resolvePrincipal({
       issuer: "sacs-test",
@@ -86,7 +86,7 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
       principalId: second.principalId,
     });
 
-    expect(openWebUi.threadId).not.toBe(agUi.threadId);
+    expect(openWebUi.threadId).toBe(agUi.threadId);
     expect(agUi.threadId).not.toBe(otherPrincipal.threadId);
     await expect(
       repository.startRun({

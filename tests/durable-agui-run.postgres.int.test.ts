@@ -260,7 +260,115 @@ describeWithPostgres("durable AG-UI Run recovery", () => {
       }),
     ).resolves.toBeDefined();
   });
+
+  it("finishes a Task-associated Message-only Run as an exact MESSAGE result", async () => {
+    await repository.createTaskBinding({
+      principalId,
+      threadId,
+      sdarTaskId: "task-message-only",
+      sdarContextId: "context-message-only",
+      status: "WORKING",
+    });
+    const input = runInput("run-message-only");
+    const innerId = taskRequestId(input.runId);
+    const result = {
+      kind: "message" as const,
+      messageId: "direct-message-only",
+      relatedTaskId: "task-message-only",
+      contextId: "context-message-only",
+      message: {
+        messageId: "direct-message-only",
+        taskId: "task-message-only",
+        contextId: "context-message-only",
+        role: "AGENT" as const,
+        parts: [
+          {
+            kind: "text" as const,
+            mediaType: "text/plain",
+            text: "direct message completion",
+          },
+        ],
+      },
+      renderedText: "direct message completion",
+    };
+    const service = new DurableAgUiRunService({
+      repository,
+      execute: async function* (context) {
+        const innerClaim = await repository.claimRequest({
+          protocol: "ag_ui",
+          externalRequestId: innerId,
+          principalId,
+          threadId,
+          requestHash: "message-only-operation",
+          leaseOwner: "message-only-worker",
+        });
+        if (innerClaim.outcome !== "acquired") {
+          throw new Error("message-only claim not acquired");
+        }
+        await repository.completeRequest({
+          requestId: innerClaim.requestId,
+          principalId,
+          leaseOwner: "message-only-worker",
+          result,
+        });
+        const factory = new InteractionEventFactory({
+          runId: context.input.runId,
+          threadId: context.input.threadId,
+        });
+        yield required(factory.create("run.started", {}));
+        yield required(
+          factory.publicText("direct message completion", {
+            task: {
+              taskId: "task-message-only",
+              contextId: "context-message-only",
+            },
+          }),
+        );
+        yield required(
+          factory.create("run.finished", { resultKind: "MESSAGE" }),
+        );
+      },
+      recoverTask: () => {
+        throw new Error("Message-only replay must not recover a Task");
+      },
+    });
+
+    const first = await collect(service.run(context(input)));
+    const replay = await collect(service.run(context(input)));
+
+    expect(first.at(-1)?.eventType).toBe("run.finished");
+    expect(replay.some((event) => event.eventType === "message.text")).toBe(
+      true,
+    );
+    await expect(
+      repository.findRequestResult({
+        protocol: "ag_ui",
+        externalRequestId: input.runId,
+        principalId,
+        threadId,
+      }),
+    ).resolves.toEqual(result);
+    await expect(
+      repository.findAuthorizedRun({
+        runId: input.runId,
+        principalId,
+        threadId,
+      }),
+    ).resolves.toMatchObject({
+      status: "FINISHED",
+      taskId: "task-message-only",
+      contextId: "context-message-only",
+    });
+  });
+
   it("recovers an accepted Task after disconnect without resubmission or cancellation", async () => {
+    await repository.createTaskBinding({
+      principalId,
+      threadId,
+      sdarTaskId: "task-a-still-active",
+      sdarContextId: "context-a-still-active",
+      status: "WORKING",
+    });
     const client = new HangingClient();
     const firstCoordinator = coordinator(repository, client);
     const firstService = taskService(repository, firstCoordinator);
@@ -320,7 +428,14 @@ describeWithPostgres("durable AG-UI Run recovery", () => {
     );
     expect(client.submitCount).toBe(1);
     expect(client.getCount).toBe(2);
+    expect(client.requestedTaskIds).toEqual(["task-p08", "task-p08"]);
     expect(client.cancelCount).toBe(0);
+    await expect(
+      restartedRepository.listActiveTasksForChat({
+        principalId,
+        threadId,
+      }),
+    ).resolves.toHaveLength(2);
     await expect(
       restartedRepository.findAuthorizedRun({
         runId: "run-task",
@@ -446,6 +561,7 @@ class HangingClient implements SdarA2aClient {
   submitCount = 0;
   getCount = 0;
   cancelCount = 0;
+  readonly requestedTaskIds: string[] = [];
   private markStreamStarted!: () => void;
 
   constructor() {
@@ -469,8 +585,9 @@ class HangingClient implements SdarA2aClient {
     });
   }
 
-  async getTask(): Promise<NormalizedTask> {
+  async getTask(taskId: string): Promise<NormalizedTask> {
     this.getCount += 1;
+    this.requestedTaskIds.push(taskId);
     return task("WORKING", "recovered from durable binding");
   }
 

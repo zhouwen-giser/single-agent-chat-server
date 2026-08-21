@@ -41,10 +41,12 @@ durable phase; structured data is allowed only for `provide_input`. If SDAR
 publishes a response schema, SACS validates the complete Resume payload against
 the supported fail-closed JSON Schema subset before claiming a side effect.
 
-The single-SDAR profile can have only one unfinished interrupt for its active
-Task. A Resume request must therefore provide exactly one complete entry.
-Zero-entry and multi-entry requests are rejected before any A2A call, avoiding
-partial multi-interrupt resolution.
+Each Task may have one unfinished interrupt, and one Thread may therefore have
+multiple open interrupts for different active Tasks. A Resume request must
+provide exactly one complete entry. That entry's durable interrupt ID resolves
+the exact Task/context independently of Focus. Zero-entry and multi-entry
+requests are rejected before any A2A call, avoiding partial multi-interrupt
+resolution.
 
 ## Durable resolution
 
@@ -65,3 +67,7 @@ An official ResumeEntry with status `cancelled` closes the local interrupt and
 sends no A2A request. It does not imply `cancelTask` or `cancel_goal`. Expired,
 cross-principal, cross-thread, changed Task/context, stale, and already-
 cancelled interrupts fail closed.
+
+Querying or focusing Task B cannot close, retarget, or authorize an interrupt
+for Task A. Resolving A leases and follows up only A; other Task interrupts in
+the same Thread remain open.

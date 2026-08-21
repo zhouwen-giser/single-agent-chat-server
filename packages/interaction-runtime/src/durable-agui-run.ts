@@ -154,6 +154,7 @@ export class DurableAgUiRunService {
     const events: SdarInteractionEvent[] = [];
     let latestTaskId: string | undefined;
     let latestContextId: string | undefined;
+    let operationResult: CompletedRequestResult | undefined;
     let observationDisconnected = false;
     try {
       for await (const event of this.options.execute(context)) {
@@ -207,15 +208,15 @@ export class DurableAgUiRunService {
         }
       }
     } finally {
-      const submittedResult = await this.options.repository.findRequestResult({
+      operationResult = await this.options.repository.findRequestResult({
         protocol: "ag_ui",
         externalRequestId: taskRequestId(context.input.runId),
         principalId: context.principalId,
         threadId: context.threadId,
       });
       latestTaskId =
-        submittedResult?.kind === "task"
-          ? submittedResult.taskId
+        operationResult?.kind === "task"
+          ? operationResult.taskId
           : latestTaskId;
       if (latestTaskId !== undefined) {
         const binding = await this.options.repository.findAuthorizedTask({
@@ -235,12 +236,17 @@ export class DurableAgUiRunService {
         });
       }
       if (context.signal.aborted) {
-        if (latestTaskId !== undefined && claim.outcome === "acquired") {
-          const result = await authorizedTaskResult(
-            this.options.repository,
-            context,
-            latestTaskId,
-          );
+        if (
+          claim.outcome === "acquired" &&
+          (operationResult !== undefined || latestTaskId !== undefined)
+        ) {
+          const result =
+            operationResult ??
+            (await authorizedTaskResult(
+              this.options.repository,
+              context,
+              latestTaskId as string,
+            ));
           await this.options.repository.completeRequest({
             requestId: claim.requestId,
             principalId: context.principalId,
@@ -265,13 +271,14 @@ export class DurableAgUiRunService {
     });
     if (claim.outcome === "acquired") {
       const result =
-        latestTaskId === undefined
+        operationResult ??
+        (latestTaskId === undefined
           ? messageResultFromEvents(context.input.runId, events)
           : await authorizedTaskResult(
               this.options.repository,
               context,
               latestTaskId,
-            );
+            ));
       await this.options.repository.completeRequest({
         requestId: claim.requestId,
         principalId: context.principalId,

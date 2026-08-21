@@ -72,12 +72,27 @@ export class InteractionPersistenceRepository {
       const existing = await findClientThread(client, input);
       if (existing !== undefined) return existing;
 
-      const threadId = randomUUID();
-      await client.query(
-        `INSERT INTO chat_service.conversation_thread(thread_id, principal_id)
-         VALUES ($1, $2)`,
-        [threadId, input.principalId],
+      const shared = await client.query<{ internal_thread_id: string }>(
+        `SELECT binding.internal_thread_id
+         FROM chat_service.client_thread_binding binding
+         JOIN chat_service.conversation_thread thread
+           ON thread.thread_id = binding.internal_thread_id
+         WHERE binding.external_thread_id = $1
+           AND binding.principal_id = $2
+           AND thread.principal_id = $2
+         ORDER BY CASE binding.client_type
+           WHEN 'openwebui' THEN 0 ELSE 1 END, binding.created_at
+         LIMIT 1`,
+        [input.externalThreadId, input.principalId],
       );
+      const threadId = shared.rows[0]?.internal_thread_id ?? randomUUID();
+      if (shared.rows[0] === undefined) {
+        await client.query(
+          `INSERT INTO chat_service.conversation_thread(thread_id, principal_id)
+           VALUES ($1, $2)`,
+          [threadId, input.principalId],
+        );
+      }
       const inserted = await client.query<ClientThreadRow>(
         `
           INSERT INTO chat_service.client_thread_binding(

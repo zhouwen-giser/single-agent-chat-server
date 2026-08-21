@@ -61,6 +61,8 @@ model for business routing, create an SDAR Task, or change Focus.
   graph invocation, deterministic Task resolution/reference updates, and
   explicit Coordinator dispatch. Northbound runners translate protocol
   envelopes and render results; they do not classify or route independently.
+  AG-UI imports every supported official message ID and uses the same service;
+  its runner only projects typed Coordinator observations into AG-UI events.
 
 - `packages/conversation-model`: model port, strict TurnDecision contracts, and
   fixed OpenAI-compatible client with bounded timeout/retry/readiness. It has no
@@ -98,6 +100,12 @@ model for business routing, create an SDAR Task, or change Focus.
 OpenAI and AG-UI adapters must not copy any conversation, selector, focus,
 authorization, coordinator, or request-result implementation.
 
+Client bindings for the same signed principal and external thread ID converge
+on one internal Thread. Stable external message IDs are reconciled at that
+Thread boundary, including when repeated history arrives through the other
+northbound protocol. Each transport persists only assistant text it actually
+publishes.
+
 ## Completed request results
 
 Both northbound protocols use the same `interaction_request` repository and
@@ -114,3 +122,8 @@ creates a Task, the durable result is `TASK`; the earlier fragments remain
 observable conversation events. A stream that ends without either a valid
 Agent Message or Task remains claimed for bounded recovery rather than
 inventing a result.
+
+An AG-UI Run separately retains its optional Task/context association for event
+recovery. That association never changes the completed-result discriminator:
+a Task-associated Message is still replayed as `MESSAGE`. Restart recovery for
+a `TASK` uses the Task recorded by that Run, never the Thread's Focus.
