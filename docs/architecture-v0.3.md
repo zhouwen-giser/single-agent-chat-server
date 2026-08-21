@@ -56,8 +56,9 @@ model for business routing, create an SDAR Task, or change Focus.
 
 ## Package boundaries
 
-- `packages/conversation-model`: model port and strict TurnDecision contracts;
-  P02 adds the fixed OpenAI-compatible client.
+- `packages/conversation-model`: model port, strict TurnDecision contracts, and
+  fixed OpenAI-compatible client with bounded timeout/retry/readiness. It has no
+  tool surface and accepts no request-level endpoint.
 - `packages/conversation-context`: protocol-neutral conversation types; P03/P04
   add persistence and bounded assembly.
 - `packages/task-directory`: Task summaries, selectors, and directory contract;

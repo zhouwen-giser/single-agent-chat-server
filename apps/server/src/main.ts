@@ -20,10 +20,14 @@ import {
   type PersistenceRuntime,
 } from "../../../packages/persistence/src/index.js";
 import {
+  OpenAiCompatibleConversationModel,
+  parseConversationModelConfig,
+} from "../../../packages/conversation-model/src/index.js";
+import {
   createSdarA2aClient,
   parseSdarA2aConfig,
 } from "../../../packages/sdar-a2a-adapter/src/index.js";
-import { localFallbackChatModel } from "../../../src/agent/model.js";
+import { adaptConversationModel } from "../../../src/agent/model.js";
 
 import type { ChatRunner, ChatRunnerResult } from "./api/openai-routes.js";
 import { buildServer } from "./bootstrap.js";
@@ -57,7 +61,19 @@ try {
       throw error;
     }
   });
-  const chatModel = instrumentChatModel(localFallbackChatModel, telemetry);
+  const conversationModelConfig = parseConversationModelConfig(process.env);
+  const rawConversationModel =
+    conversationModelConfig === undefined
+      ? undefined
+      : new OpenAiCompatibleConversationModel(conversationModelConfig);
+  const conversationModel =
+    rawConversationModel === undefined
+      ? undefined
+      : instrumentChatModel(rawConversationModel, telemetry);
+  const chatModel =
+    conversationModel === undefined
+      ? undefined
+      : adaptConversationModel(conversationModel);
   const queryService = new InteractionQueryService(
     activePersistence.interactionRepository,
     getClient,
@@ -153,6 +169,8 @@ try {
     logger: createSecureLoggerOptions(config.logLevel),
     telemetry,
     readinessCheck: () => activePersistence.readiness(),
+    conversationModelReadinessCheck: () =>
+      rawConversationModel?.readiness() ?? Promise.resolve(false),
     resolveChatThread: (input) =>
       activePersistence.repository.getOrCreateThread(input),
     resolveAgUiThread: async (input) => {

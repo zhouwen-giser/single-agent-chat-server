@@ -35,11 +35,6 @@ for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
 }
 
 const productionRoots = ["apps", "packages", "src"];
-const legacyFallbackAllowlist = new Set([
-  "apps/server/src/main.ts",
-  "src/agent/graph.ts",
-  "src/agent/model.ts",
-]);
 const legacySingleTaskApiAllowlist = new Set([
   "apps/server/src/chat/sdar-agui-runner.ts",
   "apps/server/src/chat/sdar-chat-runner.ts",
@@ -117,11 +112,8 @@ for (const file of files) {
   ) {
     violations.push(`${name}: production import from a test fixture`);
   }
-  if (
-    /\blocalFallbackChatModel\b/u.test(content) &&
-    !legacyFallbackAllowlist.has(name)
-  ) {
-    violations.push(`${name}: new production use of the legacy chat fallback`);
+  if (/\blocalFallbackChatModel\b/u.test(content)) {
+    violations.push(`${name}: production use of a local chat fallback`);
   }
   if (
     /\bfindActiveTask(?:ForChat)?\b/u.test(content) &&

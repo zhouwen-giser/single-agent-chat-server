@@ -89,23 +89,33 @@ describe("secure operational controls", () => {
     const telemetry = new SecureTelemetry({ meter });
     const model = instrumentChatModel(
       {
-        classify: async () => ({ requestKind: "general_chat" }),
-        answer: async () => "safe answer",
+        decideTurn: async () => ({ kind: "general_chat" }),
+        answerGeneral: async () => "safe answer",
+        summarize: async () => "safe summary",
       },
       telemetry,
     );
 
-    await model.classify({ userText: "private prompt", hasActiveTask: false });
-    await model.answer({ userText: "private prompt" });
+    const context = {
+      threadId: "thread-a",
+      messages: [],
+      activeTasks: [],
+      recentTerminalTasks: [],
+    } as const;
+    await model.decideTurn({ context, currentUserText: "private prompt" });
+    await model.answerGeneral({
+      context,
+      currentUserText: "private prompt",
+    });
 
     expect(records).toEqual([
       {
         name: "chat_server.llm.duration",
-        attributes: { operation: "classify", outcome: "ok" },
+        attributes: { operation: "decide_turn", outcome: "ok" },
       },
       {
         name: "chat_server.llm.duration",
-        attributes: { operation: "answer", outcome: "ok" },
+        attributes: { operation: "answer_general", outcome: "ok" },
       },
     ]);
     expect(JSON.stringify(records)).not.toContain("private prompt");

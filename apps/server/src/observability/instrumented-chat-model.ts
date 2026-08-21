@@ -1,21 +1,38 @@
-import type { StructuredChatModel } from "../../../../src/agent/model.js";
+import type {
+  ConversationModel,
+  ConversationModelInput,
+  ConversationSummaryInput,
+  PublishedResultInput,
+} from "../../../../packages/conversation-model/src/index.js";
 
 import type { SecureTelemetry } from "./telemetry.js";
 
 export function instrumentChatModel(
-  model: StructuredChatModel,
+  model: ConversationModel,
   telemetry: SecureTelemetry,
-): StructuredChatModel {
+): ConversationModel {
+  const explainPublishedResult = model.explainPublishedResult?.bind(model);
   return {
-    classify: (input) =>
-      measure(telemetry, "classify", () => model.classify(input)),
-    answer: (input) => measure(telemetry, "answer", () => model.answer(input)),
+    decideTurn: (input: ConversationModelInput) =>
+      measure(telemetry, "decide_turn", () => model.decideTurn(input)),
+    answerGeneral: (input: ConversationModelInput) =>
+      measure(telemetry, "answer_general", () => model.answerGeneral(input)),
+    summarize: (input: ConversationSummaryInput) =>
+      measure(telemetry, "summarize", () => model.summarize(input)),
+    ...(explainPublishedResult === undefined
+      ? {}
+      : {
+          explainPublishedResult: (input: PublishedResultInput) =>
+            measure(telemetry, "explain_result", () =>
+              explainPublishedResult(input),
+            ),
+        }),
   };
 }
 
 async function measure<T>(
   telemetry: SecureTelemetry,
-  operation: "classify" | "answer",
+  operation: "decide_turn" | "answer_general" | "summarize" | "explain_result",
   invoke: () => Promise<T>,
 ): Promise<T> {
   const timed = telemetry.beginLlm(operation);

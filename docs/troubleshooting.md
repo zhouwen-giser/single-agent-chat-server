@@ -6,7 +6,8 @@
 | `401 invalid_user_identity`         | JWT forwarding disabled, secret mismatch, expired/forged token                  | Open WebUI JWT settings and clock                                         |
 | `400 invalid_request`               | missing chat/message IDs or request limit                                       | required custom headers and message sizes                                 |
 | `404 model_not_found`               | wrong model ID                                                                  | use `sdar-single-agent` from `/v1/models`                                 |
-| `/ready` is 503                     | PostgreSQL unavailable                                                          | `DATABASE_URL`, network, credentials, migration logs                      |
+| `/ready` is 503                     | PostgreSQL or conversation model unavailable                                    | readiness checks, database/model URL, credentials, gateway health         |
+| ordinary chat returns safe 500      | conversation model missing, timed out, or returned invalid output               | `CONVERSATION_MODEL_*`; model gateway Chat Completions compatibility      |
 | `/ready` is 200 but Task chat fails | SDAR unavailable or Agent Card rejected                                         | `SDAR_A2A_BASE_URL`, live card, protocol/binding/modes                    |
 | endpoint origin rejection           | card/override points to another origin                                          | use a trusted same-origin base/override; do not relax validation          |
 | Follow-up not sent                  | action does not match published status/internal phase or mutation lease is busy | published Task state, `internalPhase`, retry after current interaction    |

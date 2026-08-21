@@ -60,6 +60,7 @@ function createServer(
       | "logger"
       | "rateLimiter"
       | "readinessCheck"
+      | "conversationModelReadinessCheck"
       | "runChat"
       | "resolveChatThread"
     >
@@ -74,6 +75,12 @@ function createServer(
     ...(overrides.readinessCheck === undefined
       ? {}
       : { readinessCheck: overrides.readinessCheck }),
+    ...(overrides.conversationModelReadinessCheck === undefined
+      ? {}
+      : {
+          conversationModelReadinessCheck:
+            overrides.conversationModelReadinessCheck,
+        }),
     now: () => nowMilliseconds,
     nextId: () => "fixed-id",
     runChat: overrides.runChat ?? (async () => chatResponse),
@@ -119,6 +126,25 @@ describe("OpenAI-compatible HTTP contracts", () => {
     expect(ready.json()).toEqual({
       status: "not_ready",
       checks: { configuration: "ok", postgres: "unavailable" },
+    });
+  });
+
+  it("reports conversation model readiness without exposing details", async () => {
+    const server = createServer({
+      readinessCheck: async () => true,
+      conversationModelReadinessCheck: async () => false,
+    });
+
+    const readiness = await server.inject({ method: "GET", url: "/ready" });
+
+    expect(readiness.statusCode).toBe(503);
+    expect(readiness.json()).toEqual({
+      status: "not_ready",
+      checks: {
+        configuration: "ok",
+        postgres: "ok",
+        conversationModel: "unavailable",
+      },
     });
   });
 

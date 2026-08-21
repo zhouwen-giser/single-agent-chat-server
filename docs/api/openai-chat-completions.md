@@ -90,5 +90,6 @@ validation.
 - `GET /ready` is unauthenticated process readiness. Production startup
   completes PostgreSQL migrations, checkpointer setup, and reconciliation
   before listening. The live readiness check returns `503 not_ready` while
-  PostgreSQL is unavailable; SDAR discovery remains lazy and does not gate
+  PostgreSQL or the configured conversation model is unavailable. The model
+  probe is bounded and cached; SDAR discovery remains lazy and does not gate
   readiness.

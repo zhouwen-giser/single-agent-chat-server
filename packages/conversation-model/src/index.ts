@@ -89,3 +89,14 @@ export function parseTurnDecision(value: unknown): TurnDecision {
 }
 
 export type { TaskSelector };
+export {
+  conversationModelEndpoint,
+  parseConversationModelConfig,
+  type ConversationModelConfig,
+} from "./config.js";
+export {
+  ConversationModelError,
+  OpenAiCompatibleConversationModel,
+  type ConversationModelClientOptions,
+  type ConversationModelErrorCode,
+} from "./client.js";

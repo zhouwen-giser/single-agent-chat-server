@@ -33,6 +33,7 @@ Protocol drift fails closed. See [A2A compatibility](docs/a2a-compatibility.md).
 - Node `22.14.x`
 - pnpm `11.13.1`
 - PostgreSQL 16 for persistence and integration tests
+- one reachable OpenAI-compatible Chat Completions model gateway
 - one reachable SDAR Agent Card and A2A endpoint
 - Open WebUI 0.10.2 configured to forward a signed user JWT
 
@@ -43,7 +44,7 @@ corepack enable
 corepack prepare pnpm@11.13.1 --activate
 pnpm install --frozen-lockfile
 cp .env.example .env
-# replace every development credential and configure PostgreSQL and SDAR
+# replace every development credential and configure the model, PostgreSQL, and SDAR
 pnpm migrate
 pnpm build
 pnpm start
