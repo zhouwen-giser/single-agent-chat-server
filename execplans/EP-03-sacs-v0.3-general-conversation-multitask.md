@@ -33,7 +33,7 @@ strict `TASK | MESSAGE` completed-request result.
 - [x] 2026-08-21: Create the requested feature branch from exact verified main.
 - [x] 2026-08-21: Diagnose exact-head CI's expired open-Interrupt fixture and
       replace only its stale absolute expiry with the established 2099 test date.
-- [ ] P00: publish evidence and open the Draft PR.
+- [x] P00: publish evidence, pass exact-head quality/container CI, and open Draft PR #12.
 - [ ] P01: freeze ADR, contracts, domain types, and architecture gates.
 - [ ] P02: implement the configured OpenAI-compatible conversation model.
 - [ ] P03-P04: persist and assemble durable bounded conversation context.

@@ -1,10 +1,15 @@
 {
   "goal": "SACS v0.3 general conversation, durable context and multi-task chat",
   "status": "IN_PROGRESS",
-  "currentPhase": "P00",
+  "currentPhase": "P01",
   "baseSha": "25c923524bcddc5fffd37513766cf28c9f9c2cf4",
   "branch": "feature/sacs-v0.3-general-conversation-multitask",
-  "phaseCommits": {},
+  "phaseCommits": {
+    "P00": [
+      "296dc7366a99e9e8e53fa6616ecea60488e22bc0",
+      "293189ff1c2cca3327e3c0fdab595b05160c83be"
+    ]
+  },
   "requiredGates": {
     "baseline": "PASSED",
     "unit": "PENDING",

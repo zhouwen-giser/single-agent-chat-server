@@ -1,6 +1,6 @@
 # P00 completion
 
-Status: `LOCAL_COMPLETE_PUBLICATION_PENDING`
+Status: `PASSED_PUBLISHED`
 
 ## Scope completed
 
@@ -30,8 +30,9 @@ Status: `LOCAL_COMPLETE_PUBLICATION_PENDING`
 ## Acceptance
 
 - AC-001: passed by `P00-source-lock.json`.
-- AC-002: passed locally; remote publication and Draft PR creation remain the
-  final P00 actions.
+- AC-002: passed; local and remote repair candidate matched at
+  `293189ff1c2cca3327e3c0fdab595b05160c83be`, Draft PR #12 was created against
+  `main`, and its quality and container jobs passed.
 
 ## Integrity and boundary review
 

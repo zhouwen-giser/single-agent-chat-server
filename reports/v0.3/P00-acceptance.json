@@ -1,6 +1,6 @@
 {
   "phase": "P00",
-  "status": "LOCAL_PASSED_PUBLICATION_PENDING",
+  "status": "PASSED_PUBLISHED",
   "observedAt": "2026-08-21T10:13:58.465Z",
   "acceptance": {
     "AC-001": {
@@ -38,5 +38,12 @@
     }
   ],
   "requiredReleaseGatesSatisfied": false,
-  "publication": "PENDING"
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/12",
+    "candidateSha": "293189ff1c2cca3327e3c0fdab595b05160c83be",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32472547886",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
 }
