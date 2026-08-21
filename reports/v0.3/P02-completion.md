@@ -1,12 +1,15 @@
 # P02 completion
 
-Status: `PASSED_LOCAL`
+Status: `PASSED_PUBLISHED`
 
 ## Identity
 
 - Phase: P02
 - Start SHA: `f06f0b8082e5a357942d84d3dd70abbff141b649`
 - Timestamp UTC: `2026-08-21T11:08:49.330Z`
+- Published candidate SHA: `ed81bbe8bb73b7b88d7c53947b6b173a29c62ca4`
+- Exact-head CI: run `32476742719`; quality `96754550460`; container
+  `96754865975`; all passed.
 
 ## Scope completed
 

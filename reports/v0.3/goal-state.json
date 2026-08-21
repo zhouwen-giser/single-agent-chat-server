@@ -1,7 +1,7 @@
 {
   "goal": "SACS v0.3 general conversation, durable context and multi-task chat",
   "status": "IN_PROGRESS",
-  "currentPhase": "P02",
+  "currentPhase": "P03",
   "baseSha": "25c923524bcddc5fffd37513766cf28c9f9c2cf4",
   "branch": "feature/sacs-v0.3-general-conversation-multitask",
   "phaseCommits": {
@@ -9,14 +9,18 @@
       "296dc7366a99e9e8e53fa6616ecea60488e22bc0",
       "293189ff1c2cca3327e3c0fdab595b05160c83be"
     ],
-    "P01": ["0aaf0cf53658df2a17f1238c128832a8fc70416a"]
+    "P01": ["0aaf0cf53658df2a17f1238c128832a8fc70416a"],
+    "P02": [
+      "4eca15c69e9de9d1bb2896656d5045162900734a",
+      "ed81bbe8bb73b7b88d7c53947b6b173a29c62ca4"
+    ]
   },
   "requiredGates": {
     "baseline": "PASSED",
-    "unit": "PENDING",
-    "contract": "PENDING",
+    "unit": "PASSED_CURRENT_HEAD",
+    "contract": "PASSED_CURRENT_HEAD",
     "postgres": "PENDING",
-    "security": "PENDING",
+    "security": "PASSED_CURRENT_HEAD",
     "openai": "PENDING",
     "agui": "PENDING",
     "realModel": "PENDING",
