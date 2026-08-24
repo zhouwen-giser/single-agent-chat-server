@@ -84,12 +84,12 @@ source locking, and the genuine model gate. Its first reviewed non-executing
 SDAR request then produced no A2A event or Task. A direct probe through the
 pinned official adapter reproduced HTTP 401
 `GOVERNED_CONTROL_AUTHENTICATION_REQUIRED`. The Agent Card simultaneously
-advertises A2A 1.0 HTTP+JSON streaming with zero security requirements. The
-local current-main UGV deployment has governed-control identity configuration,
-which is incompatible with SACS's required trusted-network unauthenticated A2A
-boundary. No token was sent to SACS, no interactive authentication was added,
-and no Task was confirmed or executed. This is `BLOCKED_ENVIRONMENT`, not real
-SDAR evidence.
+advertises A2A 1.0 HTTP+JSON streaming with zero security requirements and is
+not stale. The confirmation Bearer middleware was incorrectly mounted over the
+entire `/a2a` path instead of only confirmation traffic. No token was sent to
+SACS, no interactive authentication was added, and no Task was confirmed or
+executed. This remains `BLOCKED_ENVIRONMENT` until the corrected SDAR process
+is restarted; it is not real SDAR evidence.
 
 ## Real-model Turn Decision misclassification
 

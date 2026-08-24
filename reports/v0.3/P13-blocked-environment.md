@@ -9,27 +9,29 @@
 > Resume result (`2026-08-24`): the user supplied the real-model and real-SDAR
 > configuration. Candidate `3170166` passed Push and PR CI, the full regression
 > chain, current-source locking, and the genuine two-turn/strict-decision model
-> gate. The real SDAR gate is now blocked by an authenticated A2A deployment
-> that contradicts its unauthenticated Agent Card and the SACS trusted-network
-> contract. No credential or endpoint value is recorded here.
+> gate. The real SDAR gate is now blocked because the confirmation Bearer
+> middleware is incorrectly mounted over the entire `/a2a` path instead of
+> only the confirmation operation. No credential or endpoint value is recorded
+> here.
 
 ## Current exact blocker
 
 The configured loopback SDAR publishes an A2A 1.0 HTTP+JSON streaming Agent
-Card with zero agent/skill security requirements, but an initial
-`sendMessageStream` through the pinned official SDK fails before its first
-event with HTTP 401 and `GOVERNED_CONTROL_AUTHENTICATION_REQUIRED`. The same
-failure occurs through SACS and through a direct official-adapter probe. No
-Task binding is created; SACS renders its safe failure response and does not
-retry with credentials.
+Card with zero agent/skill security requirements. The card is not stale. The
+confirmation Bearer middleware is incorrectly mounted over the entire `/a2a`
+path, so an initial `sendMessageStream` through the pinned official SDK fails
+before its first event with HTTP 401 and
+`GOVERNED_CONTROL_AUTHENTICATION_REQUIRED`. The same failure occurs through
+SACS and through a direct official-adapter probe. No Task binding is created;
+SACS renders its safe failure response and does not retry with credentials.
 
 The local SDAR process is current source
 `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`. Its environment contains governed
-control identity configuration, and the current UGV profile requires that
-identity. Supplying that bearer token to SACS or adding an interactive A2A auth
-flow would violate the v0.3 hard invariant. Modifying SDAR/SMPP source or
-pretending the Fixture passed the gate is also prohibited. P13 therefore
-remains `BLOCKED_ENVIRONMENT` at the real-SDAR boundary.
+control identity configuration for confirmation. Supplying that bearer token
+to SACS or adding an interactive A2A auth flow would violate the v0.3 hard
+invariant. The SDAR deployment must be restarted after its middleware scope is
+fixed; SACS will not modify the upstream source. P13 therefore remains
+`BLOCKED_ENVIRONMENT` at the real-SDAR boundary until that restart.
 
 Sanitized current evidence:
 
@@ -139,9 +141,9 @@ container job 96862547655: success
 
 ## Exact recovery steps
 
-1. Provide or reconfigure a current-main SDAR deployment whose published A2A
-   security declaration matches its wire behavior and whose initial/read-only
-   Task traffic is unauthenticated on the trusted isolated network. Do not give
+1. Restart the current-main SDAR deployment after restricting the confirmation
+   Bearer middleware to confirmation traffic, leaving initial/read-only A2A
+   Task traffic unauthenticated on the trusted isolated network. Do not give
    the governed-control bearer token to SACS.
 2. Keep the two reviewed non-executing requests, or replace them with two safe
    requests supported by that unauthenticated Agent Card.

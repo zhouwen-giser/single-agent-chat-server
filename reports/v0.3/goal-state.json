@@ -56,7 +56,7 @@
     {
       "phase": "P13",
       "kind": "SDAR_A2A_AUTH_CONTRACT_MISMATCH",
-      "detail": "Candidate 3170166 and the real model passed. The configured current-main loopback SDAR Agent Card advertises no A2A security, but initial sendMessageStream returns 401 GOVERNED_CONTROL_AUTHENTICATION_REQUIRED before any event. SACS must remain trusted-network unauthenticated and fail closed, so AC-040 through AC-042 remain BLOCKED_ENVIRONMENT without fixture substitution."
+      "detail": "Candidate 3170166 and the real model passed. The SDAR confirmation Bearer middleware is incorrectly mounted over the entire /a2a path, so initial sendMessageStream returns 401 GOVERNED_CONTROL_AUTHENTICATION_REQUIRED before any event even though the non-stale Agent Card correctly advertises no A2A security. SACS must remain trusted-network unauthenticated and fail closed. Restart SDAR after correcting the middleware scope, then rerun AC-040 through AC-042 without fixture substitution."
     }
   ]
 }
