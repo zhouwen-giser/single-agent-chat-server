@@ -67,8 +67,15 @@ export interface ConversationModelInput {
 export interface ConversationSummaryInput {
   readonly threadId: string;
   readonly previousSummary?: string;
-  readonly messages: ConversationContext["messages"];
+  readonly messages: readonly ConversationSummaryMessage[];
   readonly summarizedThroughSequence?: number;
+}
+
+export interface ConversationSummaryMessage {
+  readonly role: "user" | "assistant";
+  readonly contentText: string;
+  readonly sequence: number;
+  readonly truncated: boolean;
 }
 
 export interface PublishedResultInput {

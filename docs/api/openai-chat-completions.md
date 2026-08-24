@@ -1,6 +1,6 @@
 # OpenAI-compatible API contract
 
-Status: Phase 9 secure observability and operational controls.
+Status: Phase 10 durable multi-turn and multi-Task integration.
 
 ## Authentication
 
@@ -34,9 +34,26 @@ stop sequences, and `stream_options.include_usage`. Known fields are bounded
 and validated; unknown fields are ignored for OpenAI forward compatibility.
 
 The signed user ID plus Open WebUI Chat ID resolves a persisted internal thread.
-The thin graph runs with the PostgreSQL checkpointer. The user-message ID is
-preserved for idempotency, and a nonempty `X-OpenWebUI-Task` deterministically
-routes utility work locally without A2A.
+The adapter converts `messages[]` to a protocol-neutral client envelope. The
+current user message is always bound to `X-OpenWebUI-User-Message-Id`; explicit
+historical `id`/`message_id` values and the parent assistant header are used for
+reconciliation. Repeated history is deduplicated, client assistant history can
+only match server-published text, and system/developer/tool content cannot
+become server instructions. The shared Conversation Application Service then
+loads bounded durable context and the Task Directory before model inference.
+
+A nonempty `X-OpenWebUI-Task` bypasses message import, context/Task lookup, and
+the conversation model. It returns the deterministic local utility response
+without A2A, Focus changes, or conversation-message writes.
+
+OpenAI and AG-UI share the protocol-neutral `interaction_request` store. An
+A2A-bound request completes with exactly one durable `TASK` or `MESSAGE`
+result. Repeating a message-only request returns the exact stored assistant
+text without another model, A2A, or Task query. Repeating a Task result first
+reauthorizes the original Task/Context binding and then observes current Task
+state. If an initial stream emits Message text before creating a Task, its
+durable result is the Task while the published Message text remains in the
+conversation transcript.
 
 ### Non-streaming
 
@@ -52,16 +69,26 @@ terminal Artifact fragments are emitted as separate content deltas as they are
 observed; the route does not buffer the full A2A response first. No
 browser-specific event protocol is used.
 
+The HTTP adapter accumulates only rendered deltas that enter the outgoing
+stream. At normal completion it writes one assistant message; on disconnect or
+a safe streaming failure it writes the published prefix with `truncated=true`.
+It never persists unseen generator output or writes once per token. A
+Task-scoped event also associates the assistant message with that authorized
+Task and the originating user-message request ID.
+
 Client disconnect aborts only this HTTP observation. It never maps to
 `cancelTask`. A later status request can resume observation through the
 persisted user/chat/Task binding and `getTask`.
 
-## Active Task interaction
+## Multi-Task interaction
 
-A status turn refreshes the authorized binding with `getTask` and never sends a
-Task Message. Explicit plan decisions, requested user input, pause/resume, goal
-patch/cancel actions, and top-level Task cancellation are phase-gated before an
-A2A operation. Ordinary text at plan confirmation never implies approval.
+An untargeted status turn lists every active Task in deterministic order. A
+targeted status refreshes only its authorized binding with `getTask` and never
+sends a Task Message. Explicit plan decisions, requested user input,
+pause/resume, goal patch/cancel actions, and top-level Task cancellation must
+resolve to one full Task ID and are phase-gated before A2A. Mutations of one
+Task serialize; another Task in the same Chat remains independently available.
+Ordinary text at plan confirmation never implies approval.
 
 Streaming protocol failures produce a generic safe delta and still terminate
 with the standard stop chunk and `[DONE]`; internal endpoints, tokens, and

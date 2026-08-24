@@ -1,6 +1,6 @@
 # AG-UI HTTP/SSE API
 
-SACS v0.2 exposes the exact pinned AG-UI `0.0.57` HTTP POST/SSE profile:
+SACS v0.3 exposes the exact pinned AG-UI `0.0.57` HTTP POST/SSE profile:
 
 ```http
 GET /ag-ui/capabilities
@@ -18,7 +18,7 @@ X-OpenWebUI-User-Jwt: <signed principal JWT>
 clients also require their exact origin in `CHAT_CORS_ALLOW_ORIGINS`; the empty
 default denies cross-origin requests. Wildcards and credentialed CORS are not
 supported. The
-principal JWT remains the frozen SACS v0.2 signed-identity profile: HS256,
+principal JWT remains the frozen signed-identity profile: HS256,
 `iss=open-webui`, bounded lifetime, subject, and `user` or `admin` role. A
 plaintext user ID header is never trusted.
 
@@ -43,20 +43,46 @@ only the current HTTP observation; it does not imply `cancelTask`.
 `GET /ag-ui/capabilities` returns an object validated by the official
 `AgentCapabilitiesSchema`. It describes AG-UI transport and interaction
 features; SDAR business capabilities remain authoritative in the current Agent
-Card and are queried through the interaction query service.
+Card and are queried as a new natural-language request to the fixed SDAR A2A
+client.
+
+## Multi-Task targeting
+
+AG-UI uses the same bounded Conversation Context, TurnDecision, deterministic
+Task resolver, and Coordinator contract as the OpenAI endpoint. Follow-up and
+Cancel always pass one locally authorized full `taskId`; untargeted status lists
+all active Tasks. A Task mutation lease never blocks status or a mutation of a
+different Task in the same Thread.
+
+Official AG-UI message IDs are imported into the protocol-neutral conversation
+ledger. When an OpenAI and AG-UI binding use the same signed principal and
+external thread ID, they resolve to one internal Thread; a stable message ID is
+deduplicated across both protocols. The assistant text actually published in
+AG-UI text events is stored with the official output message ID. A failed or
+disconnected partial observation is marked truncated.
 
 ## Durable Run and reconnect
 
-A non-Resume request claims `(principal, internal thread, runId)` before
-execution. Reusing the same `runId` with identical validated input replays the
-durable result or queries its bound Task. Reusing it with changed input produces
-`RUN_ERROR` with `run_id_conflict` and performs no A2A mutation.
+A non-Resume request claims `(protocol, principal, internal thread, runId)` in
+the same protocol-neutral request store used by OpenAI. Each Run records its own
+actual `TASK | MESSAGE` result. Reusing the same `runId` with identical
+validated input replays the exact durable `MESSAGE` result without A2A, or
+reauthorizes and queries that Run's exact `TASK` result. Reusing it with changed
+input produces `RUN_ERROR` with `run_id_conflict` and performs no A2A mutation.
+Both variants use the shared Conversation Application Service and Coordinator;
+AG-UI does not maintain separate routing, focus, or idempotency semantics.
 
 When a Run creates a Task, SACS uses the stable A2A message ID
 `${runId}:task`, persists the Task/context binding, and records it on the Run.
-After disconnect or process restart, the service calls authorized `getTask()`;
-it does not resubscribe to a stream or use an event cursor. A browser disconnect
-aborts only observation and never calls `cancelTask()`.
+After disconnect or process restart, the service calls authorized `getTask()`
+for the Task ID bound to that Run; it never substitutes the focused or most
+recent Task. It does not resubscribe to a stream or use an event cursor. A
+browser disconnect aborts only observation and never calls `cancelTask()`.
+
+If SDAR returns a Message-only result, the Run finishes normally and persists
+that exact `MESSAGE` result. A Message associated with a Task remains a Message
+for replay; the Task association is retained only as Run context and is not
+used to rewrite the discriminated result.
 
 ## Resume an interrupt
 
@@ -87,11 +113,13 @@ the array is empty or contains multiple entries.
 }
 ```
 
-The server verifies the signed principal, internal thread, authorized Task and
-context, open/expiry state, phase/action pair, input request ID, optional public
-response schema, and durable resolution hash before calling the existing A2A
-Follow-up adapter. An identical completed Resume is replayed without a second
-Follow-up; changed payload conflicts.
+The server verifies the signed principal, internal thread, exact Task and
+context retained by the interrupt, open/expiry state, phase/action pair, input
+request ID, optional public response schema, and durable resolution hash before
+calling the existing A2A Follow-up adapter. Different Tasks in one Thread may
+each retain an open interrupt. Focus changes do not change interrupt authority.
+An identical completed Resume is replayed without a second Follow-up; changed
+payload conflicts.
 
 `status: "cancelled"` closes only the AG-UI interrupt and never infers SDAR Task
 or Goal cancellation. If a Follow-up result is uncertain, the interrupt stays

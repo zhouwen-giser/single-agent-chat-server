@@ -6,6 +6,7 @@ import type { FastifyPluginAsync } from "fastify";
 
 import {
   chatCompletionRequestSchema,
+  type ChatCompletionRequest,
   createChatCompletionResponse,
   createModelsResponse,
   emptyUsage,
@@ -13,13 +14,13 @@ import {
   openAiError,
   SSE_CONTENT_TYPE,
 } from "../../../../packages/openai-api-contract/src/index.js";
+import type { ClientHistoryMessage } from "../../../../packages/conversation-context/src/index.js";
 import {
   isSdarInteractionEvent,
   type SdarInteractionEvent,
 } from "../../../../packages/interaction-contract/src/index.js";
 import { renderInteractionEventForOpenAi } from "../../../../packages/openai-interaction-adapter/src/index.js";
 import type { ThreadBinding } from "../../../../packages/persistence/src/index.js";
-import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
 import {
   createOpenWebUiUserAuthenticator,
   requireOpenWebUiIdentity,
@@ -39,11 +40,22 @@ import type { FixedWindowRateLimiter } from "../operations/rate-limiter.js";
 
 export interface ChatRunnerContext {
   readonly userText: string;
+  readonly clientMessages: readonly ClientHistoryMessage[];
   readonly identity: OpenWebUiIdentity;
   readonly openWebUi: OpenWebUiRequestContext;
   readonly threadId: string;
   readonly runId: string;
   readonly signal?: AbortSignal;
+}
+
+export interface PersistOpenAiAssistantMessageInput {
+  readonly principalId: string;
+  readonly threadId: string;
+  readonly externalMessageId: string;
+  readonly requestId: string;
+  readonly contentText: string;
+  readonly taskId?: string;
+  readonly truncated: boolean;
 }
 
 export type ChatRunnerResult =
@@ -66,6 +78,9 @@ export interface OpenAiRoutesOptions {
   readonly now?: () => number;
   readonly nextId?: () => string;
   readonly runChat?: ChatRunner;
+  readonly persistAssistantMessage?: (
+    input: PersistOpenAiAssistantMessageInput,
+  ) => Promise<void>;
 }
 
 export const registerOpenAiRoutes: FastifyPluginAsync<
@@ -73,30 +88,12 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
 > = async (server, options) => {
   const now = options.now ?? Date.now;
   const nextId = options.nextId ?? randomUUID;
-  const chatGraph =
-    options.runChat === undefined
-      ? createSingleAgentChatGraph(undefined, options.checkpointer)
-      : undefined;
   const runChat =
     options.runChat ??
     (async (context: ChatRunnerContext) => {
-      if (chatGraph === undefined) {
-        throw new Error("Chat graph is unavailable");
-      }
-      const result = await chatGraph.invoke(
-        {
-          messages: [{ role: "user", content: context.userText }],
-          threadId: context.threadId,
-          userId: context.identity.userId,
-          openWebUiChatId: context.openWebUi.chatId,
-          utilityRequest: context.openWebUi.utilityTask !== undefined,
-        },
-        { configurable: { thread_id: context.threadId } },
-      );
-      const content = result.messages.at(-1)?.content;
-      return typeof content === "string"
-        ? content
-        : "The response could not be rendered as conversational text.";
+      return context.openWebUi.utilityTask === undefined
+        ? "The conversation application service is unavailable; no SDAR operation was started."
+        : "Single SDAR chat";
     });
 
   server.addHook(
@@ -192,7 +189,21 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
     const userText =
       typeof lastUserMessage?.content === "string"
         ? lastUserMessage.content
-        : "";
+        : messageContentText(lastUserMessage?.content);
+    if (lastUserMessage === undefined || userText.length === 0) {
+      return reply
+        .code(400)
+        .send(
+          openAiError(
+            "invalid_request",
+            "A non-empty textual user message is required.",
+          ),
+        );
+    }
+    const clientMessages = toClientHistoryMessages(
+      parsed.data.messages,
+      openWebUi,
+    );
     const abortController = new AbortController();
     request.raw.once("aborted", () => abortController.abort());
     reply.raw.once("close", () => abortController.abort());
@@ -201,6 +212,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
     try {
       result = await runChat({
         userText,
+        clientMessages,
         identity,
         openWebUi,
         threadId: thread.threadId,
@@ -211,10 +223,43 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
       timedChat.end(abortController.signal.aborted ? "aborted" : "error");
       throw error;
     }
+    let taskId: string | undefined;
+    let responseTruncated = false;
     const fragments = limitFragments(
-      observeFragments(result, timedChat, abortController.signal),
+      observeFragments(
+        result,
+        timedChat,
+        abortController.signal,
+        (observedTaskId) => {
+          taskId = observedTaskId;
+        },
+      ),
       options.config.maxResponseChars,
+      () => {
+        responseTruncated = true;
+      },
     );
+    const persistAssistant = async (
+      contentText: string,
+      truncated: boolean,
+    ): Promise<void> => {
+      if (
+        openWebUi.utilityTask !== undefined ||
+        options.persistAssistantMessage === undefined ||
+        contentText.length === 0
+      ) {
+        return;
+      }
+      await options.persistAssistantMessage({
+        principalId: identity.userId,
+        threadId: thread.threadId,
+        externalMessageId: openWebUi.messageId,
+        requestId: openWebUi.userMessageId,
+        contentText,
+        ...(taskId === undefined ? {} : { taskId }),
+        truncated,
+      });
+    };
     if (parsed.data.stream) {
       return reply
         .type(SSE_CONTENT_TYPE)
@@ -231,6 +276,8 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
                 signal: abortController.signal,
                 includeUsage:
                   parsed.data.stream_options?.include_usage === true,
+                persistAssistant,
+                responseWasTruncated: () => responseTruncated,
               }),
               options.telemetry,
             ),
@@ -239,6 +286,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
     }
 
     const content = await collectFragments(fragments);
+    await persistAssistant(content, responseTruncated);
     return createChatCompletionResponse({
       id,
       created,
@@ -248,13 +296,18 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
   });
 };
 
-async function* streamChatCompletion(input: {
+export async function* streamChatCompletion(input: {
   readonly id: string;
   readonly created: number;
   readonly model: string;
   readonly fragments: AsyncIterable<string>;
   readonly signal: AbortSignal;
   readonly includeUsage: boolean;
+  readonly persistAssistant: (
+    contentText: string,
+    truncated: boolean,
+  ) => Promise<void>;
+  readonly responseWasTruncated: () => boolean;
 }): AsyncGenerator<string> {
   const common = {
     id: input.id,
@@ -266,30 +319,41 @@ async function* streamChatCompletion(input: {
     ...common,
     choices: [{ index: 0, delta: { role: "assistant" }, finish_reason: null }],
   });
+  const published: string[] = [];
+  let failed = false;
   try {
     for await (const content of input.fragments) {
       if (content.length === 0) continue;
+      published.push(content);
       yield encodeSseData({
         ...common,
         choices: [{ index: 0, delta: { content }, finish_reason: null }],
       });
     }
   } catch {
+    failed = true;
     if (!input.signal.aborted) {
+      const fallback =
+        "The SDAR operation failed safely. No internal protocol details were exposed.";
+      published.push(fallback);
       yield encodeSseData({
         ...common,
         choices: [
           {
             index: 0,
             delta: {
-              content:
-                "The SDAR operation failed safely. No internal protocol details were exposed.",
+              content: fallback,
             },
             finish_reason: null,
           },
         ],
       });
     }
+  } finally {
+    await input.persistAssistant(
+      published.join(""),
+      input.signal.aborted || failed || input.responseWasTruncated(),
+    );
   }
   yield encodeSseData({
     ...common,
@@ -301,7 +365,10 @@ async function* streamChatCompletion(input: {
   yield "data: [DONE]\n\n";
 }
 
-async function* toFragments(result: ChatRunnerResult): AsyncGenerator<string> {
+async function* toFragments(
+  result: ChatRunnerResult,
+  observeTaskId: (taskId: string) => void,
+): AsyncGenerator<string> {
   if (typeof result === "string") {
     yield result;
     return;
@@ -314,6 +381,7 @@ async function* toFragments(result: ChatRunnerResult): AsyncGenerator<string> {
     if (!isSdarInteractionEvent(value)) {
       throw new Error("Chat runner emitted an invalid interaction event");
     }
+    if (value.taskId !== undefined) observeTaskId(value.taskId);
     const fragment = renderInteractionEventForOpenAi(value);
     if (fragment !== undefined) yield fragment;
   }
@@ -323,9 +391,10 @@ async function* observeFragments(
   result: ChatRunnerResult,
   timed: TimedOperation,
   signal: AbortSignal,
+  observeTaskId: (taskId: string) => void,
 ): AsyncGenerator<string> {
   try {
-    yield* toFragments(result);
+    yield* toFragments(result, observeTaskId);
     timed.end(signal.aborted ? "aborted" : "ok");
   } catch (error) {
     timed.end(signal.aborted ? "aborted" : "error");
@@ -364,6 +433,7 @@ async function collectFragments(
 async function* limitFragments(
   fragments: AsyncIterable<string>,
   maximumCharacters: number,
+  onTruncated: () => void,
 ): AsyncGenerator<string> {
   let emittedCharacters = 0;
   let emittedFragments = 0;
@@ -371,10 +441,12 @@ async function* limitFragments(
     emittedFragments += 1;
     const remaining = maximumCharacters - emittedCharacters;
     if (emittedFragments > 512 || remaining <= 0) {
+      onTruncated();
       yield "The response was truncated at the configured safety limit.";
       return;
     }
     if (fragment.length > remaining) {
+      onTruncated();
       yield fragment.slice(0, remaining) +
         "\n\nThe response was truncated at the configured safety limit.";
       return;
@@ -382,4 +454,72 @@ async function* limitFragments(
     emittedCharacters += fragment.length;
     yield fragment;
   }
+}
+
+function toClientHistoryMessages(
+  messages: ChatCompletionRequest["messages"],
+  openWebUi: OpenWebUiRequestContext,
+): readonly ClientHistoryMessage[] {
+  const currentUserIndex = findLastUserIndex(messages);
+  const parentAssistantIndex = findPreviousAssistantIndex(
+    messages,
+    currentUserIndex,
+  );
+  const imported: ClientHistoryMessage[] = [];
+  for (const [index, message] of messages.entries()) {
+    if (message.role === "tool") continue;
+    const contentText = messageContentText(message.content);
+    if (contentText.length === 0) continue;
+    const externalMessageId =
+      message.role === "user" && index === currentUserIndex
+        ? openWebUi.userMessageId
+        : message.role === "assistant" && index === parentAssistantIndex
+          ? (openWebUi.userMessageParentId ?? explicitMessageId(message))
+          : explicitMessageId(message);
+    imported.push({
+      role: message.role,
+      contentText,
+      ...(externalMessageId === undefined ? {} : { externalMessageId }),
+    });
+  }
+  return imported;
+}
+
+function findPreviousAssistantIndex(
+  messages: ChatCompletionRequest["messages"],
+  beforeIndex: number,
+): number {
+  for (let index = beforeIndex - 1; index >= 0; index -= 1) {
+    if (messages[index]?.role === "assistant") return index;
+  }
+  return -1;
+}
+
+function findLastUserIndex(
+  messages: ChatCompletionRequest["messages"],
+): number {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index]?.role === "user") return index;
+  }
+  return -1;
+}
+
+function explicitMessageId(
+  message: ChatCompletionRequest["messages"][number],
+): string | undefined {
+  return message.id ?? message.message_id;
+}
+
+function messageContentText(content: unknown): string {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+  return content
+    .flatMap((part) => {
+      if (part === null || typeof part !== "object") return [];
+      const record = part as Readonly<Record<string, unknown>>;
+      if (typeof record.text === "string") return [record.text];
+      if (typeof record.input_text === "string") return [record.input_text];
+      return [];
+    })
+    .join("\n");
 }

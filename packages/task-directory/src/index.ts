@@ -45,3 +45,84 @@ export function parseTaskDirectorySnapshot(
 ): TaskDirectorySnapshot {
   return taskDirectorySnapshotSchema.parse(value);
 }
+
+export type TaskResolution =
+  | { readonly outcome: "resolved"; readonly task: TaskSummary }
+  | {
+      readonly outcome: "ambiguous";
+      readonly candidates: readonly TaskSummary[];
+    }
+  | { readonly outcome: "not_found" };
+
+export function resolveTaskSelector(
+  selector: TaskSelector,
+  directory: TaskDirectorySnapshot,
+): TaskResolution {
+  const tasks = allDirectoryTasks(directory);
+  if ("taskId" in selector) {
+    return one(tasks.filter((task) => task.taskId === selector.taskId));
+  }
+  if ("shortId" in selector) {
+    return one(tasks.filter((task) => task.shortId === selector.shortId));
+  }
+  if ("ordinal" in selector) {
+    const task = tasks[selector.ordinal - 1];
+    return task === undefined
+      ? { outcome: "not_found" }
+      : { outcome: "resolved", task };
+  }
+  if ("summaryQuery" in selector) {
+    const query = normalizeSummary(selector.summaryQuery);
+    if (query.length === 0) return { outcome: "not_found" };
+    return one(
+      tasks.filter((task) =>
+        normalizeSummary(task.summary ?? "").includes(query),
+      ),
+    );
+  }
+  switch (selector.reference) {
+    case "focused":
+      return resolveTaskId(directory.focusedTaskId, tasks);
+    case "latest":
+      return tasks[0] === undefined
+        ? { outcome: "not_found" }
+        : { outcome: "resolved", task: tasks[0] };
+    case "previous": {
+      const previous =
+        directory.recentTerminalTasks[0] ??
+        tasks.find((task) => task.taskId === directory.lastReferencedTaskId);
+      return previous === undefined
+        ? { outcome: "not_found" }
+        : { outcome: "resolved", task: previous };
+    }
+    case "only_active":
+      return one(directory.activeTasks);
+  }
+}
+
+export function allDirectoryTasks(
+  directory: TaskDirectorySnapshot,
+): readonly TaskSummary[] {
+  return [...directory.activeTasks, ...directory.recentTerminalTasks];
+}
+
+function resolveTaskId(
+  taskId: string | undefined,
+  tasks: readonly TaskSummary[],
+): TaskResolution {
+  return taskId === undefined
+    ? { outcome: "not_found" }
+    : one(tasks.filter((task) => task.taskId === taskId));
+}
+
+function one(tasks: readonly TaskSummary[]): TaskResolution {
+  if (tasks.length === 0) return { outcome: "not_found" };
+  if (tasks.length > 1) return { outcome: "ambiguous", candidates: tasks };
+  const task = tasks[0];
+  if (task === undefined) return { outcome: "not_found" };
+  return { outcome: "resolved", task };
+}
+
+function normalizeSummary(value: string): string {
+  return value.normalize("NFKC").trim().toLocaleLowerCase("en-US");
+}

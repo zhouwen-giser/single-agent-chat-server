@@ -8,6 +8,29 @@ import { installGracefulShutdown } from "../apps/server/src/shutdown.js";
 import type { SdarA2aClient } from "../packages/sdar-a2a-adapter/src/index.js";
 
 describe("runtime recovery helpers", () => {
+  it("constructs exactly one fixed SDAR client for concurrent requests", async () => {
+    const client = { endpoint: "http://sdar.test/a2a" } as SdarA2aClient;
+    let release!: () => void;
+    const ready = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const factory = jest.fn(async () => {
+      await ready;
+      return client;
+    });
+    const getClient = createLazySdarClient(factory);
+    const requests = Array.from({ length: 32 }, () => getClient());
+
+    expect(new Set(requests).size).toBe(1);
+    release();
+    await expect(Promise.all(requests)).resolves.toEqual(
+      Array.from({ length: 32 }, () => client),
+    );
+    expect(factory).toHaveBeenCalledTimes(1);
+    await expect(getClient()).resolves.toBe(client);
+    expect(factory).toHaveBeenCalledTimes(1);
+  });
+
   it("shares an in-flight SDAR discovery and retries after a temporary outage", async () => {
     const client = { endpoint: "http://sdar.test/a2a" } as SdarA2aClient;
     const factory = jest

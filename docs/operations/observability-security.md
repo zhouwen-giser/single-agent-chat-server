@@ -12,9 +12,11 @@ route template, method, status code, and duration. A caller-provided
 identifier; otherwise a UUID is generated. The selected value is returned in
 the response.
 
-Pino redacts authorization, signed user JWTs, tokens, credentials, request
-bodies, prompts, and Artifact fields. Application code must not add user, chat,
-Task, prompt, Artifact, credential, or hidden-reasoning values to logs.
+Pino redacts authorization, cookies, signed user JWTs, API keys, connection
+strings, database URLs, tokens, credentials, request/response bodies, message
+arrays, user text, prompts, structured content, and Artifact fields.
+Application code must not add user, chat, Task, prompt, model response, A2A
+content, Artifact, credential, or hidden-reasoning values to logs.
 
 ## OpenTelemetry
 
@@ -28,6 +30,26 @@ operations. Metrics include API/chat/A2A latency, request counts, active HTTP
 and A2A streams, and active persisted Task bindings. Labels are restricted to
 small enumerations: route, status class, operation, outcome, and stream kind.
 User, chat, Task, message, and request identifiers are forbidden metric labels.
+The attribute-free counter `a2a_unexpected_auth_required_total` records an SDK
+auth-required state as a trusted-network deployment mismatch; it never labels
+the endpoint, Task, principal, credential, or error text.
+
+The v0.3 counters below expose only fixed enumerations and never message text,
+identifiers, URLs, model output, or error details:
+
+- `conversation_model_requests_total` labels model operation and the outcome
+  `ok`, `timeout`, `unavailable`, `invalid_response`, `invalid_output`, or
+  `error`;
+- `request_result_total{kind}` labels a newly completed `task` or `message`
+  result;
+- `request_replay_total{kind}` labels a replayed `task` or `message` result;
+- `conversation_message_dedup_total` labels only northbound protocol and
+  `user`/`assistant` role;
+- `chat_server.ambiguous_task_reference` has no attributes.
+
+Persistence emits result/replay and message-dedup observations at the durable
+commit/replay boundary. Model instrumentation classifies errors from stable
+error codes, never raw exception text.
 
 ## Limits and dependency health
 
@@ -38,6 +60,14 @@ bounded. Rate-limit responses use OpenAI error shape, status 429, and
 `Retry-After`.
 PostgreSQL connection and query attempts are bounded to 5 seconds by default
 through `DATABASE_OPERATION_TIMEOUT_MS`.
+
+Conversation-model prompt data is serialized under a JSON `untrustedData`
+envelope after the fixed system instruction. User-provided URLs and published
+A2A text cannot become system instructions or select a southbound endpoint.
+The architecture gate requires exactly one SDAR client construction site in
+the process entry point and rejects production SMPP/MCP dependencies or
+imports, local model fallbacks, legacy A2A operations, and internal
+`AUTH_REQUIRED` state.
 
 `/health` reports only process liveness. `/ready` checks the required PostgreSQL
 dependency and returns 503 without exposing connection details when it is

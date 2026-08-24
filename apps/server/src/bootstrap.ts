@@ -10,6 +10,7 @@ import type { AgUiRunHandler } from "../../../packages/ag-ui-interaction-adapter
 import { openAiError } from "../../../packages/openai-api-contract/src/index.js";
 import {
   registerAgUiRoutes,
+  type AgUiRoutesOptions,
   type ResolveAgUiThread,
 } from "./api/ag-ui-routes.js";
 import { registerHealthRoutes } from "./api/health-routes.js";
@@ -24,7 +25,12 @@ import { registerCorsPolicy } from "./security/cors.js";
 
 export interface BuildServerOptions extends Pick<
   OpenAiRoutesOptions,
-  "now" | "nextId" | "runChat" | "resolveChatThread" | "checkpointer"
+  | "now"
+  | "nextId"
+  | "runChat"
+  | "resolveChatThread"
+  | "checkpointer"
+  | "persistAssistantMessage"
 > {
   readonly config: ServerConfig;
   readonly logger?: FastifyServerOptions["logger"];
@@ -33,6 +39,7 @@ export interface BuildServerOptions extends Pick<
   readonly telemetry?: SecureTelemetry;
   readonly resolveAgUiThread?: ResolveAgUiThread;
   readonly runAgUi?: AgUiRunHandler;
+  readonly persistAgUiAssistantMessages?: AgUiRoutesOptions["persistAssistantMessages"];
   readonly rateLimiter?: FixedWindowRateLimiter;
 }
 
@@ -112,6 +119,11 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     rateLimiter,
     resolveThread: options.resolveAgUiThread ?? unavailableAgUiThread,
     ...(options.runAgUi === undefined ? {} : { runAgUi: options.runAgUi }),
+    ...(options.persistAgUiAssistantMessages === undefined
+      ? {}
+      : {
+          persistAssistantMessages: options.persistAgUiAssistantMessages,
+        }),
     ...(options.now === undefined ? {} : { now: options.now }),
   });
   void server.register(registerHealthRoutes, {
@@ -134,6 +146,9 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     ...(options.now === undefined ? {} : { now: options.now }),
     ...(options.nextId === undefined ? {} : { nextId: options.nextId }),
     ...(options.runChat === undefined ? {} : { runChat: options.runChat }),
+    ...(options.persistAssistantMessage === undefined
+      ? {}
+      : { persistAssistantMessage: options.persistAssistantMessage }),
     ...(options.checkpointer === undefined
       ? {}
       : { checkpointer: options.checkpointer }),

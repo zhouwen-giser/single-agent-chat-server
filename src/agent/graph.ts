@@ -2,6 +2,7 @@ import { AIMessage } from "@langchain/core/messages";
 import { StateGraph, type BaseCheckpointSaver } from "@langchain/langgraph";
 
 import { classifyTurn } from "./classification.js";
+import type { ClassificationError } from "./classification.js";
 import {
   unavailableStructuredChatModel,
   type StructuredChatModel,
@@ -11,12 +12,33 @@ import { StateAnnotation } from "./state.js";
 export function createSingleAgentChatGraph(
   model: StructuredChatModel = unavailableStructuredChatModel,
   checkpointer?: BaseCheckpointSaver,
+  onClassificationError?: (error: ClassificationError) => void,
 ) {
   const normalizeRequest = async (
     state: typeof StateAnnotation.State,
   ): Promise<typeof StateAnnotation.Update> => {
     const content = state.messages.at(-1)?.content;
-    return { userText: typeof content === "string" ? content : "" };
+    const userText = typeof content === "string" ? content : "";
+    const conversationContext = state.conversationContext ?? {
+      threadId: state.threadId,
+      messages: [],
+      activeTasks: state.activeTasks,
+      recentTerminalTasks: state.recentTasks,
+      ...(state.focusedTaskId === undefined
+        ? {}
+        : { focusedTaskId: state.focusedTaskId }),
+      ...(state.lastReferencedTaskId === undefined
+        ? {}
+        : { lastReferencedTaskId: state.lastReferencedTaskId }),
+    };
+    return {
+      userText,
+      conversationContext,
+      activeTasks: [...conversationContext.activeTasks],
+      recentTasks: [...conversationContext.recentTerminalTasks],
+      focusedTaskId: conversationContext.focusedTaskId,
+      lastReferencedTaskId: conversationContext.lastReferencedTaskId,
+    };
   };
 
   const classify = async (
@@ -24,24 +46,26 @@ export function createSingleAgentChatGraph(
   ): Promise<typeof StateAnnotation.Update> => {
     const result = await classifyTurn(
       {
-        userText: state.userText,
+        currentUserText: state.userText,
         utilityRequest: state.utilityRequest,
-        ...(state.activeTask === undefined
-          ? {}
-          : { activeTask: state.activeTask }),
+        context:
+          state.conversationContext ??
+          (() => {
+            throw new Error("Conversation context was not normalized");
+          })(),
       },
       model,
     );
+    if (result.error !== undefined) onClassificationError?.(result.error);
     return {
       requestKind: result.requestKind,
       followUpAction: result.followUpAction,
+      targetTaskId: result.targetTaskId,
+      taskText: result.taskText,
+      includeTerminalTasks: result.includeTerminalTasks ?? false,
       lastError: result.error,
       responseFragments:
-        result.blockedNewTask === true
-          ? [
-              "当前聊天已有活动中的 SDAR Task。请先查询状态、完成或明确取消当前任务，再创建新任务。",
-            ]
-          : [],
+        result.responseText === undefined ? [] : [result.responseText],
     };
   };
 
@@ -53,12 +77,22 @@ export function createSingleAgentChatGraph(
       return { responseFragments: ["Single SDAR chat"] };
     }
     if (state.requestKind === "general_chat") {
+      const context = state.conversationContext;
+      if (context === undefined) {
+        throw new Error("Conversation context was not normalized");
+      }
       return {
-        responseFragments: [await model.answer({ userText: state.userText })],
+        responseFragments: [
+          await model.answer({
+            context,
+            currentUserText: state.userText,
+          }),
+        ],
       };
     }
     const labels = {
       new_task: "new SDAR task",
+      list_tasks: "Task directory",
       status: "task status",
       follow_up: `task follow-up (${state.followUpAction ?? "invalid"})`,
       cancel: "task cancellation",

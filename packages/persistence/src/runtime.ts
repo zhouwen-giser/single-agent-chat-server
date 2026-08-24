@@ -6,6 +6,7 @@ import type { PersistenceConfig } from "./config.js";
 import { ConversationPersistenceRepository } from "./conversation-repository.js";
 import { InteractionPersistenceRepository } from "./interaction-repository.js";
 import { runMigrations } from "./migrations.js";
+import type { PersistenceObservationSink } from "./observation.js";
 import { ChatPersistenceRepository } from "./repository.js";
 
 const { Pool } = pg;
@@ -21,6 +22,7 @@ export interface PersistenceRuntime {
 
 export async function setupPersistence(
   config: PersistenceConfig,
+  observation?: PersistenceObservationSink,
 ): Promise<PersistenceRuntime> {
   const pool = new Pool({
     connectionString: config.connectionString,
@@ -41,12 +43,18 @@ export async function setupPersistence(
       repository: new ChatPersistenceRepository(
         pool,
         config.idempotencyLeaseMs,
+        config.maxActiveTasksPerChat,
       ),
       interactionRepository: new InteractionPersistenceRepository(
         pool,
         config.idempotencyLeaseMs,
+        config.maxActiveTasksPerChat,
+        observation,
       ),
-      conversationRepository: new ConversationPersistenceRepository(pool),
+      conversationRepository: new ConversationPersistenceRepository(
+        pool,
+        observation,
+      ),
       checkpointer: activeCheckpointer,
       async readiness() {
         try {

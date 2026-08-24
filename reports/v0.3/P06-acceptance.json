@@ -1,0 +1,75 @@
+{
+  "phase": "P06",
+  "status": "PASSED_PUBLISHED",
+  "observedAt": "2026-08-21T13:31:04.432Z",
+  "acceptance": {
+    "AC-017": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/conversation-model/src/index.ts",
+        "src/agent/classification.ts",
+        "tests/v03-contracts.contract.test.ts"
+      ]
+    },
+    "AC-018": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/conversation-model/src/prompts.ts",
+        "tests/task-resolution.int.test.ts"
+      ]
+    },
+    "AC-019": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/task-directory/src/index.ts",
+        "tests/task-directory.unit.test.ts",
+        "tests/task-resolution.int.test.ts"
+      ]
+    },
+    "AC-020": {
+      "status": "PASSED",
+      "evidence": [
+        "src/agent/classification.ts",
+        "tests/task-resolution.int.test.ts",
+        "tests/adversarial.security.test.ts"
+      ]
+    },
+    "AC-021": {
+      "status": "PASSED",
+      "evidence": [
+        "apps/server/src/chat/sdar-chat-runner.ts",
+        "apps/server/src/chat/sdar-agui-runner.ts",
+        "tests/task-resolution.int.test.ts"
+      ]
+    }
+  },
+  "tests": {
+    "unit": { "passed": 96, "failed": 0, "skipped": 0 },
+    "contract": { "passed": 64, "failed": 0, "skipped": 0 },
+    "integration": { "passed": 74, "failed": 0, "skipped": 0 },
+    "postgresIntegration": { "passed": 69, "failed": 0, "skipped": 0 },
+    "security": { "passed": 11, "failed": 0, "skipped": 0 },
+    "architectureProductionFiles": 72,
+    "migrationFiles": 8,
+    "build": "PASSED",
+    "license": "PASSED",
+    "secret": "PASSED"
+  },
+  "decisionPolicy": {
+    "modelDecisionStrict": true,
+    "utilityDeterministic": true,
+    "legacyRegexProductionBypass": false,
+    "ambiguousMutationCallsA2a": false,
+    "unqualifiedMultiTaskStatusListsAll": true,
+    "focusAfterSuccessfulOperation": true,
+    "ambiguousReferenceMetricContentFree": true
+  },
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/13",
+    "candidateSha": "b29a005a125536ff9728bc3b011e7ff452aea919",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32486976750",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
+}

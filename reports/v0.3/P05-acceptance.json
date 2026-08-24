@@ -1,0 +1,68 @@
+{
+  "phase": "P05",
+  "status": "PASSED_PUBLISHED",
+  "observedAt": "2026-08-21T12:51:10.590Z",
+  "acceptance": {
+    "AC-013": {
+      "status": "PASSED",
+      "evidence": [
+        "migrations/0008_multi_task_directory.sql",
+        "scripts/verify-migrations.mjs",
+        "scripts/verify-architecture.mjs"
+      ]
+    },
+    "AC-014": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/persistence/src/interaction-repository.ts",
+        "tests/multi-task-directory.postgres.int.test.ts"
+      ]
+    },
+    "AC-015": {
+      "status": "PASSED",
+      "evidence": [
+        "migrations/0008_multi_task_directory.sql",
+        "tests/multi-task-directory.postgres.int.test.ts"
+      ]
+    },
+    "AC-016": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/persistence/src/config.ts",
+        "packages/persistence/src/repository.ts",
+        "packages/persistence/src/interaction-repository.ts",
+        "tests/multi-task-directory.postgres.int.test.ts"
+      ]
+    }
+  },
+  "tests": {
+    "unit": { "passed": 93, "failed": 0, "skipped": 0 },
+    "contract": { "passed": 64, "failed": 0, "skipped": 0 },
+    "integration": { "passed": 70, "failed": 0, "skipped": 0 },
+    "postgresIntegration": { "passed": 69, "failed": 0, "skipped": 0 },
+    "p05Postgres": { "passed": 6, "failed": 0, "skipped": 0 },
+    "security": { "passed": 10, "failed": 0, "skipped": 0 },
+    "architectureProductionFiles": 72,
+    "migrationFiles": 8,
+    "build": "PASSED",
+    "license": "PASSED",
+    "secret": "PASSED"
+  },
+  "multiTaskPolicy": {
+    "defaultActiveTaskLimit": 8,
+    "maximumConfigurableLimit": 32,
+    "directoryLimit": 32,
+    "submissionLeaseScope": "conversation_thread",
+    "mutationLeaseScope": "task_binding",
+    "focusSameThreadConstraint": true,
+    "legacyImplicitSingleTaskApis": false
+  },
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/13",
+    "candidateSha": "1b36914a5d6240e658585b62c3d242e44831aaea",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32483598648",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
+}

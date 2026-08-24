@@ -11,12 +11,19 @@ import {
   type UpDownCounter,
 } from "@opentelemetry/api";
 
+import type { ConversationContextObservation } from "../../../../packages/conversation-context/src/index.js";
+
 const allowedAttributeKeys = new Set([
   "operation",
   "outcome",
   "route",
   "status_class",
   "stream_kind",
+  "budget_truncated",
+  "summary_present",
+  "protocol",
+  "role",
+  "kind",
 ]);
 
 export function lowCardinalityAttributes(
@@ -42,6 +49,14 @@ export class SecureTelemetry {
   private readonly a2aLatency: Pick<Histogram, "record">;
   private readonly requests: Pick<Counter, "add">;
   private readonly activeStreams: Pick<UpDownCounter, "add">;
+  private readonly contextCharacters: Pick<Histogram, "record">;
+  private readonly contextMessages: Pick<Histogram, "record">;
+  private readonly ambiguousTaskReferences: Pick<Counter, "add">;
+  private readonly unexpectedA2aAuthentication: Pick<Counter, "add">;
+  private readonly conversationModelRequests: Pick<Counter, "add">;
+  private readonly requestResults: Pick<Counter, "add">;
+  private readonly requestReplays: Pick<Counter, "add">;
+  private readonly conversationMessageDeduplications: Pick<Counter, "add">;
   private activeTasks = 0;
 
   constructor(
@@ -81,6 +96,40 @@ export class SecureTelemetry {
       safelyValue(() =>
         meter?.createUpDownCounter("chat_server.streams.active"),
       ) ?? noOpCounter;
+    this.contextCharacters =
+      safelyValue(() =>
+        meter?.createHistogram("chat_server.context.characters", {
+          unit: "{character}",
+        }),
+      ) ?? noOpHistogram;
+    this.contextMessages =
+      safelyValue(() =>
+        meter?.createHistogram("chat_server.context.messages", {
+          unit: "{message}",
+        }),
+      ) ?? noOpHistogram;
+    this.ambiguousTaskReferences =
+      safelyValue(() =>
+        meter?.createCounter("chat_server.ambiguous_task_reference"),
+      ) ?? noOpCounter;
+    this.unexpectedA2aAuthentication =
+      safelyValue(() =>
+        meter?.createCounter("a2a_unexpected_auth_required_total"),
+      ) ?? noOpCounter;
+    this.conversationModelRequests =
+      safelyValue(() =>
+        meter?.createCounter("conversation_model_requests_total"),
+      ) ?? noOpCounter;
+    this.requestResults =
+      safelyValue(() => meter?.createCounter("request_result_total")) ??
+      noOpCounter;
+    this.requestReplays =
+      safelyValue(() => meter?.createCounter("request_replay_total")) ??
+      noOpCounter;
+    this.conversationMessageDeduplications =
+      safelyValue(() =>
+        meter?.createCounter("conversation_message_dedup_total"),
+      ) ?? noOpCounter;
     const activeTaskGauge = safelyValue(() =>
       meter?.createObservableGauge("chat_server.tasks.active"),
     );
@@ -95,6 +144,73 @@ export class SecureTelemetry {
 
   setActiveTasks(count: number): void {
     this.activeTasks = Math.max(0, Math.floor(count));
+  }
+
+  recordContext(observation: ConversationContextObservation): void {
+    const attributes = lowCardinalityAttributes({
+      budget_truncated: String(observation.budgetTruncated),
+      summary_present: String(observation.summaryPresent),
+    });
+    safely(() =>
+      this.contextCharacters.record(observation.characterCount, attributes),
+    );
+    safely(() =>
+      this.contextMessages.record(observation.messageCount, attributes),
+    );
+  }
+
+  recordAmbiguousTaskReference(): void {
+    safely(() => this.ambiguousTaskReferences.add(1));
+  }
+
+  recordUnexpectedA2aAuthentication(): void {
+    safely(() => this.unexpectedA2aAuthentication.add(1));
+  }
+
+  recordConversationModelRequest(
+    operation:
+      "decide_turn" | "answer_general" | "summarize" | "explain_result",
+    outcome:
+      | "ok"
+      | "timeout"
+      | "unavailable"
+      | "invalid_response"
+      | "invalid_output"
+      | "error",
+  ): void {
+    safely(() =>
+      this.conversationModelRequests.add(
+        1,
+        lowCardinalityAttributes({ operation, outcome }),
+      ),
+    );
+  }
+
+  recordRequestResult(input: {
+    readonly kind: "task" | "message";
+    readonly replay: boolean;
+  }): void {
+    const attributes = lowCardinalityAttributes({
+      kind: input.kind,
+    });
+    safely(() =>
+      (input.replay ? this.requestReplays : this.requestResults).add(
+        1,
+        attributes,
+      ),
+    );
+  }
+
+  recordConversationMessageDedup(input: {
+    readonly protocol: "openai" | "ag_ui";
+    readonly role: "user" | "assistant";
+  }): void {
+    safely(() =>
+      this.conversationMessageDeduplications.add(
+        1,
+        lowCardinalityAttributes(input),
+      ),
+    );
   }
 
   recordApi(input: {

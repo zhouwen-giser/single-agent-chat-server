@@ -39,7 +39,21 @@ export interface AgUiRoutesOptions {
   readonly rateLimiter: FixedWindowRateLimiter;
   readonly resolveThread: ResolveAgUiThread;
   readonly runAgUi?: AgUiRunHandler;
+  readonly persistAssistantMessages?: (
+    input: PersistAgUiAssistantMessagesInput,
+  ) => Promise<void>;
   readonly now?: () => number;
+}
+
+export interface PersistAgUiAssistantMessagesInput {
+  readonly principalId: string;
+  readonly internalThreadId: string;
+  readonly runInput: RunAgentInput;
+  readonly messages: readonly {
+    readonly externalMessageId: string;
+    readonly contentText: string;
+  }[];
+  readonly truncated: boolean;
 }
 
 export const registerAgUiRoutes: FastifyPluginAsync<AgUiRoutesOptions> = async (
@@ -147,7 +161,18 @@ export const registerAgUiRoutes: FastifyPluginAsync<AgUiRoutesOptions> = async (
       .header("cache-control", "no-cache, no-transform")
       .header("connection", "keep-alive")
       .header("x-accel-buffering", "no")
-      .send(Readable.from(encodeEventStream(events, abortController.signal)));
+      .send(
+        Readable.from(
+          encodeEventStream(events, abortController.signal, async (result) => {
+            await options.persistAssistantMessages?.({
+              principalId: thread.principalId,
+              internalThreadId: thread.threadId,
+              runInput: input,
+              ...result,
+            });
+          }),
+        ),
+      );
   });
 };
 
@@ -156,14 +181,45 @@ async function* encodeEventStream(
     import("../../../../packages/ag-ui-api-contract/src/index.js").AGUIEvent
   >,
   signal: AbortSignal,
+  persist: (input: {
+    readonly messages: readonly {
+      readonly externalMessageId: string;
+      readonly contentText: string;
+    }[];
+    readonly truncated: boolean;
+  }) => Promise<void>,
 ): AsyncGenerator<string> {
+  const assistantIds = new Set<string>();
+  const published = new Map<string, string>();
+  let failed = false;
+  let terminal = false;
   try {
     for await (const event of events) {
       if (signal.aborted) return;
+      observeAssistantEvent(event, assistantIds, published);
+      if (event.type === "RUN_FINISHED") terminal = true;
+      if (event.type === "RUN_ERROR") {
+        terminal = true;
+        failed = true;
+      }
       yield encodeProfileAgUiSse(event);
     }
   } catch {
-    if (!signal.aborted) yield encodeProfileAgUiSse(createSafeAgUiRunError());
+    failed = true;
+    if (!signal.aborted) {
+      terminal = true;
+      yield encodeProfileAgUiSse(createSafeAgUiRunError());
+    }
+  } finally {
+    if (published.size > 0) {
+      await persist({
+        messages: [...published].map(([externalMessageId, contentText]) => ({
+          externalMessageId,
+          contentText,
+        })),
+        truncated: signal.aborted || failed || !terminal,
+      });
+    }
   }
 }
 
@@ -193,4 +249,31 @@ function validateRunLimits(
 
 function agUiError(code: string, message: string) {
   return { error: { code, message, type: "ag_ui_error" } };
+}
+
+function observeAssistantEvent(
+  event: import("../../../../packages/ag-ui-api-contract/src/index.js").AGUIEvent,
+  assistantIds: Set<string>,
+  published: Map<string, string>,
+): void {
+  const value = event as unknown as Readonly<Record<string, unknown>>;
+  const messageId =
+    typeof value.messageId === "string" ? value.messageId : undefined;
+  if (
+    event.type === "TEXT_MESSAGE_START" &&
+    value.role === "assistant" &&
+    messageId !== undefined
+  ) {
+    assistantIds.add(messageId);
+    return;
+  }
+  if (
+    (event.type === "TEXT_MESSAGE_CONTENT" ||
+      event.type === "TEXT_MESSAGE_CHUNK") &&
+    messageId !== undefined &&
+    assistantIds.has(messageId) &&
+    typeof value.delta === "string"
+  ) {
+    published.set(messageId, (published.get(messageId) ?? "") + value.delta);
+  }
 }

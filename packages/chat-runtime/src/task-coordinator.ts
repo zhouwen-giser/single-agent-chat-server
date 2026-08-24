@@ -16,6 +16,7 @@ import {
   type JsonValue,
   type TaskBinding,
 } from "../../persistence/src/index.js";
+import type { CompletedRequestResult } from "../../request-result/src/index.js";
 import {
   boundedPublishedJson,
   safePublishedText,
@@ -35,7 +36,11 @@ export interface TaskTurnContext {
   readonly userMessageId: string;
 }
 
-export interface FollowUpTurnContext extends TaskTurnContext {
+export interface ExistingTaskTurnContext extends TaskTurnContext {
+  readonly taskId: string;
+}
+
+export interface FollowUpTurnContext extends ExistingTaskTurnContext {
   readonly action: SdarFollowUpAction;
   readonly data?: JsonValue;
 }
@@ -56,20 +61,51 @@ export type TaskCoordinatorObserver = (
   observation: TaskCoordinatorObservation,
 ) => void;
 
-export type TaskCoordinatorRepository = Pick<
+type TaskCoordinatorTaskStore = Pick<
   ChatPersistenceRepository,
-  | "claimRequest"
-  | "completeRequest"
-  | "abandonRequestClaim"
   | "claimTaskSubmissionSlot"
   | "claimTaskInteractionSlot"
   | "releaseTaskSubmissionSlot"
-  | "findActiveTaskForChat"
+  | "releaseTaskInteractionSlot"
+  | "listActiveTasksForChat"
+  | "setFocusedTask"
   | "findAuthorizedTask"
   | "createTaskBinding"
   | "updateTaskBinding"
   | "recordEvent"
 >;
+
+export type TaskCoordinatorRequestClaim =
+  | { readonly outcome: "acquired" }
+  | { readonly outcome: "in_progress"; readonly leaseUntil?: string }
+  | { readonly outcome: "replay"; readonly result: CompletedRequestResult }
+  | { readonly outcome: "conflict" };
+
+export type TaskCoordinatorRepository = TaskCoordinatorTaskStore & {
+  claimRequest(input: {
+    readonly idempotencyKey: string;
+    readonly userId: string;
+    readonly openWebUiChatId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+    readonly leaseMs?: number;
+  }): Promise<TaskCoordinatorRequestClaim>;
+  completeRequest(input: {
+    readonly idempotencyKey: string;
+    readonly userId: string;
+    readonly openWebUiChatId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+    readonly result: CompletedRequestResult;
+  }): Promise<void>;
+  abandonRequestClaim(input: {
+    readonly idempotencyKey: string;
+    readonly userId: string;
+    readonly openWebUiChatId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+  }): Promise<void>;
+};
 
 export interface TaskCoordinatorOptions {
   readonly repository: TaskCoordinatorRepository;
@@ -131,18 +167,26 @@ export class SdarTaskCoordinator {
     }
 
     if (claim.outcome === "replay") {
+      if (claim.result.kind === "message") {
+        yield* replayMessageResult(claim.result, observer);
+        return;
+      }
       const client = await this.options.getClient();
       const binding = await this.options.repository.findAuthorizedTask({
         openWebUiChatId: input.chatId,
         userId: input.userId,
-        sdarTaskId: claim.resultTaskId,
+        sdarTaskId: claim.result.taskId,
       });
-      if (binding === undefined) {
+      if (
+        binding === undefined ||
+        binding.sdarContextId !== claim.result.contextId
+      ) {
         throw new Error("Idempotency replay has no authorized Task binding");
       }
       const task = await client.getTask(binding.sdarTaskId, {
         signal: callerSignal,
       });
+      assertSameTask(task, binding);
       const observed = await this.observeTask(task, binding, true);
       if (observed.publishable) {
         observer?.({
@@ -169,8 +213,10 @@ export class SdarTaskCoordinator {
       const client = await this.options.getClient();
       let binding: TaskBinding | undefined;
       let latestState: NormalizedTaskState | undefined;
-      let sawMessage = false;
+      let latestMessageResult: CompletedRequestResult | undefined;
+      const bufferedUnboundFragments: string[] = [];
       let completedClaim = false;
+      let streamEndedNormally = false;
       const streamController = new AbortController();
       const streamTimer = setTimeout(
         () => streamController.abort(new Error("chat stream budget elapsed")),
@@ -192,7 +238,17 @@ export class SdarTaskCoordinator {
           const observed = await this.observeEvent(event, input, binding);
           binding = observed.binding ?? binding;
           latestState = eventState(event) ?? latestState;
-          sawMessage ||= event.kind === "message";
+          if (
+            event.kind === "message" &&
+            event.message.role === "AGENT" &&
+            observed.fragments.length > 0
+          ) {
+            bufferedUnboundFragments.push(...observed.fragments);
+            latestMessageResult = messageRequestResult(
+              event.message,
+              bufferedUnboundFragments,
+            );
+          }
           if (binding !== undefined && !completedClaim) {
             await this.options.repository.completeRequest({
               idempotencyKey: input.userMessageId,
@@ -200,7 +256,7 @@ export class SdarTaskCoordinator {
               openWebUiChatId: input.chatId,
               requestHash,
               leaseOwner,
-              resultTaskId: binding.sdarTaskId,
+              result: taskRequestResult(binding),
             });
             completedClaim = true;
           }
@@ -225,6 +281,9 @@ export class SdarTaskCoordinator {
               enriched.fragments.length > 0
                 ? enriched.fragments
                 : observed.fragments;
+            for (const fragment of bufferedUnboundFragments.splice(0)) {
+              yield fragment;
+            }
             for (const fragment of boundaryFragments) yield fragment;
             return;
           }
@@ -235,10 +294,15 @@ export class SdarTaskCoordinator {
               fragments: observed.fragments,
             });
           }
+          if (binding === undefined && event.kind === "message") continue;
+          for (const fragment of bufferedUnboundFragments.splice(0)) {
+            yield fragment;
+          }
           for (const fragment of observed.fragments) yield fragment;
           if (latestState !== undefined && isResponseBoundary(latestState))
             return;
         }
+        streamEndedNormally = true;
       } catch (error) {
         if (!signal.aborted) throw error;
       } finally {
@@ -247,7 +311,18 @@ export class SdarTaskCoordinator {
 
       if (binding === undefined) {
         if (callerSignal?.aborted === true) return;
-        if (sawMessage) return;
+        if (streamEndedNormally && latestMessageResult !== undefined) {
+          await this.options.repository.completeRequest({
+            idempotencyKey: input.userMessageId,
+            userId: input.userId,
+            openWebUiChatId: input.chatId,
+            requestHash,
+            leaseOwner,
+            result: latestMessageResult,
+          });
+          for (const fragment of bufferedUnboundFragments) yield fragment;
+          return;
+        }
         throw new Error("SDAR stream ended before publishing a Task binding");
       }
       if (latestState !== undefined && isResponseBoundary(latestState)) return;
@@ -267,12 +342,9 @@ export class SdarTaskCoordinator {
     callerSignal?: AbortSignal,
     observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
-    const binding = await this.options.repository.findActiveTaskForChat({
-      chatId: input.chatId,
-      userId: input.userId,
-    });
-    if (binding === undefined) {
-      yield "There is no active SDAR Task for this user and chat.";
+    const binding = await this.authorizedTask(input, input.taskId);
+    if (binding === undefined || isTerminalBinding(binding)) {
+      yield "The requested active SDAR Task is not bound to this user and chat.";
       return;
     }
     const pending = pendingDetails(binding.pendingInput);
@@ -313,11 +385,20 @@ export class SdarTaskCoordinator {
       return;
     }
 
-    const client = await this.options.getClient();
     if (claim.outcome === "replay") {
+      if (claim.result.kind === "message") {
+        assertRelatedMessageResult(claim.result, binding);
+        await this.focusTask(input, binding);
+        yield* replayMessageResult(claim.result, observer);
+        return;
+      }
+      assertTaskResult(claim.result, binding);
+      const client = await this.options.getClient();
       const task = await client.getTask(binding.sdarTaskId, {
         signal: callerSignal,
       });
+      assertSameTask(task, binding);
+      await this.focusTask(input, binding);
       const observed = await this.observeTask(task, binding, true);
       if (observed.publishable) {
         observer?.({
@@ -330,10 +411,12 @@ export class SdarTaskCoordinator {
       return;
     }
 
+    const client = await this.options.getClient();
     const interactionSlot =
       await this.options.repository.claimTaskInteractionSlot({
         chatId: input.chatId,
         userId: input.userId,
+        bindingId: binding.bindingId,
         leaseOwner,
       });
     if (!interactionSlot) {
@@ -344,7 +427,7 @@ export class SdarTaskCoordinator {
         requestHash,
         leaseOwner,
       });
-      yield "Another Task interaction is already in progress for this chat; no duplicate Follow-up was sent.";
+      yield "Another interaction is already in progress for this Task; no duplicate Follow-up was sent.";
       return;
     }
     try {
@@ -363,16 +446,22 @@ export class SdarTaskCoordinator {
         },
         { signal: callerSignal },
       );
-      await this.options.repository.completeRequest({
-        idempotencyKey: input.userMessageId,
-        userId: input.userId,
-        openWebUiChatId: input.chatId,
-        requestHash,
-        leaseOwner,
-        resultTaskId: binding.sdarTaskId,
-      });
       if (result.kind === "message") {
         const fragments = renderMessage(result.message);
+        const messageResult = messageRequestResult(
+          result.message,
+          fragments,
+          binding,
+        );
+        await this.options.repository.completeRequest({
+          idempotencyKey: input.userMessageId,
+          userId: input.userId,
+          openWebUiChatId: input.chatId,
+          requestHash,
+          leaseOwner,
+          result: messageResult,
+        });
+        await this.focusTask(input, binding);
         if (fragments.length > 0) {
           observer?.({ source: "stream", value: result, fragments });
         }
@@ -380,6 +469,15 @@ export class SdarTaskCoordinator {
         return;
       }
       assertSameTask(result.task, binding);
+      await this.options.repository.completeRequest({
+        idempotencyKey: input.userMessageId,
+        userId: input.userId,
+        openWebUiChatId: input.chatId,
+        requestHash,
+        leaseOwner,
+        result: taskRequestResult(binding),
+      });
+      await this.focusTask(input, binding);
       const observed = await this.observeTask(result.task, binding, true);
       if (observed.publishable) {
         observer?.({
@@ -390,25 +488,23 @@ export class SdarTaskCoordinator {
       }
       for (const fragment of observed.fragments) yield fragment;
     } finally {
-      await this.options.repository.releaseTaskSubmissionSlot({
+      await this.options.repository.releaseTaskInteractionSlot({
         chatId: input.chatId,
         userId: input.userId,
+        bindingId: binding.bindingId,
         leaseOwner,
       });
     }
   }
 
   async *cancel(
-    input: TaskTurnContext,
+    input: ExistingTaskTurnContext,
     callerSignal?: AbortSignal,
     observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
-    const binding = await this.options.repository.findActiveTaskForChat({
-      chatId: input.chatId,
-      userId: input.userId,
-    });
-    if (binding === undefined) {
-      yield "There is no active SDAR Task for this user and chat.";
+    const binding = await this.authorizedTask(input, input.taskId);
+    if (binding === undefined || isTerminalBinding(binding)) {
+      yield "The requested active SDAR Task is not bound to this user and chat.";
       return;
     }
     const requestHash = hashJson({
@@ -437,6 +533,10 @@ export class SdarTaskCoordinator {
     const client = await this.options.getClient();
     let task: NormalizedTask;
     if (claim.outcome === "replay") {
+      if (claim.result.kind !== "task") {
+        throw new Error("Cancellation replay did not contain a Task result");
+      }
+      assertTaskResult(claim.result, binding);
       task = await client.getTask(binding.sdarTaskId, {
         signal: callerSignal,
       });
@@ -445,6 +545,7 @@ export class SdarTaskCoordinator {
         await this.options.repository.claimTaskInteractionSlot({
           chatId: input.chatId,
           userId: input.userId,
+          bindingId: binding.bindingId,
           leaseOwner,
         });
       if (!interactionSlot) {
@@ -455,30 +556,33 @@ export class SdarTaskCoordinator {
           requestHash,
           leaseOwner,
         });
-        yield "Another Task interaction is already in progress for this chat; no duplicate cancellation was sent.";
+        yield "Another interaction is already in progress for this Task; no duplicate cancellation was sent.";
         return;
       }
       try {
         task = await client.cancelTask(binding.sdarTaskId, {
           signal: callerSignal,
         });
+        assertSameTask(task, binding);
         await this.options.repository.completeRequest({
           idempotencyKey: input.userMessageId,
           userId: input.userId,
           openWebUiChatId: input.chatId,
           requestHash,
           leaseOwner,
-          resultTaskId: binding.sdarTaskId,
+          result: taskRequestResult(binding),
         });
       } finally {
-        await this.options.repository.releaseTaskSubmissionSlot({
+        await this.options.repository.releaseTaskInteractionSlot({
           chatId: input.chatId,
           userId: input.userId,
+          bindingId: binding.bindingId,
           leaseOwner,
         });
       }
     }
     assertSameTask(task, binding);
+    await this.focusTask(input, binding);
     const observed = await this.observeTask(task, binding, true);
     if (observed.publishable) {
       observer?.({
@@ -499,11 +603,7 @@ export class SdarTaskCoordinator {
     callerSignal?: AbortSignal,
     observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
-    const binding = await this.options.repository.findAuthorizedTask({
-      openWebUiChatId: input.chatId,
-      userId: input.userId,
-      sdarTaskId: input.taskId,
-    });
+    const binding = await this.authorizedTask(input, input.taskId);
     if (binding === undefined) {
       yield "The requested SDAR Task is not bound to this user and chat.";
       return;
@@ -513,6 +613,7 @@ export class SdarTaskCoordinator {
       signal: callerSignal,
     });
     assertSameTask(task, binding);
+    await this.focusTask(input, binding);
     const observed = await this.observeTask(task, binding, true);
     if (observed.publishable) {
       observer?.({
@@ -523,29 +624,16 @@ export class SdarTaskCoordinator {
     }
     for (const fragment of observed.fragments) yield fragment;
   }
-  async *status(
+  async *listTaskStatuses(
     input: Pick<TaskTurnContext, "chatId" | "userId">,
-    callerSignal?: AbortSignal,
-    observer?: TaskCoordinatorObserver,
   ): AsyncGenerator<string> {
-    const binding = await this.options.repository.findActiveTaskForChat(input);
-    if (binding === undefined) {
+    const bindings =
+      await this.options.repository.listActiveTasksForChat(input);
+    if (bindings.length === 0) {
       yield "There is no active SDAR Task for this user and chat.";
       return;
     }
-    const client = await this.options.getClient();
-    const task = await client.getTask(binding.sdarTaskId, {
-      signal: callerSignal,
-    });
-    const observed = await this.observeTask(task, binding, true);
-    if (observed.publishable) {
-      observer?.({
-        source: "task",
-        value: task,
-        fragments: observed.fragments,
-      });
-    }
-    for (const fragment of observed.fragments) yield fragment;
+    yield renderActiveTaskList(bindings);
   }
 
   private async *pollTask(
@@ -560,6 +648,7 @@ export class SdarTaskCoordinator {
       if (signal?.aborted === true) return;
       await this.delay(this.pollingIntervalMs, signal);
       const task = await client.getTask(binding.sdarTaskId, { signal });
+      assertSameTask(task, binding);
       const observed = await this.observeTask(task, binding);
       binding = observed.binding;
       if (observed.publishable) {
@@ -573,6 +662,32 @@ export class SdarTaskCoordinator {
       if (isResponseBoundary(task.state)) return;
     }
     yield "SDAR is still working. This chat response is ending without cancellation; ask for status to continue.";
+  }
+
+  private async authorizedTask(
+    input: Pick<TaskTurnContext, "chatId" | "userId">,
+    taskId: string,
+  ): Promise<TaskBinding | undefined> {
+    const binding = await this.options.repository.findAuthorizedTask({
+      openWebUiChatId: input.chatId,
+      userId: input.userId,
+      sdarTaskId: taskId,
+    });
+    if (binding !== undefined && binding.sdarTaskId !== taskId) {
+      throw new Error("Authorized Task lookup changed Task identity");
+    }
+    return binding;
+  }
+
+  private async focusTask(
+    input: Pick<TaskTurnContext, "chatId" | "userId">,
+    binding: TaskBinding,
+  ): Promise<void> {
+    await this.options.repository.setFocusedTask({
+      chatId: input.chatId,
+      userId: input.userId,
+      bindingId: binding.bindingId,
+    });
   }
 
   private async observeEvent(
@@ -665,6 +780,7 @@ export class SdarTaskCoordinator {
     readonly fragments: string[];
     readonly publishable: boolean;
   }> {
+    assertSameTask(task, binding);
     const hash = observationHash(task);
     const unique = await this.options.repository.recordEvent({
       taskId: task.taskId,
@@ -725,15 +841,20 @@ export class SdarTaskCoordinator {
       userId: turn.userId,
       sdarTaskId: taskId,
     });
-    if (existing !== undefined) return existing;
+    if (existing !== undefined) {
+      await this.focusTask(turn, existing);
+      return existing;
+    }
     try {
-      return await this.options.repository.createTaskBinding({
+      const created = await this.options.repository.createTaskBinding({
         openWebUiChatId: turn.chatId,
         userId: turn.userId,
         sdarTaskId: taskId,
         sdarContextId: contextId,
         status: state,
       });
+      await this.focusTask(turn, created);
+      return created;
     } catch (error) {
       if (!(error instanceof PersistenceConflictError)) throw error;
       const raced = await this.options.repository.findAuthorizedTask({
@@ -742,6 +863,7 @@ export class SdarTaskCoordinator {
         sdarTaskId: taskId,
       });
       if (raced === undefined) throw error;
+      await this.focusTask(turn, raced);
       return raced;
     }
   }
@@ -946,6 +1068,81 @@ function renderMessage(message: NormalizedMessage): string[] {
   );
 }
 
+function taskRequestResult(binding: TaskBinding): CompletedRequestResult {
+  return {
+    kind: "task",
+    taskId: binding.sdarTaskId,
+    contextId: binding.sdarContextId,
+  };
+}
+
+function messageRequestResult(
+  message: NormalizedMessage,
+  fragments: readonly string[],
+  relatedTask?: TaskBinding,
+): CompletedRequestResult {
+  const renderedText = fragments.join("");
+  if (renderedText.length > 65_536) {
+    throw new Error("Rendered Message result exceeds the persistence budget");
+  }
+  return {
+    kind: "message",
+    messageId: message.messageId,
+    ...(relatedTask === undefined
+      ? {}
+      : {
+          relatedTaskId: relatedTask.sdarTaskId,
+          contextId: relatedTask.sdarContextId,
+        }),
+    message,
+    renderedText,
+  };
+}
+
+async function* replayMessageResult(
+  result: Extract<CompletedRequestResult, { readonly kind: "message" }>,
+  observer?: TaskCoordinatorObserver,
+): AsyncGenerator<string> {
+  const fragments =
+    result.renderedText.length === 0 ? [] : [result.renderedText];
+  if (fragments.length > 0) {
+    observer?.({
+      source: "stream",
+      value: { kind: "message", message: result.message },
+      fragments,
+    });
+  }
+  for (const fragment of fragments) yield fragment;
+}
+
+function assertTaskResult(
+  result: Extract<CompletedRequestResult, { readonly kind: "task" }>,
+  binding: TaskBinding,
+): void {
+  if (
+    result.taskId !== binding.sdarTaskId ||
+    result.contextId !== binding.sdarContextId
+  ) {
+    throw new Error("Completed request changed Task identity");
+  }
+}
+
+function assertRelatedMessageResult(
+  result: Extract<CompletedRequestResult, { readonly kind: "message" }>,
+  binding: TaskBinding,
+): void {
+  if (
+    result.relatedTaskId !== binding.sdarTaskId ||
+    result.contextId !== binding.sdarContextId ||
+    (result.message.taskId !== undefined &&
+      result.message.taskId !== binding.sdarTaskId) ||
+    (result.message.contextId !== undefined &&
+      result.message.contextId !== binding.sdarContextId)
+  ) {
+    throw new Error("Completed Message result changed Task identity");
+  }
+}
+
 function renderArtifact(artifact: NormalizedArtifact): string[] {
   return artifact.parts.flatMap((part) => {
     if (part.kind === "text" && part.text !== undefined) {
@@ -958,6 +1155,23 @@ function renderArtifact(artifact: NormalizedArtifact): string[] {
     }
     return [];
   });
+}
+
+function renderActiveTaskList(bindings: readonly TaskBinding[]): string {
+  return [
+    "Active SDAR Tasks in this chat:",
+    ...bindings.map(
+      (binding) =>
+        `- ${binding.shortId ?? binding.sdarTaskId}: ${binding.status}`,
+    ),
+  ].join("\n");
+}
+
+function isTerminalBinding(binding: TaskBinding): boolean {
+  return (
+    binding.terminalAt !== undefined ||
+    ["COMPLETED", "FAILED", "CANCELED", "REJECTED"].includes(binding.status)
+  );
 }
 
 function summarizeArtifact(artifact: NormalizedArtifact): JsonValue {

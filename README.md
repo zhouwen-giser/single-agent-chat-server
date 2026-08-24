@@ -19,7 +19,9 @@ agent registry, capability-discovery service, or multi-agent router.
 
 ## Frozen compatibility
 
-- SDAR: `667146a3639eefdfed9b89c2417c08e1ac50e9a9`
+- execution-time SDAR main: `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`
+- execution-time SMPP main, read-only semantic reference:
+  `f8c37e6a2ecdc859e56910803197ec938b9a807a`
 - A2A specification patch: `1.0.1`
 - Wire version: `1.0`
 - Binding: `HTTP+JSON`
@@ -66,6 +68,14 @@ Both `/v1/*` routes require the configured service bearer key and a valid
 message IDs. See [API contract](docs/api-contract.md) and
 [Open WebUI setup](docs/openwebui-setup.md).
 
+Ordinary conversation and strict Turn Decisions come from the configured
+model. The model has no tools or network/database/A2A authority. A Chat may
+hold up to eight active Tasks by default. Untargeted status lists all active
+Tasks; a mutable operation must resolve one unique authorized Task or SACS
+returns clarification without calling A2A. Completed A2A requests persist
+exactly one `TASK | MESSAGE` result, and an exact `MESSAGE` is replayed without
+refreshing a later Task.
+
 ## Container start
 
 Supply real secrets without committing them, then:
@@ -87,16 +97,18 @@ pnpm verify:phase12       # hermetic quality and adversarial gate
 pnpm verify:ci            # CI-equivalent PostgreSQL and fixture gate
 pnpm test:e2e:fixture     # deterministic in-process fixture, not real E2E
 pnpm smoke                # built-server health/models/completion probe
-pnpm verify               # exact P13 candidate gate; requires real evidence and Docker
+pnpm verify:v03           # complete exact-head gate; requires real services and Docker
 ```
 
-`pnpm verify` intentionally fails unless native PostgreSQL, Docker, and
-machine-readable current-head evidence from live Open WebUI, the official AG-UI
-client, and the fixed SDAR are configured. The evidence directory and generated
-SBOM output must be below ignored `.tmp`; every real gate must identify the
-exact local and remote candidate SHA. A skipped database suite or deterministic
-fixture never satisfies the real release gate.
+`pnpm verify:v03` intentionally fails unless native PostgreSQL, Docker, a real
+OpenAI-compatible model, the fixed current SDAR, exact source/candidate SHAs,
+operator-reviewed safe Task requests, and an exact CI URL are configured. The
+evidence directory and generated SBOM output must be below ignored `.tmp`;
+every real gate identifies the exact local and remote candidate SHA. A skipped
+database suite or deterministic fixture never satisfies the real release gate.
 
-See [operations](docs/operations.md), [troubleshooting](docs/troubleshooting.md),
-[traceability](docs/traceability.md), and the current
+See [operations](docs/operations.md),
+[v0.3 release-candidate qualification](docs/release-candidate-v0.3.md),
+[troubleshooting](docs/troubleshooting.md),
+[v0.3 traceability](docs/traceability-v0.3.md), and the current
 [project status](PROJECT_STATUS.md).

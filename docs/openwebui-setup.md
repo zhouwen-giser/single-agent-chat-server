@@ -32,6 +32,13 @@ The first three IDs are required for chat requests. A nonempty task header
 marks title/tag/follow-up-suggestion work as a local utility request and must
 not submit or mutate an SDAR Task.
 
+Users can create multiple SDAR Tasks in the same Chat. Status without a target
+lists all active Tasks. The service renders stable short IDs that users can
+reference in later turns. Cancel, pause, resume, confirmation, input, and other
+mutations must resolve exactly one Task; when a reference is ambiguous the
+response asks for clarification and does not call SDAR. This behavior is
+server-side and must not be replaced with an Open WebUI function or tool.
+
 For Docker-to-host deployment, use
 `http://host.docker.internal:3000/v1`. For a fully containerized deployment,
 attach Open WebUI and this service to a dedicated edge network and use the

@@ -1,167 +1,180 @@
-import { structuredTurnSchema, type StructuredChatModel } from "./model.js";
-import type {
-  ActiveTaskSnapshot,
-  FollowUpAction,
-  RequestKind,
-} from "./state.js";
+import {
+  turnDecisionSchema,
+  type ConversationModelInput,
+} from "../../packages/conversation-model/src/index.js";
+import {
+  resolveTaskSelector,
+  type TaskDirectorySnapshot,
+  type TaskSummary,
+} from "../../packages/task-directory/src/index.js";
+import type { StructuredChatModel } from "./model.js";
+import type { FollowUpAction, RequestKind } from "./state.js";
 
-export interface ClassificationInput {
-  readonly userText: string;
+export interface ClassificationInput extends ConversationModelInput {
   readonly utilityRequest: boolean;
-  readonly activeTask?: ActiveTaskSnapshot;
 }
+
 export interface ClassificationResult {
   readonly requestKind: RequestKind;
   readonly followUpAction?: FollowUpAction;
+  readonly targetTaskId?: string;
+  readonly taskText?: string;
+  readonly includeTerminalTasks?: boolean;
+  readonly responseText?: string;
   readonly error?:
-    "invalid_structured_classification" | "invalid_state_classification";
-  readonly blockedNewTask?: boolean;
+    | "invalid_structured_classification"
+    | "invalid_state_classification"
+    | "conversation_model_unavailable"
+    | "task_reference_not_found"
+    | "ambiguous_task_reference";
 }
+
+export type ClassificationError = NonNullable<ClassificationResult["error"]>;
 
 export async function classifyTurn(
   input: ClassificationInput,
   model: StructuredChatModel,
 ): Promise<ClassificationResult> {
-  const text = input.userText.trim();
   if (input.utilityRequest) return { requestKind: "utility" };
-  if (
-    /(?:\u8fdb\u5ea6|\u72b6\u6001|\u600e\u4e48\u6837\u4e86|status|progress)/iu.test(
-      text,
-    )
-  ) {
-    return { requestKind: "status" };
-  }
-  if (
-    /(?:\u53d6\u6d88(?:\u5f53\u524d|\u8fd9\u4e2a)?\u4efb\u52a1|cancel (?:the )?task)/iu.test(
-      text,
-    )
-  ) {
-    return { requestKind: "cancel" };
-  }
 
-  const guardedAction = classifyGuardedFollowUp(text, input.activeTask);
-  if (guardedAction !== undefined) {
-    return { requestKind: "follow_up", followUpAction: guardedAction };
+  let rawDecision: unknown;
+  try {
+    rawDecision = await model.decideTurn({
+      context: input.context,
+      currentUserText: input.currentUserText.trim(),
+    });
+  } catch {
+    return {
+      requestKind: "general_chat",
+      responseText:
+        "The conversation model is unavailable, so no SDAR operation was started.",
+      error: "conversation_model_unavailable",
+    };
   }
-
-  const parsed = structuredTurnSchema.safeParse(
-    await model.classify({
-      userText: text,
-      hasActiveTask: input.activeTask !== undefined,
-    }),
-  );
+  const parsed = turnDecisionSchema.safeParse(rawDecision);
   if (!parsed.success) {
     return {
       requestKind: "general_chat",
+      responseText:
+        "I could not determine a safe action from that request. Please clarify what you want to do; no SDAR operation was started.",
       error: "invalid_structured_classification",
     };
   }
-  if (parsed.data.requestKind === "utility") {
-    return {
-      requestKind: "general_chat",
-      error: "invalid_state_classification",
-    };
+
+  const decision = parsed.data;
+  switch (decision.kind) {
+    case "general_chat":
+      return { requestKind: "general_chat" };
+    case "clarification":
+      return {
+        requestKind: "general_chat",
+        responseText: decision.question,
+      };
+    case "new_task":
+      return { requestKind: "new_task", taskText: decision.taskText };
+    case "list_tasks":
+      return {
+        requestKind: "list_tasks",
+        includeTerminalTasks: decision.includeTerminal,
+      };
+    case "task_status":
+      return classifyStatus(decision.selector, directory(input));
+    case "task_follow_up":
+      return classifyMutable(
+        "follow_up",
+        decision.selector,
+        directory(input),
+        decision.action,
+      );
+    case "task_cancel":
+      return classifyMutable("cancel", decision.selector, directory(input));
   }
-  if (
-    input.activeTask !== undefined &&
-    parsed.data.requestKind === "new_task"
-  ) {
-    return { requestKind: "general_chat", blockedNewTask: true };
-  }
-  if (
-    parsed.data.requestKind === "follow_up" &&
-    !isActionAllowedForTask(parsed.data.followUpAction, input.activeTask)
-  ) {
-    return {
-      requestKind: "general_chat",
-      error: "invalid_state_classification",
-    };
-  }
-  return parsed.data;
 }
 
-function classifyGuardedFollowUp(
-  text: string,
-  task: ActiveTaskSnapshot | undefined,
-): FollowUpAction | undefined {
-  if (task?.status === "INPUT_REQUIRED") {
-    if (task.internalPhase === "awaiting_plan_confirmation") {
-      if (
-        /^(?:\u786e\u8ba4|\u540c\u610f|\u6279\u51c6|confirm|approve)/iu.test(
-          text,
-        )
-      ) {
-        return "confirm_plan";
-      }
-      if (/^(?:\u62d2\u7edd|\u4e0d\u540c\u610f|reject)/iu.test(text))
-        return "reject_plan";
-      if (
-        /(?:\u4fee\u6539\u8ba1\u5212|\u8c03\u6574\u8ba1\u5212|revise (?:the )?plan)/iu.test(
-          text,
-        )
-      ) {
-        return "revise_plan";
-      }
-      if (
-        /(?:\u4fee\u6539\u76ee\u6807|\u8c03\u6574\u76ee\u6807|patch (?:the )?goal)/iu.test(
-          text,
-        )
-      ) {
-        return "patch_goal";
-      }
-      return undefined;
+function classifyStatus(
+  selector: Parameters<typeof resolveTaskSelector>[0] | undefined,
+  directorySnapshot: TaskDirectorySnapshot,
+): ClassificationResult {
+  if (selector === undefined) {
+    if (directorySnapshot.activeTasks.length > 1) {
+      return { requestKind: "list_tasks", includeTerminalTasks: false };
     }
-    if (task.internalPhase === "awaiting_user_input" && text.length > 0) {
-      return "provide_input";
+    if (directorySnapshot.activeTasks.length === 0) {
+      return { requestKind: "status" };
     }
-    if (task.internalPhase === "paused") {
-      return /(?:\u6062\u590d|\u7ee7\u7eed\u6267\u884c|resume)/iu.test(text)
-        ? "resume"
-        : undefined;
-    }
+    return {
+      requestKind: "status",
+      targetTaskId: directorySnapshot.activeTasks[0]?.taskId,
+    };
   }
-  if (
-    task !== undefined &&
-    /(?:\u53d6\u6d88\u76ee\u6807|cancel (?:the )?goal)/iu.test(text)
-  ) {
-    return "cancel_goal";
+  const resolution = resolveTaskSelector(selector, directorySnapshot);
+  if (resolution.outcome === "resolved") {
+    return { requestKind: "status", targetTaskId: resolution.task.taskId };
   }
-  if (task !== undefined && /(?:\u6682\u505c|pause)/iu.test(text))
-    return "pause";
-  if (
-    task !== undefined &&
-    /(?:\u6062\u590d|\u7ee7\u7eed\u6267\u884c|resume)/iu.test(text)
-  ) {
-    return "resume";
-  }
-  if (
-    task !== undefined &&
-    /(?:\u4fee\u6539\u76ee\u6807|patch (?:the )?goal)/iu.test(text)
-  ) {
-    return "patch_goal";
-  }
-  return undefined;
+  return resolutionFailure(
+    resolution.outcome,
+    resolution.outcome === "ambiguous" ? resolution.candidates : undefined,
+  );
 }
 
-function isActionAllowedForTask(
-  action: FollowUpAction | undefined,
-  task: ActiveTaskSnapshot | undefined,
-): boolean {
-  if (action === undefined || task === undefined) return false;
-  if (task.status !== "INPUT_REQUIRED") {
-    return ["patch_goal", "cancel_goal", "pause", "resume"].includes(action);
+function classifyMutable(
+  requestKind: "follow_up" | "cancel",
+  selector: Parameters<typeof resolveTaskSelector>[0],
+  directorySnapshot: TaskDirectorySnapshot,
+  followUpAction?: FollowUpAction,
+): ClassificationResult {
+  const resolution = resolveTaskSelector(selector, directorySnapshot);
+  if (resolution.outcome !== "resolved") {
+    return resolutionFailure(
+      resolution.outcome,
+      resolution.outcome === "ambiguous" ? resolution.candidates : undefined,
+    );
   }
-  if (task.internalPhase === "awaiting_plan_confirmation") {
-    return [
-      "confirm_plan",
-      "reject_plan",
-      "revise_plan",
-      "patch_goal",
-    ].includes(action);
+  return {
+    requestKind,
+    targetTaskId: resolution.task.taskId,
+    ...(followUpAction === undefined ? {} : { followUpAction }),
+  };
+}
+
+function resolutionFailure(
+  outcome: "ambiguous" | "not_found",
+  candidates?: readonly TaskSummary[],
+): ClassificationResult {
+  if (outcome === "ambiguous") {
+    return {
+      requestKind: "general_chat",
+      responseText: renderClarification(candidates ?? []),
+      error: "ambiguous_task_reference",
+    };
   }
-  if (task.internalPhase === "awaiting_user_input") {
-    return action === "provide_input";
-  }
-  if (task.internalPhase === "paused") return action === "resume";
-  return false;
+  return {
+    requestKind: "general_chat",
+    responseText:
+      "I could not find that Task in this conversation. Use its full Task ID or a short ID from the Task list; nothing was sent.",
+    error: "task_reference_not_found",
+  };
+}
+
+function directory(input: ClassificationInput): TaskDirectorySnapshot {
+  return {
+    activeTasks: [...input.context.activeTasks],
+    recentTerminalTasks: [...input.context.recentTerminalTasks],
+    ...(input.context.focusedTaskId === undefined
+      ? {}
+      : { focusedTaskId: input.context.focusedTaskId }),
+    ...(input.context.lastReferencedTaskId === undefined
+      ? {}
+      : { lastReferencedTaskId: input.context.lastReferencedTaskId }),
+  };
+}
+
+function renderClarification(candidates: readonly TaskSummary[]): string {
+  return [
+    "That reference matches multiple Tasks. Name exactly one; nothing was sent.",
+    ...candidates.map(
+      (task) =>
+        `- ${task.shortId}: ${task.status}${task.summary === undefined ? "" : ` — ${task.summary}`}`,
+    ),
+  ].join("\n");
 }

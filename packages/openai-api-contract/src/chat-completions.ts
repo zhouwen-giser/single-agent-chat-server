@@ -4,13 +4,15 @@ const contentPartSchema = z.record(z.string(), z.unknown());
 
 export const chatMessageSchema = z
   .object({
-    role: z.enum(["system", "user", "assistant", "tool"]),
+    role: z.enum(["system", "developer", "user", "assistant", "tool"]),
     content: z.union([
       z.string().max(1_000_000),
       z.array(contentPartSchema).max(128),
       z.null(),
     ]),
     name: z.string().min(1).max(128).optional(),
+    id: z.string().min(1).max(256).optional(),
+    message_id: z.string().min(1).max(256).optional(),
     tool_call_id: z.string().min(1).max(256).optional(),
   })
   .passthrough();

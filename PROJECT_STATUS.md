@@ -1,18 +1,26 @@
 # Project status
 
-Status: `PR_READY_USER_MERGE_PENDING`
+Status: `BLOCKED_ENVIRONMENT`
 
-SACS v0.2 PR [#11](https://github.com/zhouwen-giser/single-agent-chat-server/pull/11)
-is open and Ready for review from `feature/single-sdar-chat-entry-v0.1` to
-`main`. The final product candidate is
-`80ed0bb5532a86feff2e2a374db9d7990301e7a7`; P14 evidence commit
-`b9269bcc613320d33671fd1055efefa2949c5b5d` passed push CI 31451495721 and PR
-CI 31451710922, including quality and container jobs.
+SACS v0.3 Draft PR
+[#13](https://github.com/zhouwen-giser/single-agent-chat-server/pull/13) tracks
+`feature/sacs-v0.3-general-conversation-multitask`. P00 through P12 are
+complete. P13 functional SHA
+`3a3abbd983db0480f668ce674759210915085198` passed exact-head CI run
+`32511015976`, including quality and container jobs, and implements the
+remaining machine-executable real qualification drivers.
 
-All authorized implementation, real E2E, persistence, security, Docker/Compose,
-SBOM, documentation, commit, push, and PR-Ready work is complete. AC-01 through
-AC-21 are passed. AC-22 remains pending until the user merges the protected PR
-and the final candidate becomes an ancestor of `origin/main`.
+P14 preparation SHA `630a630cda050e72b9cab1e798b87f4d9d4d7a83`
+aligns version/image/SBOM metadata to 0.3.0 and has green push and PR CI
+(`32513481057`, `32513485570`). Latest `origin/main` is already an ancestor.
+This preparation is not final P14 acceptance.
 
-Codex did not merge the PR and did not create a tag, GitHub Release, production
-deployment, or SDAR upstream change.
+No P13 real-model/current-SDAR variables or operator-reviewed safe Task
+requests are present in the execution environment. AC-039 through AC-042 are
+therefore not satisfied, P13 is not complete, P14 final evidence cannot be
+published, and PR #13 remains Draft. Supporting fixture/PostgreSQL evidence is
+not represented as real evidence. See
+[`reports/v0.3/P13-blocked-environment.md`](reports/v0.3/P13-blocked-environment.md).
+
+Codex has not merged the PR and has not created a tag, GitHub Release,
+production deployment, or change in the SDAR/SMPP upstream repositories.

@@ -12,6 +12,10 @@ import {
   PersistenceAuthorizationError,
   PersistenceConflictError,
 } from "./repository.js";
+import {
+  observePersistence,
+  type PersistenceObservationSink,
+} from "./observation.js";
 
 const MAX_CONTENT_CHARACTERS = 1_000_000;
 const MAX_SUMMARY_CHARACTERS = 60_000;
@@ -38,18 +42,25 @@ export type AssistantMessageReconciliation =
   | { readonly outcome: "missing" };
 
 export class ConversationPersistenceRepository {
-  constructor(private readonly pool: Pool) {}
+  constructor(
+    private readonly pool: Pool,
+    private readonly observation?: PersistenceObservationSink,
+  ) {}
 
-  ingestUserMessage(
+  async ingestUserMessage(
     input: ConversationMessageInput,
   ): Promise<ConversationMessageIngestResult> {
-    return this.insertMessage(input, "user");
+    const result = await this.insertMessage(input, "user");
+    this.observeDuplicate(result, input.protocol, "user");
+    return result;
   }
 
-  appendAssistantMessage(
+  async appendAssistantMessage(
     input: ConversationMessageInput,
   ): Promise<ConversationMessageIngestResult> {
-    return this.insertMessage(input, "assistant");
+    const result = await this.insertMessage(input, "assistant");
+    this.observeDuplicate(result, input.protocol, "assistant");
+    return result;
   }
 
   async reconcileAssistantMessage(
@@ -64,17 +75,11 @@ export class ConversationPersistenceRepository {
         FROM chat_service.conversation_message AS message
         JOIN chat_service.conversation_thread AS thread
           ON thread.thread_id = message.thread_id
-        WHERE message.protocol = $1
-          AND message.thread_id = $2
-          AND message.external_message_id = $3
-          AND thread.principal_id = $4
+        WHERE message.thread_id = $1
+          AND message.external_message_id = $2
+          AND thread.principal_id = $3
       `,
-      [
-        input.protocol,
-        input.threadId,
-        input.externalMessageId,
-        input.principalId,
-      ],
+      [input.threadId, input.externalMessageId, input.principalId],
     );
     const row = result.rows[0];
     if (row === undefined) return { outcome: "missing" };
@@ -86,7 +91,25 @@ export class ConversationPersistenceRepository {
         "Assistant message reconciliation conflict",
       );
     }
+    observePersistence(() =>
+      this.observation?.recordConversationMessageDedup({
+        protocol: input.protocol,
+        role: "assistant",
+      }),
+    );
     return { outcome: "matched", message: mapConversationMessage(row) };
+  }
+
+  private observeDuplicate(
+    result: ConversationMessageIngestResult,
+    protocol: ConversationProtocol,
+    role: ConversationRole,
+  ): void {
+    if (result.outcome === "duplicate") {
+      observePersistence(() =>
+        this.observation?.recordConversationMessageDedup({ protocol, role }),
+      );
+    }
   }
 
   async loadRecentMessages(input: {
@@ -113,6 +136,36 @@ export class ConversationPersistenceRepository {
         ORDER BY recent.sequence ASC
       `,
       [input.threadId, input.principalId, limit],
+    );
+    return result.rows.map(mapConversationMessage);
+  }
+
+  async loadMessagesAfter(input: {
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly afterSequence: number;
+    readonly limit?: number;
+  }): Promise<readonly ConversationMessage[]> {
+    const limit = input.limit ?? 100;
+    if (!Number.isSafeInteger(input.afterSequence) || input.afterSequence < 0) {
+      throw new Error("Conversation sequence must be a nonnegative integer");
+    }
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new Error("Conversation message limit must be from 1 to 100");
+    }
+    const result = await this.pool.query<ConversationMessageRow>(
+      `
+        SELECT message.*
+        FROM chat_service.conversation_message AS message
+        JOIN chat_service.conversation_thread AS thread
+          ON thread.thread_id = message.thread_id
+        WHERE message.thread_id = $1
+          AND thread.principal_id = $2
+          AND message.sequence > $3
+        ORDER BY message.sequence ASC
+        LIMIT $4
+      `,
+      [input.threadId, input.principalId, input.afterSequence, limit],
     );
     return result.rows.map(mapConversationMessage);
   }
@@ -280,10 +333,9 @@ export class ConversationPersistenceRepository {
       const existing = await client.query<ConversationMessageRow>(
         `
           SELECT * FROM chat_service.conversation_message
-          WHERE protocol = $1 AND thread_id = $2
-            AND external_message_id = $3
+          WHERE thread_id = $1 AND external_message_id = $2
         `,
-        [input.protocol, input.threadId, externalMessageId],
+        [input.threadId, externalMessageId],
       );
       const existingRow = existing.rows[0];
       if (existingRow !== undefined) {

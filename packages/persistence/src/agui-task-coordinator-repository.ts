@@ -1,5 +1,7 @@
 import type { TaskCoordinatorRepository } from "../../chat-runtime/src/task-coordinator.js";
-import type { IdempotencyClaim, JsonValue, TaskBinding } from "./types.js";
+import type { CompletedRequestResult } from "../../request-result/src/index.js";
+import type { InteractionProtocol } from "./interaction-types.js";
+import type { JsonValue, TaskBinding } from "./types.js";
 import { InteractionPersistenceRepository } from "./interaction-repository.js";
 
 /**
@@ -7,8 +9,11 @@ import { InteractionPersistenceRepository } from "./interaction-repository.js";
  * single-SDAR coordinator contract. The legacy field names are intentionally
  * contained here and never become AG-UI authorization identifiers.
  */
-export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository {
-  constructor(private readonly repository: InteractionPersistenceRepository) {}
+export class InteractionTaskCoordinatorRepository implements TaskCoordinatorRepository {
+  constructor(
+    private readonly repository: InteractionPersistenceRepository,
+    private readonly protocol: InteractionProtocol,
+  ) {}
 
   async claimRequest(input: {
     readonly idempotencyKey: string;
@@ -17,20 +22,19 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
     readonly requestHash: string;
     readonly leaseOwner: string;
     readonly leaseMs?: number;
-  }): Promise<IdempotencyClaim> {
+  }) {
+    const threadId = await this.threadId(input.openWebUiChatId, input.userId);
     const claim = await this.repository.claimRequest({
-      protocol: "ag_ui",
+      protocol: this.protocol,
       externalRequestId: input.idempotencyKey,
       principalId: input.userId,
-      threadId: input.openWebUiChatId,
+      threadId,
       requestHash: input.requestHash,
       leaseOwner: input.leaseOwner,
       ...(input.leaseMs === undefined ? {} : { leaseMs: input.leaseMs }),
     });
     if (claim.outcome !== "replay") return claim;
-    return claim.resultTaskId === undefined
-      ? { outcome: "in_progress" }
-      : { outcome: "replay", resultTaskId: claim.resultTaskId };
+    return { outcome: "replay" as const, result: claim.result };
   }
 
   completeRequest(input: {
@@ -39,16 +43,28 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
     readonly openWebUiChatId: string;
     readonly requestHash: string;
     readonly leaseOwner: string;
-    readonly resultTaskId: string;
+    readonly result: CompletedRequestResult;
   }): Promise<void> {
-    return this.repository.completeCoordinatorRequest({
-      protocol: "ag_ui",
+    return this.completeRequestForThread(input);
+  }
+
+  private async completeRequestForThread(input: {
+    readonly idempotencyKey: string;
+    readonly userId: string;
+    readonly openWebUiChatId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+    readonly result: CompletedRequestResult;
+  }): Promise<void> {
+    const threadId = await this.threadId(input.openWebUiChatId, input.userId);
+    await this.repository.completeCoordinatorRequest({
+      protocol: this.protocol,
       externalRequestId: input.idempotencyKey,
       principalId: input.userId,
-      threadId: input.openWebUiChatId,
+      threadId,
       requestHash: input.requestHash,
       leaseOwner: input.leaseOwner,
-      resultTaskId: input.resultTaskId,
+      result: input.result,
     });
   }
 
@@ -59,11 +75,22 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
     readonly requestHash: string;
     readonly leaseOwner: string;
   }): Promise<void> {
-    return this.repository.abandonCoordinatorRequest({
-      protocol: "ag_ui",
+    return this.abandonRequestForThread(input);
+  }
+
+  private async abandonRequestForThread(input: {
+    readonly idempotencyKey: string;
+    readonly userId: string;
+    readonly openWebUiChatId: string;
+    readonly requestHash: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    const threadId = await this.threadId(input.openWebUiChatId, input.userId);
+    await this.repository.abandonCoordinatorRequest({
+      protocol: this.protocol,
       externalRequestId: input.idempotencyKey,
       principalId: input.userId,
-      threadId: input.openWebUiChatId,
+      threadId,
       requestHash: input.requestHash,
       leaseOwner: input.leaseOwner,
     });
@@ -75,8 +102,18 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
     readonly leaseOwner: string;
     readonly leaseMs?: number;
   }): Promise<boolean> {
+    return this.claimSubmissionForThread(input);
+  }
+
+  private async claimSubmissionForThread(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly leaseOwner: string;
+    readonly leaseMs?: number;
+  }): Promise<boolean> {
+    const threadId = await this.threadId(input.chatId, input.userId);
     return this.repository.claimTaskSubmissionSlot({
-      threadId: input.chatId,
+      threadId,
       principalId: input.userId,
       leaseOwner: input.leaseOwner,
       ...(input.leaseMs === undefined ? {} : { leaseMs: input.leaseMs }),
@@ -86,14 +123,51 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
   claimTaskInteractionSlot(input: {
     readonly chatId: string;
     readonly userId: string;
+    readonly bindingId: string;
     readonly leaseOwner: string;
     readonly leaseMs?: number;
   }): Promise<boolean> {
+    return this.claimInteractionForThread(input);
+  }
+
+  private async claimInteractionForThread(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+    readonly leaseOwner: string;
+    readonly leaseMs?: number;
+  }): Promise<boolean> {
+    const threadId = await this.threadId(input.chatId, input.userId);
     return this.repository.claimTaskInteractionSlot({
-      threadId: input.chatId,
+      threadId,
       principalId: input.userId,
+      bindingId: input.bindingId,
       leaseOwner: input.leaseOwner,
       ...(input.leaseMs === undefined ? {} : { leaseMs: input.leaseMs }),
+    });
+  }
+
+  releaseTaskInteractionSlot(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    return this.releaseInteractionForThread(input);
+  }
+
+  private async releaseInteractionForThread(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    const threadId = await this.threadId(input.chatId, input.userId);
+    await this.repository.releaseTaskInteractionSlot({
+      threadId,
+      principalId: input.userId,
+      bindingId: input.bindingId,
+      leaseOwner: input.leaseOwner,
     });
   }
 
@@ -102,20 +176,61 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
     readonly userId: string;
     readonly leaseOwner: string;
   }): Promise<void> {
-    return this.repository.releaseTaskSubmissionSlot({
-      threadId: input.chatId,
+    return this.releaseSubmissionForThread(input);
+  }
+
+  private async releaseSubmissionForThread(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly leaseOwner: string;
+  }): Promise<void> {
+    const threadId = await this.threadId(input.chatId, input.userId);
+    await this.repository.releaseTaskSubmissionSlot({
+      threadId,
       principalId: input.userId,
       leaseOwner: input.leaseOwner,
     });
   }
 
-  findActiveTaskForChat(input: {
+  listActiveTasksForChat(input: {
     readonly chatId: string;
     readonly userId: string;
-  }): Promise<TaskBinding | undefined> {
-    return this.repository.findActiveTask({
-      threadId: input.chatId,
+    readonly limit?: number;
+  }): Promise<readonly TaskBinding[]> {
+    return this.listTasksForThread(input);
+  }
+
+  private async listTasksForThread(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly limit?: number;
+  }): Promise<readonly TaskBinding[]> {
+    const threadId = await this.threadId(input.chatId, input.userId);
+    return this.repository.listActiveTasksForChat({
+      threadId,
       principalId: input.userId,
+      ...(input.limit === undefined ? {} : { limit: input.limit }),
+    });
+  }
+
+  setFocusedTask(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+  }): Promise<void> {
+    return this.focusTaskForThread(input);
+  }
+
+  private async focusTaskForThread(input: {
+    readonly chatId: string;
+    readonly userId: string;
+    readonly bindingId: string;
+  }): Promise<void> {
+    const threadId = await this.threadId(input.chatId, input.userId);
+    await this.repository.setFocusedTask({
+      threadId,
+      principalId: input.userId,
+      bindingId: input.bindingId,
     });
   }
 
@@ -124,8 +239,17 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
     readonly userId: string;
     readonly sdarTaskId: string;
   }): Promise<TaskBinding | undefined> {
+    return this.findTaskForThread(input);
+  }
+
+  private async findTaskForThread(input: {
+    readonly openWebUiChatId: string;
+    readonly userId: string;
+    readonly sdarTaskId: string;
+  }): Promise<TaskBinding | undefined> {
+    const threadId = await this.threadId(input.openWebUiChatId, input.userId);
     return this.repository.findAuthorizedTask({
-      threadId: input.openWebUiChatId,
+      threadId,
       principalId: input.userId,
       sdarTaskId: input.sdarTaskId,
     });
@@ -138,8 +262,19 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
     readonly sdarContextId: string;
     readonly status: string;
   }): Promise<TaskBinding> {
+    return this.createTaskForThread(input);
+  }
+
+  private async createTaskForThread(input: {
+    readonly openWebUiChatId: string;
+    readonly userId: string;
+    readonly sdarTaskId: string;
+    readonly sdarContextId: string;
+    readonly status: string;
+  }): Promise<TaskBinding> {
+    const threadId = await this.threadId(input.openWebUiChatId, input.userId);
     return this.repository.createTaskBinding({
-      threadId: input.openWebUiChatId,
+      threadId,
       principalId: input.userId,
       sdarTaskId: input.sdarTaskId,
       sdarContextId: input.sdarContextId,
@@ -168,5 +303,15 @@ export class AgUiTaskCoordinatorRepository implements TaskCoordinatorRepository 
     readonly occurredAt?: string;
   }): Promise<boolean> {
     return this.repository.recordEvent(input);
+  }
+
+  private threadId(threadId: string, principalId: string): Promise<string> {
+    return this.protocol === "ag_ui"
+      ? Promise.resolve(threadId)
+      : this.repository.resolveInternalThreadId({
+          clientType: "openwebui",
+          externalThreadId: threadId,
+          principalId,
+        });
   }
 }

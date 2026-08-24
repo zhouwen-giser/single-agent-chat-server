@@ -1,5 +1,47 @@
 # Changelog
 
+## 0.3.0 — candidate qualification blocked on real environment
+
+### Added
+
+- A fixed, configured OpenAI-compatible conversation model client with strict
+  structured decisions, bounded calls, readiness, and no production fallback.
+- Protocol-neutral durable user/assistant history, optimistic summaries, stable
+  replay reconciliation, and deterministic bounded context assembly shared by
+  the future OpenAI and AG-UI application path.
+- Numeric-only context size/truncation telemetry and deployment controls for
+  recent-message, total-envelope, summary-trigger, and Task-summary budgets.
+- A multi-Task directory with stable short IDs, Focus, last reference,
+  deterministic selection, configurable active limit, and Task-scoped leases.
+- A strict durable `TASK | MESSAGE` completed-result union shared by OpenAI and
+  AG-UI, including exact Message replay without changing Task state.
+- Exact-head real-model/current-SDAR, v0.2 upgrade and restart, network-boundary,
+  container, Compose, and CycloneDX evidence drivers.
+
+### Changed
+
+- OpenAI and AG-UI now share one protocol-neutral conversation context,
+  selector, authorization boundary, Coordinator, and result persistence path.
+- Multiple active Tasks may coexist in one Chat; ambiguous mutable requests
+  clarify locally and never call A2A.
+
+### Security
+
+- Unexpected A2A `TASK_STATE_AUTH_REQUIRED` and Agent Card authentication
+  requirements fail closed as deployment mismatches; northbound keys, signed
+  identity, authorization, rate limits, and CORS remain enforced.
+- The conversation model receives a bounded untrusted-data envelope and has no
+  tools, request-level endpoint override, database, A2A, MCP, SMPP, Provider, or
+  arbitrary URL access.
+
+### Candidate status
+
+P00 through P12 are complete. P13 implementation and all available exact-head
+quality, PostgreSQL, CI, image, Compose, and SBOM gates pass, but required real
+model/current-SDAR variables and safe operator-selected requests are absent.
+AC-039 through AC-042, P13 completion, P14 final evidence, and PR Ready state
+remain `BLOCKED_ENVIRONMENT`. No fixture substitutes for those gates.
+
 ## Unreleased — SACS v0.2 candidate
 
 ### Added

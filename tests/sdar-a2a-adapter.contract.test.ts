@@ -9,6 +9,8 @@ import {
 import {
   createSdarA2aClient,
   parseSdarA2aConfig,
+  UnexpectedA2aAuthenticationStateError,
+  type NormalizedTaskState,
   type SdarA2aClient,
 } from "../packages/sdar-a2a-adapter/src/index.js";
 
@@ -39,6 +41,9 @@ async function startMock(
     readonly protocolVersion?: string;
     readonly discoveryDelayMs?: number;
     readonly streamEventCount?: number;
+    readonly taskState?: string;
+    readonly securityRequired?: boolean;
+    readonly skillSecurityRequired?: boolean;
   } = {},
 ) {
   const seen: SeenRequest[] = [];
@@ -65,6 +70,8 @@ async function startMock(
             endpoint: options.advertisedEndpoint ?? "http://127.0.0.1:1/a2a",
             binding: options.protocolBinding ?? "HTTP+JSON",
             version: options.protocolVersion ?? "1.0",
+            securityRequired: options.securityRequired ?? false,
+            skillSecurityRequired: options.skillSecurityRequired ?? false,
           }),
         );
       }
@@ -75,7 +82,7 @@ async function startMock(
       const event =
         "data: " +
         JSON.stringify({
-          task: taskJson("TASK_STATE_WORKING", {
+          task: taskJson(options.taskState ?? "TASK_STATE_WORKING", {
             internalPhase: "executing",
             phaseMessage: "working",
           }),
@@ -86,7 +93,7 @@ async function startMock(
     }
     if (request.url === "/a2a/message:send") {
       json(response, {
-        task: taskJson("TASK_STATE_INPUT_REQUIRED", {
+        task: taskJson(options.taskState ?? "TASK_STATE_INPUT_REQUIRED", {
           internalPhase: "awaiting_user_input",
           inputRequestId: "request-1",
           input_request_id: "request-1",
@@ -98,7 +105,7 @@ async function startMock(
       json(
         response,
         taskJson(
-          "TASK_STATE_COMPLETED",
+          options.taskState ?? "TASK_STATE_COMPLETED",
           {
             internalPhase: "completed",
           },
@@ -110,7 +117,7 @@ async function startMock(
     if (request.url === "/a2a/tasks/task-1:cancel") {
       json(
         response,
-        taskJson("TASK_STATE_CANCELED", {
+        taskJson(options.taskState ?? "TASK_STATE_CANCELED", {
           internalPhase: "canceled",
         }),
       );
@@ -205,6 +212,23 @@ describe("official SDAR A2A adapter HTTP+JSON contract", () => {
     ).rejects.toThrow("must share the configured SDAR base URL origin");
   });
 
+  it("rejects Agent Cards that require unsupported authentication", async () => {
+    for (const mock of [
+      await startMock({ securityRequired: true }),
+      await startMock({ skillSecurityRequired: true }),
+    ]) {
+      await expect(
+        createSdarA2aClient({
+          baseUrl: mock.baseUrl,
+          endpointOverride: mock.endpoint,
+        }),
+      ).rejects.toThrow("requires unsupported authentication");
+      expect(mock.seen.map((request) => request.url)).toEqual([
+        "/.well-known/agent-card.json",
+      ]);
+    }
+  });
+
   it("streams a bounded WORKING Task through the official SDK", async () => {
     const { client, seen } = await connectedClient();
     const events = [];
@@ -242,6 +266,25 @@ describe("official SDAR A2A adapter HTTP+JSON contract", () => {
         },
       },
     });
+  });
+
+  it("rejects request-level endpoint and Agent Card injection before A2A", async () => {
+    const { client, seen } = await connectedClient();
+    const consume = async () => {
+      for await (const event of client.submitTaskStream({
+        messageId: "message-injected-endpoint",
+        text: "run",
+        endpointOverride: "https://attacker.example/a2a",
+        agentCard: { supportedInterfaces: [] },
+      } as never)) {
+        void event;
+      }
+    };
+
+    await expect(consume()).rejects.toThrow("Unrecognized key");
+    expect(seen.map((request) => request.url)).toEqual([
+      "/.well-known/agent-card.json",
+    ]);
   });
 
   it("enforces strict follow-up metadata and provide_input data rules", async () => {
@@ -372,11 +415,61 @@ describe("official SDAR A2A adapter HTTP+JSON contract", () => {
     };
     await expect(consume()).rejects.toThrow("512-event limit");
   });
+
+  it("throws the typed deployment error for auth-required on every SDK result path", async () => {
+    const mock = await startMock({ taskState: "TASK_STATE_AUTH_REQUIRED" });
+    const client = await createSdarA2aClient({
+      baseUrl: mock.baseUrl,
+      endpointOverride: mock.endpoint,
+    });
+    const consume = async () => {
+      for await (const event of client.submitTaskStream({
+        messageId: "message-auth-stream",
+        text: "run",
+      })) {
+        void event;
+      }
+    };
+
+    for (const operation of [
+      consume,
+      () =>
+        client.sendFollowUp({
+          messageId: "message-auth-follow-up",
+          taskId: "task-1",
+          contextId: "context-1",
+          action: "pause",
+          text: "pause",
+        }),
+      () => client.getTask("task-1", { historyLength: 0 }),
+      () => client.cancelTask("task-1"),
+    ]) {
+      await expect(operation()).rejects.toMatchObject({
+        name: "UnexpectedA2aAuthenticationStateError",
+        code: "UNEXPECTED_A2A_AUTH_REQUIRED",
+        statusCode: 502,
+      });
+    }
+    expect(new UnexpectedA2aAuthenticationStateError().message).toBe(
+      "SDAR A2A authentication state is incompatible with the trusted deployment.",
+    );
+  });
+
+  it("excludes AUTH_REQUIRED from the internal NormalizedTaskState type", () => {
+    type AuthRequiredIsInternal =
+      Extract<NormalizedTaskState, "AUTH_REQUIRED"> extends never
+        ? false
+        : true;
+    const authRequiredIsInternal: AuthRequiredIsInternal = false;
+    expect(authRequiredIsInternal).toBe(false);
+  });
 });
 function agentCard(input: {
   readonly endpoint: string;
   readonly binding: string;
   readonly version: string;
+  readonly securityRequired: boolean;
+  readonly skillSecurityRequired: boolean;
 }) {
   return {
     name: "Mock SDAR",
@@ -390,6 +483,20 @@ function agentCard(input: {
     ],
     version: "0.0.0",
     capabilities: { streaming: true, pushNotifications: false },
+    securitySchemes:
+      input.securityRequired || input.skillSecurityRequired
+        ? {
+            bearer: {
+              httpAuthSecurityScheme: {
+                scheme: "bearer",
+                bearerFormat: "JWT",
+              },
+            },
+          }
+        : {},
+    securityRequirements: input.securityRequired
+      ? [{ schemes: { bearer: { list: [] } } }]
+      : [],
     defaultInputModes: ["text/plain"],
     defaultOutputModes: ["text/plain", "application/json"],
     skills: [
@@ -401,7 +508,9 @@ function agentCard(input: {
         examples: ["run mock"],
         inputModes: ["text/plain"],
         outputModes: ["text/plain", "application/json"],
-        securityRequirements: [],
+        securityRequirements: input.skillSecurityRequired
+          ? [{ schemes: { bearer: { list: [] } } }]
+          : [],
       },
     ],
   };

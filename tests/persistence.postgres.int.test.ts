@@ -15,7 +15,6 @@ import pg from "pg";
 
 import {
   ChatPersistenceRepository,
-  PersistenceConflictError,
   runMigrations,
   setupPersistence,
 } from "../packages/persistence/src/index.js";
@@ -67,6 +66,8 @@ describeWithPostgres("PostgreSQL persistence", () => {
       "0005_interrupt_resume.sql",
       "0006_durable_agui_runs.sql",
       "0007_conversation_history.sql",
+      "0008_multi_task_directory.sql",
+      "0009_request_result_union.sql",
     ]);
 
     const checkpointTables = await pool.query<{ table_name: string }>(`
@@ -97,73 +98,13 @@ describeWithPostgres("PostgreSQL persistence", () => {
       const versions = await pool.query<{ version: string; checksum: string }>(
         "SELECT version, checksum FROM chat_service.schema_migrations ORDER BY version",
       );
-      expect(versions.rows).toHaveLength(7);
+      expect(versions.rows).toHaveLength(9);
       expect(versions.rows[0]?.checksum).toBe(
         createHash("sha256").update(sql).digest("hex"),
       );
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
-  });
-
-  it("serializes concurrent claims for the same message", async () => {
-    const repository = repositoryFor(pool);
-    const input = claimInput("same-message", "same-hash");
-    const outcomes = await Promise.all([
-      repository.claimRequest({ ...input, leaseOwner: "worker-a" }),
-      repository.claimRequest({ ...input, leaseOwner: "worker-b" }),
-    ]);
-    expect(outcomes.map(({ outcome }) => outcome).sort()).toEqual([
-      "acquired",
-      "in_progress",
-    ]);
-  });
-
-  it("replays a completed same-hash retry", async () => {
-    const repository = repositoryFor(pool);
-    const input = claimInput("retry-message", "stable-hash");
-    await expect(
-      repository.claimRequest({ ...input, leaseOwner: "worker-a" }),
-    ).resolves.toEqual({ outcome: "acquired" });
-    await repository.completeRequest({
-      ...input,
-      leaseOwner: "worker-a",
-      resultTaskId: "task-result",
-    });
-    await expect(
-      repository.claimRequest({ ...input, leaseOwner: "worker-b" }),
-    ).resolves.toEqual({ outcome: "replay", resultTaskId: "task-result" });
-  });
-
-  it("rejects reuse of an idempotency key with a different hash", async () => {
-    const repository = repositoryFor(pool);
-    const input = claimInput("conflict-message", "hash-one");
-    await repository.claimRequest({ ...input, leaseOwner: "worker-a" });
-    await expect(
-      repository.claimRequest({
-        ...input,
-        requestHash: "hash-two",
-        leaseOwner: "worker-b",
-      }),
-    ).resolves.toEqual({ outcome: "conflict" });
-  });
-
-  it("recovers an expired claim after a worker stops", async () => {
-    const repository = repositoryFor(pool);
-    const input = claimInput("expired-message", "expired-hash");
-    await repository.claimRequest({
-      ...input,
-      leaseOwner: "worker-a",
-      leaseMs: 5,
-    });
-    await new Promise((resolveDelay) => setTimeout(resolveDelay, 20));
-    await expect(
-      repository.claimRequest({
-        ...input,
-        leaseOwner: "worker-b",
-        leaseMs: 5_000,
-      }),
-    ).resolves.toEqual({ outcome: "acquired" });
   });
 
   it("serializes and recovers per-chat Task submission leases", async () => {
@@ -271,7 +212,13 @@ describeWithPostgres("PostgreSQL persistence", () => {
         sdarContextId: "second-context",
         status: "WORKING",
       }),
-    ).rejects.toBeInstanceOf(PersistenceConflictError);
+    ).resolves.toMatchObject({ sdarTaskId: "second-active-task" });
+    await expect(
+      repository.countActiveTasksForChat({
+        chatId: "shared-chat-id",
+        userId: "user-a",
+      }),
+    ).resolves.toBe(2);
   });
 
   it("ignores stale status timestamps without losing optimistic versioning", async () => {
@@ -355,6 +302,7 @@ describeWithPostgres("PostgreSQL persistence", () => {
       poolMax: 4,
       operationTimeoutMs: 5_000,
       idempotencyLeaseMs: 60_000,
+      maxActiveTasksPerChat: 8,
     } as const;
   }
 
@@ -366,13 +314,4 @@ describeWithPostgres("PostgreSQL persistence", () => {
 
 function repositoryFor(pool: pg.Pool): ChatPersistenceRepository {
   return new ChatPersistenceRepository(pool, 60_000);
-}
-
-function claimInput(idempotencyKey: string, requestHash: string) {
-  return {
-    idempotencyKey,
-    requestHash,
-    userId: "claim-user",
-    openWebUiChatId: "claim-chat",
-  } as const;
 }

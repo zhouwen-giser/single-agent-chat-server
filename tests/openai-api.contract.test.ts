@@ -8,7 +8,10 @@ import {
   buildServer,
   type BuildServerOptions,
 } from "../apps/server/src/bootstrap.js";
-import type { ChatRunnerContext } from "../apps/server/src/api/openai-routes.js";
+import {
+  streamChatCompletion,
+  type ChatRunnerContext,
+} from "../apps/server/src/api/openai-routes.js";
 import type { ServerConfig } from "../apps/server/src/config.js";
 import { createSecureLoggerOptions } from "../apps/server/src/observability/logging.js";
 
@@ -63,6 +66,7 @@ function createServer(
       | "conversationModelReadinessCheck"
       | "runChat"
       | "resolveChatThread"
+      | "persistAssistantMessage"
     >
   > = {},
 ): FastifyInstance {
@@ -81,6 +85,9 @@ function createServer(
           conversationModelReadinessCheck:
             overrides.conversationModelReadinessCheck,
         }),
+    ...(overrides.persistAssistantMessage === undefined
+      ? {}
+      : { persistAssistantMessage: overrides.persistAssistantMessage }),
     now: () => nowMilliseconds,
     nextId: () => "fixed-id",
     runChat: overrides.runChat ?? (async () => chatResponse),
@@ -351,6 +358,140 @@ describe("OpenAI-compatible HTTP contracts", () => {
     expect(response.json().choices[0].message.content).toBe(chatResponse);
   });
 
+  it("passes a stable client-history envelope and ignores tool content", async () => {
+    let observed: ChatRunnerContext | undefined;
+    const response = await createServer({
+      runChat: async (context) => {
+        observed = context;
+        return "context imported";
+      },
+    }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: {
+        ...chatHeaders,
+        "x-openwebui-user-message-parent-id": "assistant-history",
+      },
+      payload: {
+        model: config.modelId,
+        messages: [
+          { role: "system", content: "untrusted system", id: "system-1" },
+          {
+            role: "developer",
+            content: "untrusted developer",
+            id: "developer-1",
+          },
+          { role: "user", content: "first", id: "user-history" },
+          { role: "assistant", content: "answer" },
+          { role: "tool", content: "tool output", id: "tool-history" },
+          {
+            role: "user",
+            content: [{ type: "text", text: "second" }],
+            id: "client-current-is-not-authoritative",
+          },
+        ],
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(observed?.userText).toBe("second");
+    expect(observed?.clientMessages).toEqual([
+      {
+        role: "system",
+        contentText: "untrusted system",
+        externalMessageId: "system-1",
+      },
+      {
+        role: "developer",
+        contentText: "untrusted developer",
+        externalMessageId: "developer-1",
+      },
+      {
+        role: "user",
+        contentText: "first",
+        externalMessageId: "user-history",
+      },
+      {
+        role: "assistant",
+        contentText: "answer",
+        externalMessageId: "assistant-history",
+      },
+      {
+        role: "user",
+        contentText: "second",
+        externalMessageId: "user-message-a",
+      },
+    ]);
+  });
+
+  it("persists the exact non-stream assistant envelope", async () => {
+    const persisted: unknown[] = [];
+    const response = await createServer({
+      runChat: async () => "published answer",
+      persistAssistantMessage: async (input) => {
+        persisted.push(input);
+      },
+    }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: chatPayload(),
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(persisted).toEqual([
+      {
+        principalId: "user-a",
+        threadId: "user-a:chat-a",
+        externalMessageId: "assistant-message-a",
+        requestId: "user-message-a",
+        contentText: "published answer",
+        truncated: false,
+      },
+    ]);
+  });
+
+  it("persists streamed rendered text with its authorized Task", async () => {
+    const persisted: unknown[] = [];
+    const response = await createServer({
+      runChat: async (context) =>
+        (async function* () {
+          yield {
+            eventId: "event-1",
+            eventType: "message.text" as const,
+            occurredAt: "2026-08-21T00:00:00.000Z",
+            runId: context.runId,
+            threadId: context.threadId,
+            sequence: 0,
+            taskId: "task-stream",
+            contextId: "context-stream",
+            payload: { text: "published stream" },
+          };
+        })(),
+      persistAssistantMessage: async (input) => {
+        persisted.push(input);
+      },
+    }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: { ...chatPayload(), stream: true },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(persisted).toEqual([
+      {
+        principalId: "user-a",
+        threadId: "user-a:chat-a",
+        externalMessageId: "assistant-message-a",
+        requestId: "user-message-a",
+        contentText: "published stream",
+        taskId: "task-stream",
+        truncated: false,
+      },
+    ]);
+  });
+
   it("isolates two signed users that present the same Chat ID", async () => {
     const contexts: ChatRunnerContext[] = [];
     const server = createServer({
@@ -470,13 +611,46 @@ describe("OpenAI-compatible HTTP contracts", () => {
     ]);
     expect(response.body).toMatch(/data: \[DONE\]\n\n$/u);
   });
+  it("persists only published streaming text as truncated on disconnect", async () => {
+    const controller = new AbortController();
+    const persisted: Array<{ contentText: string; truncated: boolean }> = [];
+    const source = streamChatCompletion({
+      id: "chatcmpl-disconnect",
+      created: nowSeconds,
+      model: config.modelId,
+      fragments: (async function* () {
+        yield "published before disconnect";
+        yield "must not be persisted";
+      })(),
+      signal: controller.signal,
+      includeUsage: false,
+      persistAssistant: async (contentText, truncated) => {
+        persisted.push({ contentText, truncated });
+      },
+      responseWasTruncated: () => false,
+    });
+
+    await source.next();
+    const firstContent = await source.next();
+    expect(firstContent.value).toContain("published before disconnect");
+    controller.abort();
+    await source.return(undefined);
+
+    expect(persisted).toEqual([
+      { contentText: "published before disconnect", truncated: true },
+    ]);
+  });
   it("redacts streaming protocol failures and still terminates SSE", async () => {
+    const persisted: Array<{ contentText: string; truncated: boolean }> = [];
     const response = await createServer({
       runChat: async () =>
         (async function* () {
           yield "published progress";
           throw new Error("Bearer secret-token internal endpoint");
         })(),
+      persistAssistantMessage: async ({ contentText, truncated }) => {
+        persisted.push({ contentText, truncated });
+      },
     }).inject({
       method: "POST",
       url: "/v1/chat/completions",
@@ -488,6 +662,13 @@ describe("OpenAI-compatible HTTP contracts", () => {
     expect(response.body).toContain("failed safely");
     expect(response.body).not.toContain("secret-token");
     expect(response.body).toMatch(/data: \[DONE\]\n\n$/u);
+    expect(persisted).toEqual([
+      {
+        contentText:
+          "published progressThe SDAR operation failed safely. No internal protocol details were exposed.",
+        truncated: true,
+      },
+    ]);
   });
   it("rejects invalid bodies and conflicting token limits", async () => {
     const server = createServer();

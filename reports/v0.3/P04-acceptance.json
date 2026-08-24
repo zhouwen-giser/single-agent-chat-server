@@ -1,0 +1,60 @@
+{
+  "phase": "P04",
+  "status": "PASSED_PUBLISHED",
+  "observedAt": "2026-08-21T12:03:03.015Z",
+  "acceptance": {
+    "AC-010": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/conversation-context/src/assembler.ts",
+        "tests/conversation-context.unit.test.ts",
+        "tests/conversation-persistence.postgres.int.test.ts"
+      ]
+    },
+    "AC-011": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/conversation-context/src/importer.ts",
+        "packages/persistence/src/conversation-repository.ts",
+        "tests/conversation-persistence.postgres.int.test.ts"
+      ]
+    },
+    "AC-012": {
+      "status": "PASSED",
+      "evidence": [
+        "packages/conversation-context/src/config.ts",
+        "packages/conversation-context/src/summarizer.ts",
+        "tests/conversation-context.unit.test.ts"
+      ]
+    }
+  },
+  "tests": {
+    "unit": { "passed": 93, "failed": 0, "skipped": 0 },
+    "contract": { "passed": 64, "failed": 0, "skipped": 0 },
+    "postgresIntegration": { "passed": 64, "failed": 0, "skipped": 0 },
+    "p04Postgres": { "passed": 13, "failed": 0, "skipped": 0 },
+    "security": { "passed": 9, "failed": 0, "skipped": 0 },
+    "architectureProductionFiles": 72,
+    "build": "PASSED",
+    "license": "PASSED",
+    "secret": "PASSED"
+  },
+  "contextPolicy": {
+    "defaultRecentMessages": 30,
+    "defaultModelDataCharacters": 60000,
+    "defaultSummaryTriggerCharacters": 45000,
+    "defaultTaskSummaryCharacters": 1000,
+    "currentUserTurnReserved": true,
+    "originalMessagesDeleted": false,
+    "bodyMetricsOrLogs": false
+  },
+  "publication": {
+    "status": "PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/13",
+    "candidateSha": "8177411eb2d1265b3898a0876daaf8be14044260",
+    "functionalSha": "192b5f7e170843e9add7ca471bf1179c75ccf697",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32481037950",
+    "quality": "PASSED",
+    "container": "PASSED"
+  }
+}

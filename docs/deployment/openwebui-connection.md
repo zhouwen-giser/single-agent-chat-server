@@ -61,9 +61,13 @@ Configure these custom headers on the connection:
 
 The Chat ID is mapped with the signed JWT `sub`, so two users presenting the
 same Chat ID receive different internal LangGraph threads. The user-message ID
-is preserved for the Phase 6 idempotency claim. A non-empty task header marks a
-title/tag/follow-up/background request as utility work and keeps it on the local
-deterministic graph; it must never submit an A2A Task.
+is the stable identity for current-turn message import and A2A request
+idempotency. The assistant message ID identifies the exact server-published
+response. The optional parent ID reconciles the most recent historical
+assistant even when ignored tool messages intervene. A non-empty task header
+marks a title/tag/follow-up/background request as utility work; it never calls
+the conversation model, imports chat history, writes conversation messages,
+changes Focus, or submits an A2A Task.
 
 ## Network examples
 

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import type { RunAgentInput } from "../../ag-ui-api-contract/src/index.js";
 import {
@@ -12,6 +12,7 @@ import {
   type InteractionRun,
   type JsonValue,
 } from "../../persistence/src/index.js";
+import type { CompletedRequestResult } from "../../request-result/src/index.js";
 
 export interface DurableAgUiRunContext {
   readonly input: RunAgentInput;
@@ -73,7 +74,17 @@ export class DurableAgUiRunService {
       threadId: context.threadId,
       externalRequestId: context.input.runId,
     });
-    const taskId = claim.outcome === "replay" ? claim.resultTaskId : run.taskId;
+    if (claim.outcome === "replay" && claim.result.kind === "message") {
+      const replay = replayEvents(run);
+      yield* replay.length === 0
+        ? replayStoredMessage(context, claim.result)
+        : replay;
+      return;
+    }
+    const taskId =
+      claim.outcome === "replay" && claim.result.kind === "task"
+        ? claim.result.taskId
+        : run.taskId;
     if (taskId !== undefined) {
       const recovered: SdarInteractionEvent[] = [];
       for await (const event of this.options.recoverTask(context, taskId)) {
@@ -104,11 +115,16 @@ export class DurableAgUiRunService {
         });
       }
       if (claim.outcome === "acquired") {
+        const result = await authorizedTaskResult(
+          this.options.repository,
+          context,
+          taskId,
+        );
         await this.options.repository.completeRequest({
           requestId: claim.requestId,
           principalId: context.principalId,
           leaseOwner,
-          resultTaskId: taskId,
+          result,
         });
       }
       return;
@@ -129,6 +145,7 @@ export class DurableAgUiRunService {
           requestId: claim.requestId,
           principalId: context.principalId,
           leaseOwner,
+          result: messageResultFromEvents(context.input.runId, replay),
         });
       }
       return;
@@ -137,6 +154,7 @@ export class DurableAgUiRunService {
     const events: SdarInteractionEvent[] = [];
     let latestTaskId: string | undefined;
     let latestContextId: string | undefined;
+    let operationResult: CompletedRequestResult | undefined;
     let observationDisconnected = false;
     try {
       for await (const event of this.options.execute(context)) {
@@ -190,13 +208,16 @@ export class DurableAgUiRunService {
         }
       }
     } finally {
-      const submittedTaskId = await this.options.repository.findRequestResult({
+      operationResult = await this.options.repository.findRequestResult({
         protocol: "ag_ui",
         externalRequestId: taskRequestId(context.input.runId),
         principalId: context.principalId,
         threadId: context.threadId,
       });
-      latestTaskId = submittedTaskId ?? latestTaskId;
+      latestTaskId =
+        operationResult?.kind === "task"
+          ? operationResult.taskId
+          : latestTaskId;
       if (latestTaskId !== undefined) {
         const binding = await this.options.repository.findAuthorizedTask({
           principalId: context.principalId,
@@ -215,12 +236,22 @@ export class DurableAgUiRunService {
         });
       }
       if (context.signal.aborted) {
-        if (latestTaskId !== undefined && claim.outcome === "acquired") {
+        if (
+          claim.outcome === "acquired" &&
+          (operationResult !== undefined || latestTaskId !== undefined)
+        ) {
+          const result =
+            operationResult ??
+            (await authorizedTaskResult(
+              this.options.repository,
+              context,
+              latestTaskId as string,
+            ));
           await this.options.repository.completeRequest({
             requestId: claim.requestId,
             principalId: context.principalId,
             leaseOwner,
-            resultTaskId: latestTaskId,
+            result,
           });
         }
         observationDisconnected = true;
@@ -239,11 +270,20 @@ export class DurableAgUiRunService {
       ...(latestContextId === undefined ? {} : { contextId: latestContextId }),
     });
     if (claim.outcome === "acquired") {
+      const result =
+        operationResult ??
+        (latestTaskId === undefined
+          ? messageResultFromEvents(context.input.runId, events)
+          : await authorizedTaskResult(
+              this.options.repository,
+              context,
+              latestTaskId,
+            ));
       await this.options.repository.completeRequest({
         requestId: claim.requestId,
         principalId: context.principalId,
         leaseOwner,
-        ...(latestTaskId === undefined ? {} : { resultTaskId: latestTaskId }),
+        result,
       });
     }
   }
@@ -283,6 +323,74 @@ function replayEvents(run: InteractionRun): readonly SdarInteractionEvent[] {
 
 function asJsonValue(value: unknown): JsonValue {
   return JSON.parse(JSON.stringify(value)) as JsonValue;
+}
+
+async function authorizedTaskResult(
+  repository: InteractionPersistenceRepository,
+  context: Pick<DurableAgUiRunContext, "principalId" | "threadId">,
+  taskId: string,
+): Promise<CompletedRequestResult> {
+  const binding = await repository.findAuthorizedTask({
+    principalId: context.principalId,
+    threadId: context.threadId,
+    sdarTaskId: taskId,
+  });
+  if (binding === undefined) {
+    throw new Error("Durable request result has no authorized Task binding");
+  }
+  return {
+    kind: "task",
+    taskId: binding.sdarTaskId,
+    contextId: binding.sdarContextId,
+  };
+}
+
+function messageResultFromEvents(
+  externalRequestId: string,
+  events: readonly SdarInteractionEvent[],
+): CompletedRequestResult {
+  const published = events.flatMap((event) => {
+    const text = event.payload.text ?? event.payload.message;
+    return (event.eventType === "message.text" ||
+      event.eventType === "run.error") &&
+      typeof text === "string"
+      ? [text]
+      : [];
+  });
+  const renderedText = published.join("").slice(0, 65_536);
+  const messageId =
+    "result-" +
+    createHash("sha256").update(externalRequestId).digest("hex").slice(0, 32);
+  return {
+    kind: "message",
+    messageId,
+    message: {
+      messageId,
+      role: "AGENT",
+      parts:
+        renderedText.length === 0
+          ? []
+          : [{ kind: "text", mediaType: "text/plain", text: renderedText }],
+    },
+    renderedText,
+  };
+}
+
+function replayStoredMessage(
+  context: DurableAgUiRunContext,
+  result: Extract<CompletedRequestResult, { readonly kind: "message" }>,
+): readonly SdarInteractionEvent[] {
+  const factory = new InteractionEventFactory({
+    runId: context.input.runId,
+    threadId: context.input.threadId,
+  });
+  return [
+    factory.create("run.started", { boundary: "bounded_interaction" }),
+    ...(result.renderedText.length === 0
+      ? []
+      : [factory.publicText(result.renderedText)]),
+    factory.create("run.finished", { resultKind: "MESSAGE" }),
+  ].filter((event): event is SdarInteractionEvent => event !== undefined);
 }
 
 function safeRunFailure(

@@ -15,6 +15,7 @@ import pg from "pg";
 
 import {
   InteractionPersistenceRepository,
+  InteractionTaskCoordinatorRepository,
   runMigrations,
 } from "../packages/persistence/src/index.js";
 
@@ -57,7 +58,7 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
     await pool.end();
   });
 
-  it("creates protocol-neutral principals and isolated client thread bindings", async () => {
+  it("shares cross-protocol Threads while isolating principals", async () => {
     const repository = interactionRepository();
     const first = await repository.resolvePrincipal({
       issuer: "sacs-test",
@@ -85,7 +86,7 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
       principalId: second.principalId,
     });
 
-    expect(openWebUi.threadId).not.toBe(agUi.threadId);
+    expect(openWebUi.threadId).toBe(agUi.threadId);
     expect(agUi.threadId).not.toBe(otherPrincipal.threadId);
     await expect(
       repository.startRun({
@@ -125,11 +126,14 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
       requestId: claim.requestId,
       principalId: principal.principalId,
       leaseOwner: "worker-a",
-      resultTaskId: "task-1",
+      result: { kind: "task", taskId: "task-1", contextId: "context-1" },
     });
     await expect(
       repository.claimRequest({ ...input, leaseOwner: "worker-b" }),
-    ).resolves.toEqual({ outcome: "replay", resultTaskId: "task-1" });
+    ).resolves.toEqual({
+      outcome: "replay",
+      result: { kind: "task", taskId: "task-1", contextId: "context-1" },
+    });
     await expect(
       repository.claimRequest({
         ...input,
@@ -137,6 +141,150 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
         leaseOwner: "worker-c",
       }),
     ).resolves.toEqual({ outcome: "conflict" });
+  });
+
+  it("atomically persists and replays a bounded Message result", async () => {
+    const observations: Array<{
+      readonly kind: "task" | "message";
+      readonly replay: boolean;
+    }> = [];
+    const repository = new InteractionPersistenceRepository(pool, 60_000, 8, {
+      recordRequestResult: (input) => observations.push(input),
+      recordConversationMessageDedup: () => undefined,
+    });
+    const principal = await repository.resolvePrincipal({
+      issuer: "sacs-test",
+      subject: "message-result-user",
+      role: "user",
+    });
+    const thread = await repository.getOrCreateThread({
+      clientType: "ag_ui",
+      externalThreadId: "message-result-thread",
+      principalId: principal.principalId,
+    });
+    const input = {
+      protocol: "ag_ui" as const,
+      externalRequestId: "message-result-request",
+      principalId: principal.principalId,
+      threadId: thread.threadId,
+      requestHash: "message-result-hash",
+      leaseOwner: "message-worker-a",
+    };
+    const claim = await repository.claimRequest(input);
+    if (claim.outcome !== "acquired") throw new Error("claim not acquired");
+    const result = {
+      kind: "message" as const,
+      messageId: "message-result-1",
+      relatedTaskId: "task-related",
+      contextId: "context-related",
+      message: {
+        messageId: "message-result-1",
+        taskId: "task-related",
+        contextId: "context-related",
+        role: "AGENT" as const,
+        parts: [
+          {
+            kind: "text" as const,
+            mediaType: "text/plain",
+            text: "stable rendered result",
+          },
+        ],
+      },
+      renderedText: "stable rendered result",
+    };
+    await repository.completeRequest({
+      requestId: claim.requestId,
+      principalId: principal.principalId,
+      leaseOwner: input.leaseOwner,
+      result,
+    });
+
+    await expect(
+      repository.claimRequest({ ...input, leaseOwner: "message-worker-b" }),
+    ).resolves.toEqual({ outcome: "replay", result });
+    await expect(
+      new InteractionTaskCoordinatorRepository(
+        repository,
+        "ag_ui",
+      ).claimRequest({
+        idempotencyKey: input.externalRequestId,
+        userId: principal.principalId,
+        openWebUiChatId: thread.threadId,
+        requestHash: input.requestHash,
+        leaseOwner: "message-worker-c",
+      }),
+    ).resolves.toEqual({ outcome: "replay", result });
+    const stored = await pool.query<{
+      readonly result_hash: string;
+      readonly result_message_json: unknown;
+    }>(
+      `SELECT result_hash, result_message_json
+       FROM chat_service.interaction_request
+       WHERE protocol = 'ag_ui' AND external_request_id = $1`,
+      [input.externalRequestId],
+    );
+    expect(stored.rows[0]?.result_hash).toHaveLength(64);
+    expect(stored.rows[0]?.result_message_json).toEqual(result.message);
+    expect(observations).toEqual([
+      { kind: "message", replay: false },
+      { kind: "message", replay: true },
+      { kind: "message", replay: true },
+    ]);
+  });
+
+  it("rejects COMPLETED requests with no result or both result variants", async () => {
+    const repository = interactionRepository();
+    const principal = await repository.resolvePrincipal({
+      issuer: "sacs-test",
+      subject: "invalid-result-user",
+      role: "user",
+    });
+    const thread = await repository.getOrCreateThread({
+      clientType: "ag_ui",
+      externalThreadId: "invalid-result-thread",
+      principalId: principal.principalId,
+    });
+    const claimInput = {
+      protocol: "ag_ui" as const,
+      principalId: principal.principalId,
+      threadId: thread.threadId,
+      requestHash: "invalid-result-hash",
+      leaseOwner: "invalid-result-worker",
+    };
+    const noResult = await repository.claimRequest({
+      ...claimInput,
+      externalRequestId: "no-result",
+    });
+    const bothResults = await repository.claimRequest({
+      ...claimInput,
+      externalRequestId: "both-results",
+    });
+    if (noResult.outcome !== "acquired" || bothResults.outcome !== "acquired") {
+      throw new Error("claims not acquired");
+    }
+
+    await expect(
+      pool.query(
+        `UPDATE chat_service.interaction_request
+         SET status = 'COMPLETED', lease_owner = NULL, lease_until = NULL
+         WHERE request_id = $1`,
+        [noResult.requestId],
+      ),
+    ).rejects.toMatchObject({ code: "23514" });
+    await expect(
+      pool.query(
+        `UPDATE chat_service.interaction_request
+         SET status = 'COMPLETED', result_kind = 'TASK',
+             result_task_id = 'task-double',
+             result_context_id = 'context-double',
+             result_message_id = 'message-double',
+             result_message_json = '{"messageId":"message-double","role":"AGENT","parts":[]}'::jsonb,
+             result_rendered_text = 'double', result_hash = 'hash',
+             lease_owner = NULL, lease_until = NULL
+         WHERE request_id = $1`,
+        [bothResults.requestId],
+      ),
+    ).rejects.toMatchObject({ code: "23514" });
   });
 
   it("lists and authorizes Tasks only inside the principal-owned internal thread", async () => {
@@ -513,6 +661,13 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
           'upgrade-binding', 'upgrade-thread', 'upgrade-task',
           'upgrade-context', 'WORKING'
         );
+        INSERT INTO chat_service.request_idempotency(
+          idempotency_key, user_id, openwebui_chat_id, request_hash,
+          result_task_id, status
+        ) VALUES (
+          'upgrade-request', 'upgrade-user', 'upgrade-chat', 'upgrade-hash',
+          'upgrade-task', 'COMPLETED'
+        );
       `);
 
       await runMigrations(pool);
@@ -520,10 +675,14 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
         legacy_thread: string;
         interaction_thread: string;
         migrated_task_thread: string;
+        result_kind: string;
+        result_context_id: string;
       }>(`
         SELECT legacy.thread_id AS legacy_thread,
                client.internal_thread_id AS interaction_thread,
-               task.conversation_thread_id AS migrated_task_thread
+               task.conversation_thread_id AS migrated_task_thread,
+               request.result_kind,
+               request.result_context_id
         FROM chat_service.chat_thread_binding legacy
         JOIN chat_service.client_thread_binding client
           ON client.external_thread_id = legacy.openwebui_chat_id
@@ -531,12 +690,17 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
          AND client.client_type = 'openwebui'
         JOIN chat_service.conversation_task_binding task
           ON task.thread_id = legacy.thread_id
+        JOIN chat_service.interaction_request request
+          ON request.thread_id = legacy.thread_id
+         AND request.external_request_id = 'upgrade-request'
         WHERE task.sdar_task_id = 'upgrade-task'
       `);
       expect(proof.rows[0]).toEqual({
         legacy_thread: proof.rows[0]?.legacy_thread,
         interaction_thread: proof.rows[0]?.legacy_thread,
         migrated_task_thread: proof.rows[0]?.legacy_thread,
+        result_kind: "TASK",
+        result_context_id: "upgrade-context",
       });
       const versions = await pool.query<{ version: string }>(
         "SELECT version FROM chat_service.schema_migrations ORDER BY version",
@@ -549,6 +713,8 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
         "0005_interrupt_resume.sql",
         "0006_durable_agui_runs.sql",
         "0007_conversation_history.sql",
+        "0008_multi_task_directory.sql",
+        "0009_request_result_union.sql",
       ]);
     } finally {
       await rm(directory, { recursive: true, force: true });

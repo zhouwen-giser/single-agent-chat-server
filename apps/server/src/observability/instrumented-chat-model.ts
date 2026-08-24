@@ -1,8 +1,9 @@
-import type {
-  ConversationModel,
-  ConversationModelInput,
-  ConversationSummaryInput,
-  PublishedResultInput,
+import {
+  ConversationModelError,
+  type ConversationModel,
+  type ConversationModelInput,
+  type ConversationSummaryInput,
+  type PublishedResultInput,
 } from "../../../../packages/conversation-model/src/index.js";
 
 import type { SecureTelemetry } from "./telemetry.js";
@@ -39,9 +40,27 @@ async function measure<T>(
   try {
     const result = await invoke();
     timed.end("ok");
+    telemetry.recordConversationModelRequest(operation, "ok");
     return result;
   } catch (error) {
     timed.end("error");
+    telemetry.recordConversationModelRequest(operation, modelOutcome(error));
     throw error;
+  }
+}
+
+function modelOutcome(
+  error: unknown,
+): "timeout" | "unavailable" | "invalid_response" | "invalid_output" | "error" {
+  if (!(error instanceof ConversationModelError)) return "error";
+  switch (error.code) {
+    case "CONVERSATION_MODEL_TIMEOUT":
+      return "timeout";
+    case "CONVERSATION_MODEL_UNAVAILABLE":
+      return "unavailable";
+    case "CONVERSATION_MODEL_RESPONSE_INVALID":
+      return "invalid_response";
+    case "CONVERSATION_MODEL_OUTPUT_INVALID":
+      return "invalid_output";
   }
 }

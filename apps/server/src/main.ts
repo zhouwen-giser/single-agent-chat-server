@@ -11,10 +11,10 @@ import {
   InterruptResumeService,
   persistInterruptsBeforeRunFinish,
   resumeRunToInteractionEvents,
+  taskRequestId,
 } from "../../../packages/interaction-runtime/src/index.js";
-import { InteractionQueryService } from "../../../packages/interaction-query/src/index.js";
 import {
-  AgUiTaskCoordinatorRepository,
+  InteractionTaskCoordinatorRepository,
   parsePersistenceConfig,
   setupPersistence,
   type PersistenceRuntime,
@@ -23,6 +23,11 @@ import {
   OpenAiCompatibleConversationModel,
   parseConversationModelConfig,
 } from "../../../packages/conversation-model/src/index.js";
+import {
+  ClientHistoryImporter,
+  ConversationContextAssembler,
+  parseConversationContextBudget,
+} from "../../../packages/conversation-context/src/index.js";
 import {
   createSdarA2aClient,
   parseSdarA2aConfig,
@@ -47,9 +52,12 @@ import { installGracefulShutdown } from "./shutdown.js";
 let persistence: PersistenceRuntime | undefined;
 try {
   const config = loadServerConfig();
-  persistence = await setupPersistence(parsePersistenceConfig(process.env));
-  const activePersistence = persistence;
   const telemetry = new SecureTelemetry();
+  persistence = await setupPersistence(
+    parsePersistenceConfig(process.env),
+    telemetry,
+  );
+  const activePersistence = persistence;
   const getClient = createLazySdarClient(async () => {
     const discovery = telemetry.beginA2a("agent_card_discovery");
     try {
@@ -74,13 +82,20 @@ try {
     conversationModel === undefined
       ? undefined
       : adaptConversationModel(conversationModel);
-  const queryService = new InteractionQueryService(
+  const contextAssembler = new ConversationContextAssembler(
+    activePersistence.conversationRepository,
     activePersistence.interactionRepository,
-    getClient,
+    parseConversationContextBudget(process.env),
+    telemetry,
+  );
+  const assembleContext = contextAssembler.assemble.bind(contextAssembler);
+  const historyImporter = new ClientHistoryImporter(
+    activePersistence.conversationRepository,
   );
   const agUiCoordinator = new SdarTaskCoordinator({
-    repository: new AgUiTaskCoordinatorRepository(
+    repository: new InteractionTaskCoordinatorRepository(
       activePersistence.interactionRepository,
+      "ag_ui",
     ),
     getClient,
     streamBudgetMs: config.streamBudgetMs,
@@ -95,8 +110,14 @@ try {
     repository: activePersistence.interactionRepository,
     checkpointer: activePersistence.checkpointer,
     coordinator: agUiCoordinator,
-    queryService,
     model: chatModel,
+    assembleContext,
+    importHistory: historyImporter.import.bind(historyImporter),
+    onClassificationError: (error) => {
+      if (error === "ambiguous_task_reference") {
+        telemetry.recordAmbiguousTaskReference();
+      }
+    },
   });
   const agUiTaskRecoverySource =
     createSdarAgUiTaskRecoverySource(agUiCoordinator);
@@ -140,23 +161,33 @@ try {
       ? runResumeAgUi(context)
       : runGeneralAgUi(context);
   const coordinator = new SdarTaskCoordinator({
-    repository: activePersistence.repository,
+    repository: new InteractionTaskCoordinatorRepository(
+      activePersistence.interactionRepository,
+      "openai",
+    ),
     getClient,
     streamBudgetMs: config.streamBudgetMs,
     pollingBudgetMs: config.pollingBudgetMs,
     pollingIntervalMs: config.pollingIntervalMs,
   });
-  const reconciliation = await persistence.repository.reconcileStartup({
-    leaseOwner: randomUUID(),
-  });
+  const reconciliation =
+    await activePersistence.interactionRepository.reconcileStartup({
+      leaseOwner: randomUUID(),
+    });
   telemetry.setActiveTasks(reconciliation.activeBindings.length);
   const runChat = withActiveTaskRefresh(
     createSdarChatRunner({
       repository: activePersistence.repository,
       checkpointer: activePersistence.checkpointer,
       coordinator,
-      queryService,
       model: chatModel,
+      assembleContext,
+      importHistory: historyImporter.import.bind(historyImporter),
+      onClassificationError: (error) => {
+        if (error === "ambiguous_task_reference") {
+          telemetry.recordAmbiguousTaskReference();
+        }
+      },
     }),
     async () => {
       telemetry.setActiveTasks(
@@ -187,8 +218,44 @@ try {
       });
     },
     runAgUi,
+    persistAgUiAssistantMessages: async (input) => {
+      const run =
+        await activePersistence.interactionRepository.findAuthorizedRun({
+          runId: input.runInput.runId,
+          principalId: input.principalId,
+          threadId: input.internalThreadId,
+        });
+      const resumeInterruptId = input.runInput.resume?.[0]?.interruptId;
+      const interrupt =
+        run?.taskId !== undefined || resumeInterruptId === undefined
+          ? undefined
+          : await activePersistence.interactionRepository.findInterrupt({
+              interruptId: resumeInterruptId,
+              principalId: input.principalId,
+              threadId: input.internalThreadId,
+            });
+      const taskId = run?.taskId ?? interrupt?.taskId;
+      for (const message of input.messages) {
+        await activePersistence.conversationRepository.appendAssistantMessage({
+          principalId: input.principalId,
+          threadId: input.internalThreadId,
+          protocol: "ag_ui",
+          externalMessageId: message.externalMessageId,
+          requestId: taskRequestId(input.runInput.runId),
+          contentText: message.contentText,
+          ...(taskId === undefined ? {} : { taskId }),
+          truncated: input.truncated,
+        });
+      }
+    },
     checkpointer: activePersistence.checkpointer,
     runChat,
+    persistAssistantMessage: async (input) => {
+      await activePersistence.conversationRepository.appendAssistantMessage({
+        ...input,
+        protocol: "openai",
+      });
+    },
   });
   server.addHook("onClose", async () => activePersistence.close());
   installGracefulShutdown(server);
@@ -197,6 +264,8 @@ try {
       activeTaskBindings: reconciliation.activeBindings.length,
       recoveredIdempotencyClaims: reconciliation.recoveredClaimCount,
       recoveredSubmissionSlots: reconciliation.recoveredSubmissionSlotCount,
+      recoveredTaskInteractionSlots:
+        reconciliation.recoveredTaskInteractionSlotCount,
     },
     "persistence startup reconciliation complete",
   );

@@ -1,127 +1,56 @@
-import type { BaseCheckpointSaver } from "@langchain/langgraph";
-
-import type { DurableAgUiEventSource } from "../../../../packages/interaction-runtime/src/index.js";
-import {
-  A2aInteractionMapper,
-  legacyChatResultToInteractionEvents,
-  taskRequestId,
-  type LegacyChatResult,
-} from "../../../../packages/interaction-runtime/src/index.js";
+import type { RunAgentInput } from "../../../../packages/ag-ui-api-contract/src/index.js";
 import {
   SdarTaskCoordinator,
-  type FollowUpTurnContext,
   type TaskCoordinatorObserver,
-  type TaskTurnContext,
 } from "../../../../packages/chat-runtime/src/index.js";
+import type { ClientHistoryMessage } from "../../../../packages/conversation-context/src/index.js";
+import {
+  A2aInteractionMapper,
+  taskRequestId,
+  type DurableAgUiEventSource,
+  type LegacyChatResult,
+} from "../../../../packages/interaction-runtime/src/index.js";
 import {
   InteractionEventFactory,
   type SdarInteractionEvent,
   type SdarTaskScope,
 } from "../../../../packages/interaction-contract/src/index.js";
-import type { NormalizedTaskState } from "../../../../packages/sdar-a2a-adapter/src/index.js";
 import type { InteractionPersistenceRepository } from "../../../../packages/persistence/src/index.js";
+import type { NormalizedTaskState } from "../../../../packages/sdar-a2a-adapter/src/index.js";
 import {
-  resolveQueryIntent,
-  type InteractionQueryService,
-} from "../../../../packages/interaction-query/src/index.js";
-import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
-import type { StructuredChatModel } from "../../../../src/agent/model.js";
-import type { ActiveTaskSnapshot } from "../../../../src/agent/state.js";
+  ConversationApplicationService,
+  type ConversationApplicationServiceOptions,
+} from "./conversation-application-service.js";
 
-export function createSdarAgUiInteractionSource(input: {
-  readonly repository: InteractionPersistenceRepository;
-  readonly checkpointer?: BaseCheckpointSaver;
-  readonly coordinator: SdarTaskCoordinator;
-  readonly queryService?: InteractionQueryService;
-  readonly model?: StructuredChatModel;
-}): DurableAgUiEventSource {
-  const graph = createSingleAgentChatGraph(input.model, input.checkpointer);
+export function createSdarAgUiInteractionSource(
+  input: Omit<ConversationApplicationServiceOptions, "repository"> & {
+    readonly repository: InteractionPersistenceRepository;
+  },
+): DurableAgUiEventSource {
+  const application = new ConversationApplicationService({
+    ...input,
+    repository: adaptRepository(input.repository),
+  });
   return async function* run(context) {
-    const userText = lastUserText(context.input);
-    const query = resolveQueryIntent(userText);
-    if (query !== undefined && input.queryService !== undefined) {
-      const result = await input.queryService.execute({
-        ...query,
-        principalId: context.principalId,
-        threadId: context.threadId,
-        signal: context.signal,
-      });
-      yield* legacyChatResultToInteractionEvents(result, {
-        runId: context.input.runId,
-        threadId: context.input.threadId,
-      });
-      return;
+    const currentUser = lastUserMessage(context.input);
+    if (currentUser === undefined) {
+      throw new Error("AG-UI interaction requires a current user message");
     }
-
-    const binding = await input.repository.findActiveTask({
-      principalId: context.principalId,
-      threadId: context.threadId,
-    });
-    const graphResult = await graph.invoke(
-      {
-        messages: [{ role: "user", content: userText }],
-        threadId: context.threadId,
+    yield* coordinatorInteractionEvents(context, async (observer) =>
+      application.execute({
+        protocol: "ag_ui",
+        userText: currentUser.contentText,
+        clientMessages: toClientHistoryMessages(context.input),
         userId: context.principalId,
-        openWebUiChatId: context.input.threadId,
+        chatId: context.threadId,
+        threadId: context.threadId,
+        userMessageId: taskRequestId(context.input.runId),
+        currentUserExternalMessageId: currentUser.id,
         utilityRequest: false,
-        ...(binding === undefined ? {} : { activeTask: toActiveTask(binding) }),
-      },
-      { configurable: { thread_id: context.threadId } },
+        coordinatorObserver: observer,
+        signal: context.signal,
+      }),
     );
-
-    if (graphResult.requestKind === "new_task" && binding === undefined) {
-      yield* coordinatorInteractionEvents(context, (observer) =>
-        input.coordinator.submit(
-          toTaskTurn(context, userText),
-          context.signal,
-          observer,
-        ),
-      );
-      return;
-    }
-    if (graphResult.requestKind === "status") {
-      yield* coordinatorInteractionEvents(context, (observer) =>
-        input.coordinator.status(
-          { chatId: context.threadId, userId: context.principalId },
-          context.signal,
-          observer,
-        ),
-      );
-      return;
-    }
-    const followUpAction = graphResult.followUpAction;
-    if (
-      graphResult.requestKind === "follow_up" &&
-      followUpAction !== undefined
-    ) {
-      yield* coordinatorInteractionEvents(context, (observer) =>
-        input.coordinator.followUp(
-          toFollowUpTurn(context, userText, followUpAction),
-          context.signal,
-          observer,
-        ),
-      );
-      return;
-    }
-    if (graphResult.requestKind === "cancel") {
-      yield* coordinatorInteractionEvents(context, (observer) =>
-        input.coordinator.cancel(
-          toTaskTurn(context, userText),
-          context.signal,
-          observer,
-        ),
-      );
-      return;
-    }
-
-    const result: LegacyChatResult =
-      graphResult.requestKind === "follow_up"
-        ? "No safe SDAR Follow-up action could be determined; nothing was sent."
-        : renderGraphResult(graphResult);
-    yield* legacyChatResultToInteractionEvents(result, {
-      runId: context.input.runId,
-      threadId: context.input.threadId,
-    });
   };
 }
 
@@ -147,7 +76,7 @@ export function createSdarAgUiTaskRecoverySource(
 
 type CoordinatorOperation = (
   observer: TaskCoordinatorObserver,
-) => AsyncIterable<string>;
+) => LegacyChatResult | Promise<LegacyChatResult>;
 
 async function* coordinatorInteractionEvents(
   context: Parameters<DurableAgUiEventSource>[0],
@@ -202,7 +131,8 @@ async function* coordinatorInteractionEvents(
     pendingEvents.push(...mapper.mapStreamEvent(value));
   };
 
-  for await (const fragment of operation(observer)) {
+  const result = await operation(observer);
+  for await (const fragment of fragments(result)) {
     while (pendingEvents.length > 0) {
       const event = pendingEvents.shift();
       if (event !== undefined) yield event;
@@ -244,87 +174,93 @@ async function* coordinatorInteractionEvents(
   if (finished !== undefined) yield finished;
 }
 
+function adaptRepository(repository: InteractionPersistenceRepository) {
+  return {
+    listActiveTasksForChat: (input: {
+      readonly chatId: string;
+      readonly userId: string;
+      readonly limit?: number;
+    }) =>
+      repository.listActiveTasksForChat({
+        threadId: input.chatId,
+        principalId: input.userId,
+        ...(input.limit === undefined ? {} : { limit: input.limit }),
+      }),
+    findAuthorizedTask: (input: {
+      readonly openWebUiChatId: string;
+      readonly userId: string;
+      readonly sdarTaskId: string;
+    }) =>
+      repository.findAuthorizedTask({
+        threadId: input.openWebUiChatId,
+        principalId: input.userId,
+        sdarTaskId: input.sdarTaskId,
+      }),
+    touchTaskReference: (input: {
+      readonly chatId: string;
+      readonly userId: string;
+      readonly bindingId: string;
+    }) =>
+      repository.touchTaskReference({
+        threadId: input.chatId,
+        principalId: input.userId,
+        bindingId: input.bindingId,
+      }),
+  };
+}
+
+function toClientHistoryMessages(
+  input: RunAgentInput,
+): readonly ClientHistoryMessage[] {
+  return input.messages.flatMap((message) => {
+    if (message.role === "tool") return [];
+    const contentText = messageContentText(message.content);
+    if (contentText.length === 0) return [];
+    if (!["user", "assistant", "system", "developer"].includes(message.role)) {
+      return [];
+    }
+    return [
+      {
+        role: message.role as ClientHistoryMessage["role"],
+        contentText,
+        externalMessageId: message.id,
+      },
+    ];
+  });
+}
+
+function lastUserMessage(
+  input: RunAgentInput,
+): { readonly id: string; readonly contentText: string } | undefined {
+  for (let index = input.messages.length - 1; index >= 0; index -= 1) {
+    const message = input.messages[index];
+    if (message?.role !== "user") continue;
+    const contentText = messageContentText(message.content);
+    if (contentText.length > 0) return { id: message.id, contentText };
+  }
+  return undefined;
+}
+
+function messageContentText(content: unknown): string {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+  return content
+    .flatMap((part) => {
+      if (part === null || typeof part !== "object") return [];
+      const value = part as Readonly<Record<string, unknown>>;
+      return typeof value.text === "string" ? [value.text] : [];
+    })
+    .join("\n");
+}
+
+async function* fragments(result: LegacyChatResult): AsyncGenerator<string> {
+  if (typeof result === "string") {
+    yield result;
+    return;
+  }
+  yield* result;
+}
+
 function isTerminalState(state: NormalizedTaskState): boolean {
   return ["COMPLETED", "FAILED", "CANCELED", "REJECTED"].includes(state);
-}
-function toTaskTurn(
-  context: Parameters<DurableAgUiEventSource>[0],
-  userText: string,
-): TaskTurnContext {
-  return {
-    userText,
-    userId: context.principalId,
-    chatId: context.threadId,
-    userMessageId: taskRequestId(context.input.runId),
-  };
-}
-
-function toFollowUpTurn(
-  context: Parameters<DurableAgUiEventSource>[0],
-  userText: string,
-  action: FollowUpTurnContext["action"],
-): FollowUpTurnContext {
-  return { ...toTaskTurn(context, userText), action };
-}
-
-function toActiveTask(binding: {
-  readonly sdarTaskId: string;
-  readonly sdarContextId: string;
-  readonly status: string;
-  readonly pendingInput?: unknown;
-}): ActiveTaskSnapshot {
-  const status = ["SUBMITTED", "WORKING", "INPUT_REQUIRED"].includes(
-    binding.status,
-  )
-    ? (binding.status as ActiveTaskSnapshot["status"])
-    : "WORKING";
-  const internalPhase = readInternalPhase(binding.pendingInput);
-  return {
-    taskId: binding.sdarTaskId,
-    contextId: binding.sdarContextId,
-    status,
-    ...(internalPhase === undefined ? {} : { internalPhase }),
-  };
-}
-
-function readInternalPhase(
-  value: unknown,
-): ActiveTaskSnapshot["internalPhase"] | undefined {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    return undefined;
-  }
-  const phase = (value as { readonly internalPhase?: unknown }).internalPhase;
-  return [
-    "awaiting_plan_confirmation",
-    "awaiting_user_input",
-    "paused",
-  ].includes(typeof phase === "string" ? phase : "")
-    ? (phase as ActiveTaskSnapshot["internalPhase"])
-    : undefined;
-}
-
-function lastUserText(input: {
-  readonly messages: readonly unknown[];
-}): string {
-  const message = [...input.messages]
-    .reverse()
-    .find(
-      (
-        candidate,
-      ): candidate is { readonly role: string; readonly content: unknown } =>
-        candidate !== null &&
-        typeof candidate === "object" &&
-        "role" in candidate &&
-        candidate.role === "user",
-    );
-  return typeof message?.content === "string" ? message.content : "";
-}
-
-function renderGraphResult(result: {
-  readonly messages: readonly { readonly content: unknown }[];
-}): string {
-  const content = result.messages.at(-1)?.content;
-  return typeof content === "string"
-    ? content
-    : "The response could not be rendered as conversational text.";
 }

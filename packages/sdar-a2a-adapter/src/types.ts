@@ -26,8 +26,7 @@ export type NormalizedTaskState =
   | "FAILED"
   | "CANCELED"
   | "INPUT_REQUIRED"
-  | "REJECTED"
-  | "AUTH_REQUIRED";
+  | "REJECTED";
 
 export interface NormalizedPart {
   readonly kind: "text" | "data" | "url" | "raw";

@@ -99,15 +99,21 @@ export interface QueryRepository {
     readonly threadId: string;
     readonly sdarTaskId: string;
   }): Promise<TaskBinding | undefined>;
-  findActiveTask(input: {
+  listActiveTasksForChat(input: {
     readonly principalId: string;
     readonly threadId: string;
-  }): Promise<TaskBinding | undefined>;
+    readonly limit?: number;
+  }): Promise<readonly TaskBinding[]>;
   listTaskBindings(input: {
     readonly principalId: string;
     readonly threadId: string;
     readonly limit?: number;
   }): Promise<readonly TaskBinding[]>;
+  setFocusedTask?(input: {
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly bindingId: string;
+  }): Promise<void>;
   recordAuthorizedTaskObservation(input: {
     readonly principalId: string;
     readonly threadId: string;
@@ -152,6 +158,17 @@ export class InteractionQueryService {
       if (binding === undefined)
         return "No previous Task is bound to this conversation.";
       return this.queryBoundTask(binding, input);
+    }
+    if (
+      input.taskId === undefined &&
+      ["query_active_task", "query_task_status"].includes(input.intent)
+    ) {
+      const active = await this.repository.listActiveTasksForChat({
+        principalId: input.principalId,
+        threadId: input.threadId,
+        limit: 32,
+      });
+      if (active.length > 1) return renderBindingList(active);
     }
 
     const binding = await this.resolveAuthorizedBinding(input);
@@ -220,12 +237,13 @@ export class InteractionQueryService {
         sdarTaskId: input.taskId,
       });
     }
-    const active = await this.repository.findActiveTask({
+    const active = await this.repository.listActiveTasksForChat({
       principalId: input.principalId,
       threadId: input.threadId,
+      limit: 2,
     });
-    if (active !== undefined || input.intent === "query_active_task") {
-      return active;
+    if (active.length > 0 || input.intent === "query_active_task") {
+      return active[0];
     }
     return (await this.listBindings(input))[0];
   }
@@ -234,6 +252,11 @@ export class InteractionQueryService {
     binding: TaskBinding,
     input: QueryExecutionInput,
   ): Promise<string> {
+    await this.repository.setFocusedTask?.({
+      principalId: input.principalId,
+      threadId: input.threadId,
+      bindingId: binding.bindingId,
+    });
     const client = await this.getClient();
     const task = await client.getTask(binding.sdarTaskId, {
       signal: input.signal,

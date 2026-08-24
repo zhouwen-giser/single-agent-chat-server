@@ -1,7 +1,7 @@
 {
   "goal": "SACS v0.3 general conversation, durable context and multi-task chat",
   "status": "IN_PROGRESS",
-  "currentPhase": "P04",
+  "currentPhase": "P13",
   "baseSha": "25c923524bcddc5fffd37513766cf28c9f9c2cf4",
   "branch": "feature/sacs-v0.3-general-conversation-multitask",
   "phaseCommits": {
@@ -14,28 +14,51 @@
       "4eca15c69e9de9d1bb2896656d5045162900734a",
       "ed81bbe8bb73b7b88d7c53947b6b173a29c62ca4"
     ],
-    "P03": ["0cb938b72101a0b550c7a5a0eeca1a4fef315da2"]
+    "P03": ["0cb938b72101a0b550c7a5a0eeca1a4fef315da2"],
+    "P04": [
+      "192b5f7e170843e9add7ca471bf1179c75ccf697",
+      "8177411eb2d1265b3898a0876daaf8be14044260"
+    ],
+    "P05": ["1b36914a5d6240e658585b62c3d242e44831aaea"],
+    "P06": ["b29a005a125536ff9728bc3b011e7ff452aea919"],
+    "P07": ["14e98e1cd2c243747b06f8fb12252dcf534971ef"],
+    "P08": ["2aef667e3f7e9e9552bf98975f54cbf134cda0f6"],
+    "P09": ["fc05c96b654a82ba64df2611935c2dfffa0408be"],
+    "P10": ["8515f2dde83e470ead695744d9a1f360f0c63bc3"],
+    "P11": ["e03a8570ea0dd51b97c37ed1fc33c633c6f88ca0"],
+    "P12": ["928a56e7b9f77bb30dc7bd93a30787d79b65129c"],
+    "P13": [
+      "3a3abbd983db0480f668ce674759210915085198",
+      "ada2894bdb052434e6497e327902d9c8fdfe9872",
+      "60c51afbf3ae4e4eb73c153d0a8311ef495e66a5",
+      "fceff6f3955cf79d85e65246da6fb2de3fbe14e5",
+      "2948b4e5ed5c876c8bafdf61934bc1372c2b2054",
+      "3170166befbef0e89064571c388b63869d016956",
+      "8fa93c4ef26dcaa85235e8c7f767cb1449381110",
+      "01f4ecfa4d261ed100d23418ff7b30da283cf20e"
+    ],
+    "P14_PREPARATION": ["630a630cda050e72b9cab1e798b87f4d9d4d7a83"]
   },
   "requiredGates": {
     "baseline": "PASSED",
-    "unit": "PASSED_CURRENT_HEAD",
-    "contract": "PASSED_CURRENT_HEAD",
-    "postgres": "PASSED_CURRENT_HEAD",
-    "security": "PASSED_CURRENT_HEAD",
-    "openai": "PENDING",
-    "agui": "PENDING",
-    "realModel": "PENDING",
-    "realSdar": "PENDING",
-    "migrationUpgrade": "PASSED_CURRENT_HEAD",
-    "restartRecovery": "PASSED_CURRENT_HEAD",
-    "container": "PENDING",
+    "unit": "PASSED_CANDIDATE_3170166",
+    "contract": "PASSED_CANDIDATE_3170166",
+    "postgres": "PASSED_CANDIDATE_3170166",
+    "security": "PASSED_CANDIDATE_3170166",
+    "openai": "PASSED_CANDIDATE_3170166",
+    "agui": "PASSED_CANDIDATE_3170166",
+    "realModel": "PASSED_REAL_CANDIDATE_3170166",
+    "realSdar": "BLOCKED_SDAR_AUTHORITY_AND_SOURCE_PROVENANCE",
+    "migrationUpgrade": "PENDING_REAL_GATE",
+    "restartRecovery": "PENDING_REAL_GATE",
+    "container": "PASSED_CANDIDATE_3170166",
     "prReady": "PENDING"
   },
   "blockers": [
     {
       "phase": "P13",
-      "kind": "ENVIRONMENT_NOT_YET_CONFIGURED",
-      "detail": "TEST_DATABASE_URL and exact-head real model/SDAR evidence variables are absent; implementation proceeds before the real gate."
+      "kind": "SDAR_EXPOSURE_AUTHORITY_AND_SOURCE_PROVENANCE",
+      "detail": "Candidate 3170166 and the real model passed. The restarted SDAR now accepts anonymous metadata-free text/plain UGV submission through A2A 1.0 and enters server-owned natural-language admission, but fails closed because a2a.embodied.move@2 Exposure/readiness/Provider authority is not active, current, or ready. The running clean local SDAR commit f1c86de is also not on remote main, which remains 7fa3ed8. Publish the upstream corrections and bootstrap current SDAR-owned authority, then rerun AC-040 through AC-042 without giving SACS management, MCP, Provider, database, credential, or private Capability-metadata access."
     }
   ]
 }

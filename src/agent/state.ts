@@ -1,10 +1,14 @@
 import type { BaseMessage, BaseMessageLike } from "@langchain/core/messages";
 import { Annotation, messagesStateReducer } from "@langchain/langgraph";
 
+import type { ConversationContext } from "../../packages/conversation-context/src/index.js";
+import type { TaskSummary } from "../../packages/task-directory/src/index.js";
+
 export const requestKinds = [
   "utility",
   "general_chat",
   "new_task",
+  "list_tasks",
   "status",
   "follow_up",
   "cancel",
@@ -22,15 +26,6 @@ export const followUpActions = [
   "resume",
 ] as const;
 export type FollowUpAction = (typeof followUpActions)[number];
-export type InternalPhase =
-  "awaiting_plan_confirmation" | "awaiting_user_input" | "paused";
-
-export interface ActiveTaskSnapshot {
-  readonly taskId: string;
-  readonly contextId: string;
-  readonly status: "SUBMITTED" | "WORKING" | "INPUT_REQUIRED";
-  readonly internalPhase?: InternalPhase;
-}
 
 export const StateAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[], BaseMessageLike[]>({
@@ -43,7 +38,20 @@ export const StateAnnotation = Annotation.Root({
   utilityRequest: Annotation<boolean>,
   requestKind: Annotation<RequestKind>,
   followUpAction: Annotation<FollowUpAction | undefined>,
-  activeTask: Annotation<ActiveTaskSnapshot | undefined>,
+  activeTasks: Annotation<TaskSummary[]>({
+    reducer: (_current, update) => update,
+    default: () => [],
+  }),
+  recentTasks: Annotation<TaskSummary[]>({
+    reducer: (_current, update) => update,
+    default: () => [],
+  }),
+  focusedTaskId: Annotation<string | undefined>,
+  lastReferencedTaskId: Annotation<string | undefined>,
+  targetTaskId: Annotation<string | undefined>,
+  taskText: Annotation<string | undefined>,
+  includeTerminalTasks: Annotation<boolean>,
+  conversationContext: Annotation<ConversationContext | undefined>,
   userText: Annotation<string>,
   responseFragments: Annotation<string[]>({
     reducer: (_current, update) => update,

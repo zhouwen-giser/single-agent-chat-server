@@ -26,7 +26,7 @@ for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
     throw new Error(`Out-of-bound production dependency: ${dependency}`);
   }
   if (
-    /(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|agent.?mesh|agent.?registry|copilotkit|clickhouse)/iu.test(
+    /(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|(?:^|[/@_-])smpp(?:$|[/@_-])|agent.?mesh|agent.?registry|copilotkit|clickhouse)/iu.test(
       dependency,
     )
   ) {
@@ -35,25 +35,23 @@ for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
 }
 
 const productionRoots = ["apps", "packages", "src"];
-const legacySingleTaskApiAllowlist = new Set([
-  "apps/server/src/chat/sdar-agui-runner.ts",
-  "apps/server/src/chat/sdar-chat-runner.ts",
-  "packages/chat-runtime/src/task-coordinator.ts",
-  "packages/interaction-query/src/index.ts",
-  "packages/persistence/src/agui-task-coordinator-repository.ts",
-  "packages/persistence/src/interaction-repository.ts",
-  "packages/persistence/src/repository.ts",
-]);
 const files = (
   await Promise.all(
     productionRoots.map((directory) => walk(join(root, directory))),
   )
 ).flat();
 const violations = [];
+const sdarClientConstructionSites = [];
 for (const file of files) {
   if (extname(file) !== ".ts") continue;
   const name = relative(root, file).replaceAll("\\", "/");
   const content = await readFile(file, "utf8");
+  if (
+    !name.startsWith("packages/sdar-a2a-adapter/") &&
+    /\bcreateSdarA2aClient\s*\(/u.test(content)
+  ) {
+    sdarClientConstructionSites.push(name);
+  }
   if (
     content.includes("@a2a-js/sdk") &&
     !name.startsWith("packages/sdar-a2a-adapter/")
@@ -92,6 +90,13 @@ for (const file of files) {
     violations.push(`${name}: forbidden process or network client import`);
   }
   if (
+    /from ["'][^"']*(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|(?:^|[/@_-])smpp(?:$|[/@_-]))[^"']*["']/iu.test(
+      content,
+    )
+  ) {
+    violations.push(`${name}: direct SMPP or MCP import is forbidden`);
+  }
+  if (
     /["'`]\/(?:admin|internal|management|control|mcp|providers?|resources?|actions?)(?:\/|["'`])/iu.test(
       content,
     )
@@ -115,11 +120,63 @@ for (const file of files) {
   if (/\blocalFallbackChatModel\b/u.test(content)) {
     violations.push(`${name}: production use of a local chat fallback`);
   }
+  if (/\bfindActiveTask(?:ForChat)?\b/u.test(content)) {
+    violations.push(`${name}: legacy implicit single-Task API is forbidden`);
+  }
+  if (/\bresultTaskId\b/u.test(content)) {
+    violations.push(
+      `${name}: completed requests require a TASK/MESSAGE result`,
+    );
+  }
   if (
-    /\bfindActiveTask(?:ForChat)?\b/u.test(content) &&
-    !legacySingleTaskApiAllowlist.has(name)
+    name !== "packages/sdar-a2a-adapter/src/errors.ts" &&
+    /["'`]AUTH_REQUIRED["'`]/u.test(content)
   ) {
-    violations.push(`${name}: new use of a legacy implicit single-Task API`);
+    violations.push(`${name}: internal AUTH_REQUIRED Task state is forbidden`);
+  }
+  if (
+    name !== "packages/sdar-a2a-adapter/src/normalize.ts" &&
+    /TASK_STATE_AUTH_REQUIRED/u.test(content)
+  ) {
+    violations.push(
+      `${name}: SDK auth-required handling must stay inside normalization`,
+    );
+  }
+  for (const inputType of [
+    "SubmitTaskInput",
+    "FollowUpInput",
+    "TaskTurnContext",
+    "FollowUpTurnContext",
+  ]) {
+    const body = content.match(
+      new RegExp(`(?:interface|type)\\s+${inputType}[^\\{]*\\{([^}]*)\\}`, "u"),
+    )?.[1];
+    if (
+      /\b(?:endpoint|endpointOverride|baseUrl|agentCard)\??\s*:/u.test(
+        body ?? "",
+      )
+    ) {
+      violations.push(
+        `${name}: ${inputType} accepts request-level A2A routing`,
+      );
+    }
+  }
+  if (
+    name === "packages/chat-runtime/src/task-coordinator.ts" &&
+    (/\btargetTaskId\b/u.test(content) || /async \*status\s*\(/u.test(content))
+  ) {
+    violations.push(
+      `${name}: existing-Task Coordinator operations require explicit taskId`,
+    );
+  }
+  if (
+    (name === "apps/server/src/main.ts" ||
+      name.startsWith("apps/server/src/chat/")) &&
+    /interaction-query|resolveQueryIntent/u.test(content)
+  ) {
+    violations.push(
+      `${name}: legacy regex query routing cannot bypass TurnDecision`,
+    );
   }
   if (
     /process\.env\.(?:SDAR|MCP)|process\.env\[\s*["'](?:SDAR|MCP)/u.test(
@@ -140,6 +197,51 @@ for (const file of files) {
       violations.push(`${name}: forbidden protocol token ${forbidden}`);
     }
   }
+}
+if (
+  sdarClientConstructionSites.length !== 1 ||
+  sdarClientConstructionSites[0] !== "apps/server/src/main.ts"
+) {
+  violations.push(
+    `single fixed SDAR client construction required; found ${sdarClientConstructionSites.join(", ") || "none"}`,
+  );
+}
+
+const openAiRoute = await readFile(
+  join(root, "apps/server/src/api/openai-routes.ts"),
+  "utf8",
+);
+if (
+  /createSingleAgentChatGraph|classifyTurn|SdarTaskCoordinator/u.test(
+    openAiRoute,
+  )
+) {
+  violations.push(
+    "apps/server/src/api/openai-routes.ts: OpenAI adapter bypasses ConversationApplicationService",
+  );
+}
+const openAiRunner = await readFile(
+  join(root, "apps/server/src/chat/sdar-chat-runner.ts"),
+  "utf8",
+);
+if (!/ConversationApplicationService/u.test(openAiRunner)) {
+  violations.push(
+    "apps/server/src/chat/sdar-chat-runner.ts: shared ConversationApplicationService is required",
+  );
+}
+const agUiRunner = await readFile(
+  join(root, "apps/server/src/chat/sdar-agui-runner.ts"),
+  "utf8",
+);
+if (/createSingleAgentChatGraph|classifyTurn/u.test(agUiRunner)) {
+  violations.push(
+    "apps/server/src/chat/sdar-agui-runner.ts: AG-UI adapter bypasses ConversationApplicationService",
+  );
+}
+if (!/ConversationApplicationService/u.test(agUiRunner)) {
+  violations.push(
+    "apps/server/src/chat/sdar-agui-runner.ts: shared ConversationApplicationService is required",
+  );
 }
 if (violations.length > 0) {
   throw new Error(`Architecture gate failed:\n${violations.join("\n")}`);

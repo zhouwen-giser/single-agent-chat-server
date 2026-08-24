@@ -11,16 +11,19 @@ import pg from "pg";
 import { SdarTaskCoordinator } from "../packages/chat-runtime/src/index.js";
 import {
   ChatPersistenceRepository,
+  InteractionPersistenceRepository,
+  InteractionTaskCoordinatorRepository,
   runMigrations,
 } from "../packages/persistence/src/index.js";
-import type {
-  FollowUpInput,
-  NormalizedSendResult,
-  NormalizedStreamEvent,
-  NormalizedTask,
-  OperationOptions,
-  SdarA2aClient,
-  SubmitTaskInput,
+import {
+  UnexpectedA2aAuthenticationStateError,
+  type FollowUpInput,
+  type NormalizedSendResult,
+  type NormalizedStreamEvent,
+  type NormalizedTask,
+  type OperationOptions,
+  type SdarA2aClient,
+  type SubmitTaskInput,
 } from "../packages/sdar-a2a-adapter/src/index.js";
 
 const { Pool } = pg;
@@ -31,6 +34,14 @@ const describeWithPostgres =
 describeWithPostgres("bounded SDAR task coordination", () => {
   const pool = new Pool({ connectionString, max: 4 });
   const repository = new ChatPersistenceRepository(pool, 60_000);
+  const interactionRepository = new InteractionPersistenceRepository(
+    pool,
+    60_000,
+  );
+  const coordinatorRepository = new InteractionTaskCoordinatorRepository(
+    interactionRepository,
+    "openai",
+  );
 
   beforeAll(async () => {
     const database = await pool.query<{ database_name: string }>(
@@ -45,8 +56,13 @@ describeWithPostgres("bounded SDAR task coordination", () => {
       TRUNCATE TABLE
         chat_service.a2a_event_cache,
         chat_service.request_idempotency,
+        chat_service.interaction_request,
+        chat_service.interaction_run,
         chat_service.conversation_task_binding,
-        chat_service.chat_thread_binding
+        chat_service.client_thread_binding,
+        chat_service.chat_thread_binding,
+        chat_service.conversation_thread,
+        chat_service.principal
       CASCADE
     `);
     await repository.getOrCreateThread({
@@ -62,11 +78,122 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     const client = new FakeClient([
       { kind: "message", message: agentMessage("immediate answer") },
     ]);
-    const output = await collect(coordinator(client).submit(turn()));
+    const runtime = coordinator(client);
+    const output = await collect(runtime.submit(turn()));
+    const [replay, concurrentReplay] = await Promise.all([
+      collect(runtime.submit(turn())),
+      collect(runtime.submit(turn())),
+    ]);
 
     expect(output).toEqual(["immediate answer"]);
+    expect(replay).toEqual(output);
+    expect(concurrentReplay).toEqual(output);
     expect(await repository.listActiveBindings()).toEqual([]);
     expect(client.submitCount).toBe(1);
+    expect(client.getCount).toBe(0);
+    const threadId = await interactionRepository.resolveInternalThreadId({
+      clientType: "openwebui",
+      externalThreadId: "chat-a",
+      principalId: "user-a",
+    });
+    await expect(
+      interactionRepository.findRequestResult({
+        protocol: "openai",
+        externalRequestId: "message-a",
+        principalId: "user-a",
+        threadId,
+      }),
+    ).resolves.toMatchObject({
+      kind: "message",
+      messageId: "agent-message",
+      renderedText: "immediate answer",
+    });
+  });
+
+  it("keeps TASK precedence when a stream publishes Message before Task", async () => {
+    const client = new FakeClient(
+      [
+        { kind: "message", message: agentMessage("preparing") },
+        { kind: "task", task: task("WORKING", "task created") },
+      ],
+      [task("WORKING", "current task")],
+    );
+    const runtime = coordinator(client);
+
+    await collect(runtime.submit(turn()));
+    await collect(runtime.submit(turn()));
+
+    const threadId = await interactionRepository.resolveInternalThreadId({
+      clientType: "openwebui",
+      externalThreadId: "chat-a",
+      principalId: "user-a",
+    });
+    await expect(
+      interactionRepository.findRequestResult({
+        protocol: "openai",
+        externalRequestId: "message-a",
+        principalId: "user-a",
+        threadId,
+      }),
+    ).resolves.toEqual({
+      kind: "task",
+      taskId: "task-a",
+      contextId: "context-a",
+    });
+    expect(client.submitCount).toBe(1);
+    expect(client.getCount).toBe(1);
+  });
+
+  it("does not complete a request when the stream has no valid result", async () => {
+    const client = new FakeClient([]);
+
+    await expect(collect(coordinator(client).submit(turn()))).rejects.toThrow(
+      "before publishing a Task binding",
+    );
+
+    const stored = await pool.query<{
+      readonly status: string;
+      readonly result_kind: string | null;
+    }>(
+      `SELECT status, result_kind
+       FROM chat_service.interaction_request
+       WHERE protocol = 'openai' AND external_request_id = 'message-a'`,
+    );
+    expect(stored.rows[0]).toEqual({ status: "CLAIMED", result_kind: null });
+  });
+
+  it("does not persist, poll, or create an interrupt for unexpected A2A auth", async () => {
+    const client = new UnexpectedAuthenticationClient();
+
+    await expect(
+      collect(coordinator(client).submit(turn())),
+    ).rejects.toMatchObject({
+      code: "UNEXPECTED_A2A_AUTH_REQUIRED",
+      statusCode: 502,
+    });
+
+    const state = await pool.query<{
+      readonly request_status: string;
+      readonly result_kind: string | null;
+      readonly task_count: string;
+      readonly interrupt_count: string;
+    }>(`
+      SELECT request.status AS request_status,
+             request.result_kind,
+             (SELECT count(*) FROM chat_service.conversation_task_binding)::text AS task_count,
+             (SELECT count(*) FROM chat_service.agui_interrupt_binding)::text AS interrupt_count
+      FROM chat_service.interaction_request request
+      WHERE request.protocol = 'openai'
+        AND request.external_request_id = 'message-a'
+    `);
+    expect(state.rows[0]).toEqual({
+      request_status: "CLAIMED",
+      result_kind: null,
+      task_count: "0",
+      interrupt_count: "0",
+    });
+    expect(client.submitCount).toBe(1);
+    expect(client.getCount).toBe(0);
   });
 
   it("streams Task status.message and phaseMessage as conversational deltas", async () => {
@@ -232,7 +359,11 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     }
 
     const output = await collect(
-      coordinator(client).status({ chatId: "chat-a", userId: "user-a" }),
+      coordinator(client).statusForTask({
+        chatId: "chat-a",
+        userId: "user-a",
+        taskId: "task-a",
+      }),
     );
     expect(output).toEqual(["**SDAR status: WORKING**", "recovered status"]);
     expect(client.cancelCount).toBe(0);
@@ -282,7 +413,7 @@ describeWithPostgres("bounded SDAR task coordination", () => {
 
     expect(output.join("\n")).toContain("explicit plan decision");
     expect(client.getCount).toBe(0);
-    const binding = await repository.findActiveTaskForChat({
+    const [binding] = await repository.listActiveTasksForChat({
       chatId: "chat-a",
       userId: "user-a",
     });
@@ -383,7 +514,7 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     );
 
     expect(output.join("\n")).toContain("Input rejected");
-    const binding = await repository.findActiveTaskForChat({
+    const [binding] = await repository.listActiveTasksForChat({
       chatId: "chat-a",
       userId: "user-a",
     });
@@ -414,6 +545,23 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     expect(client.followUps).toHaveLength(1);
   });
 
+  it("replays a direct Follow-up Message exactly without getTask", async () => {
+    await seedBinding("INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+    });
+    const client = new DirectMessageFollowUpClient("input accepted directly");
+    const runtime = coordinator(client);
+    const input = { ...turn(), action: "provide_input" as const };
+
+    const first = await collect(runtime.followUp(input));
+    const replay = await collect(runtime.followUp(input));
+
+    expect(first).toEqual(["input accepted directly"]);
+    expect(replay).toEqual(first);
+    expect(client.followUps).toHaveLength(1);
+    expect(client.getCount).toBe(0);
+  });
+
   it("does not repeat the same top-level cancellation", async () => {
     await seedBinding("WORKING");
     const client = new InteractiveClient(task("CANCELED", "canceled"));
@@ -437,7 +585,11 @@ describeWithPostgres("bounded SDAR task coordination", () => {
       ],
     );
     const output = await collect(
-      coordinator(client).status({ chatId: "chat-a", userId: "user-a" }),
+      coordinator(client).statusForTask({
+        chatId: "chat-a",
+        userId: "user-a",
+        taskId: "task-a",
+      }),
     );
 
     expect(output.join("\n")).toContain("Capability Gap");
@@ -457,7 +609,11 @@ describeWithPostgres("bounded SDAR task coordination", () => {
       ],
     );
     const output = await collect(
-      coordinator(client).status({ chatId: "chat-a", userId: "user-a" }),
+      coordinator(client).statusForTask({
+        chatId: "chat-a",
+        userId: "user-a",
+        taskId: "task-a",
+      }),
     );
 
     expect(output.join("\n")).toContain("business failure");
@@ -474,6 +630,190 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     await expect(collect(coordinator(client).cancel(turn()))).rejects.toThrow(
       "mismatched Task identity",
     );
+  });
+
+  it("lists A/B/C and cancels only the explicitly authorized B Task", async () => {
+    for (const name of ["a", "b", "c"]) {
+      await repository.createTaskBinding({
+        openWebUiChatId: "chat-a",
+        userId: "user-a",
+        sdarTaskId: `task-${name}`,
+        sdarContextId: `context-${name}`,
+        status: "WORKING",
+      });
+    }
+    const client = new MultiTaskClient();
+    const runtime = coordinator(client);
+
+    const listed = await collect(
+      runtime.listTaskStatuses({ chatId: "chat-a", userId: "user-a" }),
+    );
+    await collect(
+      runtime.cancel({
+        ...turn(),
+        userMessageId: "cancel-b",
+        taskId: "task-b",
+      }),
+    );
+
+    expect(listed.join("\n")).toContain("task-a");
+    expect(listed.join("\n")).toContain("task-b");
+    expect(listed.join("\n")).toContain("task-c");
+    expect(client.cancelledTaskIds).toEqual(["task-b"]);
+    await expect(
+      repository.findAuthorizedTask({
+        openWebUiChatId: "chat-a",
+        userId: "user-a",
+        sdarTaskId: "task-a",
+      }),
+    ).resolves.toMatchObject({ status: "WORKING" });
+    await expect(
+      repository.findAuthorizedTask({
+        openWebUiChatId: "chat-a",
+        userId: "user-a",
+        sdarTaskId: "task-b",
+      }),
+    ).resolves.toMatchObject({ status: "CANCELED" });
+  });
+
+  it("allows A Follow-up and B status concurrently", async () => {
+    await seedNamedBinding("a", "INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+    });
+    await seedNamedBinding("b", "WORKING");
+    const client = new BlockingMultiTaskClient();
+    const runtime = coordinator(client);
+    const followUp = collect(
+      runtime.followUp({
+        ...turn(),
+        userMessageId: "follow-a",
+        taskId: "task-a",
+        action: "provide_input",
+      }),
+    );
+    await client.followUpStarted;
+
+    const status = await collect(
+      runtime.statusForTask({
+        chatId: "chat-a",
+        userId: "user-a",
+        taskId: "task-b",
+      }),
+    );
+    client.releaseFollowUp();
+    await followUp;
+
+    expect(status.join("\n")).toContain("task-b status");
+    expect(client.requestedTaskIds).toContain("task-b");
+  });
+
+  it("serializes two mutations of A with its Task-level lease", async () => {
+    await seedNamedBinding("a", "INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+    });
+    const client = new BlockingMultiTaskClient();
+    const runtime = coordinator(client);
+    const first = collect(
+      runtime.followUp({
+        ...turn(),
+        userMessageId: "follow-a-1",
+        taskId: "task-a",
+        action: "provide_input",
+      }),
+    );
+    await client.followUpStarted;
+    const second = await collect(
+      runtime.followUp({
+        ...turn(),
+        userMessageId: "follow-a-2",
+        taskId: "task-a",
+        action: "provide_input",
+      }),
+    );
+    client.releaseFollowUp();
+    await first;
+
+    expect(second.join("\n")).toContain("already in progress");
+    expect(client.followUps).toHaveLength(1);
+  });
+
+  it("allows mutations of A and B to enter A2A concurrently", async () => {
+    await seedNamedBinding("a", "INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+    });
+    await seedNamedBinding("b", "INPUT_REQUIRED", {
+      internalPhase: "awaiting_user_input",
+    });
+    const client = new ParallelFollowUpClient();
+    const runtime = coordinator(client);
+    const first = collect(
+      runtime.followUp({
+        ...turn(),
+        userMessageId: "parallel-a",
+        taskId: "task-a",
+        action: "provide_input",
+      }),
+    );
+    const second = collect(
+      runtime.followUp({
+        ...turn(),
+        userMessageId: "parallel-b",
+        taskId: "task-b",
+        action: "provide_input",
+      }),
+    );
+    await client.bothStarted;
+    client.releaseBoth();
+    await Promise.all([first, second]);
+
+    expect(client.followUps.map(({ taskId }) => taskId).sort()).toEqual([
+      "task-a",
+      "task-b",
+    ]);
+  });
+
+  it("fails closed when explicit status returns the wrong context", async () => {
+    await seedNamedBinding("b", "WORKING");
+    const client = new MultiTaskClient();
+    client.contextOverride = "wrong-context";
+
+    await expect(
+      collect(
+        coordinator(client).statusForTask({
+          chatId: "chat-a",
+          userId: "user-a",
+          taskId: "task-b",
+        }),
+      ),
+    ).rejects.toThrow("mismatched Task identity");
+  });
+
+  it("preserves a newer terminal binding through a legacy-repository optimistic conflict", async () => {
+    const original = await repository.createTaskBinding({
+      openWebUiChatId: "chat-a",
+      userId: "user-a",
+      sdarTaskId: "task-race",
+      sdarContextId: "context-race",
+      status: "WORKING",
+    });
+    await repository.updateTaskBinding({
+      bindingId: original.bindingId,
+      expectedVersion: original.version,
+      status: "COMPLETED",
+      lastStatusTimestamp: "2026-08-21T12:00:00.000Z",
+      terminal: true,
+    });
+
+    const stale = await repository.updateTaskBinding({
+      bindingId: original.bindingId,
+      expectedVersion: original.version,
+      status: "WORKING",
+      lastStatusTimestamp: "2026-08-21T11:59:00.000Z",
+      terminal: false,
+    });
+
+    expect(stale).toMatchObject({ status: "COMPLETED" });
+    expect(stale.terminalAt).toBeDefined();
   });
 
   async function seedBinding(
@@ -497,6 +837,28 @@ describeWithPostgres("bounded SDAR task coordination", () => {
       });
     }
   }
+  async function seedNamedBinding(
+    name: string,
+    status: string,
+    pendingInput?: Record<string, string>,
+  ): Promise<void> {
+    const binding = await repository.createTaskBinding({
+      openWebUiChatId: "chat-a",
+      userId: "user-a",
+      sdarTaskId: `task-${name}`,
+      sdarContextId: `context-${name}`,
+      status,
+    });
+    if (pendingInput !== undefined) {
+      await repository.updateTaskBinding({
+        bindingId: binding.bindingId,
+        expectedVersion: binding.version,
+        status,
+        pendingInput,
+        terminal: false,
+      });
+    }
+  }
   function coordinator(
     client: SdarA2aClient,
     overrides: Partial<
@@ -504,7 +866,7 @@ describeWithPostgres("bounded SDAR task coordination", () => {
     > = {},
   ): SdarTaskCoordinator {
     return new SdarTaskCoordinator({
-      repository,
+      repository: coordinatorRepository,
       getClient: async () => client,
       pollingBudgetMs: 0,
       ...overrides,
@@ -599,6 +961,146 @@ class InteractiveClient extends FakeClient {
     return this.returnedTask;
   }
 }
+
+class DirectMessageFollowUpClient extends FakeClient {
+  readonly followUps: FollowUpInput[] = [];
+
+  constructor(private readonly text: string) {
+    super([]);
+  }
+
+  override async sendFollowUp(
+    input: FollowUpInput,
+  ): Promise<NormalizedSendResult> {
+    this.followUps.push(input);
+    return {
+      kind: "message",
+      message: {
+        ...agentMessage(this.text),
+        messageId: "follow-up-message",
+        taskId: input.taskId,
+        contextId: input.contextId,
+      },
+    };
+  }
+}
+
+class UnexpectedAuthenticationClient extends FakeClient {
+  constructor() {
+    super([]);
+  }
+
+  override async *submitTaskStream(): AsyncGenerator<NormalizedStreamEvent> {
+    this.submitCount += 1;
+    if (this.submitCount > 0) {
+      throw new UnexpectedA2aAuthenticationStateError();
+    }
+    yield { kind: "message", message: agentMessage("unreachable") };
+  }
+}
+
+class MultiTaskClient extends FakeClient {
+  readonly cancelledTaskIds: string[] = [];
+  readonly requestedTaskIds: string[] = [];
+  readonly followUps: FollowUpInput[] = [];
+  contextOverride?: string;
+
+  constructor() {
+    super([]);
+  }
+
+  override async getTask(taskId = "task-a"): Promise<NormalizedTask> {
+    this.requestedTaskIds.push(taskId);
+    return namedTask(
+      taskId,
+      "WORKING",
+      `${taskId} status`,
+      this.contextOverride,
+    );
+  }
+
+  override async cancelTask(taskId = "task-a"): Promise<NormalizedTask> {
+    this.cancelledTaskIds.push(taskId);
+    return namedTask(taskId, "CANCELED", `${taskId} canceled`);
+  }
+
+  override async sendFollowUp(
+    input: FollowUpInput,
+  ): Promise<NormalizedSendResult> {
+    this.followUps.push(input);
+    return {
+      kind: "task",
+      task: namedTask(input.taskId, "WORKING", `${input.taskId} continued`),
+    };
+  }
+}
+
+class BlockingMultiTaskClient extends MultiTaskClient {
+  readonly followUpStarted: Promise<void>;
+  private markFollowUpStarted!: () => void;
+  private continueFollowUp!: () => void;
+  private readonly followUpReleased: Promise<void>;
+
+  constructor() {
+    super();
+    this.followUpStarted = new Promise((resolve) => {
+      this.markFollowUpStarted = resolve;
+    });
+    this.followUpReleased = new Promise((resolve) => {
+      this.continueFollowUp = resolve;
+    });
+  }
+
+  releaseFollowUp(): void {
+    this.continueFollowUp();
+  }
+
+  override async sendFollowUp(
+    input: FollowUpInput,
+  ): Promise<NormalizedSendResult> {
+    this.followUps.push(input);
+    this.markFollowUpStarted();
+    await this.followUpReleased;
+    return {
+      kind: "task",
+      task: namedTask(input.taskId, "WORKING", `${input.taskId} continued`),
+    };
+  }
+}
+
+class ParallelFollowUpClient extends MultiTaskClient {
+  readonly bothStarted: Promise<void>;
+  private markBothStarted!: () => void;
+  private continueBoth!: () => void;
+  private readonly bothReleased: Promise<void>;
+
+  constructor() {
+    super();
+    this.bothStarted = new Promise((resolve) => {
+      this.markBothStarted = resolve;
+    });
+    this.bothReleased = new Promise((resolve) => {
+      this.continueBoth = resolve;
+    });
+  }
+
+  releaseBoth(): void {
+    this.continueBoth();
+  }
+
+  override async sendFollowUp(
+    input: FollowUpInput,
+  ): Promise<NormalizedSendResult> {
+    this.followUps.push(input);
+    if (this.followUps.length === 2) this.markBothStarted();
+    await this.bothReleased;
+    return {
+      kind: "task",
+      task: namedTask(input.taskId, "WORKING", `${input.taskId} continued`),
+    };
+  }
+}
+
 class HangingClient extends FakeClient {
   streamSignalAborted = false;
   nextTask = task("WORKING", "still working");
@@ -642,6 +1144,7 @@ function turn() {
     userId: "user-a",
     chatId: "chat-a",
     userMessageId: "message-a",
+    taskId: "task-a",
   } as const;
 }
 
@@ -656,6 +1159,22 @@ function task(
     state,
     ...(message === undefined ? {} : { statusMessage: agentMessage(message) }),
     ...(phaseMessage === undefined ? {} : { phaseMessage }),
+    artifacts: [],
+  };
+}
+
+function namedTask(
+  taskId: string,
+  state: NormalizedTask["state"],
+  message: string,
+  contextOverride?: string,
+): NormalizedTask {
+  const name = taskId.replace(/^task-/u, "");
+  return {
+    taskId,
+    contextId: contextOverride ?? `context-${name}`,
+    state,
+    statusMessage: agentMessage(message),
     artifacts: [],
   };
 }
