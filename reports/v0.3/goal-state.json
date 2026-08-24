@@ -27,29 +27,36 @@
     "P10": ["8515f2dde83e470ead695744d9a1f360f0c63bc3"],
     "P11": ["e03a8570ea0dd51b97c37ed1fc33c633c6f88ca0"],
     "P12": ["928a56e7b9f77bb30dc7bd93a30787d79b65129c"],
-    "P13": ["3a3abbd983db0480f668ce674759210915085198"],
+    "P13": [
+      "3a3abbd983db0480f668ce674759210915085198",
+      "ada2894bdb052434e6497e327902d9c8fdfe9872",
+      "60c51afbf3ae4e4eb73c153d0a8311ef495e66a5",
+      "fceff6f3955cf79d85e65246da6fb2de3fbe14e5",
+      "2948b4e5ed5c876c8bafdf61934bc1372c2b2054",
+      "3170166befbef0e89064571c388b63869d016956"
+    ],
     "P14_PREPARATION": ["630a630cda050e72b9cab1e798b87f4d9d4d7a83"]
   },
   "requiredGates": {
     "baseline": "PASSED",
-    "unit": "PASSED_CURRENT_HEAD",
-    "contract": "PASSED_CURRENT_HEAD",
-    "postgres": "PASSED_CURRENT_HEAD",
-    "security": "PASSED_CURRENT_HEAD",
-    "openai": "PASSED_CURRENT_HEAD",
-    "agui": "PASSED_CURRENT_HEAD",
-    "realModel": "PENDING",
-    "realSdar": "PENDING",
-    "migrationUpgrade": "PASSED_CURRENT_HEAD",
-    "restartRecovery": "PASSED_CURRENT_HEAD",
-    "container": "PASSED_CURRENT_HEAD",
+    "unit": "PASSED_CANDIDATE_3170166",
+    "contract": "PASSED_CANDIDATE_3170166",
+    "postgres": "PASSED_CANDIDATE_3170166",
+    "security": "PASSED_CANDIDATE_3170166",
+    "openai": "PASSED_CANDIDATE_3170166",
+    "agui": "PASSED_CANDIDATE_3170166",
+    "realModel": "PASSED_REAL_CANDIDATE_3170166",
+    "realSdar": "BLOCKED_PROTOCOL_DEPLOYMENT_MISMATCH",
+    "migrationUpgrade": "PENDING_REAL_GATE",
+    "restartRecovery": "PENDING_REAL_GATE",
+    "container": "PASSED_CANDIDATE_3170166",
     "prReady": "PENDING"
   },
   "blockers": [
     {
       "phase": "P13",
-      "kind": "ENVIRONMENT_NOT_YET_CONFIGURED",
-      "detail": "Exact-head real model/SDAR variables and operator-approved safe current-SDAR requests are absent. Functional SHA 3a3abbd983db0480f668ce674759210915085198 and CI 32511015976 passed, but AC-039 through AC-042 remain BLOCKED_ENVIRONMENT without fixture substitution."
+      "kind": "SDAR_A2A_AUTH_CONTRACT_MISMATCH",
+      "detail": "Candidate 3170166 and the real model passed. The configured current-main loopback SDAR Agent Card advertises no A2A security, but initial sendMessageStream returns 401 GOVERNED_CONTROL_AUTHENTICATION_REQUIRED before any event. SACS must remain trusted-network unauthenticated and fail closed, so AC-040 through AC-042 remain BLOCKED_ENVIRONMENT without fixture substitution."
     }
   ]
 }

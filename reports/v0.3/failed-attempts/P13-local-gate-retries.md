@@ -77,6 +77,20 @@ Task, while status/result/history/allowed-operation/capability-gap questions
 map to `task_status`. This failed attempt is not counted as real-model or
 real-SDAR evidence.
 
+## Real-SDAR governed-control authentication mismatch
+
+Candidate `3170166` passed both CI workflows, the complete regression chain,
+source locking, and the genuine model gate. Its first reviewed non-executing
+SDAR request then produced no A2A event or Task. A direct probe through the
+pinned official adapter reproduced HTTP 401
+`GOVERNED_CONTROL_AUTHENTICATION_REQUIRED`. The Agent Card simultaneously
+advertises A2A 1.0 HTTP+JSON streaming with zero security requirements. The
+local current-main UGV deployment has governed-control identity configuration,
+which is incompatible with SACS's required trusted-network unauthenticated A2A
+boundary. No token was sent to SACS, no interactive authentication was added,
+and no Task was confirmed or executed. This is `BLOCKED_ENVIRONMENT`, not real
+SDAR evidence.
+
 ## Real-model Turn Decision misclassification
 
 The next exact-head `pnpm verify:v03` attempt passed the complete regression

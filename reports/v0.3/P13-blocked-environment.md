@@ -2,19 +2,48 @@
 
 - Status: `BLOCKED_ENVIRONMENT`
 - Current phase: P13
-- Local head: `3a3abbd983db0480f668ce674759210915085198`
-- Remote head: `3a3abbd983db0480f668ce674759210915085198`
-- Timestamp UTC: `2026-08-21T18:07:13.149Z`
+- Qualified candidate head: `3170166befbef0e89064571c388b63869d016956`
+- Qualified candidate remote head: `3170166befbef0e89064571c388b63869d016956`
+- Timestamp UTC: `2026-08-24T09:00:00.000Z`
 
-> Resume update (`2026-08-24T07:51:50.506Z`): the user supplied the real-model
-> and real-SDAR configuration. Model readiness and Agent Card discovery now
-> pass without recording secrets. SDAR `main` moved to
-> `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`; the source lock is being
-> refreshed before any real Task request. Two operator-reviewed safe Task texts
-> remain unset, so the historical blocked status is not yet superseded by a
-> P13 pass report.
+> Resume result (`2026-08-24`): the user supplied the real-model and real-SDAR
+> configuration. Candidate `3170166` passed Push and PR CI, the full regression
+> chain, current-source locking, and the genuine two-turn/strict-decision model
+> gate. The real SDAR gate is now blocked by an authenticated A2A deployment
+> that contradicts its unauthenticated Agent Card and the SACS trusted-network
+> contract. No credential or endpoint value is recorded here.
 
-## Exact blocker
+## Current exact blocker
+
+The configured loopback SDAR publishes an A2A 1.0 HTTP+JSON streaming Agent
+Card with zero agent/skill security requirements, but an initial
+`sendMessageStream` through the pinned official SDK fails before its first
+event with HTTP 401 and `GOVERNED_CONTROL_AUTHENTICATION_REQUIRED`. The same
+failure occurs through SACS and through a direct official-adapter probe. No
+Task binding is created; SACS renders its safe failure response and does not
+retry with credentials.
+
+The local SDAR process is current source
+`7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`. Its environment contains governed
+control identity configuration, and the current UGV profile requires that
+identity. Supplying that bearer token to SACS or adding an interactive A2A auth
+flow would violate the v0.3 hard invariant. Modifying SDAR/SMPP source or
+pretending the Fixture passed the gate is also prohibited. P13 therefore
+remains `BLOCKED_ENVIRONMENT` at the real-SDAR boundary.
+
+Sanitized current evidence:
+
+```text
+candidate: 3170166befbef0e89064571c388b63869d016956
+Push CI: 32708059492 (quality/container success)
+PR CI: 32708065323 (quality/container success)
+real model: PASSED; durableTwoTurnReference=true; strictTurnDecision=true
+Agent Card: HTTP+JSON 1.0; streaming=true; securityRequirements=0
+initial A2A stream: 401 GOVERNED_CONTROL_AUTHENTICATION_REQUIRED; events=0
+Task creation/confirmation/execution: 0/0/0
+```
+
+## Historical initial blocker (superseded)
 
 The execution environment contains none of the required P13 real-model or
 real-SDAR variables. It therefore cannot run the required genuine
@@ -98,9 +127,8 @@ container job 96862547655: success
   SBOM with 3,718 components and SHA-256
   `ffcda6352f26ec301027261851222f92d96ed2f9b65079b4ac30905269337593`.
 
-## Required acceptance criteria not satisfied
+## Current required acceptance criteria not satisfied
 
-- AC-039: genuine configured model two-turn context and strict decision proof.
 - AC-040: current locked SDAR two-active-Task and precise-operation proof.
 - AC-041: exact P13 v0.2 upgrade plus SACS/PostgreSQL restart gate; its driver
   must start SACS with the genuine model and cannot be downgraded to a fixture.
@@ -111,11 +139,13 @@ container job 96862547655: success
 
 ## Exact recovery steps
 
-1. Supply the P13 variables documented in `.env.example` through a secure
-   execution environment; do not commit their values.
-2. Select two safe, non-destructive current-Agent-Card requests that remain
-   active together, and optionally approve a reversible Follow-up.
-3. Remove any stale `.tmp/p13-real-evidence` directory, set
+1. Provide or reconfigure a current-main SDAR deployment whose published A2A
+   security declaration matches its wire behavior and whose initial/read-only
+   Task traffic is unauthenticated on the trusted isolated network. Do not give
+   the governed-control bearer token to SACS.
+2. Keep the two reviewed non-executing requests, or replace them with two safe
+   requests supported by that unauthenticated Agent Card.
+3. Remove stale `.tmp/p13-real-evidence`, set
    `P13_EXPECTED_SACS_SHA` to the exact clean local/remote candidate, and run
    `pnpm verify:v03` with zero required skips.
 4. Review the sanitized evidence, commit/push the P13 completion artifacts,
