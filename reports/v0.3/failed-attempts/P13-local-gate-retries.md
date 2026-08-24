@@ -37,3 +37,15 @@ configured, and the running service could not be tied to a clean locked SDAR
 and SMPP source pair. The nearby SDAR checkout also contains substantial
 pre-existing user changes, which were preserved. This discovery is blocker
 diagnosis only and is not counted as real evidence.
+
+## Source-lock candidate CI interrupt expiry
+
+After the SDAR source-lock refresh, exact-head push CI run `32703576086`
+passed 100 unit and 78 contract tests, then failed one of 89 PostgreSQL
+integration tests. `agui-multitask-interrupt.postgres.int.test.ts` injected an
+absolute service clock of `2026-08-22T00:00:00.000Z`; once wall-clock time moved
+past that date, the database correctly treated the newly persisted Interrupt
+as expired. The test now uses the service's production default current clock.
+The focused rerun passed 1/1 and the complete isolated PostgreSQL rerun passed
+89/89. Production expiry semantics were not changed, and the failed CI is not
+counted as release evidence.

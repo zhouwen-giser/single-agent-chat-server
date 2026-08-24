@@ -94,7 +94,6 @@ describeWithPostgres("P11 multi-Task AG-UI interrupt authority", () => {
     const interrupts = new InterruptResumeService({
       repository,
       getClient: async () => client,
-      now: () => new Date("2026-08-22T00:00:00.000Z"),
     });
     await interrupts.persistInputRequired({
       event: inputRequired("run-a", "task-a", "context-a", "input-a"),
