@@ -6,6 +6,14 @@
 - Remote head: `3a3abbd983db0480f668ce674759210915085198`
 - Timestamp UTC: `2026-08-21T18:07:13.149Z`
 
+> Resume update (`2026-08-24T07:51:50.506Z`): the user supplied the real-model
+> and real-SDAR configuration. Model readiness and Agent Card discovery now
+> pass without recording secrets. SDAR `main` moved to
+> `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`; the source lock is being
+> refreshed before any real Task request. Two operator-reviewed safe Task texts
+> remain unset, so the historical blocked status is not yet superseded by a
+> P13 pass report.
+
 ## Exact blocker
 
 The execution environment contains none of the required P13 real-model or

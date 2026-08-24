@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "observedAt": "2026-08-21T10:13:58.465Z",
+  "observedAt": "2026-08-24T07:51:50.506Z",
   "sourcePriority": [
     "single-agent-chat-server origin/main",
     "skill-driven-agent-runtime origin/main public A2A contract",
@@ -19,8 +19,8 @@
     "sdar": {
       "repository": "https://github.com/zhouwen-giser/skill-driven-agent-runtime.git",
       "branch": "main",
-      "commit": "2275bc52759914bc80113358a9083e6f00d59e6d",
-      "tree": "df4520d92f558ff3fa75cf7b86755d148433ceb5",
+      "commit": "7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e",
+      "tree": "0fbf26380cbb9a99857cac441ad107752e051c14",
       "version": "1.4.1",
       "purpose": "read-only A2A authority"
     },

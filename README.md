@@ -19,7 +19,7 @@ agent registry, capability-discovery service, or multi-agent router.
 
 ## Frozen compatibility
 
-- execution-time SDAR main: `2275bc52759914bc80113358a9083e6f00d59e6d`
+- execution-time SDAR main: `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`
 - execution-time SMPP main, read-only semantic reference:
   `f8c37e6a2ecdc859e56910803197ec938b9a807a`
 - A2A specification patch: `1.0.1`
