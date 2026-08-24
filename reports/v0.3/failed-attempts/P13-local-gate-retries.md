@@ -62,3 +62,20 @@ The harness now pins the same bounded timeout, output, temperature, retry, and
 response-format settings used by the direct P13 model qualification. No
 production validation limit was weakened, no secret was logged, and this
 failed attempt is not counted as real-model or real-SDAR evidence.
+
+## Real-model Turn Decision misclassification
+
+The next exact-head `pnpm verify:v03` attempt passed the complete regression
+chain and source-lock gate, then failed the two-turn real-model assertion
+before creating any SDAR Task. PostgreSQL contained all four ordered user and
+assistant messages. A loopback-only diagnostic proxy recorded only prompt
+metadata and proved that both prior messages reached the second Turn Decision,
+but the model returned `clarification` instead of `general_chat`; the graph
+therefore rendered the classification question without invoking the general
+answer call. An isolated repeat reproduced the failure, and a redacted real
+model comparison also showed that the old prompt could misclassify the history
+question as `new_task`. The decision prompt now states that it classifies only
+intent, assigns prior-conversation questions to `general_chat`, and reserves
+`clarification` for Task operations that cannot safely proceed. No endpoint,
+credential, prompt text, model answer, or Task identifier was retained. This
+failed attempt is not counted as real-model or real-SDAR evidence.

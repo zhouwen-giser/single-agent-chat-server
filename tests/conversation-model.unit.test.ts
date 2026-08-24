@@ -81,6 +81,51 @@ describe("conversation model configuration", () => {
 });
 
 describe("OpenAI-compatible conversation model", () => {
+  it("classifies prior-conversation questions as ordinary chat before answering", async () => {
+    let requestBody: Record<string, unknown> | undefined;
+    const model = new OpenAiCompatibleConversationModel(baseConfig, {
+      fetch: async (_input, init) => {
+        requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        return completion(JSON.stringify({ kind: "general_chat" }));
+      },
+    });
+
+    await expect(
+      model.decideTurn({
+        context: {
+          ...emptyContext,
+          messages: [
+            {
+              messageId: "message-1",
+              threadId: "thread-1",
+              protocol: "openai",
+              externalMessageId: "external-1",
+              role: "user",
+              contentText: "My project codename is opal.",
+              contentHash: "hash-1",
+              sequence: 1,
+              truncated: false,
+              createdAt: "2026-08-24T00:00:00.000Z",
+            },
+          ],
+        },
+        currentUserText: "What was the codename from the prior turn?",
+      }),
+    ).resolves.toEqual({ kind: "general_chat" });
+
+    const messages = requestBody?.messages as
+      | readonly { readonly role: string; readonly content: string }[]
+      | undefined;
+    expect(messages?.[0]?.content).toContain("Classify intent only");
+    expect(messages?.[0]?.content).toContain(
+      "questions about prior conversation",
+    );
+    expect(messages?.[0]?.content).toContain(
+      "Use clarification only when a requested Task operation",
+    );
+    expect(messages?.[1]?.content).toContain("My project codename is opal.");
+  });
+
   it("uses only the configured endpoint and sends no tool surface", async () => {
     const calls: Array<{ readonly url: string; readonly body: unknown }> = [];
     const model = new OpenAiCompatibleConversationModel(baseConfig, {
