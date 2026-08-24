@@ -3,26 +3,23 @@
 - Status: `BLOCKED_ENVIRONMENT`
 - Current incomplete prerequisite: P13
 - P14 preparation head: `630a630cda050e72b9cab1e798b87f4d9d4d7a83`
-- Remote head: `630a630cda050e72b9cab1e798b87f4d9d4d7a83`
+- Current SACS head/remote: `01f4ecfa4d261ed100d23418ff7b30da283cf20e`
 - Latest `origin/main`: `0211157e8652cc0ae933a1eea9294cf665b4da38`
-- Timestamp UTC: `2026-08-21T18:32:03.776Z`
+- Timestamp UTC: `2026-08-24T10:45:50.249Z`
 
 ## Exact blocker
 
 P14 cannot publish final release-candidate evidence or mark Draft PR #13 Ready
-because P13 AC-039 through AC-042 remain blocked by the absent genuine model,
-current SDAR, and safe operator-reviewed request configuration documented in
-`P13-blocked-environment.md`. The complete `pnpm verify:v03` command correctly
-stops before tests when that environment is absent.
+because P13 AC-040 through AC-042 remain incomplete. The genuine model gate has
+passed. The current A2A 1.0 SDAR accepts anonymous metadata-free `text/plain`
+UGV submissions and enters its new natural-language admission path, but the
+deployment fails closed because the required Exposure/readiness/Provider
+authority is not active, current, or ready.
 
-A continuation audit at `2026-08-21T18:41:30.877Z` confirmed that latest
-`origin/main` remains `0211157e8652cc0ae933a1eea9294cf665b4da38` and is an
-ancestor of the clean SACS candidate. It also found a loopback A2A endpoint,
-but its only advertised capability is effectful movement requiring
-confirmation, and it cannot be tied to a clean, locked current SDAR/SMPP source
-pair. The endpoint was therefore not substituted for the missing P13
-configuration or operator-approved requests. See the P13 report for the exact
-read-only findings.
+The running SDAR source is clean local commit `f1c86de448d5e4df6d2e879d80c5765edcff8852`,
+while SDAR remote `main` remains `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`.
+It therefore cannot yet satisfy execution-time current-source locking. See
+`P13-blocked-environment.md` for the sanitized official-client observations.
 
 ## Work completed despite blocker
 
@@ -62,15 +59,17 @@ read-only findings.
 
 ## Exact recovery steps
 
-1. Securely supply all P13 variables and safe current-Agent-Card requests
-   documented in `.env.example` and `docs/release-candidate-v0.3.md`.
-2. Set `P13_EXPECTED_SACS_SHA` and `P13_CI_RUN_URL` for the exact clean final
+1. Publish the reviewed SDAR trusted-intranet and text-only admission changes
+   through the upstream PR process, then run the exact resulting remote `main`.
+2. Bootstrap the SDAR-owned current Exposure/readiness/Provider authority using
+   its operator workflow; do not give SACS any additional southbound access.
+3. Set `P13_EXPECTED_SACS_SHA` and `P13_CI_RUN_URL` for the exact clean final
    candidate, clear stale ignored evidence, and run `pnpm verify:v03`.
-3. Review and publish P13 reports only after all five real evidence documents
+4. Review and publish P13 reports only after all five real evidence documents
    pass with required skips equal to zero.
-4. Fetch `origin/main` again, rerun the full final gate, generate the P14 final
+5. Fetch `origin/main` again, rerun the full final gate, generate the P14 final
    report/acceptance/publication artifacts, and push the required final commit.
-5. Confirm local head, remote branch, PR head, evidence SHA, and green CI are
+6. Confirm local head, remote branch, PR head, evidence SHA, and green CI are
    identical; only then mark PR #13 Ready. Do not merge it.
 
 ## Integrity statement

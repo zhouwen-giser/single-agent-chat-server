@@ -107,3 +107,23 @@ intent, assigns prior-conversation questions to `general_chat`, and reserves
 `clarification` for Task operations that cannot safely proceed. No endpoint,
 credential, prompt text, model answer, or Task identifier was retained. This
 failed attempt is not counted as real-model or real-SDAR evidence.
+
+## Post-restart natural-language admission probes
+
+The first restart used a process started before the new SDAR natural-language
+admission files were written, so both the original reviewed request and a
+subject-qualified UGV variant still failed with
+`UGV_AGENT_PROFILE_TASK_CAPABILITY_BINDING_REQUIRED`. Process start time and
+source modification time identified the stale runtime precisely; neither Task
+was confirmed or executed.
+
+After a second restart, an official A2A 1.0 probe sent one metadata-free
+`text/plain` UGV request. It no longer encountered authentication or missing
+binding errors, proving that the server-owned natural-language resolver ran.
+The Task failed closed with the published message that the requested Exposure
+was not active, current, or ready. The SDAR deployment therefore still lacks a
+qualifying current PostgreSQL Exposure/readiness/Provider authority snapshot.
+The running clean SDAR commit is local `f1c86de448d5e4df6d2e879d80c5765edcff8852`,
+while remote `main` remains `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`.
+These probes are diagnostic only and are not counted as real-SDAR acceptance
+evidence.
