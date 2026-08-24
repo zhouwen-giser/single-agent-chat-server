@@ -63,6 +63,20 @@ response-format settings used by the direct P13 model qualification. No
 production validation limit was weakened, no secret was logged, and this
 failed attempt is not counted as real-model or real-SDAR evidence.
 
+## Real-model existing-Task status misclassification
+
+After the first Turn Decision fix, exact candidate `2948b4e` passed both CI
+workflows, the full local regression chain, source locking, and real two-turn
+memory. Its next strict real-model decision check classified an explicit
+existing-Task status request as `new_task` instead of `task_status`, so the run
+stopped before any SDAR Task creation. The prompt now defines mutually
+exclusive mappings for new SDAR work, Task listing, existing-Task reads,
+Follow-up mutations, top-level cancellation, ordinary chat, and clarification.
+In particular, `new_task` is prohibited for reading or changing an existing
+Task, while status/result/history/allowed-operation/capability-gap questions
+map to `task_status`. This failed attempt is not counted as real-model or
+real-SDAR evidence.
+
 ## Real-model Turn Decision misclassification
 
 The next exact-head `pnpm verify:v03` attempt passed the complete regression

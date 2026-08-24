@@ -123,6 +123,12 @@ describe("OpenAI-compatible conversation model", () => {
     expect(messages?.[0]?.content).toContain(
       "Use clarification only when a requested Task operation",
     );
+    expect(messages?.[0]?.content).toContain(
+      "Use task_status for status, result, published history",
+    );
+    expect(messages?.[0]?.content).toContain(
+      "never use it for reading or changing an existing Task",
+    );
     expect(messages?.[1]?.content).toContain("My project codename is opal.");
   });
 
