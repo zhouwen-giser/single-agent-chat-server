@@ -49,3 +49,16 @@ as expired. The test now uses the service's production default current clock.
 The focused rerun passed 1/1 and the complete isolated PostgreSQL rerun passed
 89/89. Production expiry semantics were not changed, and the failed CI is not
 counted as release evidence.
+
+## First resumed real-gate startup attempt
+
+The first resumed `pnpm verify:v03` attempt passed the complete available
+regression chain and the real source-lock gate, then stopped before any real
+Task creation because SACS exited during configuration parsing. The user `.env`
+contained general model timeout/output values above the production schema
+limits. The P13 harness had correctly overridden the real endpoint, name, and
+key, but had accidentally inherited those unrelated general tuning values.
+The harness now pins the same bounded timeout, output, temperature, retry, and
+response-format settings used by the direct P13 model qualification. No
+production validation limit was weakened, no secret was logged, and this
+failed attempt is not counted as real-model or real-SDAR evidence.

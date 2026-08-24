@@ -53,6 +53,13 @@ export async function startSacs(stamp, overrides = {}) {
       CONVERSATION_MODEL_BASE_URL: modelBaseUrl,
       CONVERSATION_MODEL_NAME: modelName,
       CONVERSATION_MODEL_API_KEY: process.env.P13_REAL_MODEL_API_KEY ?? "",
+      CONVERSATION_MODEL_TIMEOUT_MS:
+        process.env.P13_REAL_MODEL_TIMEOUT_MS ?? "60000",
+      CONVERSATION_MODEL_MAX_OUTPUT_TOKENS: "2048",
+      CONVERSATION_MODEL_TEMPERATURE: "0",
+      CONVERSATION_MODEL_MAX_RETRIES: "1",
+      CONVERSATION_MODEL_RESPONSE_FORMAT:
+        process.env.P13_REAL_MODEL_RESPONSE_FORMAT ?? "json_schema",
       SDAR_A2A_BASE_URL: sdarBaseUrl,
       SDAR_A2A_ENDPOINT_OVERRIDE:
         process.env.P13_REAL_SDAR_ENDPOINT_OVERRIDE ?? "",
