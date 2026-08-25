@@ -127,3 +127,30 @@ The running clean SDAR commit is local `f1c86de448d5e4df6d2e879d80c5765edcff8852
 while remote `main` remains `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`.
 These probes are diagnostic only and are not counted as real-SDAR acceptance
 evidence.
+
+## Real-SDAR authority expired before the aggregate scenario
+
+Exact candidate `f3b13b5` passed Push and PR CI, the complete local regression
+chain, source locking and the genuine model gate. Its first real-SDAR request
+returned a terminal failed Task instead of an active binding. A read-only query
+of the P13-dedicated SACS PostgreSQL proved that the request completed as a
+`TASK` result and that SACS persisted the exact published failure: the requested
+Exposure was not active, current, or ready. A subsequent public Agent Card read
+confirmed that `io.sdar/naturalLanguageCapabilityAdmission` was absent. No
+confirmation or execution occurred.
+
+The same request had reached `INPUT_REQUIRED` immediately after the earlier
+operator refresh, so this is an authority-window timing failure rather than a
+SACS routing, persistence or A2A mapping regression. P13 now permits an explicit
+two-command workflow for such deployments: first produce real-SDAR evidence
+immediately after refresh, then let the complete gate revalidate and reuse only
+that exact-candidate evidence while executing every other gate. The validator
+checks the wrapper schema, gate identity, candidate and source SHAs, both active
+Tasks, multi-Task isolation, ambiguous-mutation behavior, domain routing,
+disconnect behavior, absence of direct SMPP/MCP access, timestamps, exit code
+and zero required skips. Default aggregate behavior still runs the live SDAR
+scenario directly.
+
+The user explicitly directed the run to continue with SDAR process commit
+`68e05ea` while remote main is `1d5aafd`; both have the exact same Git tree.
+This deviation is disclosed and is not rewritten as exact process-SHA proof.

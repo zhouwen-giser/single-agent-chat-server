@@ -13,15 +13,19 @@ P14 cannot publish final release-candidate evidence or mark a replacement PR Rea
 because P13 AC-040 through AC-042 remain incomplete. The genuine model gate has
 passed. The current A2A 1.0 SDAR accepts anonymous metadata-free `text/plain`
 UGV submissions and enters its new natural-language admission path, but the
-deployment now reaches `INPUT_REQUIRED` with `awaiting_plan_confirmation` and
-does not execute. The remaining precondition is an exact-main SDAR restart,
-followed by the complete P13 gate.
+deployment reached `INPUT_REQUIRED` with `awaiting_plan_confirmation` and did
+not execute immediately after authority refresh. During the later aggregate
+gate, that authority had expired and the first Task failed closed. The remaining
+precondition is fresh exact-candidate real-SDAR evidence followed by strict
+reuse validation in the complete P13 gate.
 
 The running SDAR source is clean PR-head commit
 `68e05ea4d55666f7007b63edd59f32187c2aeeeb`, while SDAR remote `main` is
 `1d5aafd0a2c8324d8d0ac3cf33eebcb3c12aec6b`. Their Git trees are identical,
-but exact commit attribution still requires restarting the endpoint from main.
-See `P13-blocked-environment.md` for the sanitized official-client observations.
+The user explicitly directed the goal to continue despite those differing
+commit identities because the trees are identical. Final evidence must disclose
+both SHAs rather than claiming exact process identity. See
+`P13-blocked-environment.md` for the sanitized official-client observations.
 
 The user merged PR #13 on `2026-08-24T23:59:14Z` before P13/P14 completion.
 That user-controlled merge is not represented as release completion. Remaining
@@ -66,10 +70,10 @@ Codex did not merge, tag, release or deploy anything.
 
 ## Exact recovery steps
 
-1. Restart SDAR from exact remote-main commit `1d5aafd`, retaining the current
-   authority and anonymous admission configuration.
-2. Publish the refreshed SACS source lock and create a replacement Draft PR for
-   the remaining P13/P14 changes.
+1. Publish the strict exact-candidate real-SDAR evidence-reuse workflow and
+   obtain green exact-head CI on replacement Draft PR #14.
+2. Refresh the SDAR authority, immediately run the individual real-SDAR gate,
+   then run the complete gate with reuse explicitly enabled.
 3. Set `P13_EXPECTED_SACS_SHA` and `P13_CI_RUN_URL` for the exact clean final
    candidate, clear stale ignored evidence, and run `pnpm verify:v03`.
 4. Review and publish P13 reports only after all five real evidence documents

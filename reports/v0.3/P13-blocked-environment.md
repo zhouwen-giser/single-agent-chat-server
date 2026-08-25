@@ -2,10 +2,11 @@
 
 - Status: `BLOCKED_ENVIRONMENT`
 - Current phase: P13
-- Current SACS pre-source-lock head: `94ef72a2f0082e5dd656f670d023646757592e5a`
-- Current SACS remote head before publication: `a9257ae568082c1d1c0ea7e8e0a5f7a32c157097`
+- Current SACS candidate/remote: `f3b13b5b249428b82c02392bb596caa2e1d02220`
+- Candidate Push CI: `32808746156` (`success`)
+- Candidate PR CI: `32808768240` (`success`)
 - Last fully exercised candidate: `3170166befbef0e89064571c388b63869d016956`
-- Timestamp UTC: `2026-08-25T04:20:24.388Z`
+- Timestamp UTC: `2026-08-25T04:56:31.225Z`
 
 > Resume result (`2026-08-24`): the user supplied the real-model and real-SDAR
 > configuration. Candidate `3170166` passed Push and PR CI, the full regression
@@ -13,13 +14,30 @@
 > gate. The refreshed SDAR now advertises its natural-language admission
 > extension, and a metadata-free `text/plain` UGV request reaches an unconfirmed
 > `INPUT_REQUIRED` plan boundary. SDAR PR #27 is on remote `main`. The remaining
-> precondition is exact runtime provenance: the process was launched from PR
-> head `68e05ea`, whose Git tree is byte-identical to remote-main merge commit
-> `1d5aafd`, but the process itself has not been restarted from that exact merge
-> SHA. No credential, endpoint value, prompt, coordinate, or Task identifier is
-> recorded here.
+> precondition is a fresh SDAR authority window for the two real Tasks. The user
+> explicitly directed the goal to continue despite the process commit being PR
+> head `68e05ea` rather than remote-main merge commit `1d5aafd`; the two Git
+> trees are byte-identical and the deviation remains disclosed. No credential,
+> endpoint value, prompt, coordinate, or Task identifier is recorded here.
 
 ## Current exact blocker
+
+Candidate `f3b13b5` passed Push and PR CI and the complete local regression
+chain. Its formal real source-lock and genuine model gates passed with zero
+required skips. Before the first real SDAR scenario, the previously refreshed
+Capability authority expired. SACS correctly persisted the returned Task as
+terminal `FAILED`, with the published reason that the requested Exposure was
+not active, current, or ready; no active binding was therefore available to
+the scenario. A follow-up Agent Card read confirmed that
+`io.sdar/naturalLanguageCapabilityAdmission` had disappeared. No plan was
+confirmed and no UGV action executed.
+
+P13 now supports an explicit short-authority workflow: immediately after an
+operator refresh, `pnpm verify:v03:real-sdar` creates exact-candidate real
+evidence. The complete gate may then opt into revalidating that same evidence,
+including its candidate/source SHAs and every scenario assertion, while still
+running every other required gate with `requiredSkips=0`. Default behavior
+continues to execute the live SDAR scenario directly.
 
 Both repositories pin the official `@a2a-js/sdk@1.0.0-beta.0`; the negotiated
 wire contract is A2A 1.0 over HTTP+JSON. SACS v0.3 is the SACS product version,
@@ -53,16 +71,17 @@ SDAR remote `main` is now `1d5aafd0a2c8324d8d0ac3cf33eebcb3c12aec6b`.
 The running clean checkout is PR head
 `68e05ea4d55666f7007b63edd59f32187c2aeeeb`; it is an ancestor of that merge
 commit and both commits have exact tree
-`fca281f87b1aeba6e391fdc1013be7acc600891a`. The code is identical, but the
-required exact-SHA provenance remains pending until the endpoint is restarted
-from remote `main`. SACS does not modify, switch or publish the upstream
-repository.
+`fca281f87b1aeba6e391fdc1013be7acc600891a`. The code is identical. The user
+explicitly directed this run not to block on the differing commit identities;
+the final report must retain both identities and must not claim that the
+running process itself is commit `1d5aafd`. SACS does not modify, switch or
+publish the upstream repository.
 
 Sanitized current evidence:
 
 ```text
-current SACS pre-source-lock head: 94ef72a2f0082e5dd656f670d023646757592e5a
-last published SACS feature head: a9257ae568082c1d1c0ea7e8e0a5f7a32c157097
+current SACS candidate/remote: f3b13b5b249428b82c02392bb596caa2e1d02220
+Push/PR CI: 32808746156 / 32808768240 (success / success)
 last full local candidate: 3170166befbef0e89064571c388b63869d016956
 real model: PASSED; durableTwoTurnReference=true; strictTurnDecision=true
 Agent Card: HTTP+JSON 1.0; streaming=true; securityRequirements=0
@@ -73,6 +92,10 @@ internalPhase: awaiting_plan_confirmation
 Task confirmation/execution: 0/0
 running SDAR local/remote-main: 68e05ea... / 1d5aafd...
 running/remote tree: fca281f... / fca281f... (identical)
+latest formal source-lock: PASSED; requiredSkips=0
+latest formal real model: PASSED; requiredSkips=0
+latest formal real SDAR: FAILED before scenario; authority expired
+post-failure natural-language admission extension: absent
 ```
 
 ## Historical initial blocker (superseded)
@@ -171,17 +194,16 @@ container job 96862547655: success
 
 ## Exact recovery steps
 
-1. Restart the SDAR endpoint from exact remote-main commit `1d5aafd`; its
-   currently running PR-head tree is identical, but exact commit attribution is
-   required for published evidence.
-2. Preserve the now-current `a2a.embodied.move@2` authority and trusted
-   anonymous admission configuration. Do not grant SACS management, MCP,
-   Provider, database, credential or private Capability-metadata access.
-3. Publish this refreshed source lock, obtain exact-head SACS CI, remove
-   stale `.tmp/p13-real-evidence`, set
-   `P13_EXPECTED_SACS_SHA` to the exact clean local/remote candidate, and run
-   `pnpm verify:v03` with zero required skips.
-4. Review the sanitized evidence, commit/push the P13 completion artifacts,
+1. Publish the exact-candidate evidence-reuse implementation and obtain green
+   Push/PR CI for its new SHA.
+2. Remove stale `.tmp/p13-real-evidence`; immediately after the operator
+   refreshes `a2a.embodied.move@2`, run `pnpm verify:v03:real-sdar` before the
+   authority window expires.
+3. Set `P13_REUSE_EXACT_REAL_SDAR_EVIDENCE=true` and run the complete
+   `pnpm verify:v03`. The reuse validator must accept the exact candidate/source
+   identities and all real scenario assertions with zero skips.
+4. Retain the user's explicit runtime-SHA deviation disclosure, review the
+   sanitized evidence, commit/push the P13 completion artifacts,
    then perform P14 synchronization and rerun the full gate before marking the
    replacement Draft PR Ready.
 

@@ -49,6 +49,22 @@ real evidence documents, verifies their exact candidate SHA and zero required
 skips, builds and inspects the production container, verifies isolated Compose,
 and generates a CycloneDX 1.7 SBOM.
 
+If the current SDAR publishes a deliberately short-lived Capability authority
+window, qualify it immediately after the operator refreshes that authority:
+
+```text
+pnpm verify:v03:real-sdar
+P13_REUSE_EXACT_REAL_SDAR_EVIDENCE=true pnpm verify:v03
+```
+
+Reuse is opt-in and accepts only the existing `.tmp/…/real-sdar.json` whose
+schema, gate identity, candidate SHA, SDAR/SMPP source SHAs, required scenario
+assertions, exit code and zero-skip result match the current clean candidate.
+It is not a fixture or an old-commit skip: the first command performs the real
+requests, while the complete gate revalidates that exact-candidate evidence and
+runs every other required gate. Delete the evidence directory whenever the
+candidate or locked sources change.
+
 Evidence contains only endpoint hashes, model name and protocol, source SHAs,
 Agent Card hash, hashed Task/thread identifiers, timestamps, commands, exit
 codes, skip counts, Docker/PostgreSQL versions, and the exact CI URL. It never

@@ -49,7 +49,7 @@
     "openai": "PASSED_CANDIDATE_3170166",
     "agui": "PASSED_CANDIDATE_3170166",
     "realModel": "PASSED_REAL_CANDIDATE_3170166",
-    "realSdar": "PREFLIGHT_PASSED_PENDING_EXACT_MAIN_RUNTIME_AND_FULL_GATE",
+    "realSdar": "BLOCKED_SHORT_AUTHORITY_WINDOW_PENDING_EXACT_EVIDENCE",
     "migrationUpgrade": "PENDING_REAL_GATE",
     "restartRecovery": "PENDING_REAL_GATE",
     "container": "PASSED_CANDIDATE_3170166",
@@ -58,8 +58,8 @@
   "blockers": [
     {
       "phase": "P13",
-      "kind": "SDAR_EXACT_MAIN_RUNTIME_PROVENANCE",
-      "detail": "The real model passed. SDAR now advertises the natural-language admission extension, and a metadata-free text/plain UGV request reached INPUT_REQUIRED awaiting_plan_confirmation without confirmation or execution. SDAR remote main is 1d5aafd; the running clean PR head 68e05ea is its ancestor and has the identical fca281f tree, but exact-SHA evidence requires restarting the endpoint from remote main before the complete AC-040 through AC-042 gate. SACS retains no management, MCP, Provider, database, credential, or private Capability-metadata access."
+      "kind": "SDAR_SHORT_AUTHORITY_WINDOW",
+      "detail": "Candidate f3b13b5 passed Push/PR CI, the full local regression chain, real source locking and the genuine model gate. The first real-SDAR Task then failed because the previously refreshed Capability authority had expired; the public natural-language admission extension was absent and no confirmation or execution occurred. Publish the explicit exact-candidate evidence-reuse workflow, refresh authority, run the real-SDAR gate immediately, then run the complete gate with strict reuse validation and zero skips. The user directed the run to accept process commit 68e05ea versus remote-main 1d5aafd because their Git trees are identical; final evidence must disclose both and not claim exact process-SHA identity."
     }
   ]
 }
