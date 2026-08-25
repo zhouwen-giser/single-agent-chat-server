@@ -2,21 +2,22 @@
 
 - Status: `BLOCKED_ENVIRONMENT`
 - Current phase: P13
-- Current SACS head: `01f4ecfa4d261ed100d23418ff7b30da283cf20e`
-- Current SACS remote head: `01f4ecfa4d261ed100d23418ff7b30da283cf20e`
+- Current SACS pre-source-lock head: `94ef72a2f0082e5dd656f670d023646757592e5a`
+- Current SACS remote head before publication: `a9257ae568082c1d1c0ea7e8e0a5f7a32c157097`
 - Last fully exercised candidate: `3170166befbef0e89064571c388b63869d016956`
-- Timestamp UTC: `2026-08-24T10:45:50.249Z`
+- Timestamp UTC: `2026-08-25T04:20:24.388Z`
 
 > Resume result (`2026-08-24`): the user supplied the real-model and real-SDAR
 > configuration. Candidate `3170166` passed Push and PR CI, the full regression
 > chain, current-source locking, and the genuine two-turn/strict-decision model
-> gate. Two SDAR corrections now prove that anonymous A2A submission reaches
-> the executor and that a metadata-free `text/plain` UGV request enters the new
-> server-owned natural-language admission path. The current deployment still
-> rejects that admission because its PostgreSQL Exposure/readiness/Provider
-> authority is not active, current, or ready. The running corrected SDAR source
-> is also not yet present on remote `main`. No credential, endpoint value,
-> prompt, coordinate, or Task identifier is recorded here.
+> gate. The refreshed SDAR now advertises its natural-language admission
+> extension, and a metadata-free `text/plain` UGV request reaches an unconfirmed
+> `INPUT_REQUIRED` plan boundary. SDAR PR #27 is on remote `main`. The remaining
+> precondition is exact runtime provenance: the process was launched from PR
+> head `68e05ea`, whose Git tree is byte-identical to remote-main merge commit
+> `1d5aafd`, but the process itself has not been restarted from that exact merge
+> SHA. No credential, endpoint value, prompt, coordinate, or Task identifier is
+> recorded here.
 
 ## Current exact blocker
 
@@ -34,46 +35,44 @@ credentials. It produced an A2A Task and reached the new server-resolved
 Capability path; it no longer failed with either HTTP 401 or
 `UGV_AGENT_PROFILE_TASK_CAPABILITY_BINDING_REQUIRED`.
 
-The Task instead terminated `FAILED` before plan confirmation with the
-published message:
+After the authority refresh and restart, the public Agent Card included
+`io.sdar/naturalLanguageCapabilityAdmission`. A repeated official-client probe
+then progressed through `SUBMITTED` and `WORKING` to:
 
 ```text
-Agent execution error: The requested Exposure is not active, current, or ready.
+state: INPUT_REQUIRED
+internalPhase: awaiting_plan_confirmation
+published message: Plan confirmation required.
 ```
 
-This is the intended fail-closed SDAR boundary: the new resolver derives only a
-candidate for `a2a.embodied.move@2`; `RuntimeTaskCapabilityService` must still
-resolve the current Exposure, readiness, schema and Provider authority from
-SDAR PostgreSQL before atomically accepting the Task/Binding/Attempt. The
-running deployment does not currently contain a qualifying authority snapshot.
-Bootstrapping or repairing that SDAR-owned authority is an operator/upstream
-operation, not something SACS may do through A2A, a management API, MCP, or a
-database connection.
+No confirmation Follow-up was sent and no UGV action executed. This proves the
+server-owned resolver, current Exposure/readiness/Provider authority and manual
+confirmation boundary required for the two real P13 Tasks.
 
-Source provenance is also not yet publishable. The restarted process runs from
-clean local SDAR commit `f1c86de448d5e4df6d2e879d80c5765edcff8852`
-(`feat: Implement natural-language capability admission for UGV profile`),
-which contains its parent trusted-intranet identity correction. Remote `main`
-remains `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`. SACS does not modify or
-publish the upstream repository. Required evidence must ultimately run against
-an exact locked, remotely attributable SDAR source.
+SDAR remote `main` is now `1d5aafd0a2c8324d8d0ac3cf33eebcb3c12aec6b`.
+The running clean checkout is PR head
+`68e05ea4d55666f7007b63edd59f32187c2aeeeb`; it is an ancestor of that merge
+commit and both commits have exact tree
+`fca281f87b1aeba6e391fdc1013be7acc600891a`. The code is identical, but the
+required exact-SHA provenance remains pending until the endpoint is restarted
+from remote `main`. SACS does not modify, switch or publish the upstream
+repository.
 
 Sanitized current evidence:
 
 ```text
-current SACS head/remote: 01f4ecfa4d261ed100d23418ff7b30da283cf20e
-current Push CI: 32709708720 (quality/container success)
-current PR CI: 32709713842 (quality/container success)
+current SACS pre-source-lock head: 94ef72a2f0082e5dd656f670d023646757592e5a
+last published SACS feature head: a9257ae568082c1d1c0ea7e8e0a5f7a32c157097
 last full local candidate: 3170166befbef0e89064571c388b63869d016956
 real model: PASSED; durableTwoTurnReference=true; strictTurnDecision=true
 Agent Card: HTTP+JSON 1.0; streaming=true; securityRequirements=0
 official SDK in SACS/SDAR: @a2a-js/sdk@1.0.0-beta.0
-post-restart text/plain A2A submission: accepted; Task events observed
-natural-language admission branch: reached
-terminal state: FAILED; artifacts=0
-published failure: requested Exposure is not active, current, or ready
+natural-language admission extension: advertised
+text/plain A2A submission: SUBMITTED -> WORKING -> INPUT_REQUIRED
+internalPhase: awaiting_plan_confirmation
 Task confirmation/execution: 0/0
-running SDAR local/remote-main: f1c86de... / 7fa3ed8...
+running SDAR local/remote-main: 68e05ea... / 1d5aafd...
+running/remote tree: fca281f... / fca281f... (identical)
 ```
 
 ## Historical initial blocker (superseded)
@@ -172,24 +171,19 @@ container job 96862547655: success
 
 ## Exact recovery steps
 
-1. Publish the reviewed trusted-intranet and natural-language-admission SDAR
-   corrections through the upstream PR process, then run the endpoint from the
-   exact resulting remote `main`; do not make SACS consume a bearer or private
-   Capability metadata.
-2. Use the SDAR-owned operator/bootstrap workflow to make the fixed
-   `a2a.embodied.move@2` Exposure, readiness and Provider authority active and
-   current in the deployment. Do not grant SACS management, MCP, Provider or
-   database access.
-3. Confirm that either reviewed text-only request reaches an unconfirmed
-   `INPUT_REQUIRED` plan boundary through the official A2A 1.0 client, with no
-   physical execution.
-4. Refresh the source lock to the resulting exact SDAR `origin/main`, remove
+1. Restart the SDAR endpoint from exact remote-main commit `1d5aafd`; its
+   currently running PR-head tree is identical, but exact commit attribution is
+   required for published evidence.
+2. Preserve the now-current `a2a.embodied.move@2` authority and trusted
+   anonymous admission configuration. Do not grant SACS management, MCP,
+   Provider, database, credential or private Capability-metadata access.
+3. Publish this refreshed source lock, obtain exact-head SACS CI, remove
    stale `.tmp/p13-real-evidence`, set
    `P13_EXPECTED_SACS_SHA` to the exact clean local/remote candidate, and run
    `pnpm verify:v03` with zero required skips.
-5. Review the sanitized evidence, commit/push the P13 completion artifacts,
+4. Review the sanitized evidence, commit/push the P13 completion artifacts,
    then perform P14 synchronization and rerun the full gate before marking the
-   Draft PR Ready.
+   replacement Draft PR Ready.
 
 ## Integrity statement
 

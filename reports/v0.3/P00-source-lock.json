@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "observedAt": "2026-08-24T07:51:50.506Z",
+  "observedAt": "2026-08-25T04:20:24.388Z",
   "sourcePriority": [
     "single-agent-chat-server origin/main",
     "skill-driven-agent-runtime origin/main public A2A contract",
@@ -11,24 +11,24 @@
     "sacs": {
       "repository": "https://github.com/zhouwen-giser/single-agent-chat-server",
       "branch": "main",
-      "commit": "25c923524bcddc5fffd37513766cf28c9f9c2cf4",
-      "tree": "51cde785ceed2023ea1a9c7b7b882dfef3847c19",
-      "version": "0.1.0",
+      "commit": "9734ba21c0903f560866e349cc3a163f12108ed7",
+      "tree": "deb5292aab1683c269ff32aeff872e99dec32468",
+      "version": "0.3.0",
       "purpose": "product repository"
     },
     "sdar": {
       "repository": "https://github.com/zhouwen-giser/skill-driven-agent-runtime.git",
       "branch": "main",
-      "commit": "7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e",
-      "tree": "0fbf26380cbb9a99857cac441ad107752e051c14",
+      "commit": "1d5aafd0a2c8324d8d0ac3cf33eebcb3c12aec6b",
+      "tree": "fca281f87b1aeba6e391fdc1013be7acc600891a",
       "version": "1.4.1",
       "purpose": "read-only A2A authority"
     },
     "smpp": {
       "repository": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform.git",
       "branch": "main",
-      "commit": "f8c37e6a2ecdc859e56910803197ec938b9a807a",
-      "tree": "ace835d13c45ee2391e7b7ebcda5edd19566d70b",
+      "commit": "b6f0f645f1ce01d717420abe342aa16e3a22ee6e",
+      "tree": "1843957da6b942ddbdb33966189b2149abe4e70d",
       "version": "0.1.0",
       "purpose": "read-only downstream Provider/Resource/Action semantics"
     }

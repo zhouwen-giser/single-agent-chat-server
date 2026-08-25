@@ -3,23 +3,30 @@
 - Status: `BLOCKED_ENVIRONMENT`
 - Current incomplete prerequisite: P13
 - P14 preparation head: `630a630cda050e72b9cab1e798b87f4d9d4d7a83`
-- Current SACS head/remote: `01f4ecfa4d261ed100d23418ff7b30da283cf20e`
-- Latest `origin/main`: `0211157e8652cc0ae933a1eea9294cf665b4da38`
-- Timestamp UTC: `2026-08-24T10:45:50.249Z`
+- Current SACS pre-source-lock head: `94ef72a2f0082e5dd656f670d023646757592e5a`
+- Latest `origin/main`: `9734ba21c0903f560866e349cc3a163f12108ed7`
+- Timestamp UTC: `2026-08-25T04:20:24.388Z`
 
 ## Exact blocker
 
-P14 cannot publish final release-candidate evidence or mark Draft PR #13 Ready
+P14 cannot publish final release-candidate evidence or mark a replacement PR Ready
 because P13 AC-040 through AC-042 remain incomplete. The genuine model gate has
 passed. The current A2A 1.0 SDAR accepts anonymous metadata-free `text/plain`
 UGV submissions and enters its new natural-language admission path, but the
-deployment fails closed because the required Exposure/readiness/Provider
-authority is not active, current, or ready.
+deployment now reaches `INPUT_REQUIRED` with `awaiting_plan_confirmation` and
+does not execute. The remaining precondition is an exact-main SDAR restart,
+followed by the complete P13 gate.
 
-The running SDAR source is clean local commit `f1c86de448d5e4df6d2e879d80c5765edcff8852`,
-while SDAR remote `main` remains `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`.
-It therefore cannot yet satisfy execution-time current-source locking. See
-`P13-blocked-environment.md` for the sanitized official-client observations.
+The running SDAR source is clean PR-head commit
+`68e05ea4d55666f7007b63edd59f32187c2aeeeb`, while SDAR remote `main` is
+`1d5aafd0a2c8324d8d0ac3cf33eebcb3c12aec6b`. Their Git trees are identical,
+but exact commit attribution still requires restarting the endpoint from main.
+See `P13-blocked-environment.md` for the sanitized official-client observations.
+
+The user merged PR #13 on `2026-08-24T23:59:14Z` before P13/P14 completion.
+That user-controlled merge is not represented as release completion. Remaining
+source-lock, evidence and release-candidate changes require a replacement PR;
+Codex did not merge, tag, release or deploy anything.
 
 ## Work completed despite blocker
 
@@ -55,14 +62,14 @@ It therefore cannot yet satisfy execution-time current-source locking. See
 - Final release candidate report and machine-readable acceptance artifact.
 - Final `chore(p14): publish SACS v0.3 release candidate evidence` commit and
   its exact-head CI.
-- Draft-to-Ready transition. PR #13 remains Draft.
+- Replacement Draft-to-Ready transition; PR #13 is already user-merged.
 
 ## Exact recovery steps
 
-1. Publish the reviewed SDAR trusted-intranet and text-only admission changes
-   through the upstream PR process, then run the exact resulting remote `main`.
-2. Bootstrap the SDAR-owned current Exposure/readiness/Provider authority using
-   its operator workflow; do not give SACS any additional southbound access.
+1. Restart SDAR from exact remote-main commit `1d5aafd`, retaining the current
+   authority and anonymous admission configuration.
+2. Publish the refreshed SACS source lock and create a replacement Draft PR for
+   the remaining P13/P14 changes.
 3. Set `P13_EXPECTED_SACS_SHA` and `P13_CI_RUN_URL` for the exact clean final
    candidate, clear stale ignored evidence, and run `pnpm verify:v03`.
 4. Review and publish P13 reports only after all five real evidence documents
@@ -70,7 +77,7 @@ It therefore cannot yet satisfy execution-time current-source locking. See
 5. Fetch `origin/main` again, rerun the full final gate, generate the P14 final
    report/acceptance/publication artifacts, and push the required final commit.
 6. Confirm local head, remote branch, PR head, evidence SHA, and green CI are
-   identical; only then mark PR #13 Ready. Do not merge it.
+   identical; only then mark the replacement PR Ready. Do not merge it.
 
 ## Integrity statement
 
