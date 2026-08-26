@@ -19,6 +19,15 @@ At least one must exercise the declared `P13_SAFE_DOMAIN_KIND` (`provider`,
 safe Follow-up; otherwise the gate records the permitted real-read-only plus
 official-fixture/PostgreSQL proof mode.
 
+When loading a local `.env`, ordinary `CONVERSATION_MODEL_*` settings also
+affect the isolated Compose readiness check. Production rejects timeout values
+above 120000 ms and output limits above 16384 tokens. The verified invocation
+uses command-only `CONVERSATION_MODEL_TIMEOUT_MS=30000` and
+`CONVERSATION_MODEL_MAX_OUTPUT_TOKENS=2048` when the local file has larger
+values. This does not edit operator configuration or weaken validation. The
+genuine P13 model harness independently uses its bounded `P13_REAL_MODEL_*`
+configuration.
+
 The migration gate is intentionally destructive only to the database named
 `single_agent_chat_phase4` in the explicitly named
 `sacs-v03-*` test container. It creates a v0.2 schema and representative data,
@@ -48,6 +57,22 @@ the environment, reruns all predecessor/static/PostgreSQL gates, collects five
 real evidence documents, verifies their exact candidate SHA and zero required
 skips, builds and inspects the production container, verifies isolated Compose,
 and generates a CycloneDX 1.7 SBOM.
+
+If the current SDAR publishes a deliberately short-lived Capability authority
+window, qualify it immediately after the operator refreshes that authority:
+
+```text
+pnpm verify:v03:real-sdar
+P13_REUSE_EXACT_REAL_SDAR_EVIDENCE=true pnpm verify:v03
+```
+
+Reuse is opt-in and accepts only the existing `.tmp/…/real-sdar.json` whose
+schema, gate identity, candidate SHA, SDAR/SMPP source SHAs, required scenario
+assertions, exit code and zero-skip result match the current clean candidate.
+It is not a fixture or an old-commit skip: the first command performs the real
+requests, while the complete gate revalidates that exact-candidate evidence and
+runs every other required gate. Delete the evidence directory whenever the
+candidate or locked sources change.
 
 Evidence contains only endpoint hashes, model name and protocol, source SHAs,
 Agent Card hash, hashed Task/thread identifiers, timestamps, commands, exit

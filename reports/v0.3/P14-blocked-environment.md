@@ -1,25 +1,45 @@
-# P14 Goal Blocker Report
+# P14 historical prerequisite blocker
+
+For the current publication state, use [P14 report](P14-completion.md) and the
+exact-head receipt on PR #14. This file preserves only resolved historical
+environment blockers.
+
+P13 was qualified on 2026-08-26 at candidate `9cb0db0`; its complete gate passed
+with zero required skips. The historical prerequisites below are resolved.
+P14 final-head qualification and Ready publication remain separate work.
+See [P13 completion](P13-completion.md).
 
 - Status: `BLOCKED_ENVIRONMENT`
 - Current incomplete prerequisite: P13
 - P14 preparation head: `630a630cda050e72b9cab1e798b87f4d9d4d7a83`
-- Current SACS head/remote: `01f4ecfa4d261ed100d23418ff7b30da283cf20e`
-- Latest `origin/main`: `0211157e8652cc0ae933a1eea9294cf665b4da38`
-- Timestamp UTC: `2026-08-24T10:45:50.249Z`
+- Current SACS pre-source-lock head: `94ef72a2f0082e5dd656f670d023646757592e5a`
+- Latest `origin/main`: `9734ba21c0903f560866e349cc3a163f12108ed7`
+- Timestamp UTC: `2026-08-25T04:20:24.388Z`
 
 ## Exact blocker
 
-P14 cannot publish final release-candidate evidence or mark Draft PR #13 Ready
+P14 cannot publish final release-candidate evidence or mark a replacement PR Ready
 because P13 AC-040 through AC-042 remain incomplete. The genuine model gate has
 passed. The current A2A 1.0 SDAR accepts anonymous metadata-free `text/plain`
 UGV submissions and enters its new natural-language admission path, but the
-deployment fails closed because the required Exposure/readiness/Provider
-authority is not active, current, or ready.
+deployment reached `INPUT_REQUIRED` with `awaiting_plan_confirmation` and did
+not execute immediately after authority refresh. During the later aggregate
+gate, that authority had expired and the first Task failed closed. The remaining
+precondition is fresh exact-candidate real-SDAR evidence followed by strict
+reuse validation in the complete P13 gate.
 
-The running SDAR source is clean local commit `f1c86de448d5e4df6d2e879d80c5765edcff8852`,
-while SDAR remote `main` remains `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`.
-It therefore cannot yet satisfy execution-time current-source locking. See
+The running SDAR source is clean PR-head commit
+`68e05ea4d55666f7007b63edd59f32187c2aeeeb`, while SDAR remote `main` is
+`1d5aafd0a2c8324d8d0ac3cf33eebcb3c12aec6b`. Their Git trees are identical,
+The user explicitly directed the goal to continue despite those differing
+commit identities because the trees are identical. Final evidence must disclose
+both SHAs rather than claiming exact process identity. See
 `P13-blocked-environment.md` for the sanitized official-client observations.
+
+The user merged PR #13 on `2026-08-24T23:59:14Z` before P13/P14 completion.
+That user-controlled merge is not represented as release completion. Remaining
+source-lock, evidence and release-candidate changes require a replacement PR;
+Codex did not merge, tag, release or deploy anything.
 
 ## Work completed despite blocker
 
@@ -55,14 +75,14 @@ It therefore cannot yet satisfy execution-time current-source locking. See
 - Final release candidate report and machine-readable acceptance artifact.
 - Final `chore(p14): publish SACS v0.3 release candidate evidence` commit and
   its exact-head CI.
-- Draft-to-Ready transition. PR #13 remains Draft.
+- Replacement Draft-to-Ready transition; PR #13 is already user-merged.
 
 ## Exact recovery steps
 
-1. Publish the reviewed SDAR trusted-intranet and text-only admission changes
-   through the upstream PR process, then run the exact resulting remote `main`.
-2. Bootstrap the SDAR-owned current Exposure/readiness/Provider authority using
-   its operator workflow; do not give SACS any additional southbound access.
+1. Publish the strict exact-candidate real-SDAR evidence-reuse workflow and
+   obtain green exact-head CI on replacement Draft PR #14.
+2. Refresh the SDAR authority, immediately run the individual real-SDAR gate,
+   then run the complete gate with reuse explicitly enabled.
 3. Set `P13_EXPECTED_SACS_SHA` and `P13_CI_RUN_URL` for the exact clean final
    candidate, clear stale ignored evidence, and run `pnpm verify:v03`.
 4. Review and publish P13 reports only after all five real evidence documents
@@ -70,7 +90,7 @@ It therefore cannot yet satisfy execution-time current-source locking. See
 5. Fetch `origin/main` again, rerun the full final gate, generate the P14 final
    report/acceptance/publication artifacts, and push the required final commit.
 6. Confirm local head, remote branch, PR head, evidence SHA, and green CI are
-   identical; only then mark PR #13 Ready. Do not merge it.
+   identical; only then mark the replacement PR Ready. Do not merge it.
 
 ## Integrity statement
 

@@ -4,9 +4,9 @@ Status: `LOCAL_BASELINE_COMPLETE`
 
 ## Source identity
 
-- SACS `origin/main`: commit `25c923524bcddc5fffd37513766cf28c9f9c2cf4`, tree `51cde785ceed2023ea1a9c7b7b882dfef3847c19`.
-- SDAR `origin/main`: initially commit `2275bc52759914bc80113358a9083e6f00d59e6d`, tree `df4520d92f558ff3fa75cf7b86755d148433ceb5`; refreshed before P13 to commit `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`, tree `0fbf26380cbb9a99857cac441ad107752e051c14`.
-- SMPP `origin/main`: commit `f8c37e6a2ecdc859e56910803197ec938b9a807a`, tree `ace835d13c45ee2391e7b7ebcda5edd19566d70b`.
+- SACS `origin/main`: initially commit `25c923524bcddc5fffd37513766cf28c9f9c2cf4`, tree `51cde785ceed2023ea1a9c7b7b882dfef3847c19`; refreshed after the user-controlled PR #13 merge to commit `9734ba21c0903f560866e349cc3a163f12108ed7`, tree `deb5292aab1683c269ff32aeff872e99dec32468`.
+- SDAR `origin/main`: initially commit `2275bc52759914bc80113358a9083e6f00d59e6d`, tree `df4520d92f558ff3fa75cf7b86755d148433ceb5`; refreshed before P13 first to `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`, then after natural-language admission PR #27 to commit `1d5aafd0a2c8324d8d0ac3cf33eebcb3c12aec6b`, tree `fca281f87b1aeba6e391fdc1013be7acc600891a`.
+- SMPP `origin/main`: refreshed before the resumed P13 gate to commit `b6f0f645f1ce01d717420abe342aa16e3a22ee6e`, tree `1843957da6b942ddbdb33966189b2149abe4e70d`.
 - Feature branch: `feature/sacs-v0.3-general-conversation-multitask`, created directly from the verified SACS `origin/main`.
 - Target branch and matching PR did not exist before P00.
 
@@ -14,12 +14,19 @@ The SDAR and SMPP working directories were not changed or switched. Their
 `origin/main` objects were inspected read-only because both checkouts belong to
 other ongoing work and the SDAR checkout contains user-owned untracked files.
 
-The P13 refresh followed SDAR merge PR #25. Review confirmed that the public
+The first P13 refresh followed SDAR merge PR #25. Review confirmed that the public
 boundary remains A2A 1.0 HTTP+JSON on `/.well-known/agent-card.json` and `/a2a`
 with the pinned SDK. The changes add deterministic initial admission,
 replay-safe history projection, and optional governed confirmation identity;
 the configured Agent Card used by SACS continues to publish empty security
 requirements, so the trusted single-SDAR boundary remains applicable.
+
+The final P13 refresh followed SDAR merge PR #27. It keeps the same A2A 1.0
+wire and pinned SDK, scopes confirmation authentication away from anonymous
+admission, resolves metadata-free `text/plain` UGV input through current
+server-owned Capability authority, and publishes the optional admission
+extension only while that authority is current. A safe official-client probe
+reached `INPUT_REQUIRED` without confirmation or execution.
 
 ## Frozen protocol and dependency baseline
 

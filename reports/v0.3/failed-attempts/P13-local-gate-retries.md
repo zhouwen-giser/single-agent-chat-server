@@ -1,5 +1,31 @@
 # P13 local gate retries
 
+## 2026-08-26 resumed environment and complete-gate retries
+
+The public Card advertised natural-language admission after the operator's
+refresh. The first individual real-SDAR attempt stopped before SACS readiness:
+its dedicated PostgreSQL container no longer existed. A read-only connection
+check returned `ECONNREFUSED`; the exact absent `sacs-v03-p13-postgres-20260824`
+container was recreated on its configured loopback port with PostgreSQL 16.9.
+No existing data, upstream database or upstream container was replaced. The
+next real-SDAR run passed all two-active-Task assertions at candidate `9cb0db0`.
+
+The first complete run passed every local regression, then failed a transient
+GitHub upstream-ref lookup. A direct retry verified the same locked SHAs. The
+next complete run passed all five real/environment gates and Docker but failed
+Compose health: the local `.env` contained ordinary model timeout/output values
+150000/20480, above production bounds 120000/16384. The real-model harness uses
+its own valid bounded settings; Compose correctly rejected the inherited invalid
+configuration. No validation limit or user configuration file was changed.
+
+An isolated Compose retry with command-only values 30000/2048 passed readiness,
+16 migrated tables, hardening and scoped cleanup. The final complete run used
+the same two overrides, reran all local/model/source/migration/network gates,
+strictly reused only the same-candidate real-SDAR evidence, and passed Docker,
+Compose and SBOM with exit 0 and zero required skips. See P13 acceptance for
+the successful log hash. All earlier attempts remain failures, not substitutes
+for the successful complete command.
+
 ## Sandboxed loopback attempt
 
 The first `pnpm verify:phase12` attempt ran inside a network-isolated sandbox.
@@ -127,3 +153,30 @@ The running clean SDAR commit is local `f1c86de448d5e4df6d2e879d80c5765edcff8852
 while remote `main` remains `7fa3ed8f7a7cac6ecff6a16fb8ce72c1d61b1c3e`.
 These probes are diagnostic only and are not counted as real-SDAR acceptance
 evidence.
+
+## Real-SDAR authority expired before the aggregate scenario
+
+Exact candidate `f3b13b5` passed Push and PR CI, the complete local regression
+chain, source locking and the genuine model gate. Its first real-SDAR request
+returned a terminal failed Task instead of an active binding. A read-only query
+of the P13-dedicated SACS PostgreSQL proved that the request completed as a
+`TASK` result and that SACS persisted the exact published failure: the requested
+Exposure was not active, current, or ready. A subsequent public Agent Card read
+confirmed that `io.sdar/naturalLanguageCapabilityAdmission` was absent. No
+confirmation or execution occurred.
+
+The same request had reached `INPUT_REQUIRED` immediately after the earlier
+operator refresh, so this is an authority-window timing failure rather than a
+SACS routing, persistence or A2A mapping regression. P13 now permits an explicit
+two-command workflow for such deployments: first produce real-SDAR evidence
+immediately after refresh, then let the complete gate revalidate and reuse only
+that exact-candidate evidence while executing every other gate. The validator
+checks the wrapper schema, gate identity, candidate and source SHAs, both active
+Tasks, multi-Task isolation, ambiguous-mutation behavior, domain routing,
+disconnect behavior, absence of direct SMPP/MCP access, timestamps, exit code
+and zero required skips. Default aggregate behavior still runs the live SDAR
+scenario directly.
+
+The user explicitly directed the run to continue with SDAR process commit
+`68e05ea` while remote main is `1d5aafd`; both have the exact same Git tree.
+This deviation is disclosed and is not rewritten as exact process-SHA proof.

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 — candidate qualification blocked on real environment
+## 0.3.0 — qualified release candidate
 
 ### Added
 
@@ -8,7 +8,7 @@
   structured decisions, bounded calls, readiness, and no production fallback.
 - Protocol-neutral durable user/assistant history, optimistic summaries, stable
   replay reconciliation, and deterministic bounded context assembly shared by
-  the future OpenAI and AG-UI application path.
+  the OpenAI and AG-UI application path.
 - Numeric-only context size/truncation telemetry and deployment controls for
   recent-message, total-envelope, summary-trigger, and Task-summary budgets.
 - A multi-Task directory with stable short IDs, Focus, last reference,
@@ -36,11 +36,14 @@
 
 ### Candidate status
 
-P00 through P12 are complete. P13 implementation and all available exact-head
-quality, PostgreSQL, CI, image, Compose, and SBOM gates pass, but required real
-model/current-SDAR variables and safe operator-selected requests are absent.
-AC-039 through AC-042, P13 completion, P14 final evidence, and PR Ready state
-remain `BLOCKED_ENVIRONMENT`. No fixture substitutes for those gates.
+P00 through P13 are complete. Candidate `9cb0db0` passed the full zero-skip
+real-model/current-SDAR, PostgreSQL upgrade/restart, network, quality, Docker,
+Compose and SBOM gate. Its evidence publication `838c9e7` passed Push and PR
+CI. Final-head P14 evidence and Ready status are published as the exact-head
+receipt on [PR #14](https://github.com/zhouwen-giser/single-agent-chat-server/pull/14)
+after the release-candidate commit is tested; this changelog does not pre-claim
+that post-commit outcome. No production release, tag, deployment or merge is
+performed by this workflow.
 
 ## Unreleased — SACS v0.2 candidate
 

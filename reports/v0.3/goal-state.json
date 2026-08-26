@@ -1,7 +1,7 @@
 {
   "goal": "SACS v0.3 general conversation, durable context and multi-task chat",
-  "status": "IN_PROGRESS",
-  "currentPhase": "P13",
+  "status": "QUALIFIED_AWAITING_POST_COMMIT_RECEIPT",
+  "currentPhase": "P14",
   "baseSha": "25c923524bcddc5fffd37513766cf28c9f9c2cf4",
   "branch": "feature/sacs-v0.3-general-conversation-multitask",
   "phaseCommits": {
@@ -35,30 +35,41 @@
       "2948b4e5ed5c876c8bafdf61934bc1372c2b2054",
       "3170166befbef0e89064571c388b63869d016956",
       "8fa93c4ef26dcaa85235e8c7f767cb1449381110",
-      "01f4ecfa4d261ed100d23418ff7b30da283cf20e"
+      "01f4ecfa4d261ed100d23418ff7b30da283cf20e",
+      "a9257ae568082c1d1c0ea7e8e0a5f7a32c157097",
+      "f3b13b5b249428b82c02392bb596caa2e1d02220",
+      "9cb0db08c8f2e3ba89757f07ffb9ecaf2c5f84cb",
+      "838c9e79cba491049110231ca25c6b9e0277532e"
     ],
     "P14_PREPARATION": ["630a630cda050e72b9cab1e798b87f4d9d4d7a83"]
   },
   "requiredGates": {
     "baseline": "PASSED",
-    "unit": "PASSED_CANDIDATE_3170166",
-    "contract": "PASSED_CANDIDATE_3170166",
-    "postgres": "PASSED_CANDIDATE_3170166",
-    "security": "PASSED_CANDIDATE_3170166",
-    "openai": "PASSED_CANDIDATE_3170166",
-    "agui": "PASSED_CANDIDATE_3170166",
-    "realModel": "PASSED_REAL_CANDIDATE_3170166",
-    "realSdar": "BLOCKED_SDAR_AUTHORITY_AND_SOURCE_PROVENANCE",
-    "migrationUpgrade": "PENDING_REAL_GATE",
-    "restartRecovery": "PENDING_REAL_GATE",
-    "container": "PASSED_CANDIDATE_3170166",
+    "unit": "PASSED_CANDIDATE_9cb0db0",
+    "contract": "PASSED_CANDIDATE_9cb0db0",
+    "postgres": "PASSED_CANDIDATE_9cb0db0",
+    "security": "PASSED_CANDIDATE_9cb0db0",
+    "openai": "PASSED_CANDIDATE_9cb0db0",
+    "agui": "PASSED_CANDIDATE_9cb0db0",
+    "realModel": "PASSED_CANDIDATE_9cb0db0",
+    "realSdar": "PASSED_CANDIDATE_9cb0db0",
+    "migrationUpgrade": "PASSED_CANDIDATE_9cb0db0",
+    "restartRecovery": "PASSED_CANDIDATE_9cb0db0",
+    "container": "PASSED_CANDIDATE_9cb0db0",
     "prReady": "PENDING"
   },
-  "blockers": [
-    {
-      "phase": "P13",
-      "kind": "SDAR_EXPOSURE_AUTHORITY_AND_SOURCE_PROVENANCE",
-      "detail": "Candidate 3170166 and the real model passed. The restarted SDAR now accepts anonymous metadata-free text/plain UGV submission through A2A 1.0 and enters server-owned natural-language admission, but fails closed because a2a.embodied.move@2 Exposure/readiness/Provider authority is not active, current, or ready. The running clean local SDAR commit f1c86de is also not on remote main, which remains 7fa3ed8. Publish the upstream corrections and bootstrap current SDAR-owned authority, then rerun AC-040 through AC-042 without giving SACS management, MCP, Provider, database, credential, or private Capability-metadata access."
-    }
-  ]
+  "blockers": [],
+  "qualification": {
+    "candidateSha": "9cb0db08c8f2e3ba89757f07ffb9ecaf2c5f84cb",
+    "phase": "P13",
+    "status": "PASSED",
+    "requiredSkips": 0,
+    "acceptance": "reports/v0.3/P13-acceptance.json"
+  },
+  "publicationReceipt": {
+    "pr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/14",
+    "title": "P14 exact-head publication receipt",
+    "requiredStatus": "PASSED_READY",
+    "policy": "The final-head receipt is published after this commit; it supersedes this frozen pre-publication status without changing the tested SHA."
+  }
 }
