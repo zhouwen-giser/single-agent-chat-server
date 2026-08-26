@@ -1,0 +1,34 @@
+{
+  "phase": "P14",
+  "status": "QUALIFIED_AWAITING_POST_COMMIT_GATES",
+  "qualificationCandidate": "9cb0db08c8f2e3ba89757f07ffb9ecaf2c5f84cb",
+  "p13EvidenceCommit": "838c9e79cba491049110231ca25c6b9e0277532e",
+  "p13EvidencePushCi": "32925165630",
+  "p13EvidencePrCi": "32925168899",
+  "latestMain": "9734ba21c0903f560866e349cc3a163f12108ed7",
+  "mainIncluded": true,
+  "historyRewritten": false,
+  "publication": {
+    "pr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/14",
+    "receiptTitle": "P14 exact-head publication receipt",
+    "requiredStatus": "PASSED_READY",
+    "requiresExactLocalRemotePrAndEvidenceSha": true,
+    "requiresBothCiWorkflows": true,
+    "requiresFullGateExitCode": 0,
+    "requiresRequiredSkips": 0,
+    "requiresIsDraft": false
+  },
+  "acceptance": {
+    "AC-043": {
+      "status": "QUALIFIED_PENDING_FINAL_HEAD_RERUN",
+      "evidence": "P13-acceptance.json"
+    },
+    "AC-044": {
+      "status": "PENDING_POST_COMMIT_RECEIPT"
+    }
+  },
+  "merged": false,
+  "tagged": false,
+  "githubReleaseCreated": false,
+  "productionDeployed": false
+}

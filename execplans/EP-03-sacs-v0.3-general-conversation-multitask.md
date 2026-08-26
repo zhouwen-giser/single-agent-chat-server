@@ -48,7 +48,8 @@ strict `TASK | MESSAGE` completed-request result.
 - [x] P11: integrate the same conversation application service into AG-UI.
 - [x] P12: complete security, privacy, observability, and adversarial hardening.
 - [x] P13: qualify real model, current SDAR, migration, restart, and network boundary.
-- [ ] P14: close docs, container, CI, full gate, evidence, and Ready PR.
+- [x] P14: synchronize latest main and prepare final release-candidate documentation.
+- [ ] P14 post-commit: final-head full gate, CI, exact-head publication receipt and Ready PR.
 
 ## Implementation sequence
 
@@ -195,5 +196,13 @@ model settings were overridden only for the verification process to remain
 within production limits. See `reports/v0.3/P13-completion.md` and acceptance
 JSON. The operator's same-tree SDAR process-SHA waiver remains disclosed.
 
-In progress. Completion requires all AC-001 through AC-044, zero required skip,
-exact-head CI, real-model and current-SDAR evidence, and a Ready unmerged PR.
+P13 evidence commit `838c9e7` passed Push CI `32925165630` and PR CI
+`32925168899`. P14 fetched latest main `9734ba2` on 2026-08-26 and verified
+it is an ancestor; there is no source drift and no history rewriting. Final
+documentation changes are evidence-only relative to the qualified candidate.
+
+The committed plan is frozen before final publication. The post-commit
+`P14 exact-head publication receipt` on PR #14 is the authoritative completion
+record: it must verify the final local/remote/PR/evidence SHA, all zero-skip
+gates, both CI workflows and actual Ready state. This avoids a self-referential
+evidence commit and never substitutes prior-head proof for final-head tests.

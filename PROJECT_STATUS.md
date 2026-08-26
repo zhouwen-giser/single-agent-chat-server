@@ -1,22 +1,22 @@
 # Project status
 
-Status: `P13_PASSED_P14_PENDING`
+Status: `QUALIFIED_RELEASE_CANDIDATE` — final publication status is the
+**P14 exact-head publication receipt** on
+[PR #14](https://github.com/zhouwen-giser/single-agent-chat-server/pull/14).
 
-P00–P13 qualification is complete. Exact published candidate
-`9cb0db08c8f2e3ba89757f07ffb9ecaf2c5f84cb` passed the full `verify:v03`
-gate with zero required skips: genuine model, real SDAR multi-Task, migration
-and SACS/PostgreSQL restart, network boundary, regression, container, Compose
-and SBOM. See [P13 completion](reports/v0.3/P13-completion.md) and
-[acceptance](reports/v0.3/P13-acceptance.json).
+P00–P13 are complete. Candidate `9cb0db0` passed the full zero-skip real-model,
+real-SDAR multi-Task, upgrade/restart, network, regression, Docker, Compose and
+SBOM gate. P13 evidence commit `838c9e7` passed Push and PR CI. See
+[P13 acceptance](reports/v0.3/P13-acceptance.json).
 
-Replacement [PR #14](https://github.com/zhouwen-giser/single-agent-chat-server/pull/14)
-remains Draft on `feature/sacs-v0.3-general-conversation-multitask` until P14
-final-candidate qualification and publication CI. PR #13 was merged by the user
-before these phases completed; that merge was not release qualification.
+P14 synchronized latest main `9734ba2` and prepared the final documents.
+Its final-head rerun, CI and Ready transition occur after the containing
+commit, and are recorded in the PR receipt to preserve the tested SHA. Until a
+`PASSED_READY` receipt exists, final publication is pending. See
+[P14 report](reports/v0.3/P14-completion.md) and
+[publication policy](reports/v0.3/P14-publication.md).
 
-The SDAR process/remote-main same-tree discrepancy is an explicit operator
-waiver, not a claim of runtime commit attestation. No device plan was confirmed
-or executed by the qualification scenarios.
-
-Codex has not merged a PR, created a tag/GitHub Release, deployed production,
-or modified the SDAR/SMPP upstream repositories.
+The SDAR process/main same-tree discrepancy is an explicit operator waiver,
+not runtime commit attestation. Qualification never confirmed a device plan.
+PR #13 was previously merged by the user; Codex has not merged any PR, tagged,
+created a GitHub Release, deployed production or changed SDAR/SMPP upstreams.

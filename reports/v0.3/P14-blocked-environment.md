@@ -1,5 +1,9 @@
 # P14 historical prerequisite blocker
 
+For the current publication state, use [P14 report](P14-completion.md) and the
+exact-head receipt on PR #14. This file preserves only resolved historical
+environment blockers.
+
 P13 was qualified on 2026-08-26 at candidate `9cb0db0`; its complete gate passed
 with zero required skips. The historical prerequisites below are resolved.
 P14 final-head qualification and Ready publication remain separate work.

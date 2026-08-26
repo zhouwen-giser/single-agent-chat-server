@@ -176,6 +176,9 @@
     "isDraft": true,
     "qualificationPushCi": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32811104940",
     "qualificationPrCi": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32811108114",
-    "evidenceCommitCi": "PENDING_POST_COMMIT"
+    "evidenceCommit": "838c9e79cba491049110231ca25c6b9e0277532e",
+    "evidenceCommitCi": "PASSED",
+    "evidencePushCi": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32925165630",
+    "evidencePrCi": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32925168899"
   }
 }
