@@ -1,0 +1,181 @@
+{
+  "phase": "P13",
+  "status": "PASSED",
+  "observedAt": "2026-08-26T03:03:29.416Z",
+  "candidateSha": "9cb0db08c8f2e3ba89757f07ffb9ecaf2c5f84cb",
+  "acceptance": {
+    "AC-039": {
+      "status": "PASSED",
+      "gate": "real-model"
+    },
+    "AC-040": {
+      "status": "PASSED",
+      "gate": "real-sdar",
+      "mode": "READ_ONLY_CURRENT_SDAR_PLUS_CONTRACT_FIXTURE"
+    },
+    "AC-041": {
+      "status": "PASSED",
+      "gate": "migration-restart"
+    },
+    "AC-042": {
+      "status": "PASSED",
+      "gate": "network-boundary",
+      "scope": "architecture and Compose boundary plus configured endpoint hashes; not packet capture"
+    }
+  },
+  "requiredSkips": 0,
+  "tests": {
+    "unit": 103,
+    "contract": 78,
+    "postgres": 89,
+    "postgresRuns": 2,
+    "openAiPredecessor": 22,
+    "security": 12,
+    "fixtureE2e": 1,
+    "agUi": 35,
+    "securityAcceptance": 147,
+    "openAiApi": 24,
+    "a2a": 11,
+    "failed": 0,
+    "skipped": 0
+  },
+  "command": "P13_REUSE_EXACT_REAL_SDAR_EVIDENCE=true CONVERSATION_MODEL_TIMEOUT_MS=30000 CONVERSATION_MODEL_MAX_OUTPUT_TOKENS=2048 pnpm verify:v03",
+  "exitCode": 0,
+  "logSha256": "c822beb670242869fb00826f856b26e5f874132d056cb483dc118f9aa4af3861",
+  "evidence": [
+    {
+      "gate": "source-lock-v03",
+      "sha256": "abd7590f46f548083bc96d51d1a1d9c71e61f3bd643ac0c0a9710e799c7eedcf",
+      "startedAt": "2026-08-26T03:00:51.071Z",
+      "endedAt": "2026-08-26T03:00:53.182Z",
+      "status": "PASSED_REAL",
+      "requiredSkips": 0
+    },
+    {
+      "gate": "real-model",
+      "sha256": "9851a2811d05bfb5930d67bf8b0985a7e353eb99bbb77d2284b1b736f7a599cf",
+      "startedAt": "2026-08-26T03:00:53.314Z",
+      "endedAt": "2026-08-26T03:02:03.165Z",
+      "status": "PASSED_REAL",
+      "requiredSkips": 0
+    },
+    {
+      "gate": "real-sdar",
+      "sha256": "e7fbc1359edf8ace43a4b401960ea725c8700163817f9d354f1231825bccb1bb",
+      "startedAt": "2026-08-26T02:38:42.109Z",
+      "endedAt": "2026-08-26T02:39:39.825Z",
+      "status": "PASSED_REAL",
+      "requiredSkips": 0
+    },
+    {
+      "gate": "migration-restart",
+      "sha256": "5f392f348ebec3701f67a3e6930b3a3b28c63f02c91283ebe67dcadb6de1e0c0",
+      "startedAt": "2026-08-26T03:02:03.550Z",
+      "endedAt": "2026-08-26T03:02:18.045Z",
+      "status": "PASSED_REAL",
+      "requiredSkips": 0
+    },
+    {
+      "gate": "network-boundary",
+      "sha256": "9123fbae047399c4c8087b41bbd3e54e2f1266fde0862f3b9f80077d1f03fd51",
+      "startedAt": "2026-08-26T03:02:28.124Z",
+      "endedAt": "2026-08-26T03:02:28.236Z",
+      "status": "PASSED_REAL",
+      "requiredSkips": 0
+    }
+  ],
+  "source": {
+    "sdarSha": "1d5aafd0a2c8324d8d0ac3cf33eebcb3c12aec6b",
+    "smppSha": "b6f0f645f1ce01d717420abe342aa16e3a22ee6e",
+    "sourceMainVerified": true,
+    "a2aSdk": "1.0.0-beta.0",
+    "protocolBinding": "HTTP+JSON",
+    "protocolVersion": "1.0",
+    "securityRequirements": 0
+  },
+  "model": {
+    "modelName": "qwen3.7-plus",
+    "protocol": "OpenAI-compatible Chat Completions",
+    "readiness": true,
+    "durableTwoTurnReference": true,
+    "strictTurnDecision": true,
+    "explicitTaskReferenceCandidate": true,
+    "ambiguousMutationClarified": true,
+    "domainRequestClassifiedForSdar": true,
+    "apiKeyRecorded": false,
+    "promptRecorded": false
+  },
+  "sdar": {
+    "activeTasksCreated": 2,
+    "listContainedBoth": true,
+    "explicitTaskBStatus": true,
+    "focusedTaskBThenExplained": true,
+    "taskAUnchangedByTaskBOperation": true,
+    "ambiguousMutationClarifiedWithoutBindingMutation": true,
+    "safeOperationMode": "READ_ONLY_CURRENT_SDAR_PLUS_CONTRACT_FIXTURE",
+    "domainRequestKind": "action",
+    "domainRequestRoutedThroughSdar": true,
+    "boundedObservationRecoveredByStatusGetTask": true,
+    "clientDisconnectCanceledTask": false,
+    "stateBeforeDisconnect": "INPUT_REQUIRED",
+    "stateAfterDisconnect": "INPUT_REQUIRED",
+    "directSmppOrMcpAccess": false
+  },
+  "migration": {
+    "upgradePath": "v0.2-migrations-0001-through-0006-to-v0.3-0007-through-0009",
+    "schemaVersions": [
+      "0001_initial_persistence.sql",
+      "0002_events_and_recovery.sql",
+      "0003_submission_lease.sql",
+      "0004_interaction_gateway.sql",
+      "0005_interrupt_resume.sql",
+      "0006_durable_agui_runs.sql",
+      "0007_conversation_history.sql",
+      "0008_multi_task_directory.sql",
+      "0009_request_result_union.sql"
+    ],
+    "restartPerformed": true,
+    "sacsRestartPerformed": true,
+    "contextRecovered": true,
+    "taskDirectoryRecovered": true,
+    "focusedTaskRecovered": true,
+    "activeTaskCount": 2,
+    "legacyTaskResultRecovered": true,
+    "messageResultReplayRecovered": true,
+    "durableRunRecovered": true,
+    "postgresVersion": "16.9"
+  },
+  "compose": {
+    "status": "PASSED",
+    "project": "sacs-p13-2709861",
+    "health": "healthy",
+    "readyHttp": 200,
+    "user": "node",
+    "readOnlyRoot": true,
+    "capDropAll": true,
+    "noNewPrivileges": true,
+    "migratedTables": 16,
+    "cleanup": "PASSED"
+  },
+  "sbom": {
+    "status": "PASSED",
+    "output": ".tmp/p13-sbom.cdx.json",
+    "specVersion": "1.7",
+    "components": 3718,
+    "sha256": "a99e6e9bf5e16513b47e3d5c79800f9a908e748ea41ea158dc04bb9add8d2f02"
+  },
+  "runtimeSourceDisclosure": {
+    "operatorWaiver": true,
+    "previouslyObservedProcessCommit": "68e05ea4d55666f7007b63edd59f32187c2aeeeb",
+    "lockedRemoteMain": "1d5aafd0a2c8324d8d0ac3cf33eebcb3c12aec6b",
+    "identicalTree": "fca281f87b1aeba6e391fdc1013be7acc600891a",
+    "currentPublicCardAttestsProcessSha": false
+  },
+  "publication": {
+    "pr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/14",
+    "isDraft": true,
+    "qualificationPushCi": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32811104940",
+    "qualificationPrCi": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/32811108114",
+    "evidenceCommitCi": "PENDING_POST_COMMIT"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "goal": "SACS v0.3 general conversation, durable context and multi-task chat",
   "status": "IN_PROGRESS",
-  "currentPhase": "P13",
+  "currentPhase": "P14",
   "baseSha": "25c923524bcddc5fffd37513766cf28c9f9c2cf4",
   "branch": "feature/sacs-v0.3-general-conversation-multitask",
   "phaseCommits": {
@@ -36,30 +36,33 @@
       "3170166befbef0e89064571c388b63869d016956",
       "8fa93c4ef26dcaa85235e8c7f767cb1449381110",
       "01f4ecfa4d261ed100d23418ff7b30da283cf20e",
-      "a9257ae568082c1d1c0ea7e8e0a5f7a32c157097"
+      "a9257ae568082c1d1c0ea7e8e0a5f7a32c157097",
+      "f3b13b5b249428b82c02392bb596caa2e1d02220",
+      "9cb0db08c8f2e3ba89757f07ffb9ecaf2c5f84cb"
     ],
     "P14_PREPARATION": ["630a630cda050e72b9cab1e798b87f4d9d4d7a83"]
   },
   "requiredGates": {
     "baseline": "PASSED",
-    "unit": "PASSED_CANDIDATE_3170166",
-    "contract": "PASSED_CANDIDATE_3170166",
-    "postgres": "PASSED_CANDIDATE_3170166",
-    "security": "PASSED_CANDIDATE_3170166",
-    "openai": "PASSED_CANDIDATE_3170166",
-    "agui": "PASSED_CANDIDATE_3170166",
-    "realModel": "PASSED_REAL_CANDIDATE_3170166",
-    "realSdar": "BLOCKED_SHORT_AUTHORITY_WINDOW_PENDING_EXACT_EVIDENCE",
-    "migrationUpgrade": "PENDING_REAL_GATE",
-    "restartRecovery": "PENDING_REAL_GATE",
-    "container": "PASSED_CANDIDATE_3170166",
+    "unit": "PASSED_CANDIDATE_9cb0db0",
+    "contract": "PASSED_CANDIDATE_9cb0db0",
+    "postgres": "PASSED_CANDIDATE_9cb0db0",
+    "security": "PASSED_CANDIDATE_9cb0db0",
+    "openai": "PASSED_CANDIDATE_9cb0db0",
+    "agui": "PASSED_CANDIDATE_9cb0db0",
+    "realModel": "PASSED_CANDIDATE_9cb0db0",
+    "realSdar": "PASSED_CANDIDATE_9cb0db0",
+    "migrationUpgrade": "PASSED_CANDIDATE_9cb0db0",
+    "restartRecovery": "PASSED_CANDIDATE_9cb0db0",
+    "container": "PASSED_CANDIDATE_9cb0db0",
     "prReady": "PENDING"
   },
-  "blockers": [
-    {
-      "phase": "P13",
-      "kind": "SDAR_SHORT_AUTHORITY_WINDOW",
-      "detail": "Candidate f3b13b5 passed Push/PR CI, the full local regression chain, real source locking and the genuine model gate. The first real-SDAR Task then failed because the previously refreshed Capability authority had expired; the public natural-language admission extension was absent and no confirmation or execution occurred. Publish the explicit exact-candidate evidence-reuse workflow, refresh authority, run the real-SDAR gate immediately, then run the complete gate with strict reuse validation and zero skips. The user directed the run to accept process commit 68e05ea versus remote-main 1d5aafd because their Git trees are identical; final evidence must disclose both and not claim exact process-SHA identity."
-    }
-  ]
+  "blockers": [],
+  "qualification": {
+    "candidateSha": "9cb0db08c8f2e3ba89757f07ffb9ecaf2c5f84cb",
+    "phase": "P13",
+    "status": "PASSED",
+    "requiredSkips": 0,
+    "acceptance": "reports/v0.3/P13-acceptance.json"
+  }
 }

@@ -47,7 +47,7 @@ strict `TASK | MESSAGE` completed-request result.
       shared application service into OpenAI/OpenWebUI.
 - [x] P11: integrate the same conversation application service into AG-UI.
 - [x] P12: complete security, privacy, observability, and adversarial hardening.
-- [ ] P13: qualify real model, current SDAR, migration, restart, and network boundary.
+- [x] P13: qualify real model, current SDAR, migration, restart, and network boundary.
 - [ ] P14: close docs, container, CI, full gate, evidence, and Ready PR.
 
 ## Implementation sequence
@@ -185,6 +185,15 @@ already an ancestor. Final P14 evidence and PR Ready remain blocked by the same
 unsatisfied P13 genuine-environment gates.
 
 ## Outcomes
+
+2026-08-26 P13 qualification: exact published candidate `9cb0db0` passed the
+complete `verify:v03` command with zero required skips, all five real/environment
+evidence documents, Docker, isolated Compose and CycloneDX generation. Real
+SDAR created two active `INPUT_REQUIRED` Tasks without confirmation/execution;
+the full gate explicitly revalidated the same-candidate evidence. Ordinary
+model settings were overridden only for the verification process to remain
+within production limits. See `reports/v0.3/P13-completion.md` and acceptance
+JSON. The operator's same-tree SDAR process-SHA waiver remains disclosed.
 
 In progress. Completion requires all AC-001 through AC-044, zero required skip,
 exact-head CI, real-model and current-SDAR evidence, and a Ready unmerged PR.

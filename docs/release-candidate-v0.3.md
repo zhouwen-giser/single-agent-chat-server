@@ -19,6 +19,15 @@ At least one must exercise the declared `P13_SAFE_DOMAIN_KIND` (`provider`,
 safe Follow-up; otherwise the gate records the permitted real-read-only plus
 official-fixture/PostgreSQL proof mode.
 
+When loading a local `.env`, ordinary `CONVERSATION_MODEL_*` settings also
+affect the isolated Compose readiness check. Production rejects timeout values
+above 120000 ms and output limits above 16384 tokens. The verified invocation
+uses command-only `CONVERSATION_MODEL_TIMEOUT_MS=30000` and
+`CONVERSATION_MODEL_MAX_OUTPUT_TOKENS=2048` when the local file has larger
+values. This does not edit operator configuration or weaken validation. The
+genuine P13 model harness independently uses its bounded `P13_REAL_MODEL_*`
+configuration.
+
 The migration gate is intentionally destructive only to the database named
 `single_agent_chat_phase4` in the explicitly named
 `sacs-v03-*` test container. It creates a v0.2 schema and representative data,

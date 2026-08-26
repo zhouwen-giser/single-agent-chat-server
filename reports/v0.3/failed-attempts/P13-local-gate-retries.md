@@ -1,5 +1,31 @@
 # P13 local gate retries
 
+## 2026-08-26 resumed environment and complete-gate retries
+
+The public Card advertised natural-language admission after the operator's
+refresh. The first individual real-SDAR attempt stopped before SACS readiness:
+its dedicated PostgreSQL container no longer existed. A read-only connection
+check returned `ECONNREFUSED`; the exact absent `sacs-v03-p13-postgres-20260824`
+container was recreated on its configured loopback port with PostgreSQL 16.9.
+No existing data, upstream database or upstream container was replaced. The
+next real-SDAR run passed all two-active-Task assertions at candidate `9cb0db0`.
+
+The first complete run passed every local regression, then failed a transient
+GitHub upstream-ref lookup. A direct retry verified the same locked SHAs. The
+next complete run passed all five real/environment gates and Docker but failed
+Compose health: the local `.env` contained ordinary model timeout/output values
+150000/20480, above production bounds 120000/16384. The real-model harness uses
+its own valid bounded settings; Compose correctly rejected the inherited invalid
+configuration. No validation limit or user configuration file was changed.
+
+An isolated Compose retry with command-only values 30000/2048 passed readiness,
+16 migrated tables, hardening and scoped cleanup. The final complete run used
+the same two overrides, reran all local/model/source/migration/network gates,
+strictly reused only the same-candidate real-SDAR evidence, and passed Docker,
+Compose and SBOM with exit 0 and zero required skips. See P13 acceptance for
+the successful log hash. All earlier attempts remain failures, not substitutes
+for the successful complete command.
+
 ## Sandboxed loopback attempt
 
 The first `pnpm verify:phase12` attempt ran inside a network-isolated sandbox.

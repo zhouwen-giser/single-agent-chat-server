@@ -1,4 +1,10 @@
-# P13 Goal Blocker Report
+# P13 historical blocker report (resolved)
+
+Resolved on 2026-08-26: candidate `9cb0db0` passed the complete real/model,
+SDAR, migration/restart, network, container and SBOM gate with zero required
+skips. See [P13 completion](P13-completion.md) and
+[acceptance](P13-acceptance.json). The material below is retained as historical
+failure evidence; it is not the current release status.
 
 - Status: `BLOCKED_ENVIRONMENT`
 - Current phase: P13

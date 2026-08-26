@@ -1,4 +1,9 @@
-# P14 Goal Blocker Report
+# P14 historical prerequisite blocker
+
+P13 was qualified on 2026-08-26 at candidate `9cb0db0`; its complete gate passed
+with zero required skips. The historical prerequisites below are resolved.
+P14 final-head qualification and Ready publication remain separate work.
+See [P13 completion](P13-completion.md).
 
 - Status: `BLOCKED_ENVIRONMENT`
 - Current incomplete prerequisite: P13
