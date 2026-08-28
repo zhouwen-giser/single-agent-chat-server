@@ -8,11 +8,16 @@
 - A byte-level verifier for all 32 frozen `sacs-wsgs-grounding/1.0` artifacts.
 - An explicit fail-closed SDAR grounding-extension compatibility lock and S00
   contract Gate.
+- Strict v0.4 TurnPlan, deterministic GroundingRequestPlan, validated
+  OperationalGroundingBundle, and hybrid plan/reality comparison contracts.
+- Negative contract and architecture Gates preventing model-selected WSGS/GOWM
+  details, overbroad context, stale operational references, text downgrade,
+  and direct spatial or Provider access.
 
 ### Candidate status
 
 The WSGS candidate is blocked and current SDAR lacks
-`sacs-sdar-operational-grounding/1.0`. S00 therefore records
+`sacs-sdar-operational-grounding/1.0`. S00 and S01 therefore record
 `SACS_V0_4_STABLE_CANDIDATE_BLOCKED`; it does not claim real integration,
 authority-fusion readiness, or publication.
 

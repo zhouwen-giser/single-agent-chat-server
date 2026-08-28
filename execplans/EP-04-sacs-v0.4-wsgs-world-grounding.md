@@ -37,7 +37,10 @@ in WSGS/GOWM, planning state in SDAR, and control transactions in SMPP/Provider.
       the fail-closed disposition.
 - [x] S00 publication: semantic commits pushed, Draft PR #15 opened, and initial
       exact-head quality/container CI passed.
-- [ ] Later phases: internal contracts, adapter, TurnPlan/planner, persistence,
+- [x] S01: freeze bounded TurnPlan, deterministic request-plan ownership,
+      validated operational bundle, hybrid authority roles, and architecture
+      prohibitions with executable negative tests.
+- [ ] Later phases: adapter, planner integration, persistence,
       safe operational bundle path, authority-fusion preview, genuine E2E, and
       final acceptance, subject to external prerequisite availability.
 
@@ -67,6 +70,26 @@ artifact digest, WSGS blocked decision, and absence of the SDAR extension.
 
 The repository contract suite independently validates the committed lock shape
 and fail-closed disposition without requiring sibling repositories.
+
+## S01 decisions
+
+- Keep the qualified v0.3 runtime path unchanged while introducing strict
+  parallel v0.4 contracts. Runtime activation waits for the isolated WSGS
+  adapter and deterministic planner.
+- Express world-focus usage as five booleans in model output. Reference keys,
+  product IDs, WSGS operations, and products never cross the model boundary.
+- Define the OperationalGroundingBundle as an internal SACS contract only.
+  Because the SDAR extension is unavailable, do not invent a media type or
+  claim that SDAR consumes it.
+- Freeze hybrid output as a read-only comparison: SDAR owns published plan
+  state, WSGS/GOWM owns world state, and SACS owns only bounded composition.
+
+## S01 validation
+
+`pnpm verify:v04:s01` reruns the S00 exact-source Gate, executes 17 positive and
+negative contract tests, runs an executable authority-boundary verifier,
+checks all 76 production TypeScript files against the architecture rules, and
+passes TypeScript typecheck.
 
 ## Current outcome
 

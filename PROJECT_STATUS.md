@@ -1,7 +1,8 @@
 # Project status
 
-Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 is locally implemented, while
-the v0.4 stable candidate is ineligible on external hard prerequisites.
+Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 and S01 are locally
+implemented, while the v0.4 stable candidate is ineligible on external hard
+prerequisites.
 
 S00 locks actual fetched SACS main `f60083c`, WSGS candidate `3f9aa7c`, and
 SDAR main `b0caf69`. All 32 frozen `sacs-wsgs-grounding/1.0` artifact hashes
@@ -20,6 +21,14 @@ See [S00 acceptance](reports/v0.4/S00-acceptance.json),
 [completion report](reports/v0.4/S00-completion.md), and
 [publication status](reports/v0.4/S00-publication.md). No WSGS v0.1, fixture,
 text downgrade, or unimplemented SDAR extension is counted as real integration.
+
+S01 freezes a bounded v0.4 TurnPlan, deterministic WSGS request-plan ownership,
+a validated/non-stale OperationalGroundingBundle, and separated SDAR-plan,
+WSGS/GOWM-reality, SACS-composition authorities. Its 17/17 contract suite,
+executable authority Gate, 76-file architecture Gate, and typecheck pass. See
+[S01 acceptance](reports/v0.4/S01-acceptance.json) and
+[S01 completion](reports/v0.4/S01-completion.md). Runtime remains on the
+qualified v0.3 path until later integration phases.
 
 SACS v0.3 remains the qualified release candidate represented by merged main
 commit `f60083c` and PR #14. Authorized S00 publication created

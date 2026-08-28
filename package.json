@@ -76,6 +76,8 @@
     "verify:v03:real": "pnpm build && node scripts/phase13-real-e2e.mjs && node scripts/phase13-real-evidence.mjs",
     "test:v04:s00": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v04-source-lock.contract.test.ts",
     "verify:v04:s00": "pnpm test:v04:s00 && node scripts/verify-v04-s00.mjs",
+    "test:v04:s01": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v04-grounding-contracts.contract.test.ts",
+    "verify:v04:s01": "pnpm verify:v04:s00 && pnpm test:v04:s01 && node scripts/verify-v04-s01.mjs && pnpm verify:architecture && pnpm typecheck",
     "verify:p13:real-evidence": "node scripts/phase13-real-evidence.mjs",
     "verify:compose": "node scripts/phase13-compose.mjs",
     "verify:phase13": "node scripts/require-phase13-environment.mjs && pnpm verify:ci && pnpm verify:v03:real && pnpm docker:build && pnpm verify:container && pnpm verify:compose && pnpm generate:sbom",

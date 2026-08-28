@@ -1,0 +1,133 @@
+{
+  "$id": "https://schemas.sacs.local/v0.4/turn-plan.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TurnPlan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "turnRoute",
+    "groundingRequirement",
+    "answerMode",
+    "worldFocusUsage"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "0.4" },
+    "turnRoute": {
+      "enum": [
+        "GENERAL_CHAT",
+        "WORLD_ANSWER",
+        "SDAR_TASK",
+        "TASK_QUERY",
+        "HYBRID_PLAN_REALITY_COMPARE",
+        "CLARIFICATION"
+      ]
+    },
+    "groundingRequirement": {
+      "enum": [
+        "NONE",
+        "RESOLVE_REFERENCES",
+        "ANSWER_WORLD_QUERY",
+        "VALIDATE_REFERENCES",
+        "COMPARE_PLAN_REALITY"
+      ]
+    },
+    "answerMode": {
+      "enum": [
+        "DIRECT",
+        "GROUNDED",
+        "TASK_STATUS",
+        "HYBRID_COMPARISON",
+        "CLARIFICATION"
+      ]
+    },
+    "taskDirective": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action"],
+          "properties": { "action": { "const": "CREATE" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "includeTerminal"],
+          "properties": {
+            "action": { "const": "LIST" },
+            "includeTerminal": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action"],
+          "properties": {
+            "action": { "const": "STATUS" },
+            "selector": {
+              "$ref": "https://schemas.sacs.local/v0.3/task-selector.schema.json"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "selector", "followUpAction"],
+          "properties": {
+            "action": { "const": "FOLLOW_UP" },
+            "selector": {
+              "$ref": "https://schemas.sacs.local/v0.3/task-selector.schema.json"
+            },
+            "followUpAction": {
+              "enum": [
+                "confirm_plan",
+                "reject_plan",
+                "revise_plan",
+                "patch_goal",
+                "cancel_goal",
+                "provide_input",
+                "pause",
+                "resume"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "selector"],
+          "properties": {
+            "action": { "const": "CANCEL" },
+            "selector": {
+              "$ref": "https://schemas.sacs.local/v0.3/task-selector.schema.json"
+            }
+          }
+        }
+      ]
+    },
+    "worldFocusUsage": {
+      "$ref": "#/$defs/worldFocusUsage"
+    },
+    "clarification": { "type": "string", "minLength": 1, "maxLength": 4000 }
+  },
+  "$defs": {
+    "worldFocusUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "knownWorldReferences",
+        "priorGrounding",
+        "mapSelections",
+        "externalCorrelationHints",
+        "externalPredicates"
+      ],
+      "properties": {
+        "knownWorldReferences": { "type": "boolean" },
+        "priorGrounding": { "type": "boolean" },
+        "mapSelections": { "type": "boolean" },
+        "externalCorrelationHints": { "type": "boolean" },
+        "externalPredicates": { "type": "boolean" }
+      }
+    }
+  }
+}
