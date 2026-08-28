@@ -112,6 +112,35 @@ export class ConversationPersistenceRepository {
     }
   }
 
+  async loadMessageByExternalId(input: {
+    readonly principalId: string;
+    readonly threadId: string;
+    readonly externalMessageId: string;
+    readonly role?: ConversationRole;
+  }): Promise<ConversationMessage | undefined> {
+    const result = await this.pool.query<ConversationMessageRow>(
+      `
+        SELECT message.*
+        FROM chat_service.conversation_message AS message
+        JOIN chat_service.conversation_thread AS thread
+          ON thread.thread_id = message.thread_id
+        WHERE message.thread_id = $1
+          AND thread.principal_id = $2
+          AND message.external_message_id = $3
+          AND ($4::text IS NULL OR message.role = $4)
+      `,
+      [
+        input.threadId,
+        input.principalId,
+        input.externalMessageId,
+        input.role ?? null,
+      ],
+    );
+    return result.rows[0] === undefined
+      ? undefined
+      : mapConversationMessage(result.rows[0]);
+  }
+
   async loadRecentMessages(input: {
     readonly principalId: string;
     readonly threadId: string;

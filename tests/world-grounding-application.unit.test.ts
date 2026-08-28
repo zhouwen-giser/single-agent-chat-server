@@ -9,6 +9,36 @@ import {
 import type { StructuredChatModel } from "../src/agent/model.js";
 
 describe("SACS v0.4 world grounding application routing", () => {
+  it("handles a pending choice before model classification", async () => {
+    const decideTurn = jest.fn(async () => worldPlan());
+    const continuePendingChoice = jest.fn(
+      async () => "continued origin answer",
+    );
+    const answerWorld = jest.fn(async () => "unused");
+    const application = createApplication(
+      { decideTurn, answer: async () => "unused" },
+      {
+        continuePendingChoice,
+        answerWorld,
+        compareHybrid: jest.fn(async () => "unused"),
+        submitOperational: jest.fn(async () => "unused"),
+      },
+      jest.fn(),
+    );
+
+    await expect(
+      application.execute({ ...turn(), userText: "第二个" }),
+    ).resolves.toBe("continued origin answer");
+    expect(continuePendingChoice).toHaveBeenCalledWith(
+      expect.objectContaining({
+        externalRequestId: "message-1",
+        userText: "第二个",
+      }),
+    );
+    expect(decideTurn).not.toHaveBeenCalled();
+    expect(answerWorld).not.toHaveBeenCalled();
+  });
+
   it("routes WORLD_ANSWER through the grounding runtime and never SDAR", async () => {
     const answerWorld = jest.fn(async () => "published safe world answer");
     const compareHybrid = jest.fn(async () => "unused");

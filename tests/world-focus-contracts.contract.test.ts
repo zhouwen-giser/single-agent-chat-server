@@ -70,6 +70,7 @@ describe("SACS v0.4 S06 ConversationWorldFocus contracts", () => {
       "conversation-world-focus.schema.json",
       "pending-grounding-choice.schema.json",
       "grounding-continuation.schema.json",
+      "grounding-context-assembly.schema.json",
     ]) {
       expect(() => {
         const schema = readJson("contracts/v0.4/" + name) as object;

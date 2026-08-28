@@ -76,6 +76,9 @@ export interface ConversationApplicationServiceOptions {
 }
 
 export interface WorldGroundingApplication {
+  continuePendingChoice?(
+    input: Omit<WorldGroundingTurn, "turnPlan">,
+  ): Promise<string | undefined>;
   answerWorld(input: WorldGroundingTurn): Promise<string>;
   compareHybrid(input: HybridWorldGroundingTurn): Promise<string>;
   submitOperational(input: WorldGroundingTurn): Promise<string>;
@@ -115,6 +118,16 @@ export class ConversationApplicationService {
     const conversationContext = turn.utilityRequest
       ? fallbackContext(turn.threadId, [])
       : await this.prepareContext(turn);
+    if (
+      !turn.utilityRequest &&
+      this.options.worldGrounding?.continuePendingChoice !== undefined
+    ) {
+      const continuation =
+        await this.options.worldGrounding.continuePendingChoice(
+          toWorldGroundingControlTurn(turn),
+        );
+      if (continuation !== undefined) return continuation;
+    }
     const result = await this.graph.invoke(
       {
         messages: [{ role: "user", content: turn.userText }],
@@ -353,6 +366,19 @@ function toWorldGroundingTurn(
     externalRequestId: turn.userMessageId,
     userText: turn.userText,
     turnPlan,
+    ...(turn.signal === undefined ? {} : { signal: turn.signal }),
+  };
+}
+
+function toWorldGroundingControlTurn(
+  turn: ConversationApplicationTurn,
+): Omit<WorldGroundingTurn, "turnPlan"> {
+  return {
+    protocol: turn.protocol,
+    principalId: turn.userId,
+    threadId: turn.threadId,
+    externalRequestId: turn.userMessageId,
+    userText: turn.userText,
     ...(turn.signal === undefined ? {} : { signal: turn.signal }),
   };
 }

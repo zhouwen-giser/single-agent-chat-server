@@ -235,10 +235,36 @@ and diff checks passed.
 SACS_CONVERSATION_WORLD_FOCUS_CONTRACT_READY is emitted for S06. External
 push and PR update remain withheld pending direct authorization.
 
+## S07 decisions
+
+- Assemble exact frozen WSGS Context Capsule fields only when the TurnPlan asks
+  for them. Keep correlation hints and predicates exclusive to fusion.
+- Resolve PendingChoice locally only for exact ordinals or exact display names.
+  Semantic descriptions clarify; an ordinal without a pending choice performs
+  no world query.
+- Restore the original Message, TurnPlan, and deterministic request plan after
+  selection. Validate the selected reference before resuming and never use the
+  control message as WSGS source text.
+- Revalidate expired or stale Focus references before a dependent follow-up.
+  A successful validation refreshes version and validity through the same
+  revisioned updater.
+- Share the production Focus repository and runtime across OpenAI and AG-UI.
+
+## S07 validation
+
+`pnpm verify:v04:s07` cumulatively passed S00 through S07. The S07 phase suite
+passed 34/34 tests and the complete real PostgreSQL integration suite passed
+100/100 with zero skips. Migration validation reported 11 contiguous files;
+architecture across 82 production source files, zero-warning lint, typecheck,
+and build passed.
+
+S07 uses injected HTTP responses through the production WSGS adapter and does
+not claim live WSGS proof. SACS_CONVERSATION_WORLD_FOCUS_READY is emitted;
+SACS_MULTITURN_WORLD_GROUNDING_READY remains reserved for S08 live evidence.
+
 ## Current outcome
 
-S00 through S04 may pass as truthful internal development phases, and S05 may
-pass only its internal implementation Gates, while the
+S00 through S07 may pass as truthful internal development phases, while the
 overall v0.4 stable candidate remains externally blocked. No fixture, WSGS
 v0.1 artifact, text downgrade, or unimplemented SDAR extension is accepted as
 completion evidence.

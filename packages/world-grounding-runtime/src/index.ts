@@ -3,7 +3,18 @@ import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
 
 import { planGroundingRequest } from "../../grounding-request-planner/src/index.js";
+import {
+  GroundingContextAssembler,
+  isDeterministicChoiceControl,
+  PendingChoiceResolver,
+  WorldFocusUpdater,
+  type GroundingContextAssembly,
+  type ContextReadyWorldReference,
+  type PendingGroundingChoice,
+  type WorldFocusRepository,
+} from "../../conversation-world-focus/src/index.js";
 import type {
+  ConversationPersistenceRepository,
   GroundingPersistenceRepository,
   InteractionPersistenceRepository,
   JsonValue,
@@ -13,12 +24,14 @@ import {
   parseWsgsGroundingResult,
   WsgsHttpError,
   type WsgsGroundingJob,
+  type WsgsGroundingContextCapsule,
   type WsgsGroundingRequest,
   type WsgsGroundingResult,
   type WsgsHttpClient,
 } from "../../wsgs-http-adapter/src/index.js";
 import {
   parseHybridPlanRealityCompare,
+  parseGroundingRequestPlan,
   parseOperationalGroundingBundle,
   parseTurnPlan,
   type HybridPlanRealityCompare,
@@ -92,6 +105,11 @@ export interface WorldGroundingRuntimeTurn {
   readonly signal?: AbortSignal;
 }
 
+export type WorldGroundingControlTurn = Omit<
+  WorldGroundingRuntimeTurn,
+  "turnPlan"
+>;
+
 export type SdarPublishedPlanSnapshot = z.infer<
   typeof sdarPublishedPlanSnapshotSchema
 >;
@@ -108,19 +126,47 @@ export interface WorldGroundingRuntimeOptions {
   readonly grounding: Pick<
     GroundingPersistenceRepository,
     "claim" | "recordGroundingReady" | "complete" | "fail" | "cancel"
+  > &
+    Partial<Pick<GroundingPersistenceRepository, "get">>;
+  readonly worldFocus?: WorldFocusRepository;
+  readonly conversation?: Pick<
+    ConversationPersistenceRepository,
+    "loadMessageByExternalId"
   >;
   readonly wsgs: WsgsHttpClient;
   readonly sdarCompatibilityLock: unknown;
   readonly nextLeaseOwner?: () => string;
 }
 
+interface ReadOnlyGroundingOverrides {
+  readonly requestPlan?: ReturnType<typeof planGroundingRequest>;
+  readonly context?: GroundingContextAssembly;
+  readonly source?: {
+    readonly messageId: string;
+    readonly originalText: string;
+  };
+  readonly originMessageId?: string;
+  readonly skipFocusUpdate?: boolean;
+}
+
 export class WorldGroundingRuntime {
   private readonly lock: SdarGroundingCompatibilityLock;
   private readonly nextLeaseOwner: () => string;
+  private readonly contextAssembler?: GroundingContextAssembler;
+  private readonly focusUpdater?: WorldFocusUpdater;
+  private readonly pendingChoiceResolver = new PendingChoiceResolver();
 
   constructor(private readonly options: WorldGroundingRuntimeOptions) {
     this.lock = compatibilityLockSchema.parse(options.sdarCompatibilityLock);
     this.nextLeaseOwner = options.nextLeaseOwner ?? randomUUID;
+    this.contextAssembler =
+      options.worldFocus === undefined
+        ? undefined
+        : new GroundingContextAssembler(options.worldFocus);
+    this.focusUpdater =
+      options.worldFocus === undefined
+        ? undefined
+        : new WorldFocusUpdater(options.worldFocus);
   }
 
   async answerWorld(input: WorldGroundingRuntimeTurn): Promise<string> {
@@ -130,9 +176,19 @@ export class WorldGroundingRuntime {
         "WORLD_GROUNDING_CONTRACT_VIOLATION",
       );
     }
-    return this.executeReadOnlyGrounding(input, turnPlan, undefined, (result) =>
-      renderSafeWorldAnswer(result),
+    const revalidationFailure = await this.revalidateWorldFocus(
+      input,
+      turnPlan,
     );
+    if (revalidationFailure !== undefined) return revalidationFailure;
+    return (
+      await this.executeReadOnlyGrounding(
+        input,
+        turnPlan,
+        undefined,
+        (result) => renderSafeWorldAnswer(result),
+      )
+    ).text;
   }
 
   async compareHybrid(input: HybridGroundingRuntimeTurn): Promise<string> {
@@ -143,13 +199,186 @@ export class WorldGroundingRuntime {
       );
     }
     const sdarPlan = sdarPublishedPlanSnapshotSchema.parse(input.sdarPlan);
-    return this.executeReadOnlyGrounding(
+    const revalidationFailure = await this.revalidateWorldFocus(
       input,
       turnPlan,
-      asJsonValue({ sdarPlan }),
-      (result, observedAt) =>
-        renderHybridAuthorityFusion(result, sdarPlan, observedAt),
     );
+    if (revalidationFailure !== undefined) return revalidationFailure;
+    return (
+      await this.executeReadOnlyGrounding(
+        input,
+        turnPlan,
+        asJsonValue({ sdarPlan }),
+        (result, observedAt) =>
+          renderHybridAuthorityFusion(result, sdarPlan, observedAt),
+      )
+    ).text;
+  }
+
+  async continuePendingChoice(
+    input: WorldGroundingControlTurn,
+  ): Promise<string | undefined> {
+    if (
+      this.options.worldFocus === undefined ||
+      this.options.conversation === undefined ||
+      this.options.grounding.get === undefined ||
+      this.contextAssembler === undefined
+    ) {
+      return undefined;
+    }
+    const choice = await this.options.worldFocus.getOpenChoice({
+      principalId: input.principalId,
+      threadId: input.threadId,
+    });
+    if (choice === undefined) {
+      return isDeterministicChoiceControl(input.userText)
+        ? "WORLD_GROUNDING_NO_PENDING_CHOICE"
+        : undefined;
+    }
+    const resolution = this.pendingChoiceResolver.resolve(
+      input.userText,
+      choice,
+    );
+    if (resolution.kind === "CLARIFY") {
+      return renderPendingChoiceClarification(choice, resolution.reason);
+    }
+    const selected = await this.options.worldFocus.selectChoice({
+      principalId: input.principalId,
+      threadId: input.threadId,
+      choiceId: choice.choiceId,
+      selectedProductId: resolution.candidate.productId,
+    });
+    const origin = await this.options.conversation.loadMessageByExternalId({
+      principalId: input.principalId,
+      threadId: input.threadId,
+      externalMessageId: selected.originMessageId,
+      role: "user",
+    });
+    const originExecution = await this.options.grounding.get({
+      groundingId: selected.originGroundingId,
+      principalId: input.principalId,
+      threadId: input.threadId,
+    });
+    if (
+      origin === undefined ||
+      originExecution?.groundingResult === undefined
+    ) {
+      return "WORLD_GROUNDING_CONTINUATION_SOURCE_UNAVAILABLE";
+    }
+    const originResult = parseWsgsGroundingResult(
+      originExecution.groundingResult,
+    );
+    const selectedProduct = originResult.referenceProducts.find(
+      ({ productId }) => productId === resolution.candidate.productId,
+    );
+    if (selectedProduct === undefined) {
+      return "WORLD_GROUNDING_CONTINUATION_SOURCE_UNAVAILABLE";
+    }
+    const originTurnPlan = parseTurnPlan(selected.originTurnPlan);
+    const originRequestPlan = parseGroundingRequestPlan(
+      selected.originRequestPlan,
+    );
+    const continuationReference = {
+      alias: selectedProduct.displayName,
+      referenceKey: selectedProduct.referenceKey,
+      referenceType: selectedProduct.referenceType,
+      sourceMessageId: selected.originMessageId,
+      sourceGroundingId: originResult.groundingId,
+      ...(selectedProduct.validUntil === undefined
+        ? {}
+        : { validUntil: selectedProduct.validUntil }),
+    };
+    const validationTurnPlan = parseTurnPlan({
+      ...originTurnPlan,
+      worldFocusUsage: {
+        ...originTurnPlan.worldFocusUsage,
+        knownWorldReferences: true,
+      },
+    });
+    const validationPlan = parseGroundingRequestPlan({
+      ...originRequestPlan,
+      operation: "VALIDATE_REFERENCES",
+      requestedProducts: ["RESOLVED_REFERENCES"],
+      contextUsage: validationTurnPlan.worldFocusUsage,
+    });
+    const validationContext = await this.contextAssembler.assemble({
+      principalId: input.principalId,
+      threadId: input.threadId,
+      turnPlan: validationTurnPlan,
+      continuationReferences: [continuationReference],
+    });
+    const validation = await this.executeReadOnlyGrounding(
+      { ...input, turnPlan: validationTurnPlan },
+      validationTurnPlan,
+      asJsonValue({
+        choiceId: selected.choiceId,
+        stage: "VALIDATE_REFERENCES",
+      }),
+      () => "WORLD_GROUNDING_REFERENCE_VALIDATED",
+      {
+        requestPlan: validationPlan,
+        context: validationContext,
+        source: {
+          messageId: selected.originMessageId,
+          originalText: origin.contentText,
+        },
+        originMessageId: selected.originMessageId,
+      },
+    );
+    if (validation.result?.status !== "COMPLETED") {
+      return "WORLD_GROUNDING_REFERENCE_VALIDATION_FAILED";
+    }
+    const validatedProduct =
+      validation.result.referenceProducts.find(
+        ({ productId }) => productId === resolution.candidate.productId,
+      ) ?? selectedProduct;
+    const validatedReference = {
+      alias: validatedProduct.displayName,
+      referenceKey: validatedProduct.referenceKey,
+      referenceType: validatedProduct.referenceType,
+      sourceMessageId: selected.originMessageId,
+      sourceGroundingId: validation.result.groundingId,
+      ...(validatedProduct.validUntil === undefined
+        ? {}
+        : { validUntil: validatedProduct.validUntil }),
+    };
+    const resumeTurnPlan = parseTurnPlan({
+      ...originTurnPlan,
+      worldFocusUsage: {
+        ...originTurnPlan.worldFocusUsage,
+        knownWorldReferences: true,
+      },
+    });
+    const resumePlan = parseGroundingRequestPlan({
+      ...originRequestPlan,
+      contextUsage: resumeTurnPlan.worldFocusUsage,
+    });
+    const resumeContext = await this.contextAssembler.assemble({
+      principalId: input.principalId,
+      threadId: input.threadId,
+      turnPlan: resumeTurnPlan,
+      continuationReferences: [validatedReference],
+    });
+    return (
+      await this.executeReadOnlyGrounding(
+        { ...input, turnPlan: resumeTurnPlan },
+        resumeTurnPlan,
+        asJsonValue({
+          choiceId: selected.choiceId,
+          stage: "RESUME_ORIGIN_QUERY",
+        }),
+        (result) => renderSafeWorldAnswer(result),
+        {
+          requestPlan: resumePlan,
+          context: resumeContext,
+          source: {
+            messageId: selected.originMessageId,
+            originalText: origin.contentText,
+          },
+          originMessageId: selected.originMessageId,
+        },
+      )
+    ).text;
   }
 
   private async executeReadOnlyGrounding(
@@ -157,15 +386,29 @@ export class WorldGroundingRuntime {
     turnPlan: TurnPlan,
     hashExtension: JsonValue | undefined,
     renderResult: (result: WsgsGroundingResult, observedAt: string) => string,
-  ): Promise<string> {
+    overrides: ReadOnlyGroundingOverrides = {},
+  ): Promise<{ readonly text: string; readonly result?: WsgsGroundingResult }> {
+    const plan = overrides.requestPlan ?? planGroundingRequest(turnPlan);
+    let context: GroundingContextAssembly;
     try {
-      assertContextAvailable(turnPlan);
+      context =
+        overrides.context ?? (await this.assembleContext(input, turnPlan));
     } catch (error) {
-      if (error instanceof WorldGroundingRuntimeError) return error.code;
+      if (error instanceof WorldGroundingRuntimeError) {
+        return { text: error.code };
+      }
       throw error;
     }
-    const plan = planGroundingRequest(turnPlan);
-    const stableHash = stableTurnHash(input, turnPlan, hashExtension);
+    const stableHash = stableTurnHash(
+      input,
+      turnPlan,
+      asJsonValue({
+        ...(hashExtension === undefined ? {} : { hashExtension }),
+        context,
+        ...(overrides.source === undefined ? {} : { source: overrides.source }),
+      }),
+    );
+    const groundingId = `grounding-` + stableHash;
     const leaseOwner = this.nextLeaseOwner();
     const outerClaim = await this.options.requests.claimRequest({
       protocol: input.protocol,
@@ -182,7 +425,7 @@ export class WorldGroundingRuntime {
       );
     }
     if (outerClaim.outcome === "in_progress") {
-      return "WORLD_GROUNDING_IN_PROGRESS";
+      return { text: "WORLD_GROUNDING_IN_PROGRESS" };
     }
     if (outerClaim.outcome === "replay") {
       if (outerClaim.result.kind !== "message") {
@@ -190,7 +433,19 @@ export class WorldGroundingRuntime {
           "WORLD_GROUNDING_CONTRACT_VIOLATION",
         );
       }
-      return outerClaim.result.renderedText;
+      const execution = await this.options.grounding.get?.({
+        groundingId,
+        principalId: input.principalId,
+        threadId: input.threadId,
+      });
+      const result =
+        execution?.groundingResult === undefined
+          ? undefined
+          : parseWsgsGroundingResult(execution.groundingResult);
+      return {
+        text: outerClaim.result.renderedText,
+        ...(result === undefined ? {} : { result }),
+      };
     }
 
     const requestCreatedAt =
@@ -199,13 +454,14 @@ export class WorldGroundingRuntime {
         principalId: input.principalId,
         threadId: input.threadId,
       });
-    const groundingId = `grounding-` + stableHash;
     const wsgsRequestId = `wsgs-` + stableHash;
     const request = createWsgsRequest({
       input,
       plan,
       requestId: wsgsRequestId,
       createdAt: requestCreatedAt,
+      contextCapsule: context.contextCapsule,
+      ...(overrides.source === undefined ? {} : { source: overrides.source }),
     });
     const groundingClaim = await this.options.grounding.claim({
       groundingId,
@@ -222,10 +478,11 @@ export class WorldGroundingRuntime {
       leaseMs: 180_000,
     });
     if (groundingClaim.kind === "BUSY") {
-      return "WORLD_GROUNDING_IN_PROGRESS";
+      return { text: "WORLD_GROUNDING_IN_PROGRESS" };
     }
 
     let response: string | undefined;
+    let resultForOutcome: WsgsGroundingResult | undefined;
     try {
       let result: WsgsGroundingResult | undefined;
       if (groundingClaim.kind === "REPLAY") {
@@ -278,6 +535,18 @@ export class WorldGroundingRuntime {
       }
 
       if (result !== undefined) {
+        resultForOutcome = result;
+        if (overrides.skipFocusUpdate !== true) {
+          await this.updateWorldFocus({
+            input,
+            turnPlan,
+            requestPlan: plan,
+            groundingExecutionId: groundingId,
+            result,
+            originMessageId:
+              overrides.originMessageId ?? input.externalRequestId,
+          });
+        }
         response = renderResult(result, requestCreatedAt);
         if (
           ["COMPLETED", "PARTIAL"].includes(result.status) &&
@@ -315,7 +584,142 @@ export class WorldGroundingRuntime {
       stableHash,
       response,
     );
-    return response;
+    return {
+      text: response,
+      ...(resultForOutcome === undefined ? {} : { result: resultForOutcome }),
+    };
+  }
+
+  private async assembleContext(
+    input: WorldGroundingRuntimeTurn,
+    turnPlan: TurnPlan,
+  ): Promise<GroundingContextAssembly> {
+    if (this.contextAssembler === undefined) {
+      if (Object.values(turnPlan.worldFocusUsage).some(Boolean)) {
+        throw new WorldGroundingRuntimeError(
+          "WORLD_GROUNDING_CONTEXT_UNAVAILABLE",
+        );
+      }
+      return {
+        schemaVersion: "1.0",
+        focusRevision: 0,
+        contextCapsule: {
+          knownWorldReferences: [],
+          priorGroundings: [],
+          mapSelections: [],
+          externalCorrelationHints: [],
+          externalPredicates: [],
+        },
+        source: "EMPTY",
+      };
+    }
+    const assembled = await this.contextAssembler.assemble({
+      principalId: input.principalId,
+      threadId: input.threadId,
+      turnPlan,
+    });
+    const usage = turnPlan.worldFocusUsage;
+    const capsule = assembled.contextCapsule;
+    if (
+      (usage.knownWorldReferences &&
+        capsule.knownWorldReferences.length === 0) ||
+      (usage.priorGrounding && capsule.priorGroundings.length === 0) ||
+      (usage.mapSelections && capsule.mapSelections.length === 0) ||
+      (usage.externalCorrelationHints &&
+        capsule.externalCorrelationHints.length === 0) ||
+      (usage.externalPredicates && capsule.externalPredicates.length === 0)
+    ) {
+      throw new WorldGroundingRuntimeError(
+        "WORLD_GROUNDING_CONTEXT_UNAVAILABLE",
+      );
+    }
+    return assembled;
+  }
+
+  private async revalidateWorldFocus(
+    input: WorldGroundingRuntimeTurn,
+    turnPlan: TurnPlan,
+  ): Promise<string | undefined> {
+    if (
+      !turnPlan.worldFocusUsage.knownWorldReferences ||
+      this.options.worldFocus === undefined ||
+      this.contextAssembler === undefined
+    ) {
+      return undefined;
+    }
+    const usable = await this.options.worldFocus.listUsableReferences({
+      principalId: input.principalId,
+      threadId: input.threadId,
+      limit: 64,
+    });
+    if (usable.length > 0) return undefined;
+    const stale =
+      await this.options.worldFocus.listReferencesRequiringValidation({
+        principalId: input.principalId,
+        threadId: input.threadId,
+        limit: 64,
+      });
+    if (stale.length === 0) return undefined;
+    const validationTurnPlan = parseTurnPlan({
+      ...turnPlan,
+      worldFocusUsage: {
+        knownWorldReferences: true,
+        priorGrounding: false,
+        mapSelections: false,
+        externalCorrelationHints: false,
+        externalPredicates: false,
+      },
+    });
+    const validationPlan = parseGroundingRequestPlan({
+      ...planGroundingRequest(validationTurnPlan),
+      operation: "VALIDATE_REFERENCES",
+      requestedProducts: ["RESOLVED_REFERENCES"],
+    });
+    const validationContext = await this.contextAssembler.assemble({
+      principalId: input.principalId,
+      threadId: input.threadId,
+      turnPlan: validationTurnPlan,
+      continuationReferences: stale.map(toKnownWorldReference),
+    });
+    const validation = await this.executeReadOnlyGrounding(
+      { ...input, turnPlan: validationTurnPlan },
+      validationTurnPlan,
+      asJsonValue({
+        referenceIdentityHashes: stale.map(
+          ({ focusReference }) => focusReference.referenceIdentityHash,
+        ),
+        stage: "REVALIDATE_WORLD_FOCUS",
+      }),
+      () => "WORLD_GROUNDING_REFERENCE_VALIDATED",
+      {
+        requestPlan: validationPlan,
+        context: validationContext,
+        originMessageId: input.externalRequestId,
+      },
+    );
+    return validation.result?.status === "COMPLETED"
+      ? undefined
+      : "WORLD_GROUNDING_REFERENCE_VALIDATION_FAILED";
+  }
+
+  private async updateWorldFocus(input: {
+    readonly input: WorldGroundingRuntimeTurn;
+    readonly turnPlan: TurnPlan;
+    readonly requestPlan: ReturnType<typeof planGroundingRequest>;
+    readonly groundingExecutionId: string;
+    readonly result: WsgsGroundingResult;
+    readonly originMessageId: string;
+  }): Promise<void> {
+    if (this.focusUpdater === undefined) return;
+    await this.focusUpdater.apply({
+      principalId: input.input.principalId,
+      threadId: input.input.threadId,
+      groundingExecutionId: input.groundingExecutionId,
+      originMessageId: input.originMessageId,
+      turnPlan: input.turnPlan,
+      requestPlan: input.requestPlan,
+      result: input.result,
+    });
   }
 
   async submitOperational(input: WorldGroundingRuntimeTurn): Promise<string> {
@@ -676,35 +1080,58 @@ function createWsgsRequest(input: {
   readonly plan: ReturnType<typeof planGroundingRequest>;
   readonly requestId: string;
   readonly createdAt: string;
+  readonly contextCapsule: WsgsGroundingContextCapsule;
+  readonly source?: {
+    readonly messageId: string;
+    readonly originalText: string;
+  };
 }): WsgsGroundingRequest {
+  const messageId = input.source?.messageId ?? input.input.externalRequestId;
+  const originalText = input.source?.originalText ?? input.input.userText;
   return {
     schemaVersion: "1.0",
     requestId: input.requestId,
     operation: input.plan.operation,
     source: {
       conversationRef: input.input.threadId,
-      messageId: input.input.externalRequestId,
-      originalText: input.input.userText,
-      originalTextSha256: `sha256:` + sha256Hex(input.input.userText),
+      messageId,
+      originalText,
+      originalTextSha256: `sha256:` + sha256Hex(originalText),
       locale: "und",
       createdAt: input.createdAt,
     },
     requestedProducts: input.plan.requestedProducts,
-    contextCapsule: {
-      knownWorldReferences: [],
-      priorGroundings: [],
-      mapSelections: [],
-      externalCorrelationHints: [],
-      externalPredicates: [],
-    },
+    contextCapsule: input.contextCapsule,
     executionPolicy: input.plan.executionPolicy,
   };
 }
 
-function assertContextAvailable(turnPlan: TurnPlan): void {
-  if (Object.values(turnPlan.worldFocusUsage).some(Boolean)) {
-    throw new WorldGroundingRuntimeError("WORLD_GROUNDING_CONTEXT_UNAVAILABLE");
-  }
+function toKnownWorldReference(reference: ContextReadyWorldReference) {
+  const focus = reference.focusReference;
+  return {
+    alias: focus.displayName,
+    referenceKey: focus.referenceKey,
+    referenceType: focus.referenceType,
+    sourceMessageId: reference.sourceMessageId,
+    sourceGroundingId: focus.sourceGroundingId,
+    ...(focus.validUntil === undefined ? {} : { validUntil: focus.validUntil }),
+  };
+}
+
+function renderPendingChoiceClarification(
+  choice: PendingGroundingChoice,
+  reason: string,
+): string {
+  return [
+    "WORLD_GROUNDING_CHOICE_CLARIFICATION_REQUIRED",
+    "Reason: " + reason,
+    ...choice.candidates.map(
+      ({ ordinal, displayName }) =>
+        String(ordinal) + ". " + safeText(displayName),
+    ),
+  ]
+    .join("\n")
+    .slice(0, 8_000);
 }
 
 function assertResultIdentity(

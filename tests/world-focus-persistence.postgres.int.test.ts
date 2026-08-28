@@ -132,6 +132,18 @@ describeWithPostgres("SACS v0.4 ConversationWorldFocus PostgreSQL", () => {
         sourceMessageId: "message-1",
       },
     ]);
+    await expect(
+      repository.listReferencesRequiringValidation({
+        ...scope,
+        limit: 64,
+        now: "2026-08-29T01:00:00.000Z",
+      }),
+    ).resolves.toMatchObject([
+      {
+        focusReference: { productId: "product-expired", status: "EXPIRED" },
+        sourceMessageId: "message-1",
+      },
+    ]);
     await expect(repository.getFocus(other)).resolves.toMatchObject({
       references: [],
     });

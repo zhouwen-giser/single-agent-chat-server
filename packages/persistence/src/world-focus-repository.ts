@@ -81,6 +81,38 @@ export class PostgresWorldFocusRepository implements WorldFocusRepository {
     }));
   }
 
+  async listReferencesRequiringValidation(
+    input: WorldFocusScope & { readonly limit: number; readonly now?: string },
+  ): Promise<readonly ContextReadyWorldReference[]> {
+    if (!Number.isInteger(input.limit) || input.limit < 1 || input.limit > 64) {
+      throw new PersistenceConflictError(
+        "World focus reference limit must be between 1 and 64",
+      );
+    }
+    await this.ensureFocus(input);
+    const now = input.now ?? new Date().toISOString();
+    const result = await this.pool.query<ReferenceRow>(
+      `
+        SELECT *
+        FROM chat_service.conversation_world_reference
+        WHERE principal_id = $1
+          AND thread_id = $2
+          AND (
+            status IN ('STALE', 'EXPIRED')
+            OR revalidation_required = true
+            OR (valid_until IS NOT NULL AND valid_until <= $3::timestamptz)
+          )
+        ORDER BY last_used_at DESC, reference_identity_hash
+        LIMIT $4
+      `,
+      [input.principalId, input.threadId, now, input.limit],
+    );
+    return result.rows.map((row) => ({
+      focusReference: mapReference(row, now),
+      sourceMessageId: row.source_message_id,
+    }));
+  }
+
   async applyReferences(input: {
     readonly principalId: string;
     readonly threadId: string;

@@ -88,6 +88,8 @@ try {
   const worldGrounding = new WorldGroundingRuntime({
     requests: activePersistence.interactionRepository,
     grounding: activePersistence.groundingRepository,
+    worldFocus: activePersistence.worldFocusRepository,
+    conversation: activePersistence.conversationRepository,
     wsgs: createWsgsHttpClient(parseWsgsHttpConfig(process.env)),
     sdarCompatibilityLock: sdarGroundingCompatibilityLock,
   });
