@@ -262,6 +262,19 @@ S07 uses injected HTTP responses through the production WSGS adapter and does
 not claim live WSGS proof. SACS_CONVERSATION_WORLD_FOCUS_READY is emitted;
 SACS_MULTITURN_WORLD_GROUNDING_READY remains reserved for S08 live evidence.
 
+## S08 current state
+
+The genuine multi-turn runner now covers the ten required MultiTurn acceptance
+rows using the production adapter/runtime and an ephemeral migrated PostgreSQL
+database. It verifies the locked WSGS commit and live/ready HTTP probes, counts
+real WSGS POSTs, and emits only bounded hash/count evidence. Its explicit live
+authorization guard passes a negative fail-closed check.
+
+Live execution remains BLOCKED pending destination-specific authorization to
+use the existing local model, GOWM transport, and delegation credentials. No
+credential or private-key path was inspected and the shared GOWM fixture was
+not restarted. SACS_MULTITURN_WORLD_GROUNDING_READY is withheld.
+
 ## Current outcome
 
 S00 through S07 may pass as truthful internal development phases, while the

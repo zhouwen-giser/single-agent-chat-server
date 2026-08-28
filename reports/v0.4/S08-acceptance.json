@@ -1,0 +1,37 @@
+{
+  "phase": "S08",
+  "date": "2026-08-29",
+  "decision": "BLOCKED",
+  "marker": "WITHHELD",
+  "runner": {
+    "path": "scripts/phase-v04-s08-real-multiturn.mjs",
+    "contractTests": {
+      "pass": 3,
+      "fail": 0,
+      "skip": 0
+    },
+    "lint": "PASS_ZERO_WARNINGS",
+    "typecheck": "PASS",
+    "authorizationGate": "PASS_FAIL_CLOSED"
+  },
+  "requiredLiveEvidence": {
+    "realWsgsReadyHttp": "NOT_RUN_SECURE_HANDOFF_AUTHORIZATION_REQUIRED",
+    "realPostgres": "RUNNER_READY_NOT_RUN",
+    "vehiclePronounFollowUp": "NOT_RUN",
+    "areaPronounFollowUp": "NOT_RUN",
+    "ambiguousChoiceValidateResume": "NOT_RUN",
+    "expiredReferenceRevalidation": "NOT_RUN",
+    "threadIsolation": "NOT_RUN",
+    "restartRecovery": "NOT_RUN",
+    "openAiAgUiSharedFocus": "NOT_RUN",
+    "replayNoDuplicateWsgs": "NOT_RUN"
+  },
+  "blocker": {
+    "code": "SECURE_WSGS_HANDOFF_AUTHORIZATION_REQUIRED",
+    "detail": "The exact WSGS runbook forbids inferring or copying model, Gateway, or delegation credentials from another task without explicit authorization."
+  },
+  "publication": {
+    "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",
+    "pullRequestUpdate": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION"
+  }
+}
