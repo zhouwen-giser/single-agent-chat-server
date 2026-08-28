@@ -369,9 +369,10 @@ export class WorldFocusUpdater {
       .filter(
         (product) =>
           !ambiguousProducts.has(product.productId) &&
-          product.revalidationRequired !== true &&
-          (product.validUntil === undefined ||
-            Date.parse(product.validUntil) > now.getTime()),
+          (input.result.status === "COMPLETED" ||
+            (product.revalidationRequired !== true &&
+              (product.validUntil === undefined ||
+                Date.parse(product.validUntil) > now.getTime()))),
       )
       .map((product) => ({
         referenceKey: product.referenceKey,

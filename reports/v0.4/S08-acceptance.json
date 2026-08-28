@@ -1,7 +1,7 @@
 {
   "phase": "S08",
   "date": "2026-08-29",
-  "decision": "BLOCKED",
+  "decision": "BLOCKED_UPSTREAM_TYPED_STALE",
   "marker": "WITHHELD",
   "runner": {
     "path": "scripts/phase-v04-s08-real-multiturn.mjs",
@@ -10,25 +10,46 @@
       "fail": 0,
       "skip": 0
     },
+    "focusedRegression": {
+      "pass": 14,
+      "fail": 0,
+      "skip": 0
+    },
     "lint": "PASS_ZERO_WARNINGS",
     "typecheck": "PASS",
     "authorizationGate": "PASS_FAIL_CLOSED"
   },
   "requiredLiveEvidence": {
-    "realWsgsReadyHttp": "NOT_RUN_SECURE_HANDOFF_AUTHORIZATION_REQUIRED",
-    "realPostgres": "RUNNER_READY_NOT_RUN",
-    "vehiclePronounFollowUp": "NOT_RUN",
-    "areaPronounFollowUp": "NOT_RUN",
-    "ambiguousChoiceValidateResume": "NOT_RUN",
-    "expiredReferenceRevalidation": "NOT_RUN",
-    "threadIsolation": "NOT_RUN",
-    "restartRecovery": "NOT_RUN",
-    "openAiAgUiSharedFocus": "NOT_RUN",
-    "replayNoDuplicateWsgs": "NOT_RUN"
+    "realWsgsReadyHttp": "PASS_HTTP_200_CAPABILITIES_4_OF_4",
+    "realPostgres": "PASS_ISOLATED_DISPOSABLE_INSTANCE",
+    "vehicleInitialGrounding": "PASS_COMPLETED_ONE_MENTION_ONE_REFERENCE",
+    "vehiclePronounFollowUp": "BLOCKED_AC_M001_UPSTREAM_REFERENCE_REMAINS_STALE",
+    "areaPronounFollowUp": "NOT_REACHED",
+    "ambiguousChoiceValidateResume": "NOT_REACHED",
+    "expiredReferenceRevalidation": "NOT_REACHED_AC_M005_DEPENDS_ON_VALID_VALIDATE_RESULT",
+    "threadIsolation": "NOT_REACHED",
+    "restartRecovery": "NOT_REACHED",
+    "openAiAgUiSharedFocus": "NOT_REACHED",
+    "replayNoDuplicateWsgs": "NOT_REACHED"
+  },
+  "redactedUpstreamEvidence": {
+    "operation": "VALIDATE_REFERENCES",
+    "createHttpStatus": 202,
+    "pollHttpStatus": 200,
+    "resultStatus": "COMPLETED",
+    "errorCode": null,
+    "errorStage": null,
+    "referenceProduct": {
+      "sourceOperation": "reference.resolve",
+      "revalidationRequired": true,
+      "validUntilState": "ABSENT"
+    },
+    "sacsFocusStatus": "STALE",
+    "sacsOutcome": "WORLD_GROUNDING_CONTEXT_UNAVAILABLE"
   },
   "blocker": {
-    "code": "SECURE_WSGS_HANDOFF_AUTHORIZATION_REQUIRED",
-    "detail": "The exact WSGS runbook forbids inferring or copying model, Gateway, or delegation credentials from another task without explicit authorization."
+    "code": "UPSTREAM_VALIDATE_REFERENCES_RETURNS_TYPED_STALE",
+    "detail": "WSGS accepted and completed VALIDATE_REFERENCES, but the returned reference still requires revalidation and has no usable validity boundary. SACS correctly refuses to use it for pronoun resolution."
   },
   "publication": {
     "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",

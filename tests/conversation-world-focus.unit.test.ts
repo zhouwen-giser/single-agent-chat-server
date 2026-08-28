@@ -175,6 +175,82 @@ describe("SACS v0.4 S07 conversation world focus runtime", () => {
       }),
     );
   });
+
+  it("tracks a COMPLETED reference as STALE until WSGS validation", async () => {
+    const applyReferences = jest.fn(async () => ({ ...focus(), revision: 2 }));
+    const repository = {
+      getFocus: jest.fn(async () => focus()),
+      applyReferences,
+    } as unknown as WorldFocusRepository;
+    const updater = new WorldFocusUpdater(repository, {
+      now: () => new Date(now),
+    });
+    const result = completedResult();
+    result.referenceProducts[0] = {
+      ...expectDefined(result.referenceProducts[0]),
+      validUntil: undefined,
+      revalidationRequired: true,
+    };
+
+    await updater.apply({
+      principalId: "principal-1",
+      threadId: "thread-1",
+      groundingExecutionId: "grounding-execution-stale",
+      originMessageId: "message-origin",
+      turnPlan: turnPlan(),
+      requestPlan: requestPlan(),
+      result,
+    });
+
+    expect(applyReferences).toHaveBeenCalledWith(
+      expect.objectContaining({
+        references: [
+          expect.objectContaining({
+            productId: "product-1",
+            revalidationRequired: true,
+          }),
+        ],
+      }),
+    );
+  });
+
+  it("tracks an expired COMPLETED reference for fail-closed revalidation", async () => {
+    const applyReferences = jest.fn(async () => ({ ...focus(), revision: 2 }));
+    const repository = {
+      getFocus: jest.fn(async () => focus()),
+      applyReferences,
+    } as unknown as WorldFocusRepository;
+    const updater = new WorldFocusUpdater(repository, {
+      now: () => new Date(now),
+    });
+    const result = completedResult();
+    result.referenceProducts[0] = {
+      ...expectDefined(result.referenceProducts[0]),
+      validUntil: "2026-08-27T00:00:00.000Z",
+      revalidationRequired: false,
+    };
+
+    await updater.apply({
+      principalId: "principal-1",
+      threadId: "thread-1",
+      groundingExecutionId: "grounding-execution-expired",
+      originMessageId: "message-origin",
+      turnPlan: turnPlan(),
+      requestPlan: requestPlan(),
+      result,
+    });
+
+    expect(applyReferences).toHaveBeenCalledWith(
+      expect.objectContaining({
+        references: [
+          expect.objectContaining({
+            productId: "product-1",
+            validUntil: "2026-08-27T00:00:00.000Z",
+          }),
+        ],
+      }),
+    );
+  });
 });
 
 function focus(): ConversationWorldFocus {

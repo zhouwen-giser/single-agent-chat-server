@@ -2,53 +2,57 @@
 
 ## Decision
 
-S08 is BLOCKED. SACS_MULTITURN_WORLD_GROUNDING_READY is not emitted.
+S08 is `BLOCKED_UPSTREAM_TYPED_STALE`. The Ready marker remains withheld.
 
-The production-path runner is implemented at
-`scripts/phase-v04-s08-real-multiturn.mjs`. It requires an exact WSGS
-development-ready checkout, a local HTTP endpoint whose live and ready probes
-both return 200, and an isolated PostgreSQL admin URL. It refuses to run unless
-`ALLOW_REAL_WSGS_MULTITURN=YES` is explicitly present.
+The authorized live run used the isolated WSGS v0.2 debug instance at the
+handed-off commit and an isolated disposable SACS PostgreSQL instance. The WSGS
+live and ready probes returned HTTP 200, the northbound contract matched, and
+all four required operations were advertised ready. Credentials were consumed
+only from the authorized process environment and are not present in this
+report, runner output, or repository.
 
-## Covered live assertions
+## Redacted live evidence
 
-When authorized, the runner creates and later removes a uniquely named SACS
-test database, runs the production migrations, and uses the production WSGS
-HTTP adapter, WorldGroundingRuntime, Conversation repository, Grounding
-repository, and WorldFocus repository. It verifies:
+The initial vehicle grounding completed and produced one mention and one
+reference product. Before using that reference in the pronoun follow-up, SACS
+correctly invoked `VALIDATE_REFERENCES` because the product required
+revalidation.
 
-- “2号车在哪里？” followed by AG-UI “它现在呢？” with KnownWorldReference;
-- “A区内有哪些车辆？” followed by “那里附近还有什么？”;
-- “滨河路附近有哪些设备？” ambiguity, “第二个”, validation, and original
-  query resumption;
-- no OPEN choice means zero WSGS POSTs;
-- an expired reference invokes VALIDATE_REFERENCES before the follow-up;
-- Thread isolation, runtime/repository restart recovery, and OpenAI/AG-UI Focus
-  sharing;
-- exact replay makes no duplicate WSGS POST;
-- continuation WSGS source remains the original Message, never the control
-  text.
+- Create request: HTTP 202.
+- Poll requests: HTTP 200.
+- WSGS terminal result: `COMPLETED`.
+- WSGS `error.code`: null.
+- WSGS `error.stage`: null.
+- Returned product `sourceOperation`: `reference.resolve`.
+- Returned product `revalidationRequired`: true.
+- Returned product `validUntil`: absent.
 
-Only after all assertions pass does the runner emit the S08 Ready marker. Its
-output contains counts and hashes, not credentials, raw external identifiers,
-or raw upstream business responses.
+The successful HTTP and terminal statuses therefore did not produce a usable
+reference. SACS retained the focus item as `STALE` and failed closed with
+`WORLD_GROUNDING_CONTEXT_UNAVAILABLE` before sending a pronoun query that would
+have depended on it. Treating this product as current would violate the frozen
+policy requiring validation before use.
 
-## Current evidence
+This blocks AC-M001 (vehicle pronoun follow-up). AC-M005 (expired-reference
+revalidation) depends on the same validation transition and cannot pass until
+WSGS returns a product with current usable validity semantics. The remaining
+ordered live scenarios, including the area follow-up, PendingChoice validation
+and resume, thread isolation, restart recovery, shared OpenAI/AG-UI focus, and
+replay checks, were not reached and are not reported as passed.
 
-The runner contract passed 3/3 tests. Repository lint passed with zero warnings
-and typecheck passed. A direct negative execution produced
-S08_FAIL_CLOSED_AUTHORIZATION_GATE_PASS. These checks prove runner safety and
-coverage structure, not real WSGS behavior.
+## SACS regression evidence
 
-The locked WSGS worktree exists at commit
-3f9aa7cb8542573d2658a132644a9c649544737b. The shared GOWM sample-world Gateway
-is healthy on loopback, but no WSGS API is currently running. The WSGS runbook
-requires model credentials, a Gateway transport credential, and a registered
-delegation private key. No credential values or private-key paths were read,
-copied, logged, or committed, and the shared fixture was not restarted.
+SACS now preserves a completed-but-revalidation-required reference as `STALE`
+instead of dropping it. Focused unit and PostgreSQL integration regression
+tests passed 14/14. The runner contract passed 3/3 tests; lint passed with zero
+warnings and typecheck passed.
 
-## Required authorization
+## Required upstream resolution
 
-Explicit destination-specific authorization is required to use the existing
-local WSGS/model/GOWM secure handoff for this isolated S08 run. Static or
-injected HTTP evidence cannot replace it.
+For a reference that can be validated, `VALIDATE_REFERENCES` must return a
+product that no longer requires revalidation and carries usable current
+validity semantics. SACS must not weaken its fail-closed handling of stale
+references. After the WSGS debug instance is refreshed, rerun the complete S08
+matrix from the first scenario.
+
+No shared WSGS, GOWM, GDPS, or database fixture was restarted or modified.

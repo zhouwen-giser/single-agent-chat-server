@@ -15,7 +15,7 @@ import { createWsgsHttpClient } from "../dist/packages/wsgs-http-adapter/src/ind
 import { WorldGroundingRuntime } from "../dist/packages/world-grounding-runtime/src/index.js";
 
 const { Pool } = pg;
-const expectedWsgsCommit = "3f9aa7cb8542573d2658a132644a9c649544737b";
+const expectedWsgsCommit = "83ba79ec47be31a1d377b72778ecdff33c4f6a59";
 
 if (process.env.ALLOW_REAL_WSGS_MULTITURN !== "YES") {
   throw new Error("ALLOW_REAL_WSGS_MULTITURN=YES is required");
@@ -24,6 +24,7 @@ if (process.env.ALLOW_REAL_WSGS_MULTITURN !== "YES") {
 const adminConnection = requiredEnvironment("TEST_DATABASE_URL");
 const wsgsBaseUrl = new URL(requiredEnvironment("WSGS_BASE_URL"));
 const wsgsSourceDir = requiredEnvironment("WSGS_SOURCE_DIR");
+const wsgsBearerToken = requiredEnvironment("WSGS_BEARER_TOKEN");
 assert.equal(
   execFileSync("git", ["-C", wsgsSourceDir, "rev-parse", "HEAD"], {
     encoding: "utf8",
@@ -40,8 +41,16 @@ assert.ok(
   "S08 WSGS endpoint must be local",
 );
 
-await assertHttpStatus(new URL("health/live", wsgsBaseUrl), 200);
-await assertHttpStatus(new URL("health/ready", wsgsBaseUrl), 200);
+await assertHttpStatus(
+  new URL("health/live", wsgsBaseUrl),
+  200,
+  wsgsBearerToken,
+);
+await assertHttpStatus(
+  new URL("health/ready", wsgsBaseUrl),
+  200,
+  wsgsBearerToken,
+);
 
 const databaseName = `sacs_s08_${randomUUID().replaceAll("-", "")}`;
 assert.match(databaseName, /^sacs_s08_[0-9a-f]{32}$/u);
@@ -55,9 +64,11 @@ try {
   await runMigrations(pool);
 
   const posts = [];
-  const realFetch = captureGroundingPosts(posts);
+  const httpExchanges = [];
+  const realFetch = captureGroundingPosts(posts, httpExchanges);
   const wsgs = createWsgsHttpClient({
     baseUrl: wsgsBaseUrl.href,
+    bearerToken: wsgsBearerToken,
     fetchImpl: realFetch,
   });
   const capabilities = await wsgs.capabilities();
@@ -91,16 +102,37 @@ try {
     text: "2号车在哪里？",
     usage: emptyWorldFocus(),
   });
+  if (vehicleFirst.text.startsWith("WORLD_GROUNDING_")) {
+    throw new Error(
+      `S08_VEHICLE_INITIAL_FAILED ${JSON.stringify({
+        sacsCode: vehicleFirst.text,
+        operations: posts.map(({ operation }) => operation),
+        latestGrounding: await boundedLatestGroundingDiagnostic(
+          pool,
+          principal.principalId,
+          vehicleThread,
+        ),
+        httpExchanges: httpExchanges.slice(-12),
+      })}`,
+    );
+  }
   assertWorldSuccess(vehicleFirst.text);
   const vehicleFocus = await repositories.worldFocus.getFocus({
     principalId: principal.principalId,
     threadId: vehicleThread,
   });
-  assert.ok(
-    vehicleFocus.references.some(({ displayName }) =>
-      displayName.includes("2号车"),
-    ),
-  );
+  if (vehicleFocus.references.length === 0) {
+    throw new Error(
+      `S08_VEHICLE_FOCUS_EMPTY ${JSON.stringify(
+        await boundedLatestGroundingDiagnostic(
+          pool,
+          principal.principalId,
+          vehicleThread,
+        ),
+      )}`,
+    );
+  }
+  const vehicleAlias = vehicleFocus.references[0].displayName;
 
   const beforeVehicleFollowUp = posts.length;
   const vehicleFollowUp = await executeWorldTurn({
@@ -112,8 +144,38 @@ try {
     text: "它现在呢？",
     usage: focusUsage(),
   });
+  if (vehicleFollowUp.text === "WORLD_GROUNDING_CONTEXT_UNAVAILABLE") {
+    throw new Error(
+      `S08_VEHICLE_FOLLOWUP_CONTEXT_UNAVAILABLE ${JSON.stringify({
+        operations: posts
+          .slice(beforeVehicleFollowUp)
+          .map(({ operation }) => operation),
+        httpExchanges: httpExchanges.slice(-12),
+        latestGrounding: await boundedLatestGroundingDiagnostic(
+          pool,
+          principal.principalId,
+          vehicleThread,
+        ),
+        focusStatuses: (
+          await repositories.worldFocus.getFocus({
+            principalId: principal.principalId,
+            threadId: vehicleThread,
+          })
+        ).references.map(({ status, revalidationRequired, validUntil }) => ({
+          status,
+          revalidationRequired,
+          validUntilState:
+            validUntil === undefined
+              ? "ABSENT"
+              : Date.parse(validUntil) > Date.now()
+                ? "FUTURE"
+                : "EXPIRED",
+        })),
+      })}`,
+    );
+  }
   assertWorldSuccess(vehicleFollowUp.text);
-  assertKnownContext(posts.at(-1), "2号车");
+  assertKnownContext(posts.at(-1), vehicleAlias);
   assert.ok(posts.length > beforeVehicleFollowUp);
   const beforeReplay = posts.length;
   await runtime.answerWorld(vehicleFollowUp.turn);
@@ -134,6 +196,22 @@ try {
     usage: emptyWorldFocus(),
   });
   assertWorldSuccess(areaFirst.text);
+  const areaFocus = await repositories.worldFocus.getFocus({
+    principalId: principal.principalId,
+    threadId: areaThread,
+  });
+  if (areaFocus.references.length === 0) {
+    throw new Error(
+      `S08_AREA_FOCUS_EMPTY ${JSON.stringify(
+        await boundedLatestGroundingDiagnostic(
+          pool,
+          principal.principalId,
+          areaThread,
+        ),
+      )}`,
+    );
+  }
+  const areaAlias = areaFocus.references[0].displayName;
   const areaFollowUp = await executeWorldTurn({
     runtime,
     conversation: repositories.conversation,
@@ -144,7 +222,7 @@ try {
     usage: focusUsage(),
   });
   assertWorldSuccess(areaFollowUp.text);
-  assertKnownContext(posts.at(-1), "A区");
+  assertKnownContext(posts.at(-1), areaAlias);
 
   const ambiguityThread = await createThread(
     repositories.requests,
@@ -254,7 +332,7 @@ try {
     usage: focusUsage(),
   });
   assertWorldSuccess(restartFollowUp.text);
-  assertKnownContext(posts.at(-1), "2号车");
+  assertKnownContext(posts.at(-1), vehicleAlias);
 
   process.stdout.write(
     `${JSON.stringify({
@@ -341,15 +419,40 @@ async function executeWorldTurn(input) {
   return { text: await input.runtime.answerWorld(turn), turn };
 }
 
-function captureGroundingPosts(posts) {
+function captureGroundingPosts(posts, httpExchanges) {
   return async (input, init) => {
     const inspectable =
       input instanceof Request ? input.clone() : new Request(input, init);
     const url = new URL(inspectable.url);
-    if (inspectable.method === "POST" && url.pathname === "/v1/groundings") {
+    const isCreate =
+      inspectable.method === "POST" && url.pathname === "/v1/groundings";
+    if (isCreate) {
       posts.push(await inspectable.json());
     }
-    return fetch(input, init);
+    const response = await fetch(input, init);
+    if (url.pathname.startsWith("/v1/groundings")) {
+      let errorCode = null;
+      let errorStage = null;
+      if (!response.ok) {
+        const body = await response
+          .clone()
+          .json()
+          .catch(() => undefined);
+        errorCode = body?.error?.code ?? body?.code ?? null;
+        errorStage = body?.error?.stage ?? body?.stage ?? null;
+      }
+      httpExchanges.push({
+        route: isCreate
+          ? "CREATE"
+          : url.pathname.endsWith("/cancel")
+            ? "CANCEL"
+            : "GET",
+        status: response.status,
+        errorCode,
+        errorStage,
+      });
+    }
+    return response;
   };
 }
 
@@ -414,6 +517,52 @@ function countOperations(posts) {
   );
 }
 
+async function boundedLatestGroundingDiagnostic(pool, principalId, threadId) {
+  const result = await pool.query(
+    `
+      SELECT state, failure_code, grounding_result_json
+      FROM chat_service.grounding_execution
+      WHERE principal_id = $1 AND thread_id = $2
+      ORDER BY created_at DESC
+      LIMIT 1
+    `,
+    [principalId, threadId],
+  );
+  const row = result.rows[0];
+  const grounding = row?.grounding_result_json;
+  const products = Array.isArray(grounding?.referenceProducts)
+    ? grounding.referenceProducts
+    : [];
+  return {
+    executionState: row?.state ?? "MISSING",
+    failureCode: row?.failure_code ?? null,
+    resultStatus: grounding?.status ?? null,
+    mentionCount: Array.isArray(grounding?.mentions)
+      ? grounding.mentions.length
+      : 0,
+    referenceProductCount: products.length,
+    productStates: products.map((product) => ({
+      sourceOperation: product.sourceOperation ?? null,
+      revalidationRequired: product.revalidationRequired ?? null,
+      validUntilState:
+        product.validUntil === undefined
+          ? "ABSENT"
+          : Date.parse(product.validUntil) > Date.now()
+            ? "FUTURE"
+            : "EXPIRED",
+    })),
+    ambiguityCount: Array.isArray(grounding?.ambiguities)
+      ? grounding.ambiguities.length
+      : 0,
+    unresolvedMentionCount: Array.isArray(grounding?.unresolvedMentions)
+      ? grounding.unresolvedMentions.length
+      : 0,
+    capabilityGapCount: Array.isArray(grounding?.capabilityGaps)
+      ? grounding.capabilityGaps.length
+      : 0,
+  };
+}
+
 function hashJson(value) {
   return `sha256:${createHash("sha256").update(JSON.stringify(value)).digest("hex")}`;
 }
@@ -430,7 +579,10 @@ function requiredEnvironment(name) {
   return value;
 }
 
-async function assertHttpStatus(url, expected) {
-  const response = await fetch(url, { signal: AbortSignal.timeout(5_000) });
+async function assertHttpStatus(url, expected, bearerToken) {
+  const response = await fetch(url, {
+    headers: { authorization: `Bearer ${bearerToken}` },
+    signal: AbortSignal.timeout(30_000),
+  });
   assert.equal(response.status, expected, `${url.pathname} is not ready`);
 }

@@ -13,10 +13,11 @@ describe("SACS v0.4 S08 genuine WSGS multi-turn harness", () => {
   it("fails closed without explicit live authorization and exact source", () => {
     expect(harness).toContain('ALLOW_REAL_WSGS_MULTITURN !== "YES"');
     expect(harness).toContain(
-      'expectedWsgsCommit = "3f9aa7cb8542573d2658a132644a9c649544737b"',
+      'expectedWsgsCommit = "83ba79ec47be31a1d377b72778ecdff33c4f6a59"',
     );
     expect(harness).toContain('requiredEnvironment("WSGS_SOURCE_DIR")');
     expect(harness).toContain('requiredEnvironment("WSGS_BASE_URL")');
+    expect(harness).toContain('requiredEnvironment("WSGS_BEARER_TOKEN")');
     expect(harness).toContain('requiredEnvironment("TEST_DATABASE_URL")');
   });
 
@@ -46,5 +47,8 @@ describe("SACS v0.4 S08 genuine WSGS multi-turn harness", () => {
     expect(harness).not.toContain("GOWM_GATEWAY_TOKEN");
     expect(harness).not.toContain("MODEL_API_KEY");
     expect(harness).not.toContain("PRIVATE_KEY");
+    expect(harness).not.toMatch(
+      /console\.(?:log|error)\([^)]*wsgsBearerToken/su,
+    );
   });
 });
