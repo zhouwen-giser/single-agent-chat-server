@@ -15,8 +15,8 @@
     "wsgs": {
       "repository": "https://github.com/zhouwen-giser/world-semantic-grounding-service.git",
       "ref": "origin/codex/wsgs-v0.2-gowm-0.6.3-integration",
-      "commit": "ecb03668d543d55a4d0f18fc1efe8050cf945e11",
-      "tree": "5e4fc270f32dc7cd97aeb2e647242202f79906d4",
+      "commit": "7ba29dc720bd67cf31915148dd657ff10b9a81ad",
+      "tree": "34b067b00c4f23636942d1a949235aea856d512e",
       "version": "0.2.0",
       "contractLockBlob": "43af3610c932d68f509606b20a99b5bfea1d01eb",
       "candidateDecision": "BLOCKED",
@@ -26,6 +26,20 @@
         "fail": 0,
         "notRun": 17,
         "blocked": 67
+      },
+      "developmentReadiness": {
+        "manifestDecision": "DEVELOPMENT_READY",
+        "verification": "UNVERIFIED_MISSING_ARTIFACTS",
+        "productionQualified": false,
+        "missingEvidence": [
+          "contracts/consumers/sacs-development-handoff-v1.json",
+          "reports/wsgs-v0.2/development-acceptance-ledger.json",
+          "reports/wsgs-v0.2/development-closure-gate.json",
+          "reports/wsgs-v0.2/development-ready-report.json",
+          "reports/wsgs-v0.2/development-ready-report.md",
+          "reports/wsgs-v0.2/real-pipeline-evidence.json",
+          "reports/wsgs-v0.2/recipe-evidence"
+        ]
       },
       "markers": {
         "GOWM_0_6_3_CONTRACT_LOCKED": true,

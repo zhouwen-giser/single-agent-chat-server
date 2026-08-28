@@ -1,27 +1,29 @@
 # SACS v0.4 S00 publication
 
-Status: `NOT_RUN_AUTHORIZATION_REQUIRED`
+Status: `PUBLISHED_DRAFT_INITIAL_CI_PASSED`
 
 The S00 functional phase is committed locally as
 `265af4c776174a30bc37ae6898c0b762c820cd22` after its automated Gate and
 regression checks passed.
 
-## GitHub audit
+## GitHub publication
 
-The 2026-08-28 read-only publication audit found:
+Authorized publication completed on 2026-08-28:
 
-- no `origin/codex/sacs-v0.4-wsgs-world-grounding` branch;
-- no open pull request with that head branch;
-- local branch one commit ahead of `origin/main` before this evidence update.
+- Remote branch: `origin/codex/sacs-v0.4-wsgs-world-grounding`.
+- Draft PR: https://github.com/zhouwen-giser/single-agent-chat-server/pull/15
+- Base/head: `main` <- `codex/sacs-v0.4-wsgs-world-grounding`.
+- Initial published head: `8aee956d96fba49622f3ce60dfbcc8194b4ca506`.
+- PR state after initial CI: `OPEN`, `Draft`, `MERGEABLE`, `CLEAN`.
+- CI run: https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/33139809965
+- `quality`: `SUCCESS`, job `98747891756`.
+- `container`: `SUCCESS`, job `98748275908`.
 
-## Pending protected actions
+The evidence update containing this receipt is pushed separately. Its exact
+remote SHA and CI outcome are recorded on PR #15 without creating a
+self-referential evidence commit.
 
-Destination-specific authorization is required before:
+## Remaining gates
 
-1. pushing `codex/sacs-v0.4-wsgs-world-grounding` to `origin`;
-2. creating a Draft PR into `main` titled
-   `feat: integrate SACS with WSGS world grounding and authority fusion`;
-3. recording exact-head CI and PR receipts.
-
-Merge, tag, release, and deployment remain prohibited. No later implementation
-phase is declared complete before the S00 publication gate is resolved.
+S00 publication does not satisfy the WSGS or SDAR hard prerequisites. The PR
+must remain Draft, and merge, tag, release, and deployment remain prohibited.

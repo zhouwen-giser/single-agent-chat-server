@@ -101,6 +101,34 @@ for (const [marker, ready] of Object.entries(
   if (marker !== "GOWM_0_6_3_CONTRACT_LOCKED") assert.equal(ready, false);
 }
 
+const developmentEvidenceGroups = JSON.parse(
+  git(wsgsRepository, [
+    "show",
+    `${wsgsRef}:reports/wsgs-v0.2/development-acceptance-evidence-groups.json`,
+  ]).toString("utf8"),
+);
+assert.equal(developmentEvidenceGroups.decision, "DEVELOPMENT_READY");
+const referencedDevelopmentEvidence = [
+  ...new Set(
+    developmentEvidenceGroups.groups.flatMap((group) => group.evidence),
+  ),
+].sort();
+const missingDevelopmentEvidence = referencedDevelopmentEvidence.filter(
+  (path) => !gitObjectExists(wsgsRepository, `${wsgsRef}:${path}`),
+);
+assert.deepEqual(
+  missingDevelopmentEvidence,
+  sourceLock.repositories.wsgs.developmentReadiness.missingEvidence,
+);
+assert.equal(
+  sourceLock.repositories.wsgs.developmentReadiness.verification,
+  "UNVERIFIED_MISSING_ARTIFACTS",
+);
+assert.equal(
+  sourceLock.repositories.wsgs.developmentReadiness.productionQualified,
+  false,
+);
+
 assert.equal(
   gitText(sdarRepository, ["rev-parse", sourceLock.repositories.sdar.ref]),
   sourceLock.repositories.sdar.commit,
@@ -149,6 +177,8 @@ const result = {
   wsgsCandidateSha: sourceLock.repositories.wsgs.commit,
   wsgsContractArtifactsVerified: 32,
   wsgsCandidateDecision: "BLOCKED",
+  wsgsDevelopmentReadiness: "UNVERIFIED_MISSING_ARTIFACTS",
+  wsgsMissingDevelopmentArtifacts: missingDevelopmentEvidence.length,
   sdarSha: sourceLock.repositories.sdar.commit,
   sdarGroundingExtension: "UNAVAILABLE",
   stableCandidateEligible: false,
@@ -176,4 +206,20 @@ function git(cwd, args) {
 
 function gitText(cwd, args) {
   return git(cwd, args).toString("utf8").trim();
+}
+
+function gitObjectExists(cwd, object) {
+  const result = spawnSync("git", ["cat-file", "-e", object], {
+    cwd,
+    encoding: "utf8",
+    shell: false,
+  });
+  if (result.status === 0) return true;
+  if (
+    result.status === 128 &&
+    result.stderr.startsWith("fatal: Not a valid object name ")
+  ) {
+    return false;
+  }
+  throw new Error(result.stderr || `Unable to inspect ${object}`);
 }

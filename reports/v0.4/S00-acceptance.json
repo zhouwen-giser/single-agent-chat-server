@@ -9,7 +9,7 @@
     },
     "S00-002": {
       "status": "PASS",
-      "evidence": "WSGS candidate ecb03668d543d55a4d0f18fc1efe8050cf945e11 reports version 0.2.0"
+      "evidence": "Latest WSGS candidate 7ba29dc720bd67cf31915148dd657ff10b9a81ad reports version 0.2.0"
     },
     "S00-003": {
       "status": "PASS",
@@ -17,7 +17,7 @@
     },
     "S00-004": {
       "status": "BLOCKED_EXTERNAL",
-      "evidence": "WSGS decision is BLOCKED: 195 PASS, 17 NOT_RUN, 67 BLOCKED; readiness and completion markers withheld"
+      "evidence": "WSGS stable-candidate decision remains BLOCKED: 195 PASS, 17 NOT_RUN, 67 BLOCKED. Its newer DEVELOPMENT_READY manifest is unverified because 7 referenced evidence artifacts are absent from the exact Git tree."
     },
     "S00-005": {
       "status": "BLOCKED_EXTERNAL",
@@ -34,6 +34,8 @@
     "result": {
       "wsgsContractArtifactsVerified": 32,
       "wsgsCandidateDecision": "BLOCKED",
+      "wsgsDevelopmentReadiness": "UNVERIFIED_MISSING_ARTIFACTS",
+      "wsgsMissingDevelopmentArtifacts": 7,
       "sdarGroundingExtension": "UNAVAILABLE",
       "stableCandidateEligible": false
     }
@@ -42,12 +44,21 @@
     "command": "pnpm verify:phase1 && pnpm verify:architecture && pnpm verify:secrets",
     "status": "PASS_WITH_DATABASE_SUITES_SKIPPED",
     "unit": { "pass": 103, "fail": 0, "skip": 0 },
-    "contract": { "pass": 83, "fail": 0, "skip": 0 },
+    "contract": { "pass": 84, "fail": 0, "skip": 0 },
     "integration": { "pass": 5, "fail": 0, "skip": 84 },
     "build": "PASS",
     "architectureProductionFiles": 75,
     "secretScanTrackedFiles": 542,
     "databaseEvidenceClaimed": false
+  },
+  "publication": {
+    "status": "PUBLISHED_DRAFT_INITIAL_CI_PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/15",
+    "initialHeadSha": "8aee956d96fba49622f3ce60dfbcc8194b4ca506",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/33139809965",
+    "quality": "PASS",
+    "container": "PASS",
+    "prState": "OPEN_DRAFT_MERGEABLE_CLEAN"
   },
   "stableCandidateEligible": false,
   "requiredDisposition": "SACS_V0_4_STABLE_CANDIDATE_BLOCKED"

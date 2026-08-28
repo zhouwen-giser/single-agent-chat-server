@@ -15,6 +15,12 @@ interface SourceLock {
     wsgs: {
       candidateDecision: string;
       markers: Record<string, boolean>;
+      developmentReadiness: {
+        manifestDecision: string;
+        verification: string;
+        productionQualified: boolean;
+        missingEvidence: string[];
+      };
     };
   };
   immutableMigrations: Record<string, string>;
@@ -79,6 +85,23 @@ describe("SACS v0.4 S00 source and compatibility locks", () => {
       SEMANTIC_QUERY_COMPILER_READY: false,
       GOWM_REAL_E2E_READY: false,
       WSGS_V0_2_STABLE_CANDIDATE_COMPLETE: false,
+    });
+  });
+
+  it("does not promote an incomplete development-ready manifest", () => {
+    expect(sourceLock.repositories.wsgs.developmentReadiness).toEqual({
+      manifestDecision: "DEVELOPMENT_READY",
+      verification: "UNVERIFIED_MISSING_ARTIFACTS",
+      productionQualified: false,
+      missingEvidence: [
+        "contracts/consumers/sacs-development-handoff-v1.json",
+        "reports/wsgs-v0.2/development-acceptance-ledger.json",
+        "reports/wsgs-v0.2/development-closure-gate.json",
+        "reports/wsgs-v0.2/development-ready-report.json",
+        "reports/wsgs-v0.2/development-ready-report.md",
+        "reports/wsgs-v0.2/real-pipeline-evidence.json",
+        "reports/wsgs-v0.2/recipe-evidence",
+      ],
     });
   });
 
