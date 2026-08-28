@@ -1,7 +1,7 @@
 {
   "phase": "S08",
   "date": "2026-08-29",
-  "decision": "BLOCKED_UPSTREAM_TYPED_STALE",
+  "decision": "BLOCKED_UPSTREAM_GOWM_WORLD_OBJECT_BINDING",
   "marker": "WITHHELD",
   "runner": {
     "path": "scripts/phase-v04-s08-real-multiturn.mjs",
@@ -33,6 +33,7 @@
     "replayNoDuplicateWsgs": "NOT_REACHED"
   },
   "redactedUpstreamEvidence": {
+    "evidenceCommit": "83ba79ec47be31a1d377b72778ecdff33c4f6a59",
     "operation": "VALIDATE_REFERENCES",
     "createHttpStatus": 202,
     "pollHttpStatus": 200,
@@ -47,9 +48,16 @@
     "sacsFocusStatus": "STALE",
     "sacsOutcome": "WORLD_GROUNDING_CONTEXT_UNAVAILABLE"
   },
+  "upstreamRepairStatus": {
+    "wsgsInstanceCommit": "f63047ecca1272bdb6e3791101696a7a645632e8",
+    "wsgsProtocolFix": "CONFIRMED_RUNNING_SOURCE_OPERATION_VALIDATE_REFERENCES",
+    "gowmWorldObjectVersionBinding": "REPAIR_IN_PROGRESS",
+    "currentReferenceState": "STALE_REVALIDATION_REQUIRED_TRUE_VALID_UNTIL_ABSENT",
+    "positiveSemanticRetest": "DEFERRED_BY_AUTHORIZED_HANDOFF_UNTIL_FALSE_PLUS_VALID_UNTIL"
+  },
   "blocker": {
-    "code": "UPSTREAM_VALIDATE_REFERENCES_RETURNS_TYPED_STALE",
-    "detail": "WSGS accepted and completed VALIDATE_REFERENCES, but the returned reference still requires revalidation and has no usable validity boundary. SACS correctly refuses to use it for pronoun resolution."
+    "code": "UPSTREAM_GOWM_WORLD_OBJECT_VERSION_BINDING_STALE",
+    "detail": "WSGS f63047e now publishes VALIDATE_REFERENCES provenance, but GOWM still returns the 2号车 WORLD_OBJECT as stale without validUntil. The authorized handoff requires deferring AC-M001 and AC-M005 until false plus validUntil is proven."
   },
   "publication": {
     "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",

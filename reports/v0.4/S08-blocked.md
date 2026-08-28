@@ -2,7 +2,8 @@
 
 ## Decision
 
-S08 is `BLOCKED_UPSTREAM_TYPED_STALE`. The Ready marker remains withheld.
+S08 is `BLOCKED_UPSTREAM_GOWM_WORLD_OBJECT_BINDING`. The Ready marker remains
+withheld.
 
 The authorized live run used the isolated WSGS v0.2 debug instance at the
 handed-off commit and an isolated disposable SACS PostgreSQL instance. The WSGS
@@ -55,4 +56,19 @@ validity semantics. SACS must not weaken its fail-closed handling of stale
 references. After the WSGS debug instance is refreshed, rerun the complete S08
 matrix from the first scenario.
 
-No shared WSGS, GOWM, GDPS, or database fixture was restarted or modified.
+The SACS verification process did not restart or modify any shared WSGS, GOWM,
+GDPS, or database fixture.
+
+## Upstream repair status
+
+WSGS commit `f63047ecca1272bdb6e3791101696a7a645632e8` has been rebuilt into
+the running debug instance. The authorized handoff confirms that WSGS now
+publishes `sourceOperation=VALIDATE_REFERENCES`. The remaining stale result is
+from the upstream GOWM sample-world WORLD_OBJECT version binding:
+`revalidationRequired=true` and `validUntil` absent.
+
+Per the upstream handoff, the positive AC-M001 and AC-M005 semantic rerun is
+explicitly deferred until GOWM repair evidence shows
+`revalidationRequired=false` with a usable `validUntil`. Only the local runner
+contract, lint, and typecheck were rerun against the updated source lock; no
+business grounding request was issued to the refreshed instance in this step.

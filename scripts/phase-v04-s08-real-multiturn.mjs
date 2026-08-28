@@ -15,7 +15,7 @@ import { createWsgsHttpClient } from "../dist/packages/wsgs-http-adapter/src/ind
 import { WorldGroundingRuntime } from "../dist/packages/world-grounding-runtime/src/index.js";
 
 const { Pool } = pg;
-const expectedWsgsCommit = "83ba79ec47be31a1d377b72778ecdff33c4f6a59";
+const expectedWsgsCommit = "f63047ecca1272bdb6e3791101696a7a645632e8";
 
 if (process.env.ALLOW_REAL_WSGS_MULTITURN !== "YES") {
   throw new Error("ALLOW_REAL_WSGS_MULTITURN=YES is required");
