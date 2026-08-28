@@ -143,6 +143,96 @@ describeWithPostgres("SACS v0.4 world runtime on PostgreSQL and HTTP", () => {
     `);
     expect(executions.rows).toEqual([{ state: "COMPLETED", event_count: "3" }]);
   });
+
+  it("persists one compare-only preview and replays without a second HTTP POST", async () => {
+    const requests = new InteractionPersistenceRepository(pool, 60_000);
+    const grounding = new GroundingPersistenceRepository(pool, 60_000);
+    const principal = await requests.resolvePrincipal({
+      issuer: "s05-test",
+      subject: `principal-${randomUUID()}`,
+      role: "user",
+    });
+    const thread = await requests.getOrCreateThread({
+      clientType: "openwebui",
+      externalThreadId: `thread-${randomUUID()}`,
+      principalId: principal.principalId,
+    });
+    const posts: WsgsGroundingRequest[] = [];
+    const runtime = new WorldGroundingRuntime({
+      requests,
+      grounding,
+      wsgs: createWsgsHttpClient({
+        baseUrl: "http://wsgs.test",
+        fetchImpl: async (request, init) => {
+          const url = new URL(
+            typeof request === "string"
+              ? request
+              : request instanceof URL
+                ? request.href
+                : request.url,
+          );
+          if (url.pathname === "/v1/capabilities") {
+            return jsonResponse(capabilities());
+          }
+          if (url.pathname === "/v1/groundings") {
+            const rawBody =
+              typeof init?.body === "string"
+                ? init.body
+                : request instanceof Request
+                  ? await request.text()
+                  : "{}";
+            const body = JSON.parse(rawBody) as WsgsGroundingRequest;
+            posts.push(body);
+            return jsonResponse(resultFor(body));
+          }
+          return jsonResponse({ error: "unexpected" }, 404);
+        },
+      }),
+      sdarCompatibilityLock: unavailableLock(),
+      nextLeaseOwner: () => "s05-worker",
+    });
+    const turn = {
+      protocol: "openai" as const,
+      principalId: principal.principalId,
+      threadId: thread.threadId,
+      externalRequestId: `message-${randomUUID()}`,
+      userText: "Compare the published plan with Road 7 reality.",
+      turnPlan: {
+        schemaVersion: "0.4" as const,
+        turnRoute: "HYBRID_PLAN_REALITY_COMPARE" as const,
+        groundingRequirement: "COMPARE_PLAN_REALITY" as const,
+        answerMode: "HYBRID_COMPARISON" as const,
+        taskDirective: {
+          action: "STATUS" as const,
+          selector: { taskId: "task-plan-1" },
+        },
+        worldFocusUsage: emptyWorldFocus(),
+      },
+      sdarPlan: {
+        taskId: "task-plan-1",
+        observedStatus: "INPUT_REQUIRED" as const,
+        internalPhase: "awaiting_plan_confirmation" as const,
+        publishedSummary: "Inspect Road 7 before dispatch.",
+      },
+    };
+
+    const first = await runtime.compareHybrid(turn);
+    const replay = await runtime.compareHybrid(turn);
+
+    expect(first).toContain("AUTHORITY_FUSION_PREVIEW_READY");
+    expect(first).toContain("SACS COMPARE_ONLY");
+    expect(replay).toBe(first);
+    expect(posts).toHaveLength(1);
+    expect(posts[0]).toMatchObject({
+      operation: "EXECUTE_WORLD_QUERY",
+      requestedProducts: [
+        "WORLD_QUERY",
+        "WORLD_EVIDENCE",
+        "CORRELATION_FINDINGS",
+        "PREDICATE_EVALUATIONS",
+      ],
+    });
+  });
 });
 
 function capabilities() {
@@ -195,7 +285,22 @@ function resultFor(request: WsgsGroundingRequest) {
         safeSummary: { status: "published" },
       },
     ],
-    evidenceItems: [],
+    evidenceItems: [
+      {
+        evidenceProductId: "evidence-1",
+        productKind: "WORLD_FACT",
+        authority: "GOWM",
+        sourceOperation: "query-road",
+        upstreamStatus: "COMPLETED",
+        payloadSchemaUri: "urn:test:safe-evidence",
+        payloadSchemaHash: `sha256:${"c".repeat(64)}`,
+        safePayload: { status: "published" },
+        receiptIds: [],
+        evidenceIds: [],
+        unknowns: [],
+        warnings: [],
+      },
+    ],
     ambiguities: [],
     unresolvedMentions: [],
     capabilityGaps: [],

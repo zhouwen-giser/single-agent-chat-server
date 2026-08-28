@@ -53,8 +53,12 @@ in WSGS/GOWM, planning state in SDAR, and control transactions in SMPP/Provider.
 - [x] S04: activate production TurnPlan routing, construct the isolated WSGS
       runtime, persist and replay safe world answers, and keep operational SDAR
       submission fail-closed behind the unavailable typed extension.
-- [ ] Later phases: authority-fusion preview, genuine E2E, and final
-      acceptance, subject to external prerequisite availability.
+- [x] S05 internal: implement unique-Task, read-only Authority Fusion Preview,
+      strict completed-evidence gates, and durable one-POST replay.
+- [ ] S05 real Gate: blocked pending explicit current-task authorization for
+      the local model and GOWM sample credentials. The Ready marker is withheld.
+- [ ] Later phases: genuine external E2E and final acceptance, subject to
+      external prerequisite availability.
 
 ## S00 decisions
 
@@ -173,9 +177,42 @@ CycloneDX SBOM passed. Compose evidence uses no live WSGS. The S04 database
 integration uses production adapter code with an injected Fetch response and
 is explicitly not live WSGS E2E evidence.
 
+## S05 decisions
+
+- Resolve exactly one authorized Task before any WSGS request. Multi-Task and
+  unresolved cases remain local and do not read or mutate either authority.
+- Read the published plan snapshot only through the existing coordinator and
+  official A2A `getTask()` path. Bound it to 128 fragments and 8,000 characters.
+- Require completed, unambiguous WSGS evidence and one source world version.
+  Compose side-by-side authority views without inventing semantic differences.
+- Include the SDAR snapshot in the outer idempotency hash and replay the stored
+  Message without a second WSGS POST.
+- Withhold `AUTHORITY_FUSION_PREVIEW_READY` until a genuine live SDAR plus
+  WSGS/GOWM comparison passes. Prior handoff reports and injected transports
+  cannot satisfy that Gate.
+
+## S05 validation
+
+`pnpm verify:v04:s05` cumulatively passed S00 through S05, including 16/16
+phase tests and 94/94 real PostgreSQL integration tests. The full repository
+baseline passed 122 unit, 121 contract, 94 integration, 12 security, and one
+fixture E2E test, plus format, lint, typecheck, build, architecture, migration,
+OpenAI, A2A, AG-UI, workflow, license, secret, and smoke Gates.
+
+The final 0.4.0 image, isolated Compose readiness/security/cleanup Gate, and
+CycloneDX 1.7 SBOM also pass on the S05 tree.
+
+The live attempt confirmed WSGS Development Ready 63/63 and a healthy GOWM
+sample instance. A temporary real SDAR A2A Task failed before publishing a plan
+because no model Provider was configured. Credential injection into temporary
+SDAR/WSGS processes was denied without explicit destination-specific user
+authorization, so the real fusion Gate remains BLOCKED and the Ready marker is
+not emitted.
+
 ## Current outcome
 
-S00 through S04 may pass as truthful internal development phases while the
+S00 through S04 may pass as truthful internal development phases, and S05 may
+pass only its internal implementation Gates, while the
 overall v0.4 stable candidate remains externally blocked. No fixture, WSGS
 v0.1 artifact, text downgrade, or unimplemented SDAR extension is accepted as
 completion evidence.

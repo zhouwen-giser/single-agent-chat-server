@@ -8,6 +8,7 @@ import type {
 } from "../packages/wsgs-http-adapter/src/index.js";
 import {
   assertSdarGroundingExtensionAvailable,
+  buildHybridAuthorityFusion,
   buildOperationalGroundingBundle,
   renderSafeWorldAnswer,
   WorldGroundingRuntime,
@@ -311,6 +312,76 @@ describe("SACS v0.4 world grounding runtime", () => {
       }),
     ).resolves.toBe("SDAR_GROUNDING_EXTENSION_UNAVAILABLE");
   });
+
+  it("durably renders a compare-only authority fusion preview once", async () => {
+    const fixture = hybridRuntime((request) => ({
+      ...validResult(request),
+      evidenceItems: validResult(request).evidenceItems.map((item) => ({
+        ...item,
+        upstreamStatus: "COMPLETED" as const,
+      })),
+    }));
+    const turn = hybridTurn();
+
+    const first = await fixture.runtime.compareHybrid(turn);
+    const replay = await fixture.runtime.compareHybrid(turn);
+
+    expect(first).toContain("AUTHORITY_FUSION_PREVIEW_READY");
+    expect(first).toContain("Plan authority: SDAR");
+    expect(first).toContain("Published plan: Inspect Road 7 before dispatch");
+    expect(first).toContain("Reality authority: WSGS_GOWM");
+    expect(first).toContain("World version: 42");
+    expect(first).toContain("SACS COMPARE_ONLY");
+    expect(first).toContain("does not infer equivalence");
+    expect(replay).toBe(first);
+    expect(fixture.createGrounding).toHaveBeenCalledTimes(1);
+    expect(fixture.completeRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it("never marks incomplete or authority-ambiguous evidence as preview-ready", async () => {
+    const result = validResult(baseRequest());
+    const inputs: readonly WsgsGroundingResult[] = [
+      result,
+      { ...result, status: "UNRESOLVED" },
+      {
+        ...result,
+        ambiguities: [
+          {
+            ambiguityId: "ambiguity-hybrid",
+            mentionId: "mention-hybrid",
+            surfaceText: "Road 7",
+            candidateProductIds: ["product-1", "product-2"],
+            reason: "MULTIPLE_PLAUSIBLE_MATCHES",
+          },
+        ],
+      },
+      {
+        ...result,
+        evidenceItems: result.evidenceItems.map((item) => ({
+          ...item,
+          upstreamStatus: "COMPLETED" as const,
+        })),
+        referenceProducts: [
+          ...result.referenceProducts,
+          ...result.referenceProducts.map((product) => ({
+            ...product,
+            productId: "product-2",
+            sourceWorldVersion: 43,
+          })),
+        ],
+      },
+    ];
+
+    for (const candidate of inputs) {
+      expect(() =>
+        buildHybridAuthorityFusion({
+          result: candidate,
+          sdarPlan: hybridTurn().sdarPlan,
+          observedAt: "2026-08-28T01:00:00.000Z",
+        }),
+      ).toThrow("AUTHORITY_FUSION_PREVIEW_UNAVAILABLE");
+    }
+  });
 });
 
 function worldTurn() {
@@ -342,6 +413,80 @@ function operationalTurnPlan(): TurnPlan {
     answerMode: "GROUNDED",
     taskDirective: { action: "CREATE" },
     worldFocusUsage: emptyWorldFocus(),
+  };
+}
+
+function hybridTurn() {
+  return {
+    ...worldTurn(),
+    turnPlan: {
+      schemaVersion: "0.4" as const,
+      turnRoute: "HYBRID_PLAN_REALITY_COMPARE" as const,
+      groundingRequirement: "COMPARE_PLAN_REALITY" as const,
+      answerMode: "HYBRID_COMPARISON" as const,
+      taskDirective: {
+        action: "STATUS" as const,
+        selector: { taskId: "task-plan-1" },
+      },
+      worldFocusUsage: emptyWorldFocus(),
+    },
+    sdarPlan: {
+      taskId: "task-plan-1",
+      observedStatus: "INPUT_REQUIRED" as const,
+      internalPhase: "awaiting_plan_confirmation" as const,
+      publishedSummary: "Inspect Road 7 before dispatch.",
+    },
+  };
+}
+
+function hybridRuntime(
+  resultForRequest: (request: WsgsGroundingRequest) => WsgsGroundingResult,
+) {
+  let storedResult: CompletedRequestResult | undefined;
+  const completeRequest = jest.fn(
+    async (input: { readonly result: CompletedRequestResult }) => {
+      storedResult = input.result;
+    },
+  );
+  const requests = {
+    claimRequest: jest.fn(async () =>
+      storedResult === undefined
+        ? { outcome: "acquired" as const, requestId: "hybrid-interaction-1" }
+        : { outcome: "replay" as const, result: storedResult },
+    ),
+    completeRequest,
+    authorizedRequestCreatedAt: jest.fn(async () => "2026-08-28T01:00:00.000Z"),
+  } as unknown as WorldGroundingRuntimeOptions["requests"];
+  const grounding = {
+    claim: jest.fn(async () => ({
+      kind: "CREATED" as const,
+      execution: { state: "GROUNDING_PENDING" },
+    })),
+    recordGroundingReady: jest.fn(async () => ({ state: "GROUNDING_READY" })),
+    complete: jest.fn(async () => ({ state: "COMPLETED" })),
+    fail: jest.fn(async () => ({ state: "FAILED" })),
+    cancel: jest.fn(async () => ({ state: "CANCELLED" })),
+  } as unknown as WorldGroundingRuntimeOptions["grounding"];
+  const createGrounding = jest.fn(resultForRequest);
+  const wsgs = {
+    contractVersion: "sacs-wsgs-grounding/1.0",
+    endpoint: "http://wsgs.test/",
+    capabilities: jest.fn(async () => readyCapabilities()),
+    createGrounding,
+    getGrounding: jest.fn(),
+    waitForGrounding: jest.fn(),
+    cancelGrounding: jest.fn(),
+  } as unknown as WsgsHttpClient;
+  return {
+    runtime: new WorldGroundingRuntime({
+      requests,
+      grounding,
+      wsgs,
+      sdarCompatibilityLock: unavailableLock,
+      nextLeaseOwner: () => "hybrid-lease-owner",
+    }),
+    completeRequest,
+    createGrounding,
   };
 }
 

@@ -28,14 +28,22 @@
   unresolved or NO_DATA outcomes.
 - A validated-reference OperationalGroundingBundle builder and exact
   fail-closed SDAR extension Gate with no raw-text or ungrounded downgrade.
+- A read-only Authority Fusion Preview that resolves one authorized Task,
+  reads bounded published SDAR plan state through official A2A `getTask()`,
+  requires completed unambiguous WSGS/GOWM evidence, and composes the two
+  authorities without mutation or invented semantic conclusions.
+- Durable hybrid-preview identity including the observed SDAR snapshot, so a
+  stored preview replays without a second WSGS POST and cannot be reused for a
+  different plan observation.
 
 ### Candidate status
 
 The WSGS candidate is blocked and current SDAR lacks
-`sacs-sdar-operational-grounding/1.0`. S00 through S04 therefore record
-`SACS_V0_4_STABLE_CANDIDATE_BLOCKED`. S04 real PostgreSQL plus
-production-adapter/injected-fetch evidence is not live WSGS E2E and does not
-claim authority-fusion readiness or publication.
+`sacs-sdar-operational-grounding/1.0`. S00 through S04 and the S05 internal
+implementation therefore record `SACS_V0_4_STABLE_CANDIDATE_BLOCKED`. S05 real
+PostgreSQL plus production-adapter/injected-fetch evidence is not live
+SDAR+WSGS/GOWM E2E. The live Gate also requires explicit current-task
+credential authorization, so `AUTHORITY_FUSION_PREVIEW_READY` is withheld.
 
 ## 0.3.0 — qualified release candidate
 

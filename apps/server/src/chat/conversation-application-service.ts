@@ -13,6 +13,7 @@ import type {
   ConversationProtocol,
 } from "../../../../packages/conversation-context/src/index.js";
 import type { LegacyChatResult } from "../../../../packages/interaction-runtime/src/index.js";
+import type { NormalizedTask } from "../../../../packages/sdar-a2a-adapter/src/index.js";
 import type { TaskBinding } from "../../../../packages/persistence/src/index.js";
 import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
 import type { ClassificationError } from "../../../../src/agent/classification.js";
@@ -76,6 +77,7 @@ export interface ConversationApplicationServiceOptions {
 
 export interface WorldGroundingApplication {
   answerWorld(input: WorldGroundingTurn): Promise<string>;
+  compareHybrid(input: HybridWorldGroundingTurn): Promise<string>;
   submitOperational(input: WorldGroundingTurn): Promise<string>;
 }
 
@@ -87,6 +89,15 @@ export interface WorldGroundingTurn {
   readonly userText: string;
   readonly turnPlan: TurnPlan;
   readonly signal?: AbortSignal;
+}
+
+export interface HybridWorldGroundingTurn extends WorldGroundingTurn {
+  readonly sdarPlan: {
+    readonly taskId: string;
+    readonly observedStatus: "INPUT_REQUIRED";
+    readonly internalPhase: "awaiting_plan_confirmation";
+    readonly publishedSummary: string;
+  };
 }
 
 export class ConversationApplicationService {
@@ -132,7 +143,24 @@ export class ConversationApplicationService {
           );
     }
     if (result.requestKind === "hybrid_compare") {
-      return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
+      if (
+        this.options.worldGrounding === undefined ||
+        result.turnPlan === undefined ||
+        result.targetTaskId === undefined
+      ) {
+        return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
+      }
+      const sdarPlan = await this.readPublishedPlanSnapshot(
+        turn,
+        result.targetTaskId,
+      );
+      if (sdarPlan === undefined) {
+        return "AUTHORITY_FUSION_PLAN_UNAVAILABLE";
+      }
+      return this.options.worldGrounding.compareHybrid({
+        ...toWorldGroundingTurn(turn, result.turnPlan),
+        sdarPlan,
+      });
     }
     if (result.requestKind === "new_task") {
       const input = {
@@ -259,6 +287,58 @@ export class ConversationApplicationService {
       userId: turn.userId,
       bindingId: binding.bindingId,
     });
+  }
+
+  private async readPublishedPlanSnapshot(
+    turn: ConversationApplicationTurn,
+    taskId: string,
+  ): Promise<HybridWorldGroundingTurn["sdarPlan"] | undefined> {
+    let observedTask: NormalizedTask | undefined;
+    const fragments: string[] = [];
+    let totalLength = 0;
+    let invalid = false;
+    const observer: TaskCoordinatorObserver = (observation) => {
+      turn.coordinatorObserver?.(observation);
+      if (observation.source !== "task") return;
+      observedTask = observation.value;
+      for (const fragment of observation.fragments) {
+        if (fragments.length >= 128 || totalLength + fragment.length > 8_000) {
+          invalid = true;
+          return;
+        }
+        fragments.push(fragment);
+        totalLength += fragment.length;
+      }
+    };
+    for await (const fragment of this.options.coordinator.statusForTask(
+      { chatId: turn.chatId, userId: turn.userId, taskId },
+      turn.signal,
+      observer,
+    )) {
+      // The observer is the authoritative published snapshot. Iteration ensures
+      // the official A2A getTask() operation and persistence complete.
+      void fragment;
+    }
+    const task = observedTask;
+    const publishedSummary = fragments.join("\n").trim();
+    if (
+      invalid ||
+      task === undefined ||
+      task.taskId !== taskId ||
+      task.state !== "INPUT_REQUIRED" ||
+      task.internalPhase !== "awaiting_plan_confirmation" ||
+      task.phaseMessage === undefined ||
+      task.phaseMessage.trim() === "" ||
+      publishedSummary.length === 0
+    ) {
+      return undefined;
+    }
+    return {
+      taskId,
+      observedStatus: task.state,
+      internalPhase: task.internalPhase,
+      publishedSummary,
+    };
   }
 }
 

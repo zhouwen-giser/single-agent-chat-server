@@ -1,8 +1,8 @@
 # Project status
 
-Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 through S04 are locally
-implemented, while the v0.4 stable candidate is ineligible on external hard
-prerequisites.
+Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 through S04 and the S05 internal
+Authority Fusion implementation are complete, while the S05 live Gate and the
+v0.4 stable candidate remain ineligible on external hard prerequisites.
 
 S00 locks actual fetched SACS main `f60083c`, WSGS candidate `3f9aa7c`, and
 SDAR main `b0caf69`. All 32 frozen `sacs-wsgs-grounding/1.0` artifact hashes
@@ -65,7 +65,25 @@ S04 passed 9/9 phase tests, the 116-unit/121-contract/93-real-PostgreSQL/12-
 security/1-fixture-E2E repository baseline, 0.4.0 container and isolated
 Compose Gates, and CycloneDX SBOM generation. Its WSGS response is an injected
 Fetch fixture through production adapter code, not live WSGS E2E. World-focus
-capsule assembly and hybrid authority fusion remain later work.
+capsule assembly remains later work.
+
+S05 implements a read-only, unique-Task Authority Fusion Preview. SDAR plan
+state is read only through official A2A `getTask()` and bounded published
+fragments; WSGS/GOWM reality must be completed, unambiguous, evidence-bearing,
+and tied to one world version; SACS composes the two authorities without
+inferring equivalence, contradiction, or execution outcome. Durable replay
+avoids a second WSGS POST and no hybrid path submits, follows up, or cancels a
+Task. See [S05 acceptance](reports/v0.4/S05-acceptance.json) and
+[S05 report](reports/v0.4/S05-completion.md).
+
+S05 passed 16/16 phase tests and the updated 122-unit/121-contract/94-real-
+PostgreSQL/12-security/1-fixture-E2E baseline. The genuine combined Gate is
+BLOCKED: an isolated real SDAR A2A Task failed before plan publication without
+a model Provider, and the safety gate requires explicit authorization for this
+SACS task before local model and GOWM test credentials may be loaded into
+temporary SDAR/WSGS processes. `AUTHORITY_FUSION_PREVIEW_READY` is withheld.
+The rebuilt 0.4.0 image and isolated Compose Gate pass; the final S05 CycloneDX
+SBOM contains 3718 components.
 
 SACS v0.3 remains the qualified release candidate represented by merged main
 commit `f60083c` and PR #14. Authorized S00 publication created

@@ -118,8 +118,17 @@ function classifyTurnPlan(
         : { requestKind: "grounded_task", ...withPlan };
     case "TASK_QUERY":
       return { ...classifyTaskDirective(plan, input), ...withPlan };
-    case "HYBRID_PLAN_REALITY_COMPARE":
-      return { requestKind: "hybrid_compare", ...withPlan };
+    case "HYBRID_PLAN_REALITY_COMPARE": {
+      const selected = classifyTaskDirective(plan, input);
+      return selected.requestKind === "status" &&
+        selected.targetTaskId !== undefined
+        ? {
+            requestKind: "hybrid_compare",
+            targetTaskId: selected.targetTaskId,
+            ...withPlan,
+          }
+        : { ...selected, ...withPlan };
+    }
     case "CLARIFICATION":
       return {
         requestKind: "general_chat",

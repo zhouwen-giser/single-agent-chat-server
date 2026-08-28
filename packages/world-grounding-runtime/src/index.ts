@@ -18,11 +18,24 @@ import {
   type WsgsHttpClient,
 } from "../../wsgs-http-adapter/src/index.js";
 import {
+  parseHybridPlanRealityCompare,
   parseOperationalGroundingBundle,
   parseTurnPlan,
+  type HybridPlanRealityCompare,
   type OperationalGroundingBundle,
   type TurnPlan,
 } from "../../world-grounding-contract/src/index.js";
+
+const sdarPublishedPlanSnapshotSchema = z.strictObject({
+  taskId: z
+    .string()
+    .min(1)
+    .max(256)
+    .regex(/^[A-Za-z0-9][A-Za-z0-9._:-]*$/u),
+  observedStatus: z.literal("INPUT_REQUIRED"),
+  internalPhase: z.literal("awaiting_plan_confirmation"),
+  publishedSummary: z.string().min(1).max(8_000),
+});
 
 const compatibilityLockSchema = z
   .object({
@@ -55,6 +68,7 @@ export const worldGroundingRuntimeCodes = [
   "WORLD_GROUNDING_CAPABILITY_UNAVAILABLE",
   "WORLD_GROUNDING_CONTRACT_VIOLATION",
   "WORLD_GROUNDING_FAILED",
+  "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE",
   "SDAR_GROUNDING_EXTENSION_UNAVAILABLE",
 ] as const;
 
@@ -76,6 +90,14 @@ export interface WorldGroundingRuntimeTurn {
   readonly userText: string;
   readonly turnPlan: TurnPlan;
   readonly signal?: AbortSignal;
+}
+
+export type SdarPublishedPlanSnapshot = z.infer<
+  typeof sdarPublishedPlanSnapshotSchema
+>;
+
+export interface HybridGroundingRuntimeTurn extends WorldGroundingRuntimeTurn {
+  readonly sdarPlan: SdarPublishedPlanSnapshot;
 }
 
 export interface WorldGroundingRuntimeOptions {
@@ -108,6 +130,34 @@ export class WorldGroundingRuntime {
         "WORLD_GROUNDING_CONTRACT_VIOLATION",
       );
     }
+    return this.executeReadOnlyGrounding(input, turnPlan, undefined, (result) =>
+      renderSafeWorldAnswer(result),
+    );
+  }
+
+  async compareHybrid(input: HybridGroundingRuntimeTurn): Promise<string> {
+    const turnPlan = parseTurnPlan(input.turnPlan);
+    if (turnPlan.turnRoute !== "HYBRID_PLAN_REALITY_COMPARE") {
+      throw new WorldGroundingRuntimeError(
+        "WORLD_GROUNDING_CONTRACT_VIOLATION",
+      );
+    }
+    const sdarPlan = sdarPublishedPlanSnapshotSchema.parse(input.sdarPlan);
+    return this.executeReadOnlyGrounding(
+      input,
+      turnPlan,
+      asJsonValue({ sdarPlan }),
+      (result, observedAt) =>
+        renderHybridAuthorityFusion(result, sdarPlan, observedAt),
+    );
+  }
+
+  private async executeReadOnlyGrounding(
+    input: WorldGroundingRuntimeTurn,
+    turnPlan: TurnPlan,
+    hashExtension: JsonValue | undefined,
+    renderResult: (result: WsgsGroundingResult, observedAt: string) => string,
+  ): Promise<string> {
     try {
       assertContextAvailable(turnPlan);
     } catch (error) {
@@ -115,7 +165,7 @@ export class WorldGroundingRuntime {
       throw error;
     }
     const plan = planGroundingRequest(turnPlan);
-    const stableHash = stableTurnHash(input, turnPlan);
+    const stableHash = stableTurnHash(input, turnPlan, hashExtension);
     const leaseOwner = this.nextLeaseOwner();
     const outerClaim = await this.options.requests.claimRequest({
       protocol: input.protocol,
@@ -228,7 +278,7 @@ export class WorldGroundingRuntime {
       }
 
       if (result !== undefined) {
-        response = renderSafeWorldAnswer(result);
+        response = renderResult(result, requestCreatedAt);
         if (
           ["COMPLETED", "PARTIAL"].includes(result.status) &&
           groundingClaim.execution.state !== "COMPLETED"
@@ -414,6 +464,112 @@ export function buildOperationalGroundingBundle(input: {
   });
 }
 
+export function buildHybridAuthorityFusion(input: {
+  readonly result: WsgsGroundingResult;
+  readonly sdarPlan: SdarPublishedPlanSnapshot;
+  readonly observedAt: string;
+}): HybridPlanRealityCompare {
+  const result = parseWsgsGroundingResult(input.result);
+  const sdarPlan = sdarPublishedPlanSnapshotSchema.parse(input.sdarPlan);
+  const worldVersions = new Set(
+    result.referenceProducts.map(
+      ({ sourceWorldVersion }) => sourceWorldVersion,
+    ),
+  );
+  if (
+    result.status !== "COMPLETED" ||
+    result.ambiguities.length > 0 ||
+    result.unresolvedMentions.length > 0 ||
+    result.capabilityGaps.length > 0 ||
+    result.referenceProducts.length === 0 ||
+    result.evidenceItems.length === 0 ||
+    result.evidenceItems.some(
+      ({ upstreamStatus }) => upstreamStatus !== "COMPLETED",
+    ) ||
+    worldVersions.size !== 1
+  ) {
+    throw new WorldGroundingRuntimeError(
+      "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE",
+    );
+  }
+  const sourceWorldVersion = [...worldVersions][0];
+  if (sourceWorldVersion === undefined) {
+    throw new WorldGroundingRuntimeError(
+      "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE",
+    );
+  }
+  const publishedSummary = safeText(sdarPlan.publishedSummary).slice(0, 8_000);
+  if (publishedSummary.length === 0) {
+    throw new WorldGroundingRuntimeError(
+      "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE",
+    );
+  }
+  return parseHybridPlanRealityCompare({
+    schemaVersion: "1.0",
+    mode: "HYBRID_PLAN_REALITY_COMPARE",
+    generatedAt: input.observedAt,
+    plan: {
+      authority: "SDAR",
+      taskId: sdarPlan.taskId,
+      observedStatus: sdarPlan.observedStatus,
+      publishedSummary,
+      observedAt: input.observedAt,
+    },
+    reality: {
+      authority: "WSGS_GOWM",
+      groundingId: result.groundingId,
+      resultHash: result.resultHash,
+      sourceWorldVersion,
+      evidenceItemIds: [
+        ...new Set(
+          result.evidenceItems.map(
+            ({ evidenceProductId }) => evidenceProductId,
+          ),
+        ),
+      ],
+      observedAt: input.observedAt,
+    },
+    composition: {
+      authority: "SACS",
+      relationship: "COMPARE_ONLY",
+      summary:
+        "SACS read one published SDAR plan snapshot and one completed WSGS/GOWM reality snapshot. This preview does not infer equivalence, contradiction, execution outcome, or authority changes.",
+      differences: [],
+    },
+  });
+}
+
+export function renderHybridAuthorityFusion(
+  result: WsgsGroundingResult,
+  sdarPlan: SdarPublishedPlanSnapshot,
+  observedAt: string,
+): string {
+  const comparison = buildHybridAuthorityFusion({
+    result,
+    sdarPlan,
+    observedAt,
+  });
+  const observedReality = safeText(renderSafeWorldAnswer(result)).slice(
+    0,
+    4_000,
+  );
+  return [
+    "AUTHORITY_FUSION_PREVIEW_READY",
+    `Plan authority: ${comparison.plan.authority}`,
+    `Task: ${comparison.plan.taskId} (${comparison.plan.observedStatus})`,
+    `Published plan: ${comparison.plan.publishedSummary}`,
+    `Reality authority: ${comparison.reality.authority}`,
+    `Grounding: ${comparison.reality.groundingId}`,
+    `World version: ${String(comparison.reality.sourceWorldVersion)}`,
+    `Observed reality: ${observedReality}`,
+    `Composition: ${comparison.composition.authority} ${comparison.composition.relationship}`,
+    comparison.composition.summary,
+    `Grounding result hash: ${comparison.reality.resultHash}`,
+  ]
+    .join("\n")
+    .slice(0, 16_000);
+}
+
 export function renderSafeWorldAnswer(result: WsgsGroundingResult): string {
   const parsed = parseWsgsGroundingResult(result);
   if (parsed.status === "AMBIGUOUS") {
@@ -567,6 +723,7 @@ function assertResultIdentity(
 function stableTurnHash(
   input: WorldGroundingRuntimeTurn,
   turnPlan: TurnPlan,
+  extension?: JsonValue,
 ): string {
   return hashJsonValue({
     protocol: input.protocol,
@@ -575,6 +732,7 @@ function stableTurnHash(
     externalRequestId: input.externalRequestId,
     userText: input.userText,
     turnPlan,
+    ...(extension === undefined ? {} : { extension }),
   });
 }
 
@@ -664,5 +822,6 @@ function terminalFailureText(code: string): string {
   if (code === "WORLD_GROUNDING_CONTEXT_UNAVAILABLE") return code;
   if (code === "WORLD_GROUNDING_CAPABILITY_UNAVAILABLE") return code;
   if (code === "WORLD_GROUNDING_CONTRACT_VIOLATION") return code;
+  if (code === "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE") return code;
   return "WORLD_GROUNDING_FAILED";
 }

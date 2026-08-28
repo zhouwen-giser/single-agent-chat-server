@@ -1,6 +1,7 @@
 import { describe, expect, it, jest } from "@jest/globals";
 
 import type { SdarTaskCoordinator } from "../packages/chat-runtime/src/index.js";
+import type { TaskBinding } from "../packages/persistence/src/index.js";
 import {
   ConversationApplicationService,
   type ConversationApplicationServiceOptions,
@@ -10,6 +11,7 @@ import type { StructuredChatModel } from "../src/agent/model.js";
 describe("SACS v0.4 world grounding application routing", () => {
   it("routes WORLD_ANSWER through the grounding runtime and never SDAR", async () => {
     const answerWorld = jest.fn(async () => "published safe world answer");
+    const compareHybrid = jest.fn(async () => "unused");
     const submitOperational = jest.fn(async () => "unused");
     const submit = jest.fn();
     const application = createApplication(
@@ -19,7 +21,7 @@ describe("SACS v0.4 world grounding application routing", () => {
           throw new Error("general answer must not run");
         },
       },
-      { answerWorld, submitOperational },
+      { answerWorld, compareHybrid, submitOperational },
       submit,
     );
 
@@ -40,6 +42,7 @@ describe("SACS v0.4 world grounding application routing", () => {
 
   it("returns the exact extension blocker for grounded SDAR work", async () => {
     const answerWorld = jest.fn(async () => "unused");
+    const compareHybrid = jest.fn(async () => "unused");
     const submitOperational = jest.fn(
       async () => "SDAR_GROUNDING_EXTENSION_UNAVAILABLE",
     );
@@ -49,7 +52,7 @@ describe("SACS v0.4 world grounding application routing", () => {
         decideTurn: async () => operationalPlan(),
         answer: async () => "unused",
       },
-      { answerWorld, submitOperational },
+      { answerWorld, compareHybrid, submitOperational },
       submit,
     );
 
@@ -74,6 +77,183 @@ describe("SACS v0.4 world grounding application routing", () => {
       "WORLD_GROUNDING_RUNTIME_UNAVAILABLE",
     );
   });
+
+  it("compares one authorized published SDAR plan with WSGS reality without mutating the Task", async () => {
+    const compareHybrid = jest.fn(async () => "AUTHORITY_FUSION_PREVIEW_READY");
+    const submit = jest.fn();
+    const followUp = jest.fn();
+    const cancel = jest.fn();
+    const observer = jest.fn();
+    const statusForTask = jest.fn(async function* (
+      _input: unknown,
+      _signal: AbortSignal | undefined,
+      observed: (value: unknown) => void,
+    ) {
+      observed({
+        source: "task",
+        value: {
+          taskId: "task-plan-1",
+          contextId: "context-plan-1",
+          state: "INPUT_REQUIRED",
+          internalPhase: "awaiting_plan_confirmation",
+          phaseMessage: "Inspect Road 7 before dispatch.",
+          artifacts: [],
+        },
+        fragments: ["Published plan: inspect Road 7 before dispatch."],
+      });
+      yield "Published plan: inspect Road 7 before dispatch.";
+    });
+    const application = new ConversationApplicationService({
+      repository: repository([binding("task-plan-1", "plan001")]),
+      coordinator: {
+        submit,
+        followUp,
+        cancel,
+        statusForTask,
+      } as unknown as SdarTaskCoordinator,
+      model: {
+        decideTurn: async () => hybridPlan(),
+        answer: async () => "unused",
+      },
+      worldGrounding: {
+        answerWorld: jest.fn(async () => "unused"),
+        compareHybrid,
+        submitOperational: jest.fn(async () => "unused"),
+      },
+    });
+
+    await expect(
+      application.execute({ ...turn(), coordinatorObserver: observer }),
+    ).resolves.toBe("AUTHORITY_FUSION_PREVIEW_READY");
+    expect(statusForTask).toHaveBeenCalledWith(
+      { chatId: "chat-1", userId: "principal-1", taskId: "task-plan-1" },
+      undefined,
+      expect.any(Function),
+    );
+    expect(compareHybrid).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sdarPlan: {
+          taskId: "task-plan-1",
+          observedStatus: "INPUT_REQUIRED",
+          internalPhase: "awaiting_plan_confirmation",
+          publishedSummary: "Published plan: inspect Road 7 before dispatch.",
+        },
+      }),
+    );
+    expect(observer).toHaveBeenCalledTimes(1);
+    expect(submit).not.toHaveBeenCalled();
+    expect(followUp).not.toHaveBeenCalled();
+    expect(cancel).not.toHaveBeenCalled();
+  });
+
+  it("lists ambiguous active Tasks and never reads or compares authority state", async () => {
+    const statusForTask = jest.fn();
+    const compareHybrid = jest.fn(async () => "unused");
+    const application = new ConversationApplicationService({
+      repository: repository([
+        binding("task-plan-1", "plan001"),
+        binding("task-plan-2", "plan002"),
+      ]),
+      coordinator: { statusForTask } as unknown as SdarTaskCoordinator,
+      model: {
+        decideTurn: async () => hybridPlan(),
+        answer: async () => "unused",
+      },
+      worldGrounding: {
+        answerWorld: jest.fn(async () => "unused"),
+        compareHybrid,
+        submitOperational: jest.fn(async () => "unused"),
+      },
+    });
+
+    const response = await application.execute(turn());
+    expect(response).toContain("plan001: WORKING");
+    expect(response).toContain("plan002: WORKING");
+    expect(statusForTask).not.toHaveBeenCalled();
+    expect(compareHybrid).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the published SDAR plan snapshot exceeds its bound", async () => {
+    const compareHybrid = jest.fn(async () => "unused");
+    const statusForTask = jest.fn(async function* (
+      _input: unknown,
+      _signal: AbortSignal | undefined,
+      observed: (value: unknown) => void,
+    ) {
+      observed({
+        source: "task",
+        value: {
+          taskId: "task-plan-1",
+          contextId: "context-plan-1",
+          state: "INPUT_REQUIRED",
+          internalPhase: "awaiting_plan_confirmation",
+          phaseMessage: "Inspect Road 7 before dispatch.",
+          artifacts: [],
+        },
+        fragments: ["x".repeat(8_001)],
+      });
+      yield "bounded status";
+    });
+    const application = new ConversationApplicationService({
+      repository: repository([binding("task-plan-1", "plan001")]),
+      coordinator: { statusForTask } as unknown as SdarTaskCoordinator,
+      model: {
+        decideTurn: async () => hybridPlan(),
+        answer: async () => "unused",
+      },
+      worldGrounding: {
+        answerWorld: jest.fn(async () => "unused"),
+        compareHybrid,
+        submitOperational: jest.fn(async () => "unused"),
+      },
+    });
+
+    await expect(application.execute(turn())).resolves.toBe(
+      "AUTHORITY_FUSION_PLAN_UNAVAILABLE",
+    );
+    expect(compareHybrid).not.toHaveBeenCalled();
+  });
+
+  it("rejects a published Task observation that is not awaiting plan confirmation", async () => {
+    const compareHybrid = jest.fn(async () => "unused");
+    const statusForTask = jest.fn(async function* (
+      _input: unknown,
+      _signal: AbortSignal | undefined,
+      observed: (value: unknown) => void,
+    ) {
+      observed({
+        source: "task",
+        value: {
+          taskId: "task-plan-1",
+          contextId: "context-plan-1",
+          state: "FAILED",
+          internalPhase: "failed",
+          phaseMessage: "Planning failed.",
+          artifacts: [],
+        },
+        fragments: ["The SDAR Task failed before publishing a plan."],
+      });
+      yield "The SDAR Task failed before publishing a plan.";
+    });
+    const application = new ConversationApplicationService({
+      repository: repository([binding("task-plan-1", "plan001")]),
+      coordinator: { statusForTask } as unknown as SdarTaskCoordinator,
+      model: {
+        decideTurn: async () => hybridPlan(),
+        answer: async () => "unused",
+      },
+      worldGrounding: {
+        answerWorld: jest.fn(async () => "unused"),
+        compareHybrid,
+        submitOperational: jest.fn(async () => "unused"),
+      },
+    });
+
+    await expect(application.execute(turn())).resolves.toBe(
+      "AUTHORITY_FUSION_PLAN_UNAVAILABLE",
+    );
+    expect(compareHybrid).not.toHaveBeenCalled();
+  });
 });
 
 function createApplication(
@@ -94,6 +274,26 @@ function createApplication(
     model,
     ...(worldGrounding === undefined ? {} : { worldGrounding }),
   });
+}
+
+function repository(tasks: readonly TaskBinding[]) {
+  return {
+    listActiveTasksForChat: async () => tasks,
+    findAuthorizedTask: async () => undefined,
+    touchTaskReference: async () => undefined,
+  };
+}
+
+function binding(taskId: string, shortId: string): TaskBinding {
+  return {
+    bindingId: `binding-${taskId}`,
+    threadId: "thread-1",
+    sdarTaskId: taskId,
+    sdarContextId: `context-${taskId}`,
+    shortId,
+    status: "WORKING",
+    version: 1,
+  };
 }
 
 function turn() {
@@ -126,6 +326,17 @@ function operationalPlan() {
     groundingRequirement: "RESOLVE_REFERENCES",
     answerMode: "GROUNDED",
     taskDirective: { action: "CREATE" },
+    worldFocusUsage: emptyWorldFocus(),
+  };
+}
+
+function hybridPlan() {
+  return {
+    schemaVersion: "0.4",
+    turnRoute: "HYBRID_PLAN_REALITY_COMPARE",
+    groundingRequirement: "COMPARE_PLAN_REALITY",
+    answerMode: "HYBRID_COMPARISON",
+    taskDirective: { action: "STATUS" },
     worldFocusUsage: emptyWorldFocus(),
   };
 }

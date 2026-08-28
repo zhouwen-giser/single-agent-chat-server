@@ -84,6 +84,8 @@
     "verify:v04:s03": "pnpm verify:v04:s02 && pnpm test:v04:s03 && pnpm test:integration && pnpm verify:migrations && pnpm verify:architecture && pnpm lint && pnpm typecheck && pnpm build",
     "test:v04:s04": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/world-grounding-runtime.unit.test.ts tests/world-grounding-application.unit.test.ts tests/world-grounding-runtime.postgres.int.test.ts",
     "verify:v04:s04": "pnpm verify:v04:s03 && pnpm test:v04:s04 && pnpm verify:architecture && pnpm lint && pnpm typecheck && pnpm build",
+    "test:v04:s05": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/world-grounding-runtime.unit.test.ts tests/world-grounding-application.unit.test.ts tests/world-grounding-runtime.postgres.int.test.ts",
+    "verify:v04:s05": "pnpm verify:v04:s04 && pnpm test:v04:s05 && pnpm verify:architecture && pnpm lint && pnpm typecheck && pnpm build",
     "verify:p13:real-evidence": "node scripts/phase13-real-evidence.mjs",
     "verify:compose": "node scripts/phase13-compose.mjs",
     "verify:phase13": "node scripts/require-phase13-environment.mjs && pnpm verify:ci && pnpm verify:v03:real && pnpm docker:build && pnpm verify:container && pnpm verify:compose && pnpm generate:sbom",

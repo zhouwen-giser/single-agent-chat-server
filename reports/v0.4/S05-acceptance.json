@@ -1,0 +1,87 @@
+{
+  "phase": "S05",
+  "date": "2026-08-28",
+  "decision": "PARTIAL_INTERNAL_AUTHORITY_FUSION_IMPLEMENTED_REAL_GATE_BLOCKED",
+  "deliverables": {
+    "hybridTurnRouting": "IMPLEMENTED_UNIQUE_AUTHORIZED_TASK_ONLY",
+    "sdarPlanObservation": "OFFICIAL_A2A_GET_TASK_PUBLISHED_FIELDS_ONLY",
+    "wsgsRealityObservation": "IMPLEMENTED_READ_ONLY",
+    "authorityComposition": "IMPLEMENTED_COMPARE_ONLY",
+    "durablePreviewReplay": "IMPLEMENTED_DATABASE_BOUNDARY",
+    "liveAuthorityFusionE2e": "BLOCKED_CREDENTIAL_AUTHORIZATION_REQUIRED",
+    "authorityFusionReadyMarker": "WITHHELD"
+  },
+  "authorityInvariants": {
+    "sdarOwnsPlan": true,
+    "wsgsGowmOwnsReality": true,
+    "sacsOwnsCompositionOnly": true,
+    "hybridCallsSdarSubmit": false,
+    "hybridCallsSdarFollowUp": false,
+    "hybridCallsSdarCancel": false,
+    "hybridAutoSelectsAmbiguity": false,
+    "hybridInfersAbsenceFromNoData": false,
+    "hybridInfersEquivalenceOrContradiction": false,
+    "storedPreviewReplayAvoidsSecondWsgsPost": true
+  },
+  "readyRequirements": {
+    "wsgsStatus": "COMPLETED",
+    "ambiguities": 0,
+    "unresolvedMentions": 0,
+    "capabilityGaps": 0,
+    "minimumReferences": 1,
+    "minimumCompletedEvidenceItems": 1,
+    "uniqueSourceWorldVersion": true,
+    "publishedSdarPlanRequired": true
+  },
+  "automatedEvidence": {
+    "s05PhaseTests": {
+      "pass": 16,
+      "fail": 0,
+      "skip": 0
+    },
+    "s05RealPostgresInjectedFetchIntegration": {
+      "pass": 2,
+      "fail": 0,
+      "skip": 0,
+      "liveWsgs": false,
+      "liveSdar": false
+    },
+    "fullRepository": {
+      "unit": 122,
+      "contract": 121,
+      "realPostgresIntegration": 94,
+      "security": 12,
+      "fixtureE2e": 1
+    },
+    "productionSourceFilesChecked": 80,
+    "migrationGate": "PASS_10_CONTIGUOUS_APPEND_ONLY",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "format": "PASS",
+    "build": "PASS",
+    "secrets": "PASS_570_TRACKED_FILES",
+    "containerGate": "PASS_VERSION_0_4_0",
+    "composeGate": "PASS_READY_200_18_TABLES_CLEANUP",
+    "sbom": {
+      "specVersion": "1.7",
+      "components": 3718,
+      "sha256": "1d1aa2624fbdc47e8f111fbc10d01ca5d12fe99e1d9bdaba37f0c251fc3a8f60"
+    }
+  },
+  "realGateAttempt": {
+    "wsgsDevelopmentReadyEvidence": "VERIFIED_63_OF_63_AT_TESTED_COMMIT_75C6D273",
+    "gowmSampleInstance": "OBSERVED_HEALTHY_NOT_MODIFIED",
+    "isolatedSdarA2a": "STARTED_AND_DISCOVERED_HTTP_JSON_1_0",
+    "safeTaskState": "FAILED_BEFORE_PUBLISHED_PLAN_WITHOUT_MODEL_PROVIDER",
+    "modelCredentialConfiguration": "BLOCKED_EXPLICIT_DESTINATION_AUTHORIZATION_REQUIRED",
+    "gowmCredentialInjectionIntoWsgs": "BLOCKED_EXPLICIT_DESTINATION_AUTHORIZATION_REQUIRED",
+    "readyMarkerObserved": false
+  },
+  "externalBlockers": {
+    "currentSacsTaskLocalCredentialAuthorization": "REQUIRED",
+    "wsgsProductionQualified": false,
+    "sdarGroundingExtension": "UNAVAILABLE",
+    "stableCandidateEligible": false
+  },
+  "requiredDisposition": "SACS_V0_4_STABLE_CANDIDATE_BLOCKED"
+}
