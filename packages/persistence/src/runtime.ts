@@ -6,6 +6,7 @@ import type { PersistenceConfig } from "./config.js";
 import { ConversationPersistenceRepository } from "./conversation-repository.js";
 import { InteractionPersistenceRepository } from "./interaction-repository.js";
 import { GroundingPersistenceRepository } from "./grounding-repository.js";
+import { PostgresWorldFocusRepository } from "./world-focus-repository.js";
 import { runMigrations } from "./migrations.js";
 import type { PersistenceObservationSink } from "./observation.js";
 import { ChatPersistenceRepository } from "./repository.js";
@@ -16,6 +17,7 @@ export interface PersistenceRuntime {
   readonly repository: ChatPersistenceRepository;
   readonly interactionRepository: InteractionPersistenceRepository;
   readonly groundingRepository: GroundingPersistenceRepository;
+  readonly worldFocusRepository: PostgresWorldFocusRepository;
   readonly conversationRepository: ConversationPersistenceRepository;
   readonly checkpointer: PostgresSaver;
   readiness(): Promise<boolean>;
@@ -57,6 +59,7 @@ export async function setupPersistence(
         pool,
         config.idempotencyLeaseMs,
       ),
+      worldFocusRepository: new PostgresWorldFocusRepository(pool),
       conversationRepository: new ConversationPersistenceRepository(
         pool,
         observation,

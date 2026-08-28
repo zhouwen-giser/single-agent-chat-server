@@ -17,6 +17,7 @@ export {
 } from "./grounding-repository.js";
 export { InteractionTaskCoordinatorRepository } from "./agui-task-coordinator-repository.js";
 export { InteractionPersistenceRepository } from "./interaction-repository.js";
+export { PostgresWorldFocusRepository } from "./world-focus-repository.js";
 export type {
   AgentCardSnapshot,
   ClientThreadBinding,

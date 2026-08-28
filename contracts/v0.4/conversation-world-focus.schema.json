@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.4:conversation-world-focus",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "principalId",
+    "threadId",
+    "revision",
+    "references",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "principalId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "threadId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "lastGroundingId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "lastGroundingResultHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "references": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "world-focus-reference.schema.json"
+      }
+    },
+    "updatedAt": {
+      "$ref": "common.schema.json#/$defs/dateTime"
+    }
+  }
+}

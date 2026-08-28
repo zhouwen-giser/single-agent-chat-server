@@ -23,12 +23,55 @@ const textSpan = z.strictObject({
   start: z.number().int().nonnegative(),
   end: z.number().int().nonnegative(),
 });
-const worldFocusArrays = z.strictObject({
-  knownWorldReferences: z.array(z.unknown()).max(64),
-  priorGroundings: z.array(z.unknown()).max(16),
-  mapSelections: z.array(z.unknown()).max(32),
-  externalCorrelationHints: z.array(z.unknown()).max(32),
-  externalPredicates: z.array(z.unknown()).max(32),
+export const knownWorldReferenceSchema = z.strictObject({
+  alias: z.string().min(1).max(256).optional(),
+  referenceKey,
+  referenceType: z.string().min(1).max(128),
+  sourceMessageId: identifier,
+  sourceGroundingId: identifier.optional(),
+  validUntil: dateTime.optional(),
+});
+export const priorGroundingReferenceSchema = z.strictObject({
+  groundingId: identifier,
+  resultHash: sha256,
+  selectedProductIds: z.array(identifier).max(64).optional(),
+});
+export const mapSelectionSchema = z.strictObject({
+  selectionId: identifier,
+  label: z.string().max(512).optional(),
+  kind: z.enum(["POINT", "LINE", "AREA", "FEATURE", "ANNOTATION"]),
+  revision: z.number().int().min(1),
+  referenceKey: referenceKey.optional(),
+  geometry: z.record(z.string(), z.json()).optional(),
+  geometryHash: sha256.optional(),
+});
+export const externalCorrelationHintSchema = z.strictObject({
+  hintId: identifier,
+  externalAuthority: z.string().min(1).max(128),
+  kind: z.enum([
+    "EXECUTION_INTENT",
+    "OPERATION_CORRELATION",
+    "EXTERNAL_TASK",
+    "EXTERNAL_STEP",
+    "EXTERNAL_COMMAND",
+  ]),
+  value: z.string().min(1).max(512),
+  relationHint: z
+    .enum(["REPORTS_EXECUTION_OF", "REALIZES", "RELATED_TO"])
+    .optional(),
+  declarationConfidence: z.number().min(0).max(1).optional(),
+});
+export const externalPredicateCapsuleSchema = z.strictObject({
+  schemaUri: z.literal("urn:gowm:v0.4:external-predicate"),
+  schemaHash: sha256,
+  value: z.record(z.string(), z.json()),
+});
+export const groundingContextCapsuleSchema = z.strictObject({
+  knownWorldReferences: z.array(knownWorldReferenceSchema).max(64),
+  priorGroundings: z.array(priorGroundingReferenceSchema).max(16),
+  mapSelections: z.array(mapSelectionSchema).max(32),
+  externalCorrelationHints: z.array(externalCorrelationHintSchema).max(32),
+  externalPredicates: z.array(externalPredicateCapsuleSchema).max(32),
 });
 const groundingRequestSchema = z.strictObject({
   schemaVersion: z.literal("1.0"),
@@ -48,7 +91,7 @@ const groundingRequestSchema = z.strictObject({
     .min(1)
     .max(16)
     .refine((value) => new Set(value).size === value.length),
-  contextCapsule: worldFocusArrays,
+  contextCapsule: groundingContextCapsuleSchema,
   hints: z
     .strictObject({
       mentionHints: z
@@ -299,6 +342,32 @@ export type WsgsGroundingRequest = z.infer<typeof groundingRequestSchema>;
 export type WsgsGroundingResult = z.infer<typeof groundingResultSchema>;
 export type WsgsGroundingJob = z.infer<typeof groundingJobSchema>;
 export type WsgsCapabilities = z.infer<typeof capabilitiesSchema>;
+export type KnownWorldReference = z.infer<typeof knownWorldReferenceSchema>;
+export type PriorGroundingReference = z.infer<
+  typeof priorGroundingReferenceSchema
+>;
+export type MapSelection = z.infer<typeof mapSelectionSchema>;
+export type ExternalCorrelationHint = z.infer<
+  typeof externalCorrelationHintSchema
+>;
+export type ExternalPredicateCapsule = z.infer<
+  typeof externalPredicateCapsuleSchema
+>;
+export type WsgsGroundingContextCapsule = z.infer<
+  typeof groundingContextCapsuleSchema
+>;
+
+export function parseWsgsGroundingRequest(
+  value: unknown,
+): WsgsGroundingRequest {
+  return groundingRequestSchema.parse(value);
+}
+
+export function parseWsgsGroundingContextCapsule(
+  value: unknown,
+): WsgsGroundingContextCapsule {
+  return groundingContextCapsuleSchema.parse(value);
+}
 
 export function parseWsgsGroundingResult(value: unknown): WsgsGroundingResult {
   return groundingResultSchema.parse(value);

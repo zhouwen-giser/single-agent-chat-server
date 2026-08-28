@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.4:pending-grounding-choice",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "choiceId",
+    "principalId",
+    "threadId",
+    "originMessageId",
+    "originGroundingId",
+    "originResultHash",
+    "originTurnPlan",
+    "originRequestPlan",
+    "mentionId",
+    "surfaceText",
+    "candidates",
+    "status",
+    "expiresAt",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "choiceId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "principalId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "threadId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "originMessageId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "originGroundingId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "originResultHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "originTurnPlan": {
+      "type": "object"
+    },
+    "originRequestPlan": {
+      "type": "object"
+    },
+    "mentionId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "surfaceText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ordinal", "productId", "displayName"],
+        "properties": {
+          "ordinal": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "productId": {
+            "$ref": "common.schema.json#/$defs/identifier"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "referenceType": {
+            "type": "string",
+            "maxLength": 128
+          }
+        }
+      }
+    },
+    "status": {
+      "enum": ["OPEN", "SELECTED", "EXPIRED", "CANCELLED"]
+    },
+    "selectedProductId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "expiresAt": {
+      "$ref": "common.schema.json#/$defs/dateTime"
+    },
+    "createdAt": {
+      "$ref": "common.schema.json#/$defs/dateTime"
+    },
+    "updatedAt": {
+      "$ref": "common.schema.json#/$defs/dateTime"
+    }
+  }
+}

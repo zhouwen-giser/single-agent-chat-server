@@ -57,8 +57,11 @@ in WSGS/GOWM, planning state in SDAR, and control transactions in SMPP/Provider.
       strict completed-evidence gates, and durable one-POST replay.
 - [ ] S05 real Gate: blocked pending explicit current-task authorization for
       the local model and GOWM sample credentials. The Ready marker is withheld.
-- [ ] Later phases: genuine external E2E and final acceptance, subject to
-      external prerequisite availability.
+- [x] S06: freeze ConversationWorldFocus, PendingChoice, continuation, and
+      exact WSGS Context Capsule subcontracts; add migration 0011 and a
+      revision-safe PostgreSQL repository.
+- [ ] S07-S12: multi-turn runtime, genuine WSGS E2E, Authority Fusion v2, and
+      development closure.
 
 ## S00 decisions
 
@@ -208,6 +211,29 @@ because no model Provider was configured. Credential injection into temporary
 SDAR/WSGS processes was denied without explicit destination-specific user
 authorization, so the real fusion Gate remains BLOCKED and the Ready marker is
 not emitted.
+
+## S06 decisions
+
+- Keep ReferenceKey opaque and compute object identity from namespace, kind,
+  and ID only. A version change refreshes one durable reference.
+- Persist bounded reference source metadata and the source Message needed by
+  the exact WSGS KnownWorldReference schema. Do not store geometry, full
+  grounding results, or conversation history.
+- Use principal plus Thread as every Focus and PendingChoice scope. Serialize
+  material Focus updates with a row lock and expected revision.
+- Replace every Context Capsule unknown array with the five exact frozen WSGS
+  subcontracts. Unknown authority fields fail validation.
+
+## S06 validation
+
+An isolated PostgreSQL 17.10 database passed all 12 S06 phase tests and the
+full 99-test integration suite with zero skips. The migration Gate passed 11
+contiguous append-only files; migrations 0001 through 0010 retained their
+locked bytes. Architecture across 82 production files, lint, typecheck, build,
+and diff checks passed.
+
+SACS_CONVERSATION_WORLD_FOCUS_CONTRACT_READY is emitted for S06. External
+push and PR update remain withheld pending direct authorization.
 
 ## Current outcome
 
