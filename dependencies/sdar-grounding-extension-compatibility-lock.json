@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0",
+  "profile": "sacs-sdar-operational-grounding/1.0",
+  "status": "UNAVAILABLE",
+  "sdar": {
+    "repository": "https://github.com/zhouwen-giser/skill-driven-agent-runtime.git",
+    "branch": "main",
+    "commit": "b0caf69e9f83bc6702e1c0a85e7ca158c3781d4b",
+    "version": "1.4.1"
+  },
+  "a2a": {
+    "specPatch": "1.0.1",
+    "wire": "1.0",
+    "binding": "HTTP+JSON",
+    "sdk": "@a2a-js/sdk@1.0.0-beta.0"
+  },
+  "dataPartMediaType": null,
+  "schemaSha256": null,
+  "handlerEvidence": null,
+  "validatorEvidence": null,
+  "realE2eEvidence": null,
+  "requiredRuntimeError": "SDAR_GROUNDING_EXTENSION_UNAVAILABLE",
+  "fallback": {
+    "dropDataPart": false,
+    "convertToText": false,
+    "modifySdar": false
+  },
+  "verification": {
+    "method": "exact-string search over fetched origin/main Git object",
+    "profileMatches": 0,
+    "conclusion": "No explicit schema, Data Part media type, handler, validator, or real consumer evidence exists at the locked commit."
+  }
+}

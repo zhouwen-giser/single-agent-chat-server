@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased — SACS v0.4 development
+
+### Added
+
+- S00 exact source locks for SACS, WSGS 0.2.0, indirect GOWM 0.6.3, and SDAR.
+- A byte-level verifier for all 32 frozen `sacs-wsgs-grounding/1.0` artifacts.
+- An explicit fail-closed SDAR grounding-extension compatibility lock and S00
+  contract Gate.
+
+### Candidate status
+
+The WSGS candidate is blocked and current SDAR lacks
+`sacs-sdar-operational-grounding/1.0`. S00 therefore records
+`SACS_V0_4_STABLE_CANDIDATE_BLOCKED`; it does not claim real integration,
+authority-fusion readiness, or publication.
+
 ## 0.3.0 — qualified release candidate
 
 ### Added

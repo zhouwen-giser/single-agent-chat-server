@@ -1,22 +1,20 @@
 # Project status
 
-Status: `QUALIFIED_RELEASE_CANDIDATE` — final publication status is the
-**P14 exact-head publication receipt** on
-[PR #14](https://github.com/zhouwen-giser/single-agent-chat-server/pull/14).
+Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 is locally implemented, while
+the v0.4 stable candidate is ineligible on external hard prerequisites.
 
-P00–P13 are complete. Candidate `9cb0db0` passed the full zero-skip real-model,
-real-SDAR multi-Task, upgrade/restart, network, regression, Docker, Compose and
-SBOM gate. P13 evidence commit `838c9e7` passed Push and PR CI. See
-[P13 acceptance](reports/v0.3/P13-acceptance.json).
+S00 locks actual fetched SACS main `f60083c`, WSGS candidate `ecb0366`, and
+SDAR main `b0caf69`. All 32 frozen `sacs-wsgs-grounding/1.0` artifact hashes
+match. WSGS nevertheless declares a blocked candidate with 195 PASS,
+17 NOT_RUN, and 67 BLOCKED and withholds every required readiness/completion
+marker except `GOWM_0_6_3_CONTRACT_LOCKED`. Current SDAR does not declare or
+consume `sacs-sdar-operational-grounding/1.0`.
 
-P14 synchronized latest main `9734ba2` and prepared the final documents.
-Its final-head rerun, CI and Ready transition occur after the containing
-commit, and are recorded in the PR receipt to preserve the tested SHA. Until a
-`PASSED_READY` receipt exists, final publication is pending. See
-[P14 report](reports/v0.3/P14-completion.md) and
-[publication policy](reports/v0.3/P14-publication.md).
+See [S00 acceptance](reports/v0.4/S00-acceptance.json),
+[completion report](reports/v0.4/S00-completion.md), and
+[publication status](reports/v0.4/S00-publication.md). No WSGS v0.1, fixture,
+text downgrade, or unimplemented SDAR extension is counted as real integration.
 
-The SDAR process/main same-tree discrepancy is an explicit operator waiver,
-not runtime commit attestation. Qualification never confirmed a device plan.
-PR #13 was previously merged by the user; Codex has not merged any PR, tagged,
-created a GitHub Release, deployed production or changed SDAR/SMPP upstreams.
+SACS v0.3 remains the qualified release candidate represented by merged main
+commit `f60083c` and PR #14. S00 has not pushed, opened a Draft PR, merged,
+tagged, released, deployed, or modified WSGS/GOWM/SDAR/SMPP.

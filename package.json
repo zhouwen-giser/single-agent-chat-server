@@ -1,6 +1,6 @@
 {
   "name": "single-agent-chat-server",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "OpenAI-compatible conversational entrance for one SDAR A2A agent.",
   "private": true,
   "type": "module",
@@ -74,6 +74,8 @@
     "verify:v03:migration-restart": "pnpm verify:v03:migration",
     "verify:v03:network": "node scripts/phase13-network-boundary.mjs",
     "verify:v03:real": "pnpm build && node scripts/phase13-real-e2e.mjs && node scripts/phase13-real-evidence.mjs",
+    "test:v04:s00": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v04-source-lock.contract.test.ts",
+    "verify:v04:s00": "pnpm test:v04:s00 && node scripts/verify-v04-s00.mjs",
     "verify:p13:real-evidence": "node scripts/phase13-real-evidence.mjs",
     "verify:compose": "node scripts/phase13-compose.mjs",
     "verify:phase13": "node scripts/require-phase13-environment.mjs && pnpm verify:ci && pnpm verify:v03:real && pnpm docker:build && pnpm verify:container && pnpm verify:compose && pnpm generate:sbom",
