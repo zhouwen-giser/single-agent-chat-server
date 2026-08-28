@@ -27,7 +27,9 @@ a validated/non-stale OperationalGroundingBundle, and separated SDAR-plan,
 WSGS/GOWM-reality, SACS-composition authorities. Its 17/17 contract suite,
 executable authority Gate, 76-file architecture Gate, and typecheck pass. See
 [S01 acceptance](reports/v0.4/S01-acceptance.json) and
-[S01 completion](reports/v0.4/S01-completion.md). Runtime remains on the
+[S01 completion](reports/v0.4/S01-completion.md). Exact functional commit
+`33541ca` passed both GitHub quality and container CI; see
+[S01 publication](reports/v0.4/S01-publication.md). Runtime remains on the
 qualified v0.3 path until later integration phases.
 
 SACS v0.3 remains the qualified release candidate represented by merged main

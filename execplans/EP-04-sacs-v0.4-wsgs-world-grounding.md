@@ -40,6 +40,8 @@ in WSGS/GOWM, planning state in SDAR, and control transactions in SMPP/Provider.
 - [x] S01: freeze bounded TurnPlan, deterministic request-plan ownership,
       validated operational bundle, hybrid authority roles, and architecture
       prohibitions with executable negative tests.
+- [x] S01 publication: functional commit `33541ca` pushed to Draft PR #15;
+      quality and container CI passed.
 - [ ] Later phases: adapter, planner integration, persistence,
       safe operational bundle path, authority-fusion preview, genuine E2E, and
       final acceptance, subject to external prerequisite availability.
@@ -90,6 +92,9 @@ and fail-closed disposition without requiring sibling repositories.
 negative contract tests, runs an executable authority-boundary verifier,
 checks all 76 production TypeScript files against the architecture rules, and
 passes TypeScript typecheck.
+
+Remote CI run `33149718205` passed quality job `98778638464` and container job
+`98779103132` for the exact S01 functional commit.
 
 ## Current outcome
 
