@@ -5,6 +5,7 @@ import { createPostgresCheckpointer } from "./checkpoint.js";
 import type { PersistenceConfig } from "./config.js";
 import { ConversationPersistenceRepository } from "./conversation-repository.js";
 import { InteractionPersistenceRepository } from "./interaction-repository.js";
+import { GroundingPersistenceRepository } from "./grounding-repository.js";
 import { runMigrations } from "./migrations.js";
 import type { PersistenceObservationSink } from "./observation.js";
 import { ChatPersistenceRepository } from "./repository.js";
@@ -14,6 +15,7 @@ const { Pool } = pg;
 export interface PersistenceRuntime {
   readonly repository: ChatPersistenceRepository;
   readonly interactionRepository: InteractionPersistenceRepository;
+  readonly groundingRepository: GroundingPersistenceRepository;
   readonly conversationRepository: ConversationPersistenceRepository;
   readonly checkpointer: PostgresSaver;
   readiness(): Promise<boolean>;
@@ -50,6 +52,10 @@ export async function setupPersistence(
         config.idempotencyLeaseMs,
         config.maxActiveTasksPerChat,
         observation,
+      ),
+      groundingRepository: new GroundingPersistenceRepository(
+        pool,
+        config.idempotencyLeaseMs,
       ),
       conversationRepository: new ConversationPersistenceRepository(
         pool,

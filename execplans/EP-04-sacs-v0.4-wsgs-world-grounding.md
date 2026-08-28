@@ -45,9 +45,14 @@ in WSGS/GOWM, planning state in SDAR, and control transactions in SMPP/Provider.
 - [x] S02: implement the deterministic TurnPlan-to-WSGS planner and the only
       isolated WSGS HTTP adapter with fixed routes, bounded polling, contract
       validation, transport-only auth, and sanitized failure handling.
-- [ ] Later phases: server integration, persistence,
-      safe operational bundle path, authority-fusion preview, genuine E2E, and
-      final acceptance, subject to external prerequisite availability.
+- [x] S02 publication: functional and evidence commits pushed to Draft PR #15;
+      quality and container CI passed.
+- [x] S03: add migration 0010, the seven-state append-only grounding lifecycle,
+      exactly-once reservation keys, immutable events, and expired-lease
+      recovery with real PostgreSQL validation.
+- [ ] Later phases: server integration, safe operational bundle path,
+      authority-fusion preview, genuine E2E, and final acceptance, subject to
+      external prerequisite availability.
 
 ## S00 decisions
 
@@ -114,8 +119,30 @@ Remote CI run `33149718205` passed quality job `98778638464` and container job
 and adapter tests, checks 78 production files against the architecture Gate,
 and passes lint and typecheck.
 
+## S03 decisions
+
+- Add new migration 0010 without changing the byte-frozen 0001 through 0009
+  chain. The database, not an in-memory worker, owns the seven-state lifecycle,
+  immutable results, transition legality, terminal closure, and event history.
+- Bind each grounding to the exact authorized principal, Thread, and
+  interaction request. Use unique WSGS request, grounding idempotency, and SDAR
+  submission keys for the external side-effect boundaries.
+- Replay any request already beyond `GROUNDING_PENDING` instead of reacquiring
+  a WSGS lease. Recover only expired pending/reserved leases with row locking
+  and `SKIP LOCKED`.
+- Treat persistence proof as internal runtime substrate only. Do not claim that
+  the server invokes WSGS or that SDAR consumes the unavailable extension.
+
+## S03 validation
+
+Real PostgreSQL 16.9 validation passed 11 static persistence contracts, 3
+database lifecycle/recovery groups, and the full 92-test integration suite
+with zero database skips. Migration, architecture across 79 production files,
+lint, typecheck, and build are included in `pnpm verify:v04:s03`.
+
 ## Current outcome
 
-S00 may pass as a truthful bootstrap phase while the overall v0.4 stable
-candidate remains externally blocked. No fixture, WSGS v0.1 artifact, text
-downgrade, or unimplemented SDAR extension is accepted as completion evidence.
+S00 through S03 may pass as truthful internal development phases while the
+overall v0.4 stable candidate remains externally blocked. No fixture, WSGS
+v0.1 artifact, text downgrade, or unimplemented SDAR extension is accepted as
+completion evidence.

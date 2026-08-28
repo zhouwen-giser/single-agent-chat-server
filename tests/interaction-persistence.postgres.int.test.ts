@@ -715,6 +715,7 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
         "0007_conversation_history.sql",
         "0008_multi_task_directory.sql",
         "0009_request_result_union.sql",
+        "0010_grounding_lifecycle.sql",
       ]);
     } finally {
       await rm(directory, { recursive: true, force: true });

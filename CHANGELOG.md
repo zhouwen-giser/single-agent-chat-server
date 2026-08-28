@@ -16,11 +16,15 @@
 - A deterministic GroundingRequestPlanner and isolated WSGS HTTP adapter with
   fixed routes, transport-only authentication, bounded responses/polling, and
   sanitized protocol failures.
+- Append-only PostgreSQL grounding execution/events with the required
+  seven-state lifecycle, composite request authorization, exactly-once WSGS
+  and SDAR reservation identities, immutable outputs, terminal closure, and
+  expired-lease recovery.
 
 ### Candidate status
 
 The WSGS candidate is blocked and current SDAR lacks
-`sacs-sdar-operational-grounding/1.0`. S00 and S01 therefore record
+`sacs-sdar-operational-grounding/1.0`. S00 through S03 therefore record
 `SACS_V0_4_STABLE_CANDIDATE_BLOCKED`; it does not claim real integration,
 authority-fusion readiness, or publication.
 

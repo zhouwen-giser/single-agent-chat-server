@@ -1,6 +1,6 @@
 # Project status
 
-Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 and S01 are locally
+Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 through S03 are locally
 implemented, while the v0.4 stable candidate is ineligible on external hard
 prerequisites.
 
@@ -39,6 +39,16 @@ polling, cancellation, and error redaction. This is injected-transport contract
 evidence, not a live WSGS E2E claim. See
 [S02 acceptance](reports/v0.4/S02-acceptance.json) and
 [S02 completion](reports/v0.4/S02-completion.md).
+
+S03 adds append-only migration 0010 and a durable seven-state grounding
+lifecycle with composite request authorization, unique WSGS/grounding/SDAR
+reservation identities, immutable outputs/events, terminal closure, and
+expired-lease recovery. Its 11/11 static contracts, 3/3 real PostgreSQL groups,
+and full 92/92 integration regression passed with zero database skips. See
+[S03 acceptance](reports/v0.4/S03-acceptance.json) and
+[S03 completion](reports/v0.4/S03-completion.md). Server construction, live
+WSGS traffic, and SDAR grounding submission remain later work and are not
+claimed by this phase.
 
 SACS v0.3 remains the qualified release candidate represented by merged main
 commit `f60083c` and PR #14. Authorized S00 publication created

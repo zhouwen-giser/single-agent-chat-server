@@ -7,6 +7,14 @@ export {
 } from "./conversation-repository.js";
 export { parsePersistenceConfig, type PersistenceConfig } from "./config.js";
 export { hashJson } from "./hash.js";
+export {
+  GroundingPersistenceRepository,
+  groundingStates,
+  type GroundingClaim,
+  type GroundingEvent,
+  type GroundingExecution,
+  type GroundingState,
+} from "./grounding-repository.js";
 export { InteractionTaskCoordinatorRepository } from "./agui-task-coordinator-repository.js";
 export { InteractionPersistenceRepository } from "./interaction-repository.js";
 export type {

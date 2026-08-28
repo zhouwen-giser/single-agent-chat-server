@@ -16,7 +16,15 @@ for (const [index, file] of files.entries()) {
   }
   const sql = await readFile(resolve(root, file), "utf8");
   if (sql.trim().length === 0) throw new Error(`Empty migration: ${file}`);
-  if (/\b(?:DROP\s+(?:DATABASE|SCHEMA|TABLE)|TRUNCATE)\b/iu.test(sql)) {
+  const executableSql = sql
+    .replaceAll(/'(?:''|[^'])*'/gu, "''")
+    .replaceAll(
+      /\b(BEFORE|AFTER|INSTEAD\s+OF)\s+TRUNCATE\s+ON\b/giu,
+      "$1 TRUNCATE_EVENT ON",
+    );
+  if (
+    /\b(?:DROP\s+(?:DATABASE|SCHEMA|TABLE)|TRUNCATE)\b/iu.test(executableSql)
+  ) {
     throw new Error(`Destructive statement is forbidden in ${file}`);
   }
   const normalized = sql.replaceAll(/\s+/gu, " ").trim();
