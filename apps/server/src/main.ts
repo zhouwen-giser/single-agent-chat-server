@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import process from "node:process";
 
+import sdarGroundingCompatibilityLock from "../../../dependencies/sdar-grounding-extension-compatibility-lock.json" with { type: "json" };
+
 import {
   createInteractionAgUiRunHandler,
   type AgUiRunHandler,
@@ -32,6 +34,11 @@ import {
   createSdarA2aClient,
   parseSdarA2aConfig,
 } from "../../../packages/sdar-a2a-adapter/src/index.js";
+import {
+  createWsgsHttpClient,
+  parseWsgsHttpConfig,
+} from "../../../packages/wsgs-http-adapter/src/index.js";
+import { WorldGroundingRuntime } from "../../../packages/world-grounding-runtime/src/index.js";
 import { adaptConversationModel } from "../../../src/agent/model.js";
 
 import type { ChatRunner, ChatRunnerResult } from "./api/openai-routes.js";
@@ -78,6 +85,12 @@ try {
     rawConversationModel === undefined
       ? undefined
       : instrumentChatModel(rawConversationModel, telemetry);
+  const worldGrounding = new WorldGroundingRuntime({
+    requests: activePersistence.interactionRepository,
+    grounding: activePersistence.groundingRepository,
+    wsgs: createWsgsHttpClient(parseWsgsHttpConfig(process.env)),
+    sdarCompatibilityLock: sdarGroundingCompatibilityLock,
+  });
   const chatModel =
     conversationModel === undefined
       ? undefined
@@ -111,6 +124,7 @@ try {
     checkpointer: activePersistence.checkpointer,
     coordinator: agUiCoordinator,
     model: chatModel,
+    worldGrounding,
     assembleContext,
     importHistory: historyImporter.import.bind(historyImporter),
     onClassificationError: (error) => {
@@ -181,6 +195,7 @@ try {
       checkpointer: activePersistence.checkpointer,
       coordinator,
       model: chatModel,
+      worldGrounding,
       assembleContext,
       importHistory: historyImporter.import.bind(historyImporter),
       onClassificationError: (error) => {
@@ -276,9 +291,53 @@ try {
     JSON.stringify({
       event: "server.start.failed",
       errorType: error instanceof Error ? error.name : "UnknownError",
+      ...safeZodIssueSummary(error),
     }) + String.fromCharCode(10),
   );
   process.exitCode = 1;
+}
+
+function safeZodIssueSummary(error: unknown):
+  | {
+      readonly issues: readonly {
+        readonly code: string;
+        readonly path: string;
+      }[];
+    }
+  | Record<string, never> {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("issues" in error) ||
+    !Array.isArray(error.issues)
+  ) {
+    return {};
+  }
+  const issues = error.issues.slice(0, 16).flatMap((issue: unknown) => {
+    if (typeof issue !== "object" || issue === null || !("code" in issue)) {
+      return [];
+    }
+    const code =
+      typeof issue.code === "string"
+        ? issue.code.replaceAll(/[^A-Za-z0-9_.:-]/gu, "_").slice(0, 64)
+        : "unknown";
+    const rawPath =
+      "path" in issue && Array.isArray(issue.path) ? issue.path : [];
+    const path = rawPath
+      .filter(
+        (segment: unknown): segment is string | number =>
+          typeof segment === "string" || typeof segment === "number",
+      )
+      .map((segment) =>
+        String(segment)
+          .replaceAll(/[^A-Za-z0-9_.:-]/gu, "_")
+          .slice(0, 64),
+      )
+      .join(".")
+      .slice(0, 256);
+    return [{ code, path }];
+  });
+  return issues.length === 0 ? {} : { issues };
 }
 
 function withActiveTaskRefresh(

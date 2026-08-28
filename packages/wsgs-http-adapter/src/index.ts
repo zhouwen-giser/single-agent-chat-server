@@ -12,6 +12,12 @@ const identifier = z
   .regex(/^[A-Za-z0-9][A-Za-z0-9._:-]*$/u);
 const sha256 = z.string().regex(/^sha256:[0-9a-f]{64}$/u);
 const dateTime = z.iso.datetime();
+const referenceKey = z.strictObject({
+  namespace: z.literal("gowm"),
+  kind: z.string().min(1).max(64),
+  id: z.string().regex(/^wrf_[0-9a-f]{32}$/u),
+  version: z.string().min(1).max(128),
+});
 const textSpan = z.strictObject({
   encoding: z.literal("UTF16_CODE_UNIT"),
   start: z.number().int().nonnegative(),
@@ -95,6 +101,69 @@ const terminalStatus = z.enum([
   "FAILED",
   "CANCELLED",
 ]);
+const referenceProductSchema = z.strictObject({
+  productId: identifier,
+  productKind: z.enum([
+    "RESOLVED_REFERENCE",
+    "DERIVED_REFERENCE",
+    "REFERENCE_SET",
+    "QUERY_RESULT",
+  ]),
+  referenceKey,
+  referenceType: z.string().max(128),
+  displayName: z.string().max(512),
+  matchedBy: z.string().max(64).optional(),
+  matchScore: z.number().min(0).max(1).optional(),
+  stateConfidence: z.number().min(0).max(1).optional(),
+  sourceOperation: z.string().max(128),
+  sourceWorldVersion: z.number().int().nonnegative(),
+  validUntil: dateTime.optional(),
+  revalidationRequired: z.boolean().optional(),
+  safeSummary: z.record(z.string(), z.json()).optional(),
+});
+const evidenceItemSchema = z.strictObject({
+  evidenceProductId: identifier,
+  productKind: z.enum([
+    "WORLD_FACT",
+    "WORLD_GEOMETRY",
+    "PROVENANCE",
+    "EVENT_TIMELINE",
+    "OPERATIONAL_TASK",
+    "CORRELATION_FINDING",
+    "PREDICATE_EVALUATION",
+    "OBSERVABILITY_ASSESSMENT",
+    "CAPABILITY_RESULT",
+  ]),
+  authority: z.string().min(1).max(128),
+  sourceOperation: z.string().max(128),
+  sourceProvider: z.string().max(128).optional(),
+  sourceQueryId: z.string().max(256).optional(),
+  sourceNodeId: z.string().max(64).optional(),
+  upstreamStatus: z.enum(["COMPLETED", "PARTIAL", "NO_DATA", "INDETERMINATE"]),
+  payloadSchemaUri: z.string().max(512),
+  payloadSchemaHash: sha256,
+  safePayload: z.json().optional(),
+  payloadRef: z.string().max(1_024).optional(),
+  dataSnapshot: z.record(z.string(), z.json()).optional(),
+  computeSnapshot: z.record(z.string(), z.json()).optional(),
+  receiptIds: z.array(z.string().max(256)).max(256),
+  evidenceIds: z.array(z.string().max(256)).max(1_000),
+  unknowns: z.array(z.string().max(4_096)).max(128),
+  warnings: z.array(z.string().max(4_096)).max(128),
+});
+const groundingAmbiguitySchema = z.strictObject({
+  ambiguityId: identifier,
+  mentionId: identifier,
+  surfaceText: z.string().max(512),
+  candidateProductIds: z.array(identifier).min(2).max(20),
+  reason: z.enum([
+    "MULTIPLE_EXACT_MATCHES",
+    "MULTIPLE_PLAUSIBLE_MATCHES",
+    "NAMESPACE_CONFLICT",
+    "CONTEXT_CONFLICT",
+    "MAP_TEXT_CONFLICT",
+  ]),
+});
 const groundingResultSchema = z.strictObject({
   schemaVersion: z.literal("1.0"),
   requestId: identifier,
@@ -107,10 +176,10 @@ const groundingResultSchema = z.strictObject({
   mentions: z.array(z.unknown()).max(32),
   semanticFrame: z.unknown().optional(),
   groundingGraph: z.unknown().optional(),
-  referenceProducts: z.array(z.unknown()).max(1_000),
-  evidenceItems: z.array(z.unknown()).max(1_000),
+  referenceProducts: z.array(referenceProductSchema).max(1_000),
+  evidenceItems: z.array(evidenceItemSchema).max(1_000),
   gowmQueries: z.array(z.unknown()).max(64).optional(),
-  ambiguities: z.array(z.unknown()).max(32),
+  ambiguities: z.array(groundingAmbiguitySchema).max(32),
   unresolvedMentions: z.array(z.unknown()).max(32),
   capabilityGaps: z.array(z.unknown()).max(64),
   warnings: z.array(z.string().max(4_096)).max(256),
@@ -230,6 +299,10 @@ export type WsgsGroundingRequest = z.infer<typeof groundingRequestSchema>;
 export type WsgsGroundingResult = z.infer<typeof groundingResultSchema>;
 export type WsgsGroundingJob = z.infer<typeof groundingJobSchema>;
 export type WsgsCapabilities = z.infer<typeof capabilitiesSchema>;
+
+export function parseWsgsGroundingResult(value: unknown): WsgsGroundingResult {
+  return groundingResultSchema.parse(value);
+}
 
 export interface WsgsHttpAdapterConfig {
   readonly baseUrl: string;

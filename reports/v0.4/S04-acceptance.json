@@ -1,0 +1,64 @@
+{
+  "phase": "S04",
+  "date": "2026-08-28",
+  "decision": "PASS_INTERNAL_WORLD_RUNTIME_WITH_INJECTED_HTTP_NOT_LIVE_WSGS_E2E",
+  "deliverables": {
+    "productionTurnPlanRouting": "ACTIVATED_WITH_V03_COMPATIBILITY",
+    "worldGroundingRuntime": "IMPLEMENTED",
+    "serverWsgsAdapterConstruction": "IMPLEMENTED_CONDITIONAL_USE",
+    "safeWorldAnswer": "PUBLISHED_SAFE_FIELDS_ONLY",
+    "durableRequestReplay": "IMPLEMENTED_DATABASE_BOUNDARY",
+    "operationalGroundingBundleBuilder": "IMPLEMENTED_VALIDATED_REFERENCES_ONLY",
+    "sdarGroundingSubmission": "BLOCKED_EXTENSION_UNAVAILABLE",
+    "hybridAuthorityFusion": "NOT_STARTED_S05",
+    "realWsgsE2e": "NOT_RUN"
+  },
+  "runtimeInvariants": {
+    "worldAnswerCallsSdar": false,
+    "groundedSdarWithoutExtensionCallsWsgs": false,
+    "groundedSdarWithoutExtensionCallsSdar": false,
+    "requiredSdarFailureCode": "SDAR_GROUNDING_EXTENSION_UNAVAILABLE",
+    "suggestedUniqueAutoAccept": false,
+    "absenceInferredFromNoData": false,
+    "ambiguityAutoSelected": false,
+    "worldFocusCapsuleData": "FAIL_CLOSED_UNTIL_CONTEXT_ASSEMBLY",
+    "storedResultReplayAvoidsSecondWsgsPost": true
+  },
+  "automatedEvidence": {
+    "s04UnitTests": {
+      "pass": 8,
+      "fail": 0
+    },
+    "s04RealPostgresInjectedFetchIntegration": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0,
+      "liveWsgs": false
+    },
+    "fullRepository": {
+      "unit": 116,
+      "contract": 121,
+      "realPostgresIntegration": 93,
+      "security": 12,
+      "fixtureE2e": 1
+    },
+    "productionSourceFilesChecked": 80,
+    "migrationGate": "PASS_10_CONTIGUOUS_APPEND_ONLY",
+    "containerGate": "PASS_VERSION_0_4_0",
+    "composeGate": "PASS_READY_200_18_TABLES_CLEANUP",
+    "sbom": {
+      "specVersion": "1.7",
+      "components": 3718,
+      "sha256": "c5c220d0eba1aeb253f1e671999ecefbaeae785981c9810f29a63ce4d154a80c"
+    },
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "format": "PASS"
+  },
+  "externalBlockers": {
+    "wsgsProductionQualified": false,
+    "sdarGroundingExtension": "UNAVAILABLE",
+    "stableCandidateEligible": false
+  },
+  "requiredDisposition": "SACS_V0_4_STABLE_CANDIDATE_BLOCKED"
+}

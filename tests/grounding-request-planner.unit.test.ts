@@ -81,6 +81,9 @@ function turnPlan(
   groundingRequirement: TurnPlan["groundingRequirement"],
   hybrid: boolean,
 ): TurnPlan {
+  const operational =
+    groundingRequirement === "RESOLVE_REFERENCES" ||
+    groundingRequirement === "VALIDATE_REFERENCES";
   return {
     schemaVersion: "0.4",
     turnRoute:
@@ -88,7 +91,9 @@ function turnPlan(
         ? "GENERAL_CHAT"
         : hybrid
           ? "HYBRID_PLAN_REALITY_COMPARE"
-          : "WORLD_ANSWER",
+          : operational
+            ? "SDAR_TASK"
+            : "WORLD_ANSWER",
     groundingRequirement,
     answerMode:
       groundingRequirement === "NONE"
@@ -103,7 +108,9 @@ function turnPlan(
             selector: { reference: "focused" as const },
           },
         }
-      : {}),
+      : operational
+        ? { taskDirective: { action: "CREATE" as const } }
+        : {}),
     worldFocusUsage: noFocus,
   };
 }

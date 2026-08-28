@@ -50,9 +50,11 @@ in WSGS/GOWM, planning state in SDAR, and control transactions in SMPP/Provider.
 - [x] S03: add migration 0010, the seven-state append-only grounding lifecycle,
       exactly-once reservation keys, immutable events, and expired-lease
       recovery with real PostgreSQL validation.
-- [ ] Later phases: server integration, safe operational bundle path,
-      authority-fusion preview, genuine E2E, and final acceptance, subject to
-      external prerequisite availability.
+- [x] S04: activate production TurnPlan routing, construct the isolated WSGS
+      runtime, persist and replay safe world answers, and keep operational SDAR
+      submission fail-closed behind the unavailable typed extension.
+- [ ] Later phases: authority-fusion preview, genuine E2E, and final
+      acceptance, subject to external prerequisite availability.
 
 ## S00 decisions
 
@@ -140,9 +142,40 @@ database lifecycle/recovery groups, and the full 92-test integration suite
 with zero database skips. Migration, architecture across 79 production files,
 lint, typecheck, and build are included in `pnpm verify:v04:s03`.
 
+## S04 decisions
+
+- Activate the strict v0.4 TurnPlan in production while preserving the
+  qualified v0.3 structured-decision fallback. Keep the route/grounding/answer
+  tuple constraints identical in Zod and JSON Schema.
+- Construct one WorldGroundingRuntime for both OpenAI and AG-UI. Claim durable
+  request and grounding identities before WSGS, then persist and replay the
+  deterministic safe Message without another WSGS POST.
+- Render only strict published safe fields. Ambiguity requires clarification;
+  unresolved and NO_DATA outcomes never prove absence.
+- Build operational bundles only from completed validation, live selected
+  references, and explicit ambiguity confirmation. Because the SDAR extension
+  remains unavailable, return the required code before either external call
+  and forbid every downgrade.
+- Fail closed when a TurnPlan asks to use world-focus capsule data until that
+  bounded data assembly exists. Leave hybrid comparison to S05.
+
+## S04 validation
+
+`pnpm verify:v04:s04` cumulatively passed S00 through S04, including 9/9 S04
+tests and the full 93/93 real PostgreSQL integration suite. The complete
+repository baseline passed 116 unit, 121 contract, 93 integration, 12 security,
+and one fixture E2E test. Architecture across 80 production files, migration,
+lint, typecheck, build, format, OpenAI predecessor, A2A, AG-UI, workflow,
+license, and secret Gates passed.
+
+The 0.4.0 container, isolated Compose readiness/security/cleanup checks, and
+CycloneDX SBOM passed. Compose evidence uses no live WSGS. The S04 database
+integration uses production adapter code with an injected Fetch response and
+is explicitly not live WSGS E2E evidence.
+
 ## Current outcome
 
-S00 through S03 may pass as truthful internal development phases while the
+S00 through S04 may pass as truthful internal development phases while the
 overall v0.4 stable candidate remains externally blocked. No fixture, WSGS
 v0.1 artifact, text downgrade, or unimplemented SDAR extension is accepted as
 completion evidence.

@@ -20,13 +20,22 @@
   seven-state lifecycle, composite request authorization, exactly-once WSGS
   and SDAR reservation identities, immutable outputs, terminal closure, and
   expired-lease recovery.
+- Production v0.4 TurnPlan routing and one isolated WorldGroundingRuntime shared
+  by OpenAI and AG-UI, with durable one-call WSGS execution and safe Message
+  replay.
+- Strict WSGS reference, evidence, and ambiguity result subcontracts plus
+  deterministic safe world-answer rendering that never infers absence from
+  unresolved or NO_DATA outcomes.
+- A validated-reference OperationalGroundingBundle builder and exact
+  fail-closed SDAR extension Gate with no raw-text or ungrounded downgrade.
 
 ### Candidate status
 
 The WSGS candidate is blocked and current SDAR lacks
-`sacs-sdar-operational-grounding/1.0`. S00 through S03 therefore record
-`SACS_V0_4_STABLE_CANDIDATE_BLOCKED`; it does not claim real integration,
-authority-fusion readiness, or publication.
+`sacs-sdar-operational-grounding/1.0`. S00 through S04 therefore record
+`SACS_V0_4_STABLE_CANDIDATE_BLOCKED`. S04 real PostgreSQL plus
+production-adapter/injected-fetch evidence is not live WSGS E2E and does not
+claim authority-fusion readiness or publication.
 
 ## 0.3.0 — qualified release candidate
 

@@ -86,7 +86,21 @@ describe("OpenAI-compatible conversation model", () => {
     const model = new OpenAiCompatibleConversationModel(baseConfig, {
       fetch: async (_input, init) => {
         requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
-        return completion(JSON.stringify({ kind: "general_chat" }));
+        return completion(
+          JSON.stringify({
+            schemaVersion: "0.4",
+            turnRoute: "GENERAL_CHAT",
+            groundingRequirement: "NONE",
+            answerMode: "DIRECT",
+            worldFocusUsage: {
+              knownWorldReferences: false,
+              priorGrounding: false,
+              mapSelections: false,
+              externalCorrelationHints: false,
+              externalPredicates: false,
+            },
+          }),
+        );
       },
     });
 
@@ -111,7 +125,10 @@ describe("OpenAI-compatible conversation model", () => {
         },
         currentUserText: "What was the codename from the prior turn?",
       }),
-    ).resolves.toEqual({ kind: "general_chat" });
+    ).resolves.toMatchObject({
+      schemaVersion: "0.4",
+      turnRoute: "GENERAL_CHAT",
+    });
 
     const messages = requestBody?.messages as
       | readonly { readonly role: string; readonly content: string }[]
@@ -121,10 +138,10 @@ describe("OpenAI-compatible conversation model", () => {
       "questions about prior conversation",
     );
     expect(messages?.[0]?.content).toContain(
-      "Use clarification only when a requested Task operation",
+      "Use CLARIFICATION only when a requested Task operation",
     );
     expect(messages?.[0]?.content).toContain(
-      "Use task_status for status, result, published history",
+      "Use TASK_QUERY with STATUS for status, result, published history",
     );
     expect(messages?.[0]?.content).toContain(
       "never use it for reading or changing an existing Task",
@@ -163,7 +180,22 @@ describe("OpenAI-compatible conversation model", () => {
       model: "general-chat-model",
       temperature: 0,
       max_tokens: 2_048,
-      response_format: { type: "json_schema" },
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "sacs_turn_plan_v04",
+          strict: true,
+          schema: {
+            properties: {
+              schemaVersion: { const: "0.4" },
+              turnRoute: {},
+              groundingRequirement: {},
+              answerMode: {},
+              worldFocusUsage: {},
+            },
+          },
+        },
+      },
     });
   });
 

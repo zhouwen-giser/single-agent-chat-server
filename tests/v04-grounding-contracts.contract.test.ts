@@ -55,6 +55,76 @@ describe("SACS v0.4 world-grounding authority contracts", () => {
     ).toMatchObject({ turnRoute: "WORLD_ANSWER" });
   });
 
+  it("rejects inconsistent route, answer, grounding, and Task action tuples", () => {
+    const base = {
+      schemaVersion: "0.4",
+      worldFocusUsage,
+    };
+    expect(() =>
+      parseTurnPlan({
+        ...base,
+        turnRoute: "WORLD_ANSWER",
+        groundingRequirement: "RESOLVE_REFERENCES",
+        answerMode: "DIRECT",
+      }),
+    ).toThrow();
+    expect(() =>
+      parseTurnPlan({
+        ...base,
+        turnRoute: "SDAR_TASK",
+        groundingRequirement: "RESOLVE_REFERENCES",
+        answerMode: "GROUNDED",
+        taskDirective: { action: "STATUS" },
+      }),
+    ).toThrow();
+    expect(() =>
+      parseTurnPlan({
+        ...base,
+        turnRoute: "HYBRID_PLAN_REALITY_COMPARE",
+        groundingRequirement: "COMPARE_PLAN_REALITY",
+        answerMode: "HYBRID_COMPARISON",
+        taskDirective: { action: "CANCEL", selector: { kind: "focused" } },
+      }),
+    ).toThrow();
+  });
+
+  it("keeps JSON Schema and runtime tuple validation aligned", () => {
+    const ajv = new Ajv2020({ strict: false, validateFormats: false });
+    ajv.addSchema(readJson("contracts/v0.3/task-selector.schema.json"));
+    const validate = ajv.compile(
+      readJson("contracts/v0.4/turn-plan.schema.json"),
+    );
+    const invalidPlans = [
+      {
+        schemaVersion: "0.4",
+        turnRoute: "WORLD_ANSWER",
+        groundingRequirement: "RESOLVE_REFERENCES",
+        answerMode: "DIRECT",
+        worldFocusUsage,
+      },
+      {
+        schemaVersion: "0.4",
+        turnRoute: "SDAR_TASK",
+        groundingRequirement: "RESOLVE_REFERENCES",
+        answerMode: "GROUNDED",
+        taskDirective: { action: "STATUS" },
+        worldFocusUsage,
+      },
+      {
+        schemaVersion: "0.4",
+        turnRoute: "HYBRID_PLAN_REALITY_COMPARE",
+        groundingRequirement: "COMPARE_PLAN_REALITY",
+        answerMode: "HYBRID_COMPARISON",
+        taskDirective: { action: "CANCEL", selector: { kind: "focused" } },
+        worldFocusUsage,
+      },
+    ];
+    for (const plan of invalidPlans) {
+      expect(validate(plan)).toBe(false);
+      expect(() => parseTurnPlan(plan)).toThrow();
+    }
+  });
+
   it.each([
     "operation",
     "requestedProducts",

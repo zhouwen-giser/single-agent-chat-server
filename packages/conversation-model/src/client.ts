@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import {
   parseTurnDecision,
-  turnDecisionSchema,
   type ConversationModel,
   type ConversationModelInput,
   type ConversationSummaryInput,
@@ -19,6 +18,10 @@ import {
   summaryPrompt,
   type ModelPromptMessage,
 } from "./prompts.js";
+import {
+  parseTurnPlan,
+  turnPlanSchema,
+} from "../../world-grounding-contract/src/index.js";
 
 const completionResponseSchema = z
   .object({
@@ -87,12 +90,16 @@ export class OpenAiCompatibleConversationModel implements ConversationModel {
       );
     }
     try {
-      return parseTurnDecision(parsed);
+      return parseTurnPlan(parsed);
     } catch {
-      throw new ConversationModelError(
-        "CONVERSATION_MODEL_OUTPUT_INVALID",
-        "Conversation model returned a decision outside the allowed schema.",
-      );
+      try {
+        return parseTurnDecision(parsed);
+      } catch {
+        throw new ConversationModelError(
+          "CONVERSATION_MODEL_OUTPUT_INVALID",
+          "Conversation model returned a decision outside the allowed schema.",
+        );
+      }
     }
   }
 
@@ -182,9 +189,9 @@ export class OpenAiCompatibleConversationModel implements ConversationModel {
                       ? {
                           type: "json_schema",
                           json_schema: {
-                            name: "sacs_turn_decision",
+                            name: "sacs_turn_plan_v04",
                             strict: true,
-                            schema: z.toJSONSchema(turnDecisionSchema),
+                            schema: z.toJSONSchema(turnPlanSchema),
                           },
                         }
                       : { type: "json_object" },

@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 
-const image = process.env.CHAT_SERVER_IMAGE ?? "single-agent-chat-server:0.3.0";
+const image = process.env.CHAT_SERVER_IMAGE ?? "single-agent-chat-server:0.4.0";
 const result = spawnSync(
   "docker",
   ["image", "inspect", image, "--format", "{{json .Config}}"],
@@ -26,9 +26,9 @@ if (!Array.isArray(config.Healthcheck?.Test)) {
 if (config.ExposedPorts?.["3000/tcp"] === undefined) {
   throw new Error("Container image does not expose 3000/tcp");
 }
-if (config.Labels?.["org.opencontainers.image.version"] !== "0.3.0") {
-  throw new Error("Container image must carry the SACS 0.3.0 OCI version");
+if (config.Labels?.["org.opencontainers.image.version"] !== "0.4.0") {
+  throw new Error("Container image must carry the SACS 0.4.0 OCI version");
 }
 process.stdout.write(
-  `Container metadata gate passed: version=0.3.0, user=${config.User}, healthcheck=present.\n`,
+  `Container metadata gate passed: version=0.4.0, user=${config.User}, healthcheck=present.\n`,
 );

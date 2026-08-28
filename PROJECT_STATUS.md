@@ -1,6 +1,6 @@
 # Project status
 
-Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 through S03 are locally
+Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 through S04 are locally
 implemented, while the v0.4 stable candidate is ineligible on external hard
 prerequisites.
 
@@ -49,6 +49,23 @@ and full 92/92 integration regression passed with zero database skips. See
 [S03 completion](reports/v0.4/S03-completion.md). Server construction, live
 WSGS traffic, and SDAR grounding submission remain later work and are not
 claimed by this phase.
+
+S04 activates strict v0.4 TurnPlan routing in both production entry paths and
+constructs the isolated WSGS runtime. Safe world answers use only published
+strict result fields, ambiguity never auto-selects, NO_DATA never becomes an
+absence conclusion, and durable replay avoids a second WSGS POST. The
+OperationalGroundingBundle builder accepts only live validated references and
+explicit ambiguity confirmation. Current SDAR grounding submission returns the
+exact extension-unavailable code before either external call and never
+downgrades to text or an ungrounded Task. See
+[S04 acceptance](reports/v0.4/S04-acceptance.json) and
+[S04 completion](reports/v0.4/S04-completion.md).
+
+S04 passed 9/9 phase tests, the 116-unit/121-contract/93-real-PostgreSQL/12-
+security/1-fixture-E2E repository baseline, 0.4.0 container and isolated
+Compose Gates, and CycloneDX SBOM generation. Its WSGS response is an injected
+Fetch fixture through production adapter code, not live WSGS E2E. World-focus
+capsule assembly and hybrid authority fusion remain later work.
 
 SACS v0.3 remains the qualified release candidate represented by merged main
 commit `f60083c` and PR #14. Authorized S00 publication created

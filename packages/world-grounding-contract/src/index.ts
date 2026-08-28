@@ -155,6 +155,67 @@ export const turnPlanSchema = z
         path: ["taskDirective"],
       });
     }
+    const expected = {
+      GENERAL_CHAT: { grounding: "NONE", answer: "DIRECT" },
+      WORLD_ANSWER: {
+        grounding: "ANSWER_WORLD_QUERY",
+        answer: "GROUNDED",
+      },
+      TASK_QUERY: { grounding: "NONE", answer: "TASK_STATUS" },
+      HYBRID_PLAN_REALITY_COMPARE: {
+        grounding: "COMPARE_PLAN_REALITY",
+        answer: "HYBRID_COMPARISON",
+      },
+      CLARIFICATION: { grounding: "NONE", answer: "CLARIFICATION" },
+    } as const;
+    if (value.turnRoute !== "SDAR_TASK") {
+      const routeExpected = expected[value.turnRoute];
+      if (value.groundingRequirement !== routeExpected.grounding) {
+        context.addIssue({
+          code: "custom",
+          message: "turn route and grounding requirement are inconsistent",
+          path: ["groundingRequirement"],
+        });
+      }
+      if (value.answerMode !== routeExpected.answer) {
+        context.addIssue({
+          code: "custom",
+          message: "turn route and answer mode are inconsistent",
+          path: ["answerMode"],
+        });
+      }
+    } else if (
+      value.taskDirective?.action !== "CREATE" ||
+      value.answerMode !==
+        (value.groundingRequirement === "NONE" ? "DIRECT" : "GROUNDED")
+    ) {
+      context.addIssue({
+        code: "custom",
+        message:
+          "SDAR_TASK requires CREATE and an answer mode matching grounding",
+        path: ["taskDirective"],
+      });
+    }
+    if (
+      value.turnRoute === "TASK_QUERY" &&
+      value.taskDirective?.action === "CREATE"
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "TASK_QUERY cannot create an SDAR Task",
+        path: ["taskDirective"],
+      });
+    }
+    if (
+      value.turnRoute === "HYBRID_PLAN_REALITY_COMPARE" &&
+      value.taskDirective?.action !== "STATUS"
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "hybrid comparison requires a read-only Task STATUS selector",
+        path: ["taskDirective"],
+      });
+    }
   });
 
 export const groundingRequestPlanSchema = z.strictObject({

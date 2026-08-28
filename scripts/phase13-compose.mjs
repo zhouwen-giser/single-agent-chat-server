@@ -16,7 +16,7 @@ const environment = {
   ...process.env,
   COMPOSE_PROJECT_NAME: project,
   CHAT_SERVER_IMAGE:
-    process.env.CHAT_SERVER_IMAGE ?? "single-agent-chat-server:0.3.0",
+    process.env.CHAT_SERVER_IMAGE ?? "single-agent-chat-server:0.4.0",
   CHAT_SERVER_PUBLISHED_PORT: "0",
   CHAT_SERVER_FRONTEND_NETWORK: `${project}-frontend`,
   CHAT_SERVER_SDAR_NETWORK: `${project}-sdar`,
@@ -27,6 +27,7 @@ const environment = {
   CONVERSATION_MODEL_BASE_URL: `http://host.docker.internal:${modelFixturePort}/v1`,
   CONVERSATION_MODEL_NAME: "compose-readiness-fixture",
   CONVERSATION_MODEL_API_KEY: "",
+  CONVERSATION_MODEL_MAX_OUTPUT_TOKENS: "2048",
 };
 
 let result;
@@ -39,9 +40,18 @@ try {
   for (let attempt = 0; attempt < 60; attempt += 1) {
     inspection = JSON.parse(docker(["inspect", serverId]))[0];
     if (inspection.State?.Health?.Status === "healthy") break;
+    if (inspection.State?.Running === false) break;
     await delay(2_000);
   }
-  assert.equal(inspection.State?.Health?.Status, "healthy");
+  if (inspection.State?.Health?.Status !== "healthy") {
+    const logs = dockerCompose(
+      ["logs", "--no-color", "--tail", "100", "server"],
+      false,
+    );
+    throw new Error(
+      `compose server health=${String(inspection.State?.Health?.Status)} running=${String(inspection.State?.Running)}\n${logs}`,
+    );
+  }
   assert.equal(inspection.Config?.User, "node");
   assert.equal(inspection.HostConfig?.ReadonlyRootfs, true);
   assert.ok(inspection.HostConfig?.CapDrop?.includes("ALL"));
@@ -140,7 +150,9 @@ function run(args, required) {
       `docker ${args.join(" ")} failed: ${child.stderr || child.error?.message}`,
     );
   }
-  return child.stdout ?? "";
+  return required
+    ? (child.stdout ?? "")
+    : `${child.stdout ?? ""}${child.stderr ?? ""}`;
 }
 
 function credential(purpose) {
