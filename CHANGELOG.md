@@ -13,6 +13,9 @@
 - Negative contract and architecture Gates preventing model-selected WSGS/GOWM
   details, overbroad context, stale operational references, text downgrade,
   and direct spatial or Provider access.
+- A deterministic GroundingRequestPlanner and isolated WSGS HTTP adapter with
+  fixed routes, transport-only authentication, bounded responses/polling, and
+  sanitized protocol failures.
 
 ### Candidate status
 

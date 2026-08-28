@@ -32,6 +32,14 @@ executable authority Gate, 76-file architecture Gate, and typecheck pass. See
 [S01 publication](reports/v0.4/S01-publication.md). Runtime remains on the
 qualified v0.3 path until later integration phases.
 
+S02 implements the deterministic TurnPlan-to-WSGS mapping and the only isolated
+WSGS HTTP adapter. Its 12/12 contract tests cover fixed routes, capability
+locking, transport-only authentication, authority-field rejection, bounded
+polling, cancellation, and error redaction. This is injected-transport contract
+evidence, not a live WSGS E2E claim. See
+[S02 acceptance](reports/v0.4/S02-acceptance.json) and
+[S02 completion](reports/v0.4/S02-completion.md).
+
 SACS v0.3 remains the qualified release candidate represented by merged main
 commit `f60083c` and PR #14. Authorized S00 publication created
 [Draft PR #15](https://github.com/zhouwen-giser/single-agent-chat-server/pull/15);
