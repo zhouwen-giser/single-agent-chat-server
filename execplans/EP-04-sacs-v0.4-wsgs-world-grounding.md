@@ -43,12 +43,12 @@ in WSGS/GOWM, planning state in SDAR, and control transactions in SMPP/Provider.
 
 ## S00 decisions
 
-- Treat WSGS remote candidate `7ba29dc720bd67cf31915148dd657ff10b9a81ad`
-  as authoritative. Its 0.2.0 version and frozen northbound contract pass, but
-  its stable-candidate report records 195 PASS, 17 NOT_RUN, and 67 BLOCKED and
-  withholds all required readiness/completion markers except the GOWM
-  contract-lock milestone. Its separate `DEVELOPMENT_READY` manifest is not
-  accepted because 7 referenced evidence artifacts are absent from the tree.
+- Treat WSGS remote candidate `3f9aa7cb8542573d2658a132644a9c649544737b`
+  and its tested development commit `75c6d2731094087efd0c203814fcb8fa8b6fefe3`
+  as authoritative for internal development. The exact handoff, 63/63 ledger,
+  real fourteen-stage pipeline, R1-R6, and recovery evidence are present and
+  verified. `productionQualified=false` and the missing task-book Stable
+  Candidate markers continue to block final promotion.
 - Treat SDAR `b0caf69e9f83bc6702e1c0a85e7ca158c3781d4b` as authoritative.
   Exact-tree search finds no `sacs-sdar-operational-grounding/1.0` declaration,
   so no media type, schema hash, handler, validator, or real E2E is invented.

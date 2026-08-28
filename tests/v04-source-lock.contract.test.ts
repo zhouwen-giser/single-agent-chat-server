@@ -19,6 +19,20 @@ interface SourceLock {
         manifestDecision: string;
         verification: string;
         productionQualified: boolean;
+        testedCommit: string;
+        developmentAcceptance: {
+          total: number;
+          pass: number;
+          fail: number;
+          notRun: number;
+        };
+        developmentLedgerHash: string;
+        realPipelineEvidenceHash: string;
+        handoffBlob: string;
+        readyReportBlob: string;
+        ledgerBlob: string;
+        realPipelineEvidenceBlob: string;
+        stableRecipes: string[];
         missingEvidence: string[];
       };
     };
@@ -88,20 +102,23 @@ describe("SACS v0.4 S00 source and compatibility locks", () => {
     });
   });
 
-  it("does not promote an incomplete development-ready manifest", () => {
+  it("records verified development readiness without promoting production", () => {
     expect(sourceLock.repositories.wsgs.developmentReadiness).toEqual({
       manifestDecision: "DEVELOPMENT_READY",
-      verification: "UNVERIFIED_MISSING_ARTIFACTS",
+      verification: "VERIFIED_DEVELOPMENT_READY",
       productionQualified: false,
-      missingEvidence: [
-        "contracts/consumers/sacs-development-handoff-v1.json",
-        "reports/wsgs-v0.2/development-acceptance-ledger.json",
-        "reports/wsgs-v0.2/development-closure-gate.json",
-        "reports/wsgs-v0.2/development-ready-report.json",
-        "reports/wsgs-v0.2/development-ready-report.md",
-        "reports/wsgs-v0.2/real-pipeline-evidence.json",
-        "reports/wsgs-v0.2/recipe-evidence",
-      ],
+      testedCommit: "75c6d2731094087efd0c203814fcb8fa8b6fefe3",
+      developmentAcceptance: { total: 63, pass: 63, fail: 0, notRun: 0 },
+      developmentLedgerHash:
+        "sha256:fd2def26d5c34a68121fad531d336d46358b334213dfdefcb09c9e628f73bc74",
+      realPipelineEvidenceHash:
+        "sha256:c31e95285a1cc39994f8037e109942865477717827752806ea96d5a5901917a4",
+      handoffBlob: "fd88f58fb8afeb5e5e5742e21feb854560648219",
+      readyReportBlob: "f2c3d4bc8df7224cbc34ceeb80d1bbcbad374c9c",
+      ledgerBlob: "f0dfee4c5026d4883107ba4d762eadbbb88be8f7",
+      realPipelineEvidenceBlob: "a0c9b1a4652b9827bf75117f1ea14120ced3f1e2",
+      stableRecipes: ["R1", "R2", "R3", "R4", "R5", "R6"],
+      missingEvidence: [],
     });
   });
 

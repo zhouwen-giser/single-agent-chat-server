@@ -9,7 +9,7 @@
     },
     "S00-002": {
       "status": "PASS",
-      "evidence": "Latest WSGS candidate 7ba29dc720bd67cf31915148dd657ff10b9a81ad reports version 0.2.0"
+      "evidence": "Latest WSGS candidate 3f9aa7cb8542573d2658a132644a9c649544737b reports version 0.2.0 and commits the tested 75c6d2731094087efd0c203814fcb8fa8b6fefe3 development handoff"
     },
     "S00-003": {
       "status": "PASS",
@@ -17,7 +17,7 @@
     },
     "S00-004": {
       "status": "BLOCKED_EXTERNAL",
-      "evidence": "WSGS stable-candidate decision remains BLOCKED: 195 PASS, 17 NOT_RUN, 67 BLOCKED. Its newer DEVELOPMENT_READY manifest is unverified because 7 referenced evidence artifacts are absent from the exact Git tree."
+      "evidence": "WSGS Development Ready is verified at 63/63 PASS with all referenced artifacts present, but productionQualified=false and the task-book Stable Candidate markers remain absent; the historical stable-candidate decision remains BLOCKED."
     },
     "S00-005": {
       "status": "BLOCKED_EXTERNAL",
@@ -34,8 +34,8 @@
     "result": {
       "wsgsContractArtifactsVerified": 32,
       "wsgsCandidateDecision": "BLOCKED",
-      "wsgsDevelopmentReadiness": "UNVERIFIED_MISSING_ARTIFACTS",
-      "wsgsMissingDevelopmentArtifacts": 7,
+      "wsgsDevelopmentReadiness": "VERIFIED_DEVELOPMENT_READY",
+      "wsgsMissingDevelopmentArtifacts": 0,
       "sdarGroundingExtension": "UNAVAILABLE",
       "stableCandidateEligible": false
     }

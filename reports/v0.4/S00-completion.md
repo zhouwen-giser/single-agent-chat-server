@@ -8,7 +8,8 @@ candidate is not eligible because both external hard prerequisites are absent.
 ## Locked sources
 
 - SACS main: `f60083c03c2c0aa602ab711090b6ff79c1b77d3e`.
-- WSGS candidate: `7ba29dc720bd67cf31915148dd657ff10b9a81ad`.
+- WSGS candidate: `3f9aa7cb8542573d2658a132644a9c649544737b`.
+- WSGS tested development commit: `75c6d2731094087efd0c203814fcb8fa8b6fefe3`.
 - SDAR main: `b0caf69e9f83bc6702e1c0a85e7ca158c3781d4b`.
 - Indirect GOWM: 0.6.3 at
   `17dd221330d9af540ec815a39eca96550690299a` through the WSGS intake.
@@ -21,11 +22,12 @@ object. WSGS itself nevertheless reports a blocked candidate with 195 PASS,
 17 NOT_RUN, and 67 BLOCKED; it withholds executable pipeline, reference
 grounding, compiler, real E2E, and stable-candidate completion markers.
 
-The newer candidate adds a `DEVELOPMENT_READY` evidence-group manifest, but its
-exact Git tree omits 7 referenced artifacts: the SACS development handoff,
-development ledger, closure gate, JSON/Markdown readiness reports, real
-pipeline evidence, and recipe-evidence directory. SACS therefore records this
-as `UNVERIFIED_MISSING_ARTIFACTS`, not as an external prerequisite pass.
+The repaired candidate commits every previously missing artifact. Its
+independent development profile is 63/63 PASS, with a real fourteen-stage
+API/PostgreSQL/worker/model/GOWM pipeline, R1-R6, restart/idempotency evidence,
+and an exact SACS handoff. SACS records this as `VERIFIED_DEVELOPMENT_READY`.
+The report also states `productionQualified=false`; the task-book Stable
+Candidate markers remain absent, so final SACS promotion stays blocked.
 
 SDAR contains no exact `sacs-sdar-operational-grounding/1.0` profile at its
 locked main commit. Therefore the Data Part media type, schema hash, handler,

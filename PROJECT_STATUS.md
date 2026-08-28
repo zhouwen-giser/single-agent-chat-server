@@ -3,17 +3,18 @@
 Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 is locally implemented, while
 the v0.4 stable candidate is ineligible on external hard prerequisites.
 
-S00 locks actual fetched SACS main `f60083c`, WSGS candidate `7ba29dc`, and
+S00 locks actual fetched SACS main `f60083c`, WSGS candidate `3f9aa7c`, and
 SDAR main `b0caf69`. All 32 frozen `sacs-wsgs-grounding/1.0` artifact hashes
 match. WSGS nevertheless declares a blocked candidate with 195 PASS,
 17 NOT_RUN, and 67 BLOCKED and withholds every required readiness/completion
 marker except `GOWM_0_6_3_CONTRACT_LOCKED`. Current SDAR does not declare or
 consume `sacs-sdar-operational-grounding/1.0`.
 
-The WSGS branch also contains a `DEVELOPMENT_READY` summary, but 7 evidence
-artifacts referenced by that summary are absent from its exact Git tree. It is
-recorded as `UNVERIFIED_MISSING_ARTIFACTS` and does not override the blocked
-stable-candidate report.
+The repaired WSGS branch now contains all referenced Development Ready evidence:
+63/63 PASS, a real fourteen-stage pipeline, R1-R6, recovery, and an exact SACS
+handoff. It is recorded as `VERIFIED_DEVELOPMENT_READY`. Because its report also
+states `productionQualified=false` and omits the task-book Stable Candidate
+markers, it does not override the final promotion blocker.
 
 See [S00 acceptance](reports/v0.4/S00-acceptance.json),
 [completion report](reports/v0.4/S00-completion.md), and

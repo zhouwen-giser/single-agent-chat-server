@@ -120,14 +120,69 @@ assert.deepEqual(
   missingDevelopmentEvidence,
   sourceLock.repositories.wsgs.developmentReadiness.missingEvidence,
 );
+assert.deepEqual(missingDevelopmentEvidence, []);
 assert.equal(
   sourceLock.repositories.wsgs.developmentReadiness.verification,
-  "UNVERIFIED_MISSING_ARTIFACTS",
+  "VERIFIED_DEVELOPMENT_READY",
 );
 assert.equal(
   sourceLock.repositories.wsgs.developmentReadiness.productionQualified,
   false,
 );
+const developmentReadyReport = JSON.parse(
+  git(wsgsRepository, [
+    "show",
+    `${wsgsRef}:reports/wsgs-v0.2/development-ready-report.json`,
+  ]).toString("utf8"),
+);
+const developmentHandoff = JSON.parse(
+  git(wsgsRepository, [
+    "show",
+    `${wsgsRef}:contracts/consumers/sacs-development-handoff-v1.json`,
+  ]).toString("utf8"),
+);
+assert.equal(developmentReadyReport.status, "DEVELOPMENT_READY");
+assert.deepEqual(developmentReadyReport.developmentAcceptance, {
+  total: 63,
+  pass: 63,
+  fail: 0,
+  notRun: 0,
+});
+assert.equal(
+  developmentReadyReport.wsgsCommit,
+  sourceLock.repositories.wsgs.developmentReadiness.testedCommit,
+);
+assert.equal(developmentReadyReport.productionQualified, false);
+assert.equal(developmentHandoff.status, "DEVELOPMENT_READY");
+assert.equal(
+  developmentHandoff.wsgs.commit,
+  sourceLock.repositories.wsgs.developmentReadiness.testedCommit,
+);
+assert.equal(developmentHandoff.wsgs.version, "0.2.0");
+assert.equal(
+  developmentHandoff.northboundContract.id,
+  "sacs-wsgs-grounding/1.0",
+);
+assert.equal(
+  developmentHandoff.developmentLedgerHash,
+  developmentReadyReport.developmentLedgerHash,
+);
+assert.deepEqual(
+  developmentHandoff.stableRecipes,
+  sourceLock.repositories.wsgs.developmentReadiness.stableRecipes,
+);
+assert.equal(developmentHandoff.productionQualified, false);
+for (const [field, path] of Object.entries({
+  handoffBlob: "contracts/consumers/sacs-development-handoff-v1.json",
+  readyReportBlob: "reports/wsgs-v0.2/development-ready-report.json",
+  ledgerBlob: "reports/wsgs-v0.2/development-acceptance-ledger.json",
+  realPipelineEvidenceBlob: "reports/wsgs-v0.2/real-pipeline-evidence.json",
+})) {
+  assert.equal(
+    gitText(wsgsRepository, ["rev-parse", `${wsgsRef}:${path}`]),
+    sourceLock.repositories.wsgs.developmentReadiness[field],
+  );
+}
 
 assert.equal(
   gitText(sdarRepository, ["rev-parse", sourceLock.repositories.sdar.ref]),
@@ -177,7 +232,7 @@ const result = {
   wsgsCandidateSha: sourceLock.repositories.wsgs.commit,
   wsgsContractArtifactsVerified: 32,
   wsgsCandidateDecision: "BLOCKED",
-  wsgsDevelopmentReadiness: "UNVERIFIED_MISSING_ARTIFACTS",
+  wsgsDevelopmentReadiness: "VERIFIED_DEVELOPMENT_READY",
   wsgsMissingDevelopmentArtifacts: missingDevelopmentEvidence.length,
   sdarSha: sourceLock.repositories.sdar.commit,
   sdarGroundingExtension: "UNAVAILABLE",
