@@ -2,8 +2,8 @@
 
 ## Decision
 
-S08 is `BLOCKED_UPSTREAM_GOWM_WORLD_OBJECT_BINDING`. The Ready marker remains
-withheld.
+S08 is `BLOCKED_DOCKER_RECOVERY_AUTHORIZATION_REQUIRED`. The Ready marker
+remains withheld.
 
 The authorized live run used the isolated WSGS v0.2 debug instance at the
 handed-off commit and an isolated disposable SACS PostgreSQL instance. The WSGS
@@ -72,3 +72,18 @@ explicitly deferred until GOWM repair evidence shows
 `revalidationRequired=false` with a usable `validUntil`. Only the local runner
 contract, lint, and typecheck were rerun against the updated source lock; no
 business grounding request was issued to the refreshed instance in this step.
+
+## Current runtime blocker
+
+The host Docker daemon/control-plane is now globally unresponsive. WSGS
+`/health/live` previously returned HTTP 200, but current `/health/ready` probes
+time out. The GOWM WORLD_OBJECT repair image was built, but it has not been
+confirmed active on port 18063; current 12/12 operation availability is
+`NOT_VERIFIED`, and the positive resolve-to-validate canary is `NOT_RUN`.
+
+The earlier 18063 HTTP 200 and old canary cannot prove that the repaired image
+is running. Restarting Docker Desktop or the engine would temporarily affect
+all shared containers and requires explicit user authorization. After an
+authorized recovery, upstream must first prove healthy WSGS/GOWM readiness and
+`revalidationRequired=false` plus a usable `validUntil`; SACS must then recreate
+its disposable PostgreSQL instance and rerun the complete S08 matrix.
