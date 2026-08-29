@@ -1,11 +1,17 @@
 import { describe, expect, it } from "@jest/globals";
 
 import {
+  GeospatialConsumerLockPlanningError,
   GroundingPlanningError,
   planGroundingRequest,
 } from "../packages/grounding-request-planner/src/index.js";
+import {
+  calculateConsumerLockHash,
+  parseWsgsGeospatialConsumerLock,
+} from "../packages/wsgs-geospatial-consumer/src/index.js";
 import type { TurnPlan } from "../packages/world-grounding-contract/src/index.js";
 
+const sha = `sha256:${"a".repeat(64)}`;
 const noFocus = {
   knownWorldReferences: false,
   priorGrounding: false,
@@ -77,7 +83,89 @@ describe("deterministic GroundingRequestPlanner", () => {
       GroundingPlanningError,
     );
   });
+
+  it("does not request new products under the BLOCKED production lock", () => {
+    expect(
+      planGroundingRequest(turnPlan("ANSWER_WORLD_QUERY", false))
+        .requestedProducts,
+    ).toEqual([
+      "MENTIONS",
+      "RESOLVED_REFERENCES",
+      "WORLD_QUERY",
+      "WORLD_EVIDENCE",
+    ]);
+  });
+
+  it("adds only products declared by a READY REQUESTED_PRODUCTS lock", () => {
+    const plan = planGroundingRequest(
+      turnPlan("ANSWER_WORLD_QUERY", false),
+      readyLock("REQUESTED_PRODUCTS", ["EVENT_TIMELINES"]),
+    );
+    expect(plan.requestedProducts).toEqual([
+      "MENTIONS",
+      "RESOLVED_REFERENCES",
+      "WORLD_QUERY",
+      "WORLD_EVIDENCE",
+      "EVENT_TIMELINES",
+    ]);
+  });
+
+  it("does not add products for a READY RESULT_EXTENSION lock", () => {
+    const plan = planGroundingRequest(
+      turnPlan("ANSWER_WORLD_QUERY", false),
+      readyLock("RESULT_EXTENSION", []),
+    );
+    expect(plan.requestedProducts).toEqual([
+      "MENTIONS",
+      "RESOLVED_REFERENCES",
+      "WORLD_QUERY",
+      "WORLD_EVIDENCE",
+    ]);
+  });
+
+  it("fails closed when an authoritative lock names an unknown product", () => {
+    expect(() =>
+      planGroundingRequest(
+        turnPlan("ANSWER_WORLD_QUERY", false),
+        readyLock("REQUESTED_PRODUCTS", ["FUTURE_GEOSPATIAL_PRODUCT"]),
+      ),
+    ).toThrow(GeospatialConsumerLockPlanningError);
+  });
 });
+
+function readyLock(
+  transportMode: "REQUESTED_PRODUCTS" | "RESULT_EXTENSION",
+  requestedProducts: string[],
+) {
+  const value = {
+    schemaVersion: "sacs-wsgs-geospatial-consumer-lock/1.0",
+    provenance: "AUTHORITATIVE_WSGS_HANDOFF",
+    sources: {
+      wsgsSha: "b".repeat(40),
+      gowmSha: "c".repeat(40),
+      gdpsSha: "d".repeat(40),
+    },
+    groundingContract: {
+      contractVersion: "sacs-wsgs-grounding/1.0",
+      resultSchemaHash: sha,
+      capabilitiesSchemaHash: sha,
+    },
+    geospatialProfile: {
+      profile: "sacs-wsgs-geospatial-findings/1.0",
+      transportMode,
+      profileSchemaHash: sha,
+      findingSchemaHash: sha,
+      sourceProductSchemaHash: sha,
+      gapSchemaHash: sha,
+      requestedProducts,
+    },
+    currentness: { mode: "UNSUPPORTED" },
+    status: "READY",
+    consumerLockHash: sha,
+  };
+  value.consumerLockHash = calculateConsumerLockHash(value);
+  return parseWsgsGeospatialConsumerLock(value);
+}
 
 function turnPlan(
   groundingRequirement: TurnPlan["groundingRequirement"],

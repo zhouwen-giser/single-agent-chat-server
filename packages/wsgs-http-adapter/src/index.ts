@@ -4,6 +4,17 @@ import {
   wsgsOperations,
   wsgsRequestedProducts,
 } from "../../world-grounding-contract/src/index.js";
+import {
+  assertWsgsCapabilitiesAgainstConsumerLock,
+  assertWsgsGeospatialFindingsAuthorized,
+  defaultWsgsGeospatialConsumerLock,
+  parseWsgsGeospatialConsumerLock,
+  WsgsGeospatialConsumerLockError,
+  wsgsGeospatialFindingsSchema,
+  type WsgsGeospatialConsumerLock,
+} from "../../wsgs-geospatial-consumer/src/index.js";
+
+export type { WsgsGeospatialFindings } from "../../wsgs-geospatial-consumer/src/index.js";
 
 const identifier = z
   .string()
@@ -221,6 +232,7 @@ const groundingResultSchema = z.strictObject({
   groundingGraph: z.unknown().optional(),
   referenceProducts: z.array(referenceProductSchema).max(1_000),
   evidenceItems: z.array(evidenceItemSchema).max(1_000),
+  geospatialFindings: wsgsGeospatialFindingsSchema.optional(),
   gowmQueries: z.array(z.unknown()).max(64).optional(),
   ambiguities: z.array(groundingAmbiguitySchema).max(32),
   unresolvedMentions: z.array(z.unknown()).max(32),
@@ -261,23 +273,32 @@ const groundingJobSchema = z.strictObject({
 });
 const capabilitiesSchema = z.strictObject({
   service: z.literal("world-semantic-grounding-service"),
-  version: z.literal("0.1.0"),
-  contractVersion: z.literal("sacs-wsgs-grounding/1.0"),
-  supportedOperations: z.array(z.string()),
-  supportedProducts: z.array(z.string()),
+  version: z.string().min(1).max(128),
+  contractVersion: z.string().min(1).max(128),
+  supportedOperations: z
+    .array(identifier)
+    .min(1)
+    .max(64)
+    .refine((value) => new Set(value).size === value.length),
+  supportedProducts: z
+    .array(identifier)
+    .max(256)
+    .refine((value) => new Set(value).size === value.length),
   gowmContract: z.strictObject({
-    softwareVersion: z.literal("0.4.0"),
-    commit: z.literal("db575f79c874a69f65a2043a7e463338524b713d"),
-    sourcePackageArtifacts: z.literal(33),
+    softwareVersion: z.string().min(1).max(128),
+    commit: z.string().regex(/^[0-9a-f]{40}$/u),
+    sourcePackageArtifacts: z.number().int().nonnegative().max(100_000),
   }),
   requiredCapabilitiesReady: z.boolean(),
-  optionalCapabilities: z.array(
-    z.strictObject({
-      operationId: z.string(),
-      available: z.boolean(),
-      reason: z.string().optional(),
-    }),
-  ),
+  optionalCapabilities: z
+    .array(
+      z.strictObject({
+        operationId: identifier,
+        available: z.boolean(),
+        reason: z.string().min(1).max(4_096).optional(),
+      }),
+    )
+    .max(128),
 });
 const protocolErrorSchema = z.strictObject({
   schemaVersion: z.literal("1.0"),
@@ -382,11 +403,13 @@ export interface WsgsHttpAdapterConfig {
   readonly bearerToken?: string;
   readonly fetchImpl?: typeof fetch;
   readonly sleepImpl?: (milliseconds: number) => Promise<void>;
+  readonly geospatialConsumerLock?: unknown;
 }
 
 export interface WsgsHttpClient {
   readonly contractVersion: "sacs-wsgs-grounding/1.0";
   readonly endpoint: string;
+  readonly geospatialConsumerLock: WsgsGeospatialConsumerLock;
   capabilities(signal?: AbortSignal): Promise<WsgsCapabilities>;
   createGrounding(
     request: WsgsGroundingRequest,
@@ -478,6 +501,9 @@ export function createWsgsHttpClient(
     bearerToken: input.bearerToken,
   });
   const endpoint = normalizedEndpoint(parsed.baseUrl);
+  const geospatialConsumerLock = parseWsgsGeospatialConsumerLock(
+    input.geospatialConsumerLock ?? defaultWsgsGeospatialConsumerLock,
+  );
   const fetchImpl = input.fetchImpl ?? fetch;
   const sleepImpl =
     input.sleepImpl ??
@@ -527,6 +553,7 @@ export function createWsgsHttpClient(
   return {
     contractVersion: "sacs-wsgs-grounding/1.0",
     endpoint: endpoint.href,
+    geospatialConsumerLock,
     async capabilities(signal) {
       const response = await request("GET", "/v1/capabilities", { signal });
       const capabilities = parseContract(
@@ -540,6 +567,7 @@ export function createWsgsHttpClient(
       if (missing.length > 0) {
         throw new WsgsHttpError("WSGS_REQUIRED_OPERATION_UNAVAILABLE");
       }
+      assertConsumerLockCapabilities(capabilities, geospatialConsumerLock);
       return capabilities;
     },
     async createGrounding(requestBody, idempotencyKey, signal) {
@@ -557,6 +585,7 @@ export function createWsgsHttpClient(
           "WSGS_RESULT_CONTRACT_VIOLATION",
         );
         assertNoForbiddenFields(result, forbiddenDecisionFields);
+        assertConsumerLockResult(result, geospatialConsumerLock);
         return result;
       }
       if (response.status === 202) {
@@ -566,6 +595,7 @@ export function createWsgsHttpClient(
           "WSGS_JOB_CONTRACT_VIOLATION",
         );
         assertNoForbiddenFields(job, forbiddenDecisionFields);
+        assertConsumerLockResult(job.result, geospatialConsumerLock);
         return job;
       }
       throw new WsgsHttpError("WSGS_UNEXPECTED_CREATE_STATUS", response.status);
@@ -584,6 +614,7 @@ export function createWsgsHttpClient(
         "WSGS_JOB_CONTRACT_VIOLATION",
       );
       assertNoForbiddenFields(job, forbiddenDecisionFields);
+      assertConsumerLockResult(job.result, geospatialConsumerLock);
       return job;
     },
     async waitForGrounding(groundingId, signal) {
@@ -602,13 +633,44 @@ export function createWsgsHttpClient(
         )}:cancel`,
         { signal },
       );
-      return parseContract(
+      const job = parseContract(
         groundingJobSchema,
         response.value,
         "WSGS_JOB_CONTRACT_VIOLATION",
       );
+      assertConsumerLockResult(job.result, geospatialConsumerLock);
+      return job;
     },
   };
+}
+
+function assertConsumerLockCapabilities(
+  capabilities: WsgsCapabilities,
+  lock: WsgsGeospatialConsumerLock,
+): void {
+  try {
+    assertWsgsCapabilitiesAgainstConsumerLock(capabilities, lock);
+  } catch (error) {
+    throw consumerLockFailure(error);
+  }
+}
+
+function assertConsumerLockResult(
+  result: WsgsGroundingResult | undefined,
+  lock: WsgsGeospatialConsumerLock,
+): void {
+  if (result?.geospatialFindings === undefined) return;
+  try {
+    assertWsgsGeospatialFindingsAuthorized(result.geospatialFindings, lock);
+  } catch (error) {
+    throw consumerLockFailure(error);
+  }
+}
+
+function consumerLockFailure(error: unknown): WsgsHttpError {
+  return error instanceof WsgsGeospatialConsumerLockError
+    ? new WsgsHttpError(error.code)
+    : new WsgsHttpError("WSGS_GEOSPATIAL_CONSUMER_LOCK_INVALID");
 }
 
 function normalizedEndpoint(value: string): URL {

@@ -1,15 +1,32 @@
 import {
   groundingRequestPlanSchema,
   parseTurnPlan,
+  wsgsRequestedProducts,
   type GroundingRequestPlan,
   type TurnPlan,
 } from "../../world-grounding-contract/src/index.js";
+import {
+  declaredGeospatialRequestedProducts,
+  defaultWsgsGeospatialConsumerLock,
+  parseWsgsGeospatialConsumerLock,
+  type WsgsGeospatialConsumerLock,
+} from "../../wsgs-geospatial-consumer/src/index.js";
 
 export class GroundingPlanningError extends Error {
   readonly code = "GROUNDING_NOT_REQUIRED";
 
   constructor() {
     super("TurnPlan does not require WSGS grounding");
+  }
+}
+
+export class GeospatialConsumerLockPlanningError extends Error {
+  readonly code = "WSGS_GEOSPATIAL_CONSUMER_LOCK_UNSUPPORTED_PRODUCT";
+
+  constructor(readonly product: string) {
+    super(
+      `Authoritative WSGS consumer lock declares unsupported product: ${product}`,
+    );
   }
 }
 
@@ -22,8 +39,12 @@ const executionPolicy = {
   allowApproximation: false,
 } as const;
 
-export function planGroundingRequest(input: TurnPlan): GroundingRequestPlan {
+export function planGroundingRequest(
+  input: TurnPlan,
+  consumerLock: unknown = defaultWsgsGeospatialConsumerLock,
+): GroundingRequestPlan {
   const turnPlan = parseTurnPlan(input);
+  const geospatialConsumerLock = parseWsgsGeospatialConsumerLock(consumerLock);
   const base = {
     schemaVersion: "1.0" as const,
     plannedBy: "SACS_DETERMINISTIC_V1" as const,
@@ -46,12 +67,13 @@ export function planGroundingRequest(input: TurnPlan): GroundingRequestPlan {
       return groundingRequestPlanSchema.parse({
         ...base,
         operation: "EXECUTE_WORLD_QUERY",
-        requestedProducts: [
+        requestedProducts: uniqueProducts([
           "MENTIONS",
           "RESOLVED_REFERENCES",
           "WORLD_QUERY",
           "WORLD_EVIDENCE",
-        ],
+          ...requestedGeospatialProducts(geospatialConsumerLock),
+        ]),
       });
     case "VALIDATE_REFERENCES":
       return groundingRequestPlanSchema.parse({
@@ -75,4 +97,21 @@ export function planGroundingRequest(input: TurnPlan): GroundingRequestPlan {
     case "NONE":
       throw new GroundingPlanningError();
   }
+}
+
+function requestedGeospatialProducts(
+  consumerLock: WsgsGeospatialConsumerLock,
+): readonly string[] {
+  const declared = declaredGeospatialRequestedProducts(consumerLock);
+  const stableProducts = new Set<string>(wsgsRequestedProducts);
+  for (const product of declared) {
+    if (!stableProducts.has(product)) {
+      throw new GeospatialConsumerLockPlanningError(product);
+    }
+  }
+  return declared;
+}
+
+function uniqueProducts(products: readonly string[]): readonly string[] {
+  return [...new Set(products)];
 }
