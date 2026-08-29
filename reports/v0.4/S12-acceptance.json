@@ -1,0 +1,47 @@
+{
+  "phase": "S12",
+  "marker": "SACS_V0_4_WORLD_CONTEXT_AND_FUSION_READY",
+  "status": "BLOCKED",
+  "markerAsserted": false,
+  "asOf": "2026-08-29",
+  "completed": {
+    "fullJestWithoutServices": "311 PASS, 99 SKIPPED, 410 total",
+    "format": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "migrationStaticGate": "PASS",
+    "architecture": "PASS",
+    "secretPatternGate": "PASS",
+    "productionSourceFilesChecked": 84,
+    "trackedFilesSecretChecked": 602
+  },
+  "notRun": {
+    "realPostgresS10S11": true,
+    "realWsgsS11": true,
+    "dockerBuild": true,
+    "containerVerification": true,
+    "composeVerification": true
+  },
+  "requiredMatrix": {
+    "developmentRequiredRows": 119,
+    "deferredRows": 7,
+    "finalStatus": "NOT_CLOSED"
+  },
+  "blocker": {
+    "code": "SHARED_DOCKER_WSL_RESTART_AUTHORIZATION_REQUIRED",
+    "details": "Docker control-plane did not return a server result; WSGS 18072 and GOWM 18063 had no listener. Restarting shared Docker/WSL was not authorized and was not attempted."
+  },
+  "scopeSafety": {
+    "upstreamRepositoriesModified": false,
+    "sharedWsgsModified": false,
+    "sharedGowmModified": false,
+    "dockerOrWslRestarted": false,
+    "push": "NOT_RUN",
+    "prUpdate": "NOT_RUN",
+    "merge": "NOT_RUN",
+    "tag": "NOT_RUN",
+    "release": "NOT_RUN",
+    "deploy": "NOT_RUN"
+  }
+}
