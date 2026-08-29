@@ -1,7 +1,7 @@
 {
   "phase": "S08",
   "date": "2026-08-29",
-  "decision": "BLOCKED_GOWM_AREA_LAYER_FEATURE_AUTHORITY_VERSION_BINDING",
+  "decision": "BLOCKED_WSGS_PENDING_CHOICE_RESUME_PERSISTENCE",
   "marker": "WITHHELD",
   "runner": {
     "path": "scripts/phase-v04-s08-real-multiturn.mjs",
@@ -33,8 +33,9 @@
     "vehicleInitialGrounding": "PASS",
     "vehiclePronounFollowUp": "PASS_AC_M001_KNOWN_REFERENCE_WITHOUT_PRIOR_GROUNDING",
     "areaInitialGrounding": "PASS_REFERENCE_PERSISTED",
-    "areaPronounFollowUp": "BLOCKED_AC_M002_VALIDATION_REMAINS_STALE",
-    "ambiguousChoiceValidateResume": "NOT_REACHED",
+    "areaPronounFollowUp": "PASS_AC_M002_VALIDATED_REFERENCE_AND_PARTIAL_EXECUTE",
+    "ambiguousChoiceInitial": "PASS_AMBIGUOUS_TWO_CANDIDATES",
+    "ambiguousChoiceValidateResume": "BLOCKED_AC_M003_RESUME_EXECUTE_PERSISTENCE",
     "expiredReferenceRevalidation": "NOT_REACHED_AC_M005",
     "threadIsolation": "NOT_REACHED",
     "restartRecovery": "NOT_REACHED",
@@ -51,24 +52,26 @@
     "wsgsInstanceCommit": "7c7340a602b2c9c7963b1d8dc2ca210bd1baaefa",
     "executeKnownReferenceMerge": "PASS_AC_M001",
     "vehicleFollowUpTerminalStatus": "PARTIAL_WITHOUT_ERROR",
-    "vehicleValidatedReferenceCount": 1
+    "vehicleValidatedReferenceCount": 1,
+    "gowmAreaAuthorityVersionRepair": "PASS_IN_SACS_AC_M002_CHAIN",
+    "areaFollowUpTerminalStatus": "PARTIAL_WITHOUT_ERROR",
+    "areaValidatedReferenceCount": 1
   },
   "latestRedactedFailure": {
-    "acceptanceItem": "AC-M002",
-    "operation": "VALIDATE_REFERENCES",
+    "acceptanceItem": "AC-M003",
+    "operations": [
+      "VALIDATE_REFERENCES",
+      "EXECUTE_WORLD_QUERY"
+    ],
+    "failedOperation": "EXECUTE_WORLD_QUERY",
     "createHttpStatus": 202,
     "pollHttpStatus": 200,
-    "jobStatus": "COMPLETED",
-    "resultStatus": "COMPLETED",
-    "resultPresent": true,
-    "referenceProductCount": 1,
-    "sourceOperation": "VALIDATE_REFERENCES",
-    "revalidationRequired": true,
-    "validUntilState": "ABSENT",
-    "errorCode": null,
-    "errorStage": null,
-    "sacsOutcome": "WORLD_GROUNDING_CONTEXT_UNAVAILABLE",
-    "persistedFocusStatus": "STALE"
+    "jobStatus": "FAILED",
+    "resultPresent": false,
+    "errorCode": "WORKER_PIPELINE_FAILED",
+    "errorStage": "PERSISTENCE",
+    "sacsOutcome": "WORLD_GROUNDING_FAILED",
+    "originMessagePreserved": true
   },
   "sacsCorrections": {
     "focusRevisionExcludedFromReplayIdentity": true,
@@ -76,9 +79,8 @@
     "taskPackageAreaPromptRestoredExactly": true
   },
   "blocker": {
-    "code": "GOWM_AREA_LAYER_FEATURE_AUTHORITY_VERSION_BINDING_STALE",
-    "upstreamReason": "Pinned data snapshot is stale",
-    "detail": "WSGS 7c7340a passes the vehicle KnownWorldReference EXECUTE path and SACS replay. The exact AC-M002 area prompt persists the authoritative LAYER_FEATURE reference, but shared GOWM rejects its pinned version as STALE. WSGS correctly preserves revalidationRequired=true without validUntil, and SACS correctly refuses pronoun context."
+    "code": "WSGS_PENDING_CHOICE_RESUME_EXECUTE_PERSISTENCE",
+    "detail": "The repaired shared GOWM now passes AC-M002 in SACS. AC-M003 persists a two-candidate ambiguity and deterministically selects the second candidate. WSGS validation advances to the resume EXECUTE, which terminates FAILED without a result at stage PERSISTENCE."
   },
   "publication": {
     "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",

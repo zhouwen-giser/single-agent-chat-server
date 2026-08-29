@@ -311,6 +311,22 @@ try {
     userText: "第二个",
   });
   assert.ok(continued);
+  if (continued.startsWith("WORLD_GROUNDING_")) {
+    throw new Error(
+      `S08_PENDING_CHOICE_CONTINUATION_FAILED ${JSON.stringify({
+        sacsCode: continued,
+        operations: posts
+          .slice(continuationStart)
+          .map(({ operation }) => operation),
+        httpExchanges: httpExchanges.slice(-16),
+        latestGrounding: await boundedLatestGroundingDiagnostic(
+          pool,
+          principal.principalId,
+          ambiguityThread,
+        ),
+      })}`,
+    );
+  }
   assertWorldSuccess(continued);
   assert.deepEqual(
     posts.slice(continuationStart).map(({ operation }) => operation),

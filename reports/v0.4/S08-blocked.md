@@ -2,7 +2,7 @@
 
 ## Decision
 
-S08 is `BLOCKED_GOWM_AREA_LAYER_FEATURE_AUTHORITY_VERSION_BINDING`. The
+S08 is `BLOCKED_WSGS_PENDING_CHOICE_RESUME_PERSISTENCE`. The
 `SACS_MULTITURN_WORLD_GROUNDING_READY` marker remains withheld.
 
 The authorized runner is locked to WSGS commit
@@ -10,7 +10,7 @@ The authorized runner is locked to WSGS commit
 from the authorized process environment and are not present in this report,
 runner output, or repository.
 
-## Closed vehicle-reference and replay blockers
+## Closed vehicle, area, and replay blockers
 
 The WSGS EXECUTE path now merges resolver output with supplied
 `KnownWorldReference` values before reference validation. With the exact task
@@ -28,34 +28,31 @@ an identical turn appear new. Focus context is now excluded from turn identity
 while the persisted WSGS request hash still covers the actual context capsule.
 The exact replay no longer sends a duplicate WSGS POST, passing AC-M010.
 
+The repaired shared GOWM area `LAYER_FEATURE` authority/version binding was
+then exercised by SACS from a new isolated database. The exact sequence
+`A区有哪些车？` then `那里附近还有什么？` completed validation and produced
+a safe no-error `PARTIAL` follow-up using one validated area reference.
+AC-M002 now passes from SACS's own real chain.
+
 ## Current redacted live blocker
 
-The runner then used the exact AC-M002 task-package sequence:
-`A区有哪些车？` then `那里附近还有什么？`. The initial turn persisted an
-area reference. The follow-up performed fail-closed validation:
+The runner next executed the exact AC-M003 sequence:
+`滨河路附近有哪些设备？` → `AMBIGUOUS` → `第二个` → validate → resume.
+The initial result created a durable open choice with two candidates. SACS
+deterministically selected the second candidate and preserved the origin
+message and source text for both continuation requests.
 
-- Operation: `VALIDATE_REFERENCES`.
-- Create request: HTTP 202.
-- Poll requests: HTTP 200.
-- Terminal job and result status: `COMPLETED`.
-- Reference product count: 1.
-- `sourceOperation`: `VALIDATE_REFERENCES`.
-- `revalidationRequired`: true.
-- `validUntil`: absent.
-- WSGS `error.code` and `error.stage`: absent.
-- Persisted SACS Focus status: `STALE`.
-- Safe SACS outcome: `WORLD_GROUNDING_CONTEXT_UNAVAILABLE`.
+- Operations emitted: `VALIDATE_REFERENCES`, then `EXECUTE_WORLD_QUERY`.
+- Resume create request: HTTP 202.
+- Resume poll requests: HTTP 200.
+- Resume terminal status: `FAILED`.
+- Result present: false.
+- WSGS `error.code`: `WORKER_PIPELINE_FAILED`.
+- WSGS `error.stage`: `PERSISTENCE`.
+- Safe SACS outcome: `WORLD_GROUNDING_FAILED`.
 
-SACS therefore did not supply stale context for the pronoun follow-up. AC-M002
-is blocked on a positive area-reference validation lease; later ordered S08
-scenarios remain `NOT_REACHED`, not passed.
-
-Upstream isolated the failure to the shared GOWM A区 `LAYER_FEATURE`
-authority/version binding. The resolved identity matches the authoritative
-handoff object, excluding a same-name parse error. WSGS sends the resolved
-pinned version unchanged with `requireCurrentSnapshot=true`; GOWM returns
-`STALE` with reason `Pinned data snapshot is stale`. No SACS or WSGS layer
-may replace that version with a current/handoff value.
+AC-M003 is blocked at the WSGS resume EXECUTE persistence stage. Later ordered
+S08 scenarios remain `NOT_REACHED`, not passed.
 
 ## Regression evidence
 
@@ -73,11 +70,9 @@ reference identifiers, or raw upstream business payloads.
 
 ## Required upstream resolution
 
-Shared GOWM must make the persisted A区 reference validate with
-`revalidationRequired=false` and a future `validUntil`, or publish a typed
-terminal error explaining why the area reference cannot be validated. After
-the authorized instance is refreshed and readiness is reconfirmed, rerun every
-S08 scenario from the beginning.
+WSGS must complete the PendingChoice resume `EXECUTE_WORLD_QUERY` after the
+selected reference validates. After the authorized instance is refreshed and
+readiness is reconfirmed, rerun every S08 scenario from the beginning.
 
 The SACS verification process did not restart or modify any shared WSGS, GOWM,
 GDPS, or database fixture.
