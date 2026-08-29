@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import pg from "pg";
 
 import {
+  AuthorityFusionRepository,
   ConversationPersistenceRepository,
   GroundingPersistenceRepository,
   InteractionPersistenceRepository,
@@ -228,12 +229,131 @@ describeWithPostgres("SACS v0.4 world runtime on PostgreSQL and HTTP", () => {
     expect(posts[0]).toMatchObject({
       operation: "EXECUTE_WORLD_QUERY",
       requestedProducts: [
-        "WORLD_QUERY",
+        "RESOLVED_REFERENCES",
         "WORLD_EVIDENCE",
+        "OPERATIONAL_TASKS",
+        "EVENT_TIMELINES",
         "CORRELATION_FINDINGS",
         "PREDICATE_EVALUATIONS",
       ],
     });
+  });
+
+  it("persists v2 fusion and reuses only the exact Task, requirement and grounding snapshots", async () => {
+    const requests = new InteractionPersistenceRepository(pool, 60_000);
+    const grounding = new GroundingPersistenceRepository(pool, 60_000);
+    const worldFocus = new PostgresWorldFocusRepository(pool);
+    const authorityFusion = new AuthorityFusionRepository(pool);
+    const principal = await requests.resolvePrincipal({
+      issuer: "s11-test",
+      subject: `principal-${randomUUID()}`,
+      role: "user",
+    });
+    const thread = await requests.getOrCreateThread({
+      clientType: "openwebui",
+      externalThreadId: `thread-${randomUUID()}`,
+      principalId: principal.principalId,
+    });
+    const posts: WsgsGroundingRequest[] = [];
+    const runtime = new WorldGroundingRuntime({
+      requests,
+      grounding,
+      worldFocus,
+      authorityFusion,
+      wsgs: createWsgsHttpClient({
+        baseUrl: "http://wsgs.test",
+        fetchImpl: async (request, init) => {
+          const url = new URL(
+            typeof request === "string"
+              ? request
+              : request instanceof URL
+                ? request.href
+                : request.url,
+          );
+          if (url.pathname === "/v1/capabilities") {
+            return jsonResponse(capabilities());
+          }
+          if (url.pathname === "/v1/groundings") {
+            const rawBody =
+              typeof init?.body === "string"
+                ? init.body
+                : request instanceof Request
+                  ? await request.text()
+                  : "{}";
+            const body = JSON.parse(rawBody) as WsgsGroundingRequest;
+            posts.push(body);
+            return jsonResponse(fusionResultFor(body));
+          }
+          return jsonResponse({ error: "unexpected" }, 404);
+        },
+      }),
+      sdarCompatibilityLock: unavailableLock(),
+      nextLeaseOwner: () => randomUUID(),
+    });
+    const base = {
+      principalId: principal.principalId,
+      threadId: thread.threadId,
+      userText: "Compare the published Task with world reality.",
+      turnPlan: {
+        schemaVersion: "0.4" as const,
+        turnRoute: "HYBRID_PLAN_REALITY_COMPARE" as const,
+        groundingRequirement: "COMPARE_PLAN_REALITY" as const,
+        answerMode: "HYBRID_COMPARISON" as const,
+        taskDirective: {
+          action: "STATUS" as const,
+          selector: { taskId: "task-fusion-1" },
+        },
+        worldFocusUsage: emptyWorldFocus(),
+      },
+    };
+
+    const first = await runtime.compareHybrid({
+      ...base,
+      protocol: "openai",
+      externalRequestId: "message-fusion-1",
+      sdarTask: fusionTask("WORKING", "predicate-1"),
+    });
+    const exactReplay = await runtime.compareHybrid({
+      ...base,
+      protocol: "ag_ui",
+      externalRequestId: "message-fusion-2",
+      sdarTask: fusionTask("WORKING", "predicate-1"),
+    });
+    const changedTask = await runtime.compareHybrid({
+      ...base,
+      protocol: "openai",
+      externalRequestId: "message-fusion-3",
+      sdarTask: fusionTask("COMPLETED", "predicate-1"),
+    });
+    const changedRequirement = await runtime.compareHybrid({
+      ...base,
+      protocol: "ag_ui",
+      externalRequestId: "message-fusion-4",
+      sdarTask: fusionTask("COMPLETED", "predicate-2"),
+    });
+
+    expect(first).toContain("AUTHORITY_FUSION_V2_READY");
+    expect(exactReplay).toBe(first);
+    expect(changedTask).toContain("Task: task-fusion-1 (COMPLETED)");
+    expect(changedRequirement).toContain("AUTHORITY_FUSION_V2_READY");
+    expect(posts).toHaveLength(3);
+    expect(posts[0]?.requestedProducts).toEqual([
+      "RESOLVED_REFERENCES",
+      "WORLD_EVIDENCE",
+      "OPERATIONAL_TASKS",
+      "EVENT_TIMELINES",
+      "CORRELATION_FINDINGS",
+      "PREDICATE_EVALUATIONS",
+    ]);
+    const rows = await pool.query<{ count: string }>(
+      `
+        SELECT count(*)
+        FROM chat_service.authority_fusion_evaluation
+        WHERE principal_id = $1 AND thread_id = $2 AND task_id = 'task-fusion-1'
+      `,
+      [principal.principalId, thread.threadId],
+    );
+    expect(Number(rows.rows[0]?.count ?? 0)).toBe(3);
   });
 
   it("validates an exact pending choice and resumes the original source", async () => {
@@ -491,6 +611,101 @@ function resultFor(request: WsgsGroundingRequest) {
     },
     resultHash: `sha256:${"d".repeat(64)}`,
   };
+}
+
+function fusionTask(state: "WORKING" | "COMPLETED", predicateId: string) {
+  return {
+    taskId: "task-fusion-1",
+    contextId: "context-fusion-1",
+    state,
+    internalPhase: state.toLowerCase(),
+    phaseMessage: "Published lifecycle state",
+    statusTimestamp: "2026-08-29T08:00:00.000Z",
+    publishedStructuredPlan: {
+      predicates: [
+        {
+          schemaUri: "urn:gowm:v0.4:external-predicate",
+          schemaHash: `sha256:${"a".repeat(64)}`,
+          value: { predicateId },
+        },
+      ],
+    },
+    artifacts: [],
+  };
+}
+
+function fusionResultFor(request: WsgsGroundingRequest) {
+  const base = resultFor(request);
+  const predicateValue = request.contextCapsule.externalPredicates[0]?.value;
+  const predicateId = readString(predicateValue, "predicateId");
+  const taskHint = request.contextCapsule.externalCorrelationHints.find(
+    ({ kind }) => kind === "EXTERNAL_TASK",
+  );
+  if (predicateId === undefined || taskHint === undefined) {
+    throw new Error("Missing fusion request context");
+  }
+  return {
+    ...base,
+    evidenceItems: [
+      {
+        evidenceProductId: "evidence-correlation",
+        productKind: "CORRELATION_FINDING",
+        authority: "GOWM",
+        sourceOperation: "correlation.find",
+        upstreamStatus: "COMPLETED",
+        payloadSchemaUri: "urn:gowm:v0.4:correlation-finding",
+        payloadSchemaHash: `sha256:${"b".repeat(64)}`,
+        safePayload: {
+          findingId: "finding-task-fusion-1",
+          externalAuthority: "SDAR",
+          externalKind: "EXTERNAL_TASK",
+          externalValue: taskHint.value,
+          relation: "REALIZES",
+          matchBasis: "PROPAGATED_CORRELATION_ID",
+          operationalEventIds: [],
+          evidenceIds: [],
+          worldVersion: 42,
+          methodVersion: "1",
+        },
+        receiptIds: [],
+        evidenceIds: [],
+        unknowns: [],
+        warnings: [],
+      },
+      {
+        evidenceProductId: "evidence-predicate-" + predicateId,
+        productKind: "PREDICATE_EVALUATION",
+        authority: "GOWM",
+        sourceOperation: "predicate.evaluate",
+        upstreamStatus: "COMPLETED",
+        payloadSchemaUri: "urn:gowm:v0.4:predicate-evaluation",
+        payloadSchemaHash: `sha256:${"c".repeat(64)}`,
+        safePayload: {
+          evaluationId: "evaluation-" + predicateId,
+          predicateId,
+          status: "SUPPORTED",
+          evaluatedAtWorldVersion: 42,
+          supportingEvidenceIds: [],
+          contradictingEvidenceIds: [],
+          assumptions: [],
+          warnings: [],
+          methodVersion: "1",
+        },
+        receiptIds: [],
+        evidenceIds: [],
+        unknowns: [],
+        warnings: [],
+      },
+    ],
+  };
+}
+
+function readString(value: unknown, field: string): string | undefined {
+  if (value === null || Array.isArray(value) || typeof value !== "object") {
+    return undefined;
+  }
+  const found = (value as Record<string, unknown>)[field];
+  return typeof found === "string" ? found : undefined;
 }
 
 function ambiguousResultFor(request: WsgsGroundingRequest) {
