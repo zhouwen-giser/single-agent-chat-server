@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:world-explanation-replay-key:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "principalId",
+    "threadId",
+    "groundingResultHash",
+    "locale",
+    "contractHash",
+    "rendererPolicyHash"
+  ],
+  "properties": {
+    "principalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "threadId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "groundingResultHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 32
+    },
+    "contractHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "rendererPolicyHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

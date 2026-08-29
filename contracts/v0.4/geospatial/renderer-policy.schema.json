@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:world-explanation-renderer-policy:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "policyId",
+    "policyHashAlgorithm",
+    "limits",
+    "rules"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-world-explanation-renderer-policy/1.0"
+    },
+    "policyId": {
+      "type": "string"
+    },
+    "policyHashAlgorithm": {
+      "const": "SHA-256_CANONICAL_JSON"
+    },
+    "limits": {
+      "type": "object"
+    },
+    "rules": {
+      "type": "object"
+    }
+  }
+}

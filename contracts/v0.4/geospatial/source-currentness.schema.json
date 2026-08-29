@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:source-currentness:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "productId",
+    "previousContentHash",
+    "status",
+    "checkedAt",
+    "validationGroundingId",
+    "validationResultHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-source-currentness/1.0"
+    },
+    "productId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "previousContentHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "currentContentHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "status": {
+      "enum": ["CURRENT", "CHANGED", "NOT_AVAILABLE", "UNKNOWN"]
+    },
+    "checkedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validationGroundingId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "validationResultHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

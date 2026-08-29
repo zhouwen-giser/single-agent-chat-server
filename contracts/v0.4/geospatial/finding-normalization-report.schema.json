@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:finding-normalization-report:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "status",
+    "findingCount",
+    "sourceProductCount",
+    "gapCount",
+    "issues"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-finding-normalization-report/1.0"
+    },
+    "status": {
+      "enum": ["PASS", "PARTIAL", "FAIL"]
+    },
+    "findingCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sourceProductCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gapCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "issues": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

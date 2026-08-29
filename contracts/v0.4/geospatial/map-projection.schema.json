@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:map-projection:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "features", "truncated"],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-map-projection/1.0"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["projectionId", "findingId", "semanticRole"],
+        "properties": {
+          "projectionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "findingId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "featureId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "semanticRole": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "referenceKey": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["namespace", "kind", "id", "version"],
+            "properties": {
+              "namespace": {
+                "const": "gowm"
+              },
+              "kind": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^wrf_[0-9a-f]{32}$"
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            }
+          },
+          "geometry": {
+            "type": "object"
+          },
+          "payloadRef": {
+            "type": "string",
+            "maxLength": 1024
+          }
+        },
+        "oneOf": [
+          {
+            "required": ["referenceKey"],
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["geometry"]
+                },
+                {
+                  "required": ["payloadRef"]
+                }
+              ]
+            }
+          },
+          {
+            "required": ["geometry"],
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["referenceKey"]
+                },
+                {
+                  "required": ["payloadRef"]
+                }
+              ]
+            }
+          },
+          {
+            "required": ["payloadRef"],
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["referenceKey"]
+                },
+                {
+                  "required": ["geometry"]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "maxItems": 256
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 1024
+      },
+      "maxItems": 32
+    }
+  }
+}
