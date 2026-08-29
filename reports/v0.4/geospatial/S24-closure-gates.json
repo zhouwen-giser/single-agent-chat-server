@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "sacs-geospatial-closure-gates/1.0",
+  "sourceScope": "LOCAL_WORKTREE",
+  "gates": {
+    "base411FinalRegression": {
+      "status": "BLOCKED",
+      "localGateStatus": "PASS",
+      "missingEvidenceTypes": ["CI", "GIT"],
+      "command": "pnpm test",
+      "baselineTotal": 411,
+      "current": {
+        "suitesPassed": 60,
+        "suitesSkipped": 15,
+        "testsPassed": 456,
+        "testsSkipped": 109,
+        "testsTotal": 565
+      },
+      "regressionDetected": false
+    },
+    "migration0013Contiguous": {
+      "status": "BLOCKED",
+      "localGateStatus": "PASS",
+      "missingEvidenceTypes": ["CI", "GIT"],
+      "command": "pnpm verify:migrations"
+    },
+    "architectureBoundary": {
+      "status": "BLOCKED",
+      "localGateStatus": "PASS",
+      "missingEvidenceTypes": ["CI", "GIT"],
+      "command": "pnpm verify:architecture"
+    },
+    "repositorySecretPatterns": {
+      "status": "BLOCKED",
+      "localGateStatus": "PASS",
+      "missingEvidenceTypes": ["CI", "GIT"],
+      "command": "pnpm verify:secrets"
+    },
+    "containerBuild": {
+      "status": "BLOCKED",
+      "localGateStatus": "PASS",
+      "missingEvidenceTypes": ["CI", "GIT"],
+      "buildCommand": "pnpm docker:build",
+      "verificationCommand": "pnpm verify:container",
+      "image": "single-agent-chat-server:0.4.0",
+      "version": "0.4.0",
+      "runtimeUser": "node",
+      "healthcheckPresent": true
+    },
+    "composeWithRealWsgs": {
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    "restartReplay": {
+      "status": "NOT_RUN"
+    },
+    "wsgsOutageRecovery": {
+      "status": "NOT_RUN"
+    },
+    "draftPullRequest": {
+      "status": "NOT_RUN",
+      "reasonCode": "NOT_AUTHORIZED"
+    },
+    "protectedActions": {
+      "status": "BLOCKED",
+      "localGateStatus": "PASS",
+      "missingEvidenceTypes": ["CI", "GIT"],
+      "performed": []
+    }
+  }
+}

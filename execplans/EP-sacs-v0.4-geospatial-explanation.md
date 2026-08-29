@@ -18,16 +18,16 @@ geospatial finding bundle is absent at the fetched WSGS PR #6 head.
 ## Progress
 
 - [x] S13
-- [ ] S14 — authoritative marker blocked; fail-closed intake work pending
-- [ ] S15
-- [ ] S16
-- [ ] S17
-- [ ] S18
-- [ ] S19
-- [ ] S20
-- [ ] S21
-- [ ] S22
-- [ ] S23
+- [ ] S14 — strict fail-closed intake implemented; authoritative marker blocked
+- [x] S15
+- [x] S16
+- [x] S17
+- [x] S18
+- [x] S19
+- [ ] S20 — local resolver/focus primitives pass; trusted structured selection ingress absent
+- [ ] S21 — local policy passes; required REAL_WSGS evidence unavailable
+- [ ] S22 — local policy passes; required REAL_WSGS evidence unavailable
+- [x] S23
 - [ ] S24 — real E2E blocked until the authoritative profile and runtime exist
 
 ## Decisions
@@ -40,15 +40,22 @@ geospatial finding bundle is absent at the fetched WSGS PR #6 head.
 
 ## Applied migrations
 
-None beyond the existing 0010–0012 baseline at S13.
+Append-only `0013_world_explanation.sql` is applied and verified on isolated
+PostgreSQL, including exact replay after a physical restart of the dedicated
+test container.
 
 ## Real evidence
 
-- SACS baseline Jest: 311 PASS, 100 skipped, 411 total.
-- GOWM readiness: status ok, 122 capabilities.
-- WSGS readiness: timeout; no live request evidence claimed.
+- Final local Jest: 456 PASS, 109 skipped, 565 total.
+- Isolated PostgreSQL: S19 12/12, S20 28/28, S23 5/5 real-database tests;
+  WSGS transport in S23 remained an injected protocol fixture.
+- S24 preflight: BLOCKED by the provisional consumer lock before credentials,
+  readiness/capability GETs, or business POSTs; current shared runtime state is
+  `NOT_VERIFIED` by this goal.
 
 ## Blockers
 
 - `SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY`
-- `SACS_GEOSPATIAL_LIVE_ENVIRONMENT_NOT_READY`
+- `STRUCTURED_GEOSPATIAL_SELECTION_INGRESS_UNAVAILABLE`
+- `REAL_WSGS_GEOSPATIAL_EVIDENCE_UNAVAILABLE`
+- `EXACT_HEAD_CI_AND_GIT_PUBLICATION_NOT_RUN`

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "sacs-geospatial-s23-postgres-evidence/1.0",
+  "status": "PASS",
+  "scope": "DEDICATED_ISOLATED_POSTGRESQL",
+  "suite": "tests/world-grounding-runtime.postgres.int.test.ts",
+  "testSuitesPassed": 1,
+  "testsPassed": 5,
+  "geospatialHybrid": {
+    "productionRepositoriesUsed": [
+      "InteractionPersistenceRepository",
+      "GroundingPersistenceRepository",
+      "PostgresWorldFocusRepository",
+      "AuthorityFusionRepository",
+      "WorldExplanationRepository"
+    ],
+    "openAiFirstExecution": true,
+    "agUiExactReplay": true,
+    "wsgsProtocolPosts": 1,
+    "persistedWorldExplanations": 1,
+    "persistedAuthorityFusionEvaluations": 1,
+    "groundingIdentityPreserved": true
+  },
+  "wsgsEvidence": {
+    "transport": "INJECTED_PROTOCOL_FIXTURE",
+    "realWsgsClaimed": false
+  },
+  "credentialsPrintedOrPersisted": false,
+  "sharedServicesModified": false
+}

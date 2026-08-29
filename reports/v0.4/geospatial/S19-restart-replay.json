@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "sacs-geospatial-s19-restart-replay/1.0",
+  "status": "PASS",
+  "databaseName": "sacs_v04_geospatial_s19_restart",
+  "containerIdentityHash": "sha256:4b94b53f8e1a2cad7e84d74ba8978fabb9d97c0f4c6e9122470a5f25bbc72ce4",
+  "containerImageHash": "sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+  "latestMigration": 13,
+  "databaseRestartPerformed": true,
+  "exactReplayRecovered": true,
+  "explanationHash": "sha256:a2552dd447f0f35c48b867c72a416cb8a589852b92cd36ff8d01d369138f5fd8",
+  "groundingResultHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "durableJsonHash": "sha256:52e06f7c7238911698b1420c6de1c6d25a43589363d8df18af60273198ee2fc1",
+  "credentialsPrintedOrPersisted": false,
+  "sharedServicesModified": false,
+  "completedAt": "2026-08-29T15:55:29.092Z"
+}

@@ -1,0 +1,281 @@
+{
+  "schemaVersion": "sacs-geospatial-phase-summary/1.0",
+  "finalDecision": "BLOCKED",
+  "blockerMarkers": [
+    "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+    "SACS_GEOSPATIAL_LIVE_ENVIRONMENT_NOT_READY",
+    "SACS_V0_4_WORLD_GROUNDING_GEOSPATIAL_EXPLANATION_BLOCKED"
+  ],
+  "phases": {
+    "S13": {
+      "status": "PASS",
+      "marker": "SACS_GEOSPATIAL_BASELINE_LOCKED",
+      "markerAsserted": true,
+      "acceptance": {
+        "total": 22,
+        "PASS": 22,
+        "FAIL": 0,
+        "BLOCKED": 0,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "pnpm test (pre-feature baseline)",
+          "result": "PASS 311; package-defined skip 100; total 411",
+          "evidence": "reports/v0.4/geospatial/S13-completion.md"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S13-phase-report.md"
+    },
+    "S14": {
+      "status": "BLOCKED",
+      "marker": "SACS_WSGS_GEOSPATIAL_CONTRACT_READY",
+      "markerAsserted": false,
+      "acceptance": {
+        "total": 28,
+        "PASS": 0,
+        "FAIL": 0,
+        "BLOCKED": 28,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "pnpm test:v04:s14",
+          "result": "PASS 23/23",
+          "evidence": "three focused contract/unit suites"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S14-phase-report.md"
+    },
+    "S15": {
+      "status": "PASS",
+      "marker": "SACS_GEOSPATIAL_EXPLANATION_CONTRACT_READY",
+      "markerAsserted": true,
+      "acceptance": {
+        "total": 32,
+        "PASS": 32,
+        "FAIL": 0,
+        "BLOCKED": 0,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "focused Jest S15-S18 file set",
+          "result": "PASS within 8 suites / 72 tests",
+          "evidence": "world explanation contract and hash suites"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S15-phase-report.md"
+    },
+    "S16": {
+      "status": "PASS",
+      "marker": "SACS_GEOSPATIAL_FINDING_NORMALIZER_READY",
+      "markerAsserted": true,
+      "acceptance": {
+        "total": 32,
+        "PASS": 32,
+        "FAIL": 0,
+        "BLOCKED": 0,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "focused Jest S15-S18 file set",
+          "result": "PASS within 8 suites / 72 tests",
+          "evidence": "assembler and renderer hostile-input coverage"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S16-phase-report.md"
+    },
+    "S17": {
+      "status": "PASS",
+      "marker": "SACS_GEOSPATIAL_NARRATIVE_READY",
+      "markerAsserted": true,
+      "acceptance": {
+        "total": 34,
+        "PASS": 34,
+        "FAIL": 0,
+        "BLOCKED": 0,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "focused Jest S15-S18 file set",
+          "result": "PASS within 8 suites / 72 tests",
+          "evidence": "assembler, renderer, and hash suites"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S17-phase-report.md"
+    },
+    "S18": {
+      "status": "PASS",
+      "marker": "SACS_AGUI_GEOSPATIAL_PROJECTION_READY",
+      "markerAsserted": true,
+      "acceptance": {
+        "total": 26,
+        "PASS": 26,
+        "FAIL": 0,
+        "BLOCKED": 0,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "focused Jest S15-S18 file set",
+          "result": "PASS within 8 suites / 72 tests",
+          "evidence": "projection, runtime, OpenAI HTTP, and AG-UI HTTP/SSE suites"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S18-phase-report.md"
+    },
+    "S19": {
+      "status": "PASS",
+      "marker": "SACS_GEOSPATIAL_EXPLANATION_REPLAY_READY",
+      "markerAsserted": true,
+      "acceptance": {
+        "total": 25,
+        "PASS": 25,
+        "FAIL": 0,
+        "BLOCKED": 0,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "pnpm test:v04:s19 with isolated TEST_DATABASE_URL",
+          "result": "PASS 2 suites / 12 tests",
+          "evidence": "contract plus tests/world-explanation-persistence.postgres.int.test.ts"
+        },
+        {
+          "command": "node scripts/phase-v04-s19-restart-replay.mjs",
+          "result": "PASS; isolated PostgreSQL physically restarted and exact replay recovered",
+          "evidence": "reports/v0.4/geospatial/S19-restart-replay.json"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S19-phase-report.md"
+    },
+    "S20": {
+      "status": "BLOCKED",
+      "marker": "SACS_GEOSPATIAL_MULTITURN_READY",
+      "markerAsserted": false,
+      "acceptance": {
+        "total": 22,
+        "PASS": 0,
+        "FAIL": 0,
+        "BLOCKED": 22,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "pnpm test:v04:s20 with isolated TEST_DATABASE_URL",
+          "result": "PASS 4 suites / 28 tests",
+          "evidence": "local resolver/focus/application/PostgreSQL only; structured selection ingress and REAL_WSGS remain BLOCKED"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S20-phase-report.md"
+    },
+    "S21": {
+      "status": "BLOCKED",
+      "marker": "SACS_GEOSPATIAL_GAP_SEMANTICS_READY",
+      "markerAsserted": false,
+      "acceptance": {
+        "total": 15,
+        "PASS": 0,
+        "FAIL": 0,
+        "BLOCKED": 15,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "focused Jest S21-S23 file set",
+          "result": "PASS within 5 suites / 45 tests",
+          "evidence": "geospatial gap policy suite"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S21-phase-report.md"
+    },
+    "S22": {
+      "status": "BLOCKED",
+      "marker": "SACS_GEOSPATIAL_CURRENTNESS_READY",
+      "markerAsserted": false,
+      "acceptance": {
+        "total": 13,
+        "PASS": 0,
+        "FAIL": 0,
+        "BLOCKED": 13,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "focused Jest S21-S23 file set",
+          "result": "PASS within 5 suites / 45 tests",
+          "evidence": "WSGS-only currentness policy suite"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S22-phase-report.md"
+    },
+    "S23": {
+      "status": "PASS",
+      "marker": "SACS_GEOSPATIAL_AUTHORITY_BOUNDARY_READY",
+      "markerAsserted": true,
+      "acceptance": {
+        "total": 18,
+        "PASS": 18,
+        "FAIL": 0,
+        "BLOCKED": 0,
+        "NOT_RUN": 0
+      },
+      "testRuns": [
+        {
+          "command": "pnpm test:v04:s23 with isolated TEST_DATABASE_URL",
+          "result": "PASS 9 suites / 88 tests, including 5 real PostgreSQL tests",
+          "evidence": "authority guards plus three-section runtime, exact replay, OpenAI HTTP, and AG-UI HTTP/SSE parity"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S23-phase-report.md"
+    },
+    "S24": {
+      "status": "BLOCKED",
+      "marker": "SACS_GEOSPATIAL_REAL_E2E_READY",
+      "markerAsserted": false,
+      "acceptance": {
+        "total": 38,
+        "PASS": 0,
+        "FAIL": 0,
+        "BLOCKED": 35,
+        "NOT_RUN": 3
+      },
+      "testRuns": [
+        {
+          "command": "pnpm test",
+          "result": "PASS 60 suites / 456 tests; 15 suites / 109 tests skipped; 565 total",
+          "evidence": "full current worktree regression; prior 411-case baseline preserved"
+        },
+        {
+          "command": "pnpm docker:build",
+          "result": "PASS; single-agent-chat-server:0.4.0 built",
+          "evidence": "local container candidate build"
+        },
+        {
+          "command": "pnpm verify:container",
+          "result": "PASS; version=0.4.0, user=node, healthcheck present",
+          "evidence": "local container metadata verification"
+        },
+        {
+          "command": "pnpm test:v04:s24:preflight",
+          "result": "PASS 2 suites / 24 tests",
+          "evidence": "strict readiness/capability preflight plus per-row acceptance evidence contract"
+        },
+        {
+          "command": "pnpm preflight:v04:s24",
+          "result": "BLOCKED safely; 0 read-only requests; 0 business POSTs",
+          "evidence": "reports/v0.4/geospatial/S24-real-e2e.json"
+        },
+        {
+          "command": "pnpm verify:migrations; pnpm verify:architecture; pnpm verify:secrets",
+          "result": "PASS; PASS; PASS",
+          "evidence": "reports/v0.4/geospatial/S24-closure-gates.json"
+        }
+      ],
+      "report": "reports/v0.4/geospatial/S24-phase-report.md"
+    }
+  }
+}

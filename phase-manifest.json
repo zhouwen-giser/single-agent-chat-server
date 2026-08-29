@@ -66,7 +66,7 @@
     { "id": "S06-S12", "status": "COMPLETE" },
     {
       "id": "S13",
-      "status": "PASS_WITH_EXTERNAL_BLOCKERS",
+      "status": "PASS",
       "marker": "SACS_GEOSPATIAL_BASELINE_LOCKED"
     },
     {
@@ -74,15 +74,26 @@
       "status": "BLOCKED",
       "blocker": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY"
     },
-    { "id": "S15-S23", "status": "IN_PROGRESS" },
+    { "id": "S15-S19", "status": "PASS" },
+    {
+      "id": "S20",
+      "status": "BLOCKED",
+      "blocker": "STRUCTURED_GEOSPATIAL_SELECTION_INGRESS_UNAVAILABLE"
+    },
+    {
+      "id": "S21-S22",
+      "status": "BLOCKED",
+      "blocker": "REAL_WSGS_GEOSPATIAL_EVIDENCE_UNAVAILABLE"
+    },
+    { "id": "S23", "status": "PASS" },
     {
       "id": "S24",
       "status": "BLOCKED",
-      "blocker": "SACS_GEOSPATIAL_LIVE_ENVIRONMENT_NOT_READY"
+      "blocker": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
     }
   ],
-  "currentGoalCompletionMarker": "SACS_V0_4_WORLD_GROUNDING_GEOSPATIAL_EXPLANATION_COMPLETE",
-  "taskPackageRevision": "R2",
+  "currentGoalCompletionMarker": "SACS_V0_4_WORLD_GROUNDING_GEOSPATIAL_EXPLANATION_BLOCKED",
+  "taskPackageRevision": "R1",
   "sdarA2aBaseline": {
     "specPatch": "1.0.1",
     "wireVersion": "1.0",

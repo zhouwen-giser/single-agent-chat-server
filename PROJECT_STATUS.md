@@ -1,16 +1,25 @@
 # Project status
 
-Status: `SACS_V0_4_GEOSPATIAL_EXPLANATION_IN_PROGRESS` — S00 through S12 are
-complete at the published PR #15 head, and S13 has locked the new geospatial
-explanation baseline on a dedicated local stacked branch. S14 and S24 remain
-fail-closed on an absent authoritative WSGS geospatial consumer handoff and a
-non-ready WSGS application endpoint; no fixture is counted as live evidence.
+Status: `SACS_V0_4_WORLD_GROUNDING_GEOSPATIAL_EXPLANATION_BLOCKED` — S13 and
+the local S15-S19/S23 implementation gates pass on the dedicated stacked
+branch. S14, S20-S22 and S24 remain fail-closed: the authoritative WSGS-owned
+geospatial consumer bundle is absent, the frozen northbound contracts do not
+define a trusted Finding/MapSelection envelope, and no REAL_WSGS geospatial
+chain or exact-head CI/Git publication evidence exists. No fixture, isolated
+PostgreSQL run, container health, or four-operation capability response is
+counted as live geospatial authority evidence.
 
 The current goal starts from PR #15 head `2dcbbe1c` on
 `codex/sacs-v0.4-geospatial-explanation`. Its source reconciliation, PR/CI
 state, four-repository observations and pre-change 411-test baseline are in
 [`S13-source-lock.json`](reports/v0.4/geospatial/S13-source-lock.json) and the
 [`S13 completion report`](reports/v0.4/geospatial/S13-completion.md).
+
+The current local closure is recorded in
+[`FINAL_REPORT.md`](reports/v0.4/geospatial/FINAL_REPORT.md) and the independent
+305-row [`acceptance-ledger.json`](reports/v0.4/geospatial/acceptance-ledger.json):
+189 PASS, 0 FAIL, 3 NOT_RUN and 113 BLOCKED. The final local regression passed
+60 suites / 456 tests, with 15 suites / 109 tests skipped (565 total).
 
 The detailed S00–S05 history below is retained as historical evidence. The
 later S06–S12 development closure is recorded in

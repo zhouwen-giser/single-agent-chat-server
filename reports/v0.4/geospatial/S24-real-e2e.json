@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "sacs-geospatial-real-e2e-preflight/1.0",
+  "status": "BLOCKED",
+  "blocker": {
+    "code": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING",
+    "safeDetail": "The checked-in WSGS geospatial consumer lock is valid but is not an authoritative READY handoff."
+  },
+  "authorityGate": {
+    "consumerLockValidation": "VALID",
+    "consumerLockStatus": "BLOCKED",
+    "consumerLockProvenance": "TASK_PACKAGE_PROVISIONAL",
+    "consumerLockHash": "sha256:2367e0467b6044b9cca613101f936cc6db6543374eacf32b135077cd390dd1cf",
+    "consumerLockBytesHash": "sha256:171bcb989c9263cc86d511615680701865728fddf2702cfdad7d52dac4197cbc",
+    "consumerLockHashVerified": true,
+    "authoritativeLockReady": false,
+    "provenanceClosureVerified": false,
+    "geospatialProfileVerified": false,
+    "transportModeVerified": false,
+    "liveBusinessRequestsAllowed": false
+  },
+  "transportConfiguration": {
+    "source": "NOT_READ_FOR_BLOCKED_LOCK",
+    "baseUrlConfigured": false,
+    "bearerConfigured": false,
+    "instanceCommitConfigured": false,
+    "bearerReadInProcessOnly": false
+  },
+  "execution": {
+    "mode": "READ_ONLY_REQUIRE_READY_PREFLIGHT",
+    "readOnlyRequestsAttempted": 0,
+    "businessPostsAttempted": 0,
+    "businessPostRefused": true,
+    "realE2eCasesExecuted": 0,
+    "responseBodiesPersisted": false,
+    "credentialsPrintedOrPersisted": false,
+    "redirectsAllowed": false,
+    "readOnlyChecks": []
+  },
+  "cases": [
+    {
+      "caseId": "E2E-01",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "E2E-02",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "E2E-03",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "E2E-04",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "E2E-05",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "E2E-06",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "E2E-07",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "E2E-08",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "E2E-09",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "E2E-10",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "NEG-01",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "NEG-02",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "NEG-03",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "NEG-04",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "NEG-05",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "NEG-06",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "NEG-07",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    },
+    {
+      "caseId": "HYBRID-01",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
+    }
+  ],
+  "finalMarker": "SACS_V0_4_WORLD_GROUNDING_GEOSPATIAL_EXPLANATION_BLOCKED"
+}
