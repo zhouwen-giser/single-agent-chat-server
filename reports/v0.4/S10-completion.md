@@ -1,4 +1,4 @@
-# S10 Authority Fusion v2 — BLOCKED
+# S10 Authority Fusion v2 — PASS
 
 Authority Fusion v2 is implemented as a deterministic, read-only evaluator over the published SDAR Task snapshot and WSGS typed products. It maps only the locked `predicate-evaluation` and `correlation-finding` payloads; generic `safePayload` text cannot become a semantic decision.
 
@@ -9,8 +9,10 @@ Migration `0012_authority_fusion.sql` defines immutable snapshot identity across
 Evidence completed in this environment:
 
 - focused evaluator and contract tests: 16/16 PASS;
+- isolated PostgreSQL migration, replay and snapshot tests: 4/4 PASS;
+- complete S10 phase entry: 20/20 PASS;
 - locked result and record schemas: byte-exact PASS;
 - format, lint, typecheck, build, architecture, secrets and migration static gates: PASS;
-- full Jest regression without database services: 311 PASS, 99 SKIPPED across 57 suites.
+- full Jest regression with isolated PostgreSQL: 411/411 PASS across 57 suites.
 
-S10 remains BLOCKED because the required real PostgreSQL tests for exact replay, snapshot changes, migration application, upgrade preservation, and uniqueness were NOT_RUN. The host Docker control plane did not return a server result, and no isolated PostgreSQL endpoint was available. No Docker/WSL restart was performed.
+The PostgreSQL evidence uses an isolated disposable database. It verifies clean 0011/0012 application, lossless 0010→0012 upgrade, immutable fusion uniqueness, exact replay, and new records when either the Task snapshot or requirement hash changes.

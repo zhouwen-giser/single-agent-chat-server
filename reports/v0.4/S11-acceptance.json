@@ -5,16 +5,17 @@
   "asOf": "2026-08-29",
   "summary": {
     "focusedUnitAndContract": "PASS",
-    "focusedTests": "41/41",
-    "fullJestWithoutServices": "311 PASS, 99 SKIPPED",
-    "realPostgres": "NOT_RUN",
+    "focusedTests": "49/49",
+    "fullJestWithPostgres": "411/411 PASS",
+    "realPostgres": "PASS",
+    "fakeWsgsHttpIntegration": "PASS",
     "realWsgs": "NOT_RUN"
   },
   "acceptance": {
     "AC-U014": "PASS",
     "AC-U015": "PASS",
-    "AC-U018-U020": "NOT_RUN",
-    "AC-S007-S010": "PASS_UNIT_INTEGRATION_REAL_RUNTIME_NOT_RUN",
+    "AC-U018-U020": "PASS_REAL_POSTGRES_FAKE_WSGS_HTTP",
+    "AC-S007-S010": "PASS_REAL_POSTGRES_FAKE_WSGS_HTTP",
     "AC-S011-S013": "PASS",
     "AC-S014-S015": "NOT_RUN",
     "AC-S016-S017": "PASS"
@@ -28,11 +29,12 @@
     "bounded safe rendering for OpenAI and AG-UI shared runtime"
   ],
   "blocker": {
-    "code": "WSGS_AND_DOCKER_RUNTIME_UNAVAILABLE",
+    "code": "SHARED_GOWM_WSGS_NOT_READY",
     "evidence": [
-      "WSGS 18072 readiness timed out after 10 seconds",
-      "no listener was present on 18072 or shared GOWM 18063",
-      "Docker control-plane did not return a server result"
+      "Docker control-plane recovered",
+      "WSGS 18072 application readiness remained HTTP 503 after its stack started",
+      "shared GOWM 18063 refused connections",
+      "upstream reported a PostgreSQL toast corruption signal and did not assert readiness"
     ],
     "lastCandidateOnly": "46e872359536b84351ce2b417117fc5725c59145",
     "warning": "The last candidate is not current runtime evidence"

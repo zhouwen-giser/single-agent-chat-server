@@ -5,7 +5,7 @@
   "markerAsserted": false,
   "asOf": "2026-08-29",
   "completed": {
-    "fullJestWithoutServices": "311 PASS, 99 SKIPPED, 410 total",
+    "fullJestWithPostgres": "411 PASS, 0 SKIPPED, 411 total",
     "format": "PASS",
     "lint": "PASS",
     "typecheck": "PASS",
@@ -14,14 +14,17 @@
     "architecture": "PASS",
     "secretPatternGate": "PASS",
     "productionSourceFilesChecked": 84,
-    "trackedFilesSecretChecked": 602
+    "trackedFilesSecretChecked": 618,
+    "dockerBuild": "PASS",
+    "containerMetadata": "PASS",
+    "compose": "PASS",
+    "composeReadyHttp": 200,
+    "composeMigratedTables": 22,
+    "composeCleanup": "PASS"
   },
   "notRun": {
-    "realPostgresS10S11": true,
     "realWsgsS11": true,
-    "dockerBuild": true,
-    "containerVerification": true,
-    "composeVerification": true
+    "sharedGowmReadiness": true
   },
   "requiredMatrix": {
     "developmentRequiredRows": 119,
@@ -29,8 +32,8 @@
     "finalStatus": "NOT_CLOSED"
   },
   "blocker": {
-    "code": "SHARED_DOCKER_WSL_RESTART_AUTHORIZATION_REQUIRED",
-    "details": "Docker control-plane did not return a server result; WSGS 18072 and GOWM 18063 had no listener. Restarting shared Docker/WSL was not authorized and was not attempted."
+    "code": "SHARED_GOWM_WSGS_NOT_READY",
+    "details": "Docker recovered and all SACS-local PostgreSQL/container gates pass. Shared GOWM 18063 is not ready and WSGS 18072 application readiness is HTTP 503, so the genuine S11 chain remains NOT_RUN."
   },
   "scopeSafety": {
     "upstreamRepositoriesModified": false,
