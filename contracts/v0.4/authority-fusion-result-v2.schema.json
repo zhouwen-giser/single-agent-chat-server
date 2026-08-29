@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.4:authority-fusion-result-v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "task",
+    "reality",
+    "checks",
+    "overall",
+    "unknowns"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "2.0"
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority",
+        "taskId",
+        "state",
+        "observedAt"
+      ],
+      "properties": {
+        "authority": {
+          "const": "SDAR"
+        },
+        "taskId": {
+          "$ref": "common.schema.json#/$defs/identifier"
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "internalPhase": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "observedAt": {
+          "$ref": "common.schema.json#/$defs/dateTime"
+        }
+      }
+    },
+    "reality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority",
+        "groundingId",
+        "resultHash",
+        "observedAt"
+      ],
+      "properties": {
+        "authority": {
+          "const": "GOWM"
+        },
+        "groundingId": {
+          "$ref": "common.schema.json#/$defs/identifier"
+        },
+        "resultHash": {
+          "$ref": "common.schema.json#/$defs/sha256"
+        },
+        "worldVersion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observedAt": {
+          "$ref": "common.schema.json#/$defs/dateTime"
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "checkId",
+          "type",
+          "required",
+          "evaluation",
+          "evidenceItemIds"
+        ],
+        "properties": {
+          "checkId": {
+            "$ref": "common.schema.json#/$defs/identifier"
+          },
+          "type": {
+            "enum": [
+              "TASK_CORRELATION",
+              "ACTIVITY_STATE",
+              "OUTCOME_VERIFICATION",
+              "PLAN_PREDICATE"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "expected": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "observed": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "evaluation": {
+            "enum": [
+              "SATISFIED",
+              "VIOLATED",
+              "UNKNOWN",
+              "NOT_COMPARABLE"
+            ]
+          },
+          "reasonCode": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "evidenceItemIds": {
+            "type": "array",
+            "maxItems": 128,
+            "items": {
+              "$ref": "common.schema.json#/$defs/identifier"
+            }
+          }
+        }
+      }
+    },
+    "overall": {
+      "enum": [
+        "CONSISTENT",
+        "INCONSISTENT",
+        "UNKNOWN",
+        "NOT_COMPARABLE"
+      ]
+    },
+    "unknowns": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "type": "string",
+        "maxLength": 2000
+      }
+    }
+  }
+}

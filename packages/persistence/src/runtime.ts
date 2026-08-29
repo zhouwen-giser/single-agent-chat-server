@@ -2,6 +2,7 @@ import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
 import pg from "pg";
 
 import { createPostgresCheckpointer } from "./checkpoint.js";
+import { AuthorityFusionRepository } from "./authority-fusion-repository.js";
 import type { PersistenceConfig } from "./config.js";
 import { ConversationPersistenceRepository } from "./conversation-repository.js";
 import { InteractionPersistenceRepository } from "./interaction-repository.js";
@@ -18,6 +19,7 @@ export interface PersistenceRuntime {
   readonly interactionRepository: InteractionPersistenceRepository;
   readonly groundingRepository: GroundingPersistenceRepository;
   readonly worldFocusRepository: PostgresWorldFocusRepository;
+  readonly authorityFusionRepository: AuthorityFusionRepository;
   readonly conversationRepository: ConversationPersistenceRepository;
   readonly checkpointer: PostgresSaver;
   readiness(): Promise<boolean>;
@@ -60,6 +62,7 @@ export async function setupPersistence(
         config.idempotencyLeaseMs,
       ),
       worldFocusRepository: new PostgresWorldFocusRepository(pool),
+      authorityFusionRepository: new AuthorityFusionRepository(pool),
       conversationRepository: new ConversationPersistenceRepository(
         pool,
         observation,

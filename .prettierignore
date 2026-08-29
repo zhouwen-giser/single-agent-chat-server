@@ -21,6 +21,8 @@ LICENSE
 # Preserve imported SACS v0.4 S09 schemas byte-for-byte.
 contracts/v0.4/sdar-task-observation-v2.schema.json
 contracts/v0.4/plan-reality-requirements.schema.json
+contracts/v0.4/authority-fusion-result-v2.schema.json
+contracts/v0.4/authority-fusion-record.schema.json
 
 # Generated supply-chain evidence.
 reports/security/sbom.cdx.json

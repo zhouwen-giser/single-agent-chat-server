@@ -1,5 +1,10 @@
 export { CHECKPOINT_SCHEMA, createPostgresCheckpointer } from "./checkpoint.js";
 export {
+  AuthorityFusionRepository,
+  type AuthorityFusionIdentity,
+  type StoredAuthorityFusion,
+} from "./authority-fusion-repository.js";
+export {
   ConversationPersistenceRepository,
   type AssistantMessageReconciliation,
   type ConversationMessageIngestResult,
