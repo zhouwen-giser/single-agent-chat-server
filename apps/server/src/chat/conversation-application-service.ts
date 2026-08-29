@@ -20,6 +20,7 @@ import type { ClassificationError } from "../../../../src/agent/classification.j
 import type { StructuredChatModel } from "../../../../src/agent/model.js";
 import type { TurnPlan } from "../../../../packages/world-grounding-contract/src/index.js";
 import type { WorldExplanationV1 } from "../../../../packages/world-explanation-contract/src/index.js";
+import type { HybridAuthoritySeparatedResult } from "../../../../packages/world-grounding-runtime/src/index.js";
 
 export interface ConversationApplicationRepository {
   listActiveTasksForChat(input: {
@@ -84,7 +85,9 @@ export interface WorldGroundingApplication {
     input: WorldGroundingTurn,
   ): Promise<WorldExplanationV1 | string>;
   answerWorld(input: WorldGroundingTurn): Promise<string>;
-  compareHybrid(input: HybridWorldGroundingTurn): Promise<string>;
+  compareHybrid(
+    input: HybridWorldGroundingTurn,
+  ): Promise<string | HybridAuthoritySeparatedResult>;
   submitOperational(input: WorldGroundingTurn): Promise<string>;
 }
 
@@ -180,10 +183,19 @@ export class ConversationApplicationService {
       if (sdarTask === undefined) {
         return "AUTHORITY_FUSION_PLAN_UNAVAILABLE";
       }
-      return this.options.worldGrounding.compareHybrid({
+      const hybrid = await this.options.worldGrounding.compareHybrid({
         ...toWorldGroundingTurn(turn, result.turnPlan),
         sdarTask,
       });
+      return typeof hybrid === "string"
+        ? hybrid
+        : {
+            kind: "world_explanation",
+            explanation: hybrid.explanation,
+            renderedText: hybrid.renderedText,
+            authorityPresentation: hybrid.authorityPresentation,
+            authorityFusion: hybrid.authorityFusion,
+          };
     }
     if (result.requestKind === "new_task") {
       const input = {

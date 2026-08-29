@@ -133,6 +133,26 @@ export function safePublicText(
   value: unknown,
   maximumCharacters = 16_000,
 ): string | undefined {
+  return sanitizePublicText(value, maximumCharacters, false);
+}
+
+/**
+ * Status and phase text is published metadata, not an authority-owned link
+ * surface. Redact provider endpoints in addition to credentials before it can
+ * reach protocol state, activity, custom, or text events.
+ */
+export function safePublicStatusText(
+  value: unknown,
+  maximumCharacters = 4_000,
+): string | undefined {
+  return sanitizePublicText(value, maximumCharacters, true);
+}
+
+function sanitizePublicText(
+  value: unknown,
+  maximumCharacters: number,
+  redactUrls: boolean,
+): string | undefined {
   if (typeof value !== "string") return undefined;
   const normalized = [...value]
     .filter((character) => {
@@ -145,13 +165,25 @@ export function safePublicText(
     })
     .join("")
     .replace(
-      /(?:authorization|api[_-]?key|password|secret)\s*[:=]\s*\S+/giu,
-      "[REDACTED]",
+      /\b(postgres(?:ql)?|mysql|mongodb(?:\+srv)?):\/\/[^\s/@:]+:[^\s/@]+@/giu,
+      "$1://[REDACTED]@",
     )
-    .trim();
-  if (normalized.length === 0) return undefined;
-  if (normalized.length <= maximumCharacters) return normalized;
-  return `${normalized.slice(0, maximumCharacters)}\n\n[truncated]`;
+    .replace(/Bearer\s+\S+/giu, "Bearer [REDACTED]")
+    .replace(
+      /(?:authorization|proxy-authorization|cookie|set-cookie|api[_-]?key|x-api-key|password|secret|token)\s*[:=]\s*\S+/giu,
+      "[REDACTED]",
+    );
+  const redacted = (
+    redactUrls
+      ? normalized.replace(
+          /\b[A-Za-z][A-Za-z0-9+.-]*:\/\/[^\s<>(){}"']+/gu,
+          "[REDACTED_URL]",
+        )
+      : normalized
+  ).trim();
+  if (redacted.length === 0) return undefined;
+  if (redacted.length <= maximumCharacters) return redacted;
+  return `${redacted.slice(0, maximumCharacters)}\n\n[truncated]`;
 }
 
 export function isSdarInteractionEvent(

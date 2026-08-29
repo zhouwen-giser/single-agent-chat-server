@@ -2,6 +2,7 @@ import { isIP } from "node:net";
 
 import {
   InteractionEventFactory,
+  safePublicStatusText,
   safePublicText,
   type PublicJsonValue,
   type SdarInteractionEvent,
@@ -80,7 +81,7 @@ export class A2aInteractionMapper {
       : this.ensureSnapshot(scope, status);
     return [
       ...events,
-      ...this.mapMessage(event.message, scope),
+      ...this.mapMessage(event.message, scope, true),
       ...this.mapStatusSignals(scope, status),
     ];
   }
@@ -112,7 +113,7 @@ export class A2aInteractionMapper {
       : this.ensureSnapshot(scope, status);
     return [
       ...events,
-      ...this.mapMessage(task.statusMessage, scope),
+      ...this.mapMessage(task.statusMessage, scope, true),
       ...this.mapStatusSignals(scope, status),
       ...task.artifacts.flatMap((artifact) =>
         this.mapArtifact(artifact, scope),
@@ -194,15 +195,20 @@ export class A2aInteractionMapper {
           "input.required",
           {
             state: status.state,
-            ...(safePublicText(status.internalPhase, 128) === undefined
+            ...(safePublicStatusText(status.internalPhase, 128) === undefined
               ? {}
-              : { internalPhase: safePublicText(status.internalPhase, 128) }),
+              : {
+                  internalPhase: safePublicStatusText(
+                    status.internalPhase,
+                    128,
+                  ),
+                }),
             ...(safePublicText(status.inputRequestId, 256) === undefined
               ? {}
               : { inputRequestId: safePublicText(status.inputRequestId, 256) }),
-            ...(safePublicText(status.phaseMessage, 4_000) === undefined
+            ...(safePublicStatusText(status.phaseMessage, 4_000) === undefined
               ? {}
-              : { text: safePublicText(status.phaseMessage, 4_000) }),
+              : { text: safePublicStatusText(status.phaseMessage, 4_000) }),
             allowedActions: allowedActions(status),
           },
           {
@@ -256,6 +262,7 @@ export class A2aInteractionMapper {
   private mapMessage(
     message: NormalizedMessage | undefined,
     scope = this.taskScope,
+    statusBoundary = false,
   ): readonly SdarInteractionEvent[] {
     if (message === undefined || message.role !== "AGENT") return [];
     if (
@@ -267,14 +274,18 @@ export class A2aInteractionMapper {
       throw new Error("A2A Message identity does not match authorized Task");
     }
     return compact(
-      message.parts.map((part, index) =>
-        part.kind === "text"
-          ? this.factory.publicText(part.text ?? "", {
+      message.parts.map((part, index) => {
+        if (part.kind !== "text") return undefined;
+        const text = statusBoundary
+          ? safePublicStatusText(part.text, 16_000)
+          : safePublicText(part.text, 16_000);
+        return text === undefined
+          ? undefined
+          : this.factory.publicText(text, {
               ...(scope === undefined ? {} : { task: scope }),
               dedupeKey: `message:${message.messageId}:${index}`,
-            })
-          : undefined,
-      ),
+            });
+      }),
     );
   }
 
@@ -352,12 +363,12 @@ function publicTaskPayload(
     state: status.state,
     terminal: terminalStates.has(status.state),
     text: statusText(status),
-    ...(safePublicText(status.internalPhase, 128) === undefined
+    ...(safePublicStatusText(status.internalPhase, 128) === undefined
       ? {}
-      : { internalPhase: safePublicText(status.internalPhase, 128) }),
-    ...(safePublicText(status.phaseMessage, 4_000) === undefined
+      : { internalPhase: safePublicStatusText(status.internalPhase, 128) }),
+    ...(safePublicStatusText(status.phaseMessage, 4_000) === undefined
       ? {}
-      : { phaseMessage: safePublicText(status.phaseMessage, 4_000) }),
+      : { phaseMessage: safePublicStatusText(status.phaseMessage, 4_000) }),
     ...(safeErrorCode(status.errorCode) === undefined
       ? {}
       : { errorCode: safeErrorCode(status.errorCode) }),
@@ -368,7 +379,7 @@ function publicTaskPayload(
 }
 
 function statusText(status: PublicStatus): string {
-  const phase = safePublicText(status.phaseMessage, 4_000);
+  const phase = safePublicStatusText(status.phaseMessage, 4_000);
   return `**SDAR status: ${status.state}**${phase === undefined ? "" : `\n\n${phase}`}`;
 }
 

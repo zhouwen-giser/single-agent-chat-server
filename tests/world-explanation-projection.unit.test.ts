@@ -11,6 +11,7 @@ import {
   finalizeWorldExplanation,
   type WorldExplanationV1,
 } from "../packages/world-explanation-contract/src/index.js";
+import { hybridWorldExplanationFixture } from "./fixtures/hybrid-world-explanation.js";
 
 describe("WorldExplanation protocol projections", () => {
   it("projects one persisted explanation to OpenAI text and ordered typed events", async () => {
@@ -101,6 +102,95 @@ describe("WorldExplanation protocol projections", () => {
 
     expect(map?.payload.mapProjection).toBeNull();
     expect(JSON.stringify(map?.payload)).not.toContain("coordinates");
+  });
+
+  it("projects one validated hybrid object identically to OpenAI and AG-UI", async () => {
+    const result = hybridWorldExplanationFixture(fixtureExplanation());
+    const interactionEvents = await collect(
+      legacyChatResultToInteractionEvents(result, {
+        runId: "run-world-hybrid-1",
+        threadId: "thread-world-hybrid-1",
+      }),
+    );
+    const worldEvent = interactionEvents.find(
+      ({ eventType }) => eventType === "world.explanation",
+    );
+    const mapEvent = interactionEvents.find(
+      ({ eventType }) => eventType === "world.map_projection",
+    );
+    const sourceEvent = interactionEvents.find(
+      ({ eventType }) => eventType === "world.source_products",
+    );
+    const openAiText = (
+      await collect(
+        renderInteractionEventsForOpenAi(iterable(interactionEvents)),
+      )
+    ).join("");
+    const agUi = await collect(
+      renderInteractionEventsForAgUi(iterable(interactionEvents)),
+    );
+    const agUiWorld = agUi.find(
+      (event): event is AGUIEvent & { name: string; value: unknown } =>
+        event.type === EventType.CUSTOM &&
+        "name" in event &&
+        event.name === "sacs.world-explanation.v1" &&
+        "value" in event,
+    );
+
+    expect(openAiText).toBe(result.renderedText);
+    expect(worldEvent?.payload).toEqual(
+      expect.objectContaining({
+        explanation: result.explanation,
+        authorityPresentation: result.authorityPresentation,
+        authorityFusion: result.authorityFusion,
+      }),
+    );
+    expect(agUiWorld?.value).toEqual(worldEvent?.payload);
+    const findingEvidenceIds = new Set(
+      result.explanation.findings.flatMap(
+        ({ evidenceItemIds }) => evidenceItemIds ?? [],
+      ),
+    );
+    expect(
+      result.authorityFusion?.checks.flatMap(
+        ({ evidenceItemIds }) => evidenceItemIds,
+      ),
+    ).toEqual(expect.not.arrayContaining([...findingEvidenceIds]));
+    for (const event of [worldEvent, mapEvent, sourceEvent]) {
+      expect(event?.payload).toEqual(
+        expect.objectContaining({
+          explanationId: result.explanation.explanationId,
+          explanationHash: result.explanation.explanationHash,
+          groundingId: result.explanation.grounding.groundingId,
+          groundingResultHash: result.explanation.grounding.resultHash,
+        }),
+      );
+    }
+    expect(mapEvent?.payload).not.toHaveProperty("authorityFusion");
+    expect(sourceEvent?.payload).not.toHaveProperty("authorityPresentation");
+  });
+
+  it("fails closed when hybrid authority optional fields are only partially present", async () => {
+    const complete = hybridWorldExplanationFixture(fixtureExplanation());
+    const { authorityFusion: ignored, ...partial } = complete;
+    void ignored;
+    const interactionEvents = await collect(
+      legacyChatResultToInteractionEvents(partial, {
+        runId: "run-world-hybrid-partial",
+        threadId: "thread-world-hybrid-partial",
+      }),
+    );
+
+    expect(interactionEvents.map(({ eventType }) => eventType)).toEqual([
+      "run.started",
+      "run.error",
+    ]);
+    expect(interactionEvents).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ eventType: "message.text" }),
+        expect.objectContaining({ eventType: "world.explanation" }),
+      ]),
+    );
   });
 });
 

@@ -20,6 +20,7 @@ import {
 } from "../packages/ag-ui-interaction-adapter/src/index.js";
 import { legacyChatResultToInteractionEvents } from "../packages/interaction-runtime/src/index.js";
 import { assembleWorldExplanation } from "../packages/world-explanation-runtime/src/index.js";
+import { hybridWorldExplanationFixture } from "./fixtures/hybrid-world-explanation.js";
 import { assemblyInput } from "./world-explanation-fixtures.js";
 
 const openAiServiceKey = "phase-5-openai-service-key-at-least-32-characters";
@@ -211,6 +212,59 @@ describe("AG-UI HTTP/SSE endpoint", () => {
         }),
       );
     }
+  });
+
+  it("publishes the same validated hybrid object and deterministic text over AG-UI HTTP", async () => {
+    const result = hybridWorldExplanationFixture(
+      assembleWorldExplanation(assemblyInput()),
+    );
+    const runAgUi = createInteractionAgUiRunHandler((context) =>
+      legacyChatResultToInteractionEvents(result, {
+        runId: context.input.runId,
+        threadId: context.internalThreadId,
+      }),
+    );
+    const response = await createServer(
+      "unused",
+      [],
+      undefined,
+      runAgUi,
+    ).inject({
+      method: "POST",
+      url: "/ag-ui",
+      headers: { ...headers, accept: "text/event-stream" },
+      payload: runInput(),
+    });
+    const events = decodeEvents(response.body);
+    const text = events
+      .filter(
+        (event): event is AGUIEvent & { delta: string } =>
+          event.type === EventType.TEXT_MESSAGE_CONTENT && "delta" in event,
+      )
+      .map(({ delta }) => delta)
+      .join("");
+    const world = events.find(
+      (event): event is AGUIEvent & { name: string; value: unknown } =>
+        event.type === EventType.CUSTOM &&
+        "name" in event &&
+        event.name === "sacs.world-explanation.v1" &&
+        "value" in event,
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect(text).toBe(result.renderedText);
+    expect(world?.value).toEqual(
+      expect.objectContaining({
+        explanation: result.explanation,
+        authorityPresentation: result.authorityPresentation,
+        authorityFusion: result.authorityFusion,
+        explanationId: result.explanation.explanationId,
+        explanationHash: result.explanation.explanationHash,
+        groundingId: result.explanation.grounding.groundingId,
+        groundingResultHash: result.explanation.grounding.resultHash,
+      }),
+    );
+    expect(events.at(-1)?.type).toBe(EventType.RUN_FINISHED);
   });
 
   it("is consumed by the exact pinned official HttpAgent", async () => {

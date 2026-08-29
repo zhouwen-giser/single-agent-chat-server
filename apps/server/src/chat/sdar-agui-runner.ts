@@ -137,11 +137,12 @@ async function* coordinatorInteractionEvents(
   if (isWorldExplanationChatResult(result)) {
     while (pendingEvents.length > 0) {
       const event = pendingEvents.shift();
-      if (event !== undefined) yield event;
+      if (event !== undefined && !isLookupVisibleText(event)) yield event;
     }
     for (const event of worldExplanationInteractionEvents(
       factory,
       result.explanation,
+      result,
     )) {
       yield event;
     }
@@ -192,6 +193,10 @@ async function* coordinatorInteractionEvents(
     taskTerminal: false,
   });
   if (finished !== undefined) yield finished;
+}
+
+function isLookupVisibleText(event: SdarInteractionEvent): boolean {
+  return ["message.text", "artifact.text"].includes(event.eventType);
 }
 
 function adaptRepository(repository: InteractionPersistenceRepository) {

@@ -6,10 +6,17 @@ import {
   AuthorityFusionEvaluator,
   AuthorityFusionRenderer,
   hashPlanRealityRequirements,
+  parseAuthorityFusionResultV2,
   PlanRealityRequirementCompiler,
   SdarTaskObservationAssembler,
   type AuthorityFusionResultV2,
+  type SdarTaskObservationV2,
 } from "../../authority-fusion/src/index.js";
+import {
+  composeAuthoritySeparatedPresentation,
+  type AuthoritySeparatedPresentation,
+} from "../../geospatial-explanation-policy/src/index.js";
+import { safePublicStatusText } from "../../interaction-contract/src/index.js";
 import { planGroundingRequest } from "../../grounding-request-planner/src/index.js";
 import {
   GroundingContextAssembler,
@@ -152,6 +159,13 @@ export type SdarPublishedPlanSnapshot = z.infer<
 export interface HybridGroundingRuntimeTurn extends WorldGroundingRuntimeTurn {
   readonly sdarTask?: NormalizedTask;
   readonly sdarPlan?: SdarPublishedPlanSnapshot;
+}
+
+export interface HybridAuthoritySeparatedResult {
+  readonly explanation: WorldExplanationV1;
+  readonly authorityFusion: AuthorityFusionResultV2;
+  readonly authorityPresentation: AuthoritySeparatedPresentation;
+  readonly renderedText: string;
 }
 
 export interface WorldGroundingRuntimeOptions {
@@ -368,7 +382,9 @@ export class WorldGroundingRuntime {
     };
   }
 
-  async compareHybrid(input: HybridGroundingRuntimeTurn): Promise<string> {
+  async compareHybrid(
+    input: HybridGroundingRuntimeTurn,
+  ): Promise<string | HybridAuthoritySeparatedResult> {
     const turnPlan = parseTurnPlan(input.turnPlan);
     if (turnPlan.turnRoute !== "HYBRID_PLAN_REALITY_COMPARE") {
       throw new WorldGroundingRuntimeError(
@@ -424,7 +440,13 @@ export class WorldGroundingRuntime {
         groundingResultHash: focus.lastGroundingResultHash,
       });
       if (replay !== undefined) {
-        return renderAuthorityFusionV2(replay.result);
+        const structuredReplay = await this.replayHybridWorldExplanation({
+          input,
+          task,
+          groundingResultHash: focus.lastGroundingResultHash,
+          fusion: replay.result,
+        });
+        return structuredReplay ?? renderAuthorityFusionV2(replay.result);
       }
     }
     const fusionTurnPlan = parseTurnPlan({
@@ -446,41 +468,108 @@ export class WorldGroundingRuntime {
       turnPlan: fusionTurnPlan,
       fusionRequirements: requirements,
     });
-    return (
-      await this.executeReadOnlyGrounding(
-        { ...input, turnPlan: fusionTurnPlan },
-        fusionTurnPlan,
-        asJsonValue({
-          taskSnapshotHash: requirements.taskSnapshotHash,
-          requirementHash,
-        }),
-        async (result, observedAt) => {
-          if (result.status === "AMBIGUOUS") {
-            return renderSafeWorldAnswer(result);
-          }
-          if (!["COMPLETED", "PARTIAL"].includes(result.status)) {
-            return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
-          }
-          const fusion = new AuthorityFusionEvaluator({
-            now: () => new Date(observedAt),
-          }).evaluate({ task, requirements, grounding: result });
-          if (this.options.authorityFusion !== undefined) {
-            await this.options.authorityFusion.saveOrReplay({
-              principalId: input.principalId,
-              threadId: input.threadId,
-              taskId: task.taskId,
-              taskSnapshotHash: requirements.taskSnapshotHash,
-              requirementHash,
-              groundingId: result.groundingId,
-              groundingResultHash: result.resultHash,
-              result: fusion,
+    let structuredResult: HybridAuthoritySeparatedResult | undefined;
+    const outcome = await this.executeReadOnlyGrounding(
+      { ...input, turnPlan: fusionTurnPlan },
+      fusionTurnPlan,
+      asJsonValue({
+        taskSnapshotHash: requirements.taskSnapshotHash,
+        requirementHash,
+      }),
+      async (result, observedAt) => {
+        if (result.status === "AMBIGUOUS") {
+          return renderSafeWorldAnswer(result);
+        }
+        if (!["COMPLETED", "PARTIAL"].includes(result.status)) {
+          return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
+        }
+        const fusion = new AuthorityFusionEvaluator({
+          now: () => new Date(observedAt),
+        }).evaluate({ task, requirements, grounding: result });
+        if (result.geospatialFindings !== undefined) {
+          let explanation: WorldExplanationV1 | undefined;
+          try {
+            explanation = await this.createOrReplayWorldExplanation({
+              input,
+              result,
+              observedAt,
             });
+          } catch {
+            return "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE";
           }
-          return renderAuthorityFusionV2(fusion);
-        },
-        { context },
-      )
-    ).text;
+          if (explanation === undefined) {
+            return "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE";
+          }
+          await this.saveAuthorityFusion({
+            input,
+            task,
+            requirements,
+            requirementHash,
+            result,
+            fusion,
+          });
+          structuredResult = buildHybridAuthoritySeparatedResult({
+            task,
+            explanation,
+            fusion,
+          });
+          return structuredResult.renderedText;
+        }
+        await this.saveAuthorityFusion({
+          input,
+          task,
+          requirements,
+          requirementHash,
+          result,
+          fusion,
+        });
+        return renderAuthorityFusionV2(fusion);
+      },
+      { context },
+    );
+    if (structuredResult !== undefined) return structuredResult;
+    return outcome.text;
+  }
+
+  private async saveAuthorityFusion(input: {
+    readonly input: HybridGroundingRuntimeTurn;
+    readonly task: SdarTaskObservationV2;
+    readonly requirements: ReturnType<
+      PlanRealityRequirementCompiler["compile"]
+    >;
+    readonly requirementHash: Sha256;
+    readonly result: WsgsGroundingResult;
+    readonly fusion: AuthorityFusionResultV2;
+  }): Promise<void> {
+    if (this.options.authorityFusion === undefined) return;
+    await this.options.authorityFusion.saveOrReplay({
+      principalId: input.input.principalId,
+      threadId: input.input.threadId,
+      taskId: input.task.taskId,
+      taskSnapshotHash: input.requirements.taskSnapshotHash,
+      requirementHash: input.requirementHash,
+      groundingId: input.result.groundingId,
+      groundingResultHash: input.result.resultHash,
+      result: input.fusion,
+    });
+  }
+
+  private async replayHybridWorldExplanation(input: {
+    readonly input: HybridGroundingRuntimeTurn;
+    readonly task: SdarTaskObservationV2;
+    readonly groundingResultHash: Sha256;
+    readonly fusion: AuthorityFusionResultV2;
+  }): Promise<HybridAuthoritySeparatedResult | undefined> {
+    if (this.options.worldExplanations === undefined) return undefined;
+    const replay = await this.options.worldExplanations.findExact(
+      this.explanationReplayKey(input.input, input.groundingResultHash),
+    );
+    if (replay === undefined) return undefined;
+    return buildHybridAuthoritySeparatedResult({
+      task: input.task,
+      explanation: replay.explanation,
+      fusion: input.fusion,
+    });
   }
 
   async continuePendingChoice(
@@ -1268,6 +1357,51 @@ export function renderAuthorityFusionV2(
     .slice(0, 16_000);
 }
 
+export function buildHybridAuthoritySeparatedResult(input: {
+  readonly task: SdarTaskObservationV2;
+  readonly explanation: WorldExplanationV1;
+  readonly fusion: AuthorityFusionResultV2;
+}): HybridAuthoritySeparatedResult {
+  const authorityFusion = parseAuthorityFusionResultV2(input.fusion);
+  const authorityPresentation = composeAuthoritySeparatedPresentation({
+    taskPlanText: renderSdarTaskPlanAuthority(input.task),
+    worldExplanationText: input.explanation.renderedText,
+    fusionChecksText: renderAuthorityFusionV2(authorityFusion),
+  });
+  return {
+    explanation: input.explanation,
+    authorityFusion,
+    authorityPresentation,
+    renderedText: authorityPresentation.sections
+      .map(
+        ({ section, authority, content }) =>
+          "[" + section + " | " + authority + "]\n" + content,
+      )
+      .join("\n\n"),
+  };
+}
+
+function renderSdarTaskPlanAuthority(task: SdarTaskObservationV2): string {
+  const internalPhase =
+    task.internalPhase === undefined
+      ? undefined
+      : safeAuthorityStatusText(task.internalPhase);
+  const phaseMessage =
+    task.phaseMessage === undefined
+      ? undefined
+      : safeAuthorityStatusText(task.phaseMessage);
+  return [
+    "SDAR published Task/Plan snapshot.",
+    "Task: " + safeText(task.taskId) + " (" + safeText(task.taskState) + ")",
+    ...(internalPhase === undefined
+      ? []
+      : ["Internal phase: " + internalPhase]),
+    ...(phaseMessage === undefined
+      ? ["Published plan/status text: unavailable."]
+      : ["Published plan/status text: " + phaseMessage]),
+  ].join("\n");
+}
+
 export function renderSafeWorldAnswer(result: WsgsGroundingResult): string {
   const parsed = parseWsgsGroundingResult(result);
   if (parsed.status === "AMBIGUOUS") {
@@ -1522,6 +1656,11 @@ function safeText(value: string): string {
     .replaceAll(/\s+/gu, " ")
     .trim()
     .slice(0, 2_000);
+}
+
+function safeAuthorityStatusText(value: string): string {
+  const sanitized = safePublicStatusText(value, 2_000);
+  return sanitized === undefined ? "unavailable" : safeText(sanitized);
 }
 
 function safeJson(value: JsonValue): string {

@@ -16,6 +16,7 @@ import type { ServerConfig } from "../apps/server/src/config.js";
 import { createSecureLoggerOptions } from "../apps/server/src/observability/logging.js";
 import { legacyChatResultToInteractionEvents } from "../packages/interaction-runtime/src/index.js";
 import { assembleWorldExplanation } from "../packages/world-explanation-runtime/src/index.js";
+import { hybridWorldExplanationFixture } from "./fixtures/hybrid-world-explanation.js";
 import { assemblyInput } from "./world-explanation-fixtures.js";
 
 const serviceKey = "phase-1-test-service-key-32-bytes-minimum";
@@ -621,6 +622,53 @@ describe("OpenAI-compatible HTTP contracts", () => {
     );
     expect(streamedText).toBe(explanation.renderedText);
     expect(stream.body).not.toContain(explanation.explanationId);
+  });
+
+  it("returns the deterministic authority-separated hybrid text in SSE and non-SSE modes", async () => {
+    const result = hybridWorldExplanationFixture(
+      assembleWorldExplanation(assemblyInput()),
+    );
+    const runChat: NonNullable<BuildServerOptions["runChat"]> = (context) =>
+      legacyChatResultToInteractionEvents(result, {
+        runId: context.runId,
+        threadId: context.threadId,
+      });
+    const nonStream = await createServer({ runChat }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: chatPayload(),
+    });
+    const stream = await createServer({ runChat }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: { ...chatPayload(), stream: true },
+    });
+    const streamedText = stream.body
+      .trim()
+      .split("\n\n")
+      .slice(0, -1)
+      .map(
+        (frame) =>
+          JSON.parse(frame.slice("data: ".length)) as {
+            choices: readonly { delta: { content?: string } }[];
+          },
+      )
+      .map((chunk) => chunk.choices[0]?.delta.content ?? "")
+      .join("");
+
+    expect(nonStream.statusCode).toBe(200);
+    expect(stream.statusCode).toBe(200);
+    expect(nonStream.json().choices[0].message.content).toBe(
+      result.renderedText,
+    );
+    expect(streamedText).toBe(result.renderedText);
+    expect(result.renderedText).toContain("[SDAR_TASK_PLAN | SDAR]");
+    expect(result.renderedText).toContain("[WORLD_EXPLANATION | WSGS_GOWM]");
+    expect(result.renderedText).toContain(
+      "[SACS_FUSION_CHECKS | SACS_COMPARE_ONLY]",
+    );
   });
 
   it("emits async runner fragments as distinct SSE deltas", async () => {
