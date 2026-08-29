@@ -245,7 +245,9 @@ try {
   if (areaFollowUp.text === "WORLD_GROUNDING_CONTEXT_UNAVAILABLE") {
     throw new Error(
       `S08_AREA_FOLLOWUP_CONTEXT_UNAVAILABLE ${JSON.stringify({
-        operations: posts.slice(areaFollowUpStart).map(({ operation }) => operation),
+        operations: posts
+          .slice(areaFollowUpStart)
+          .map(({ operation }) => operation),
         httpExchanges: httpExchanges.slice(-12),
         latestGrounding: await boundedLatestGroundingDiagnostic(
           pool,
@@ -549,9 +551,7 @@ function boundedResultContractDiagnostic(job, request) {
       issues = Array.isArray(error?.issues)
         ? error.issues.slice(0, 16).map((issue) => ({
             path: issue.path
-              .map((segment) =>
-                typeof segment === "number" ? "[]" : segment,
-              )
+              .map((segment) => (typeof segment === "number" ? "[]" : segment))
               .join("."),
             code: issue.code,
           }))

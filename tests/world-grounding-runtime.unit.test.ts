@@ -202,25 +202,23 @@ describe("SACS v0.4 world grounding runtime", () => {
         };
       },
     );
-    const waitForGrounding = jest.fn(
-      async (): Promise<WsgsGroundingJob> => ({
-        schemaVersion: "1.0",
-        jobId: "job-failed-1",
-        groundingId: "grounding-failed-1",
-        requestId,
-        status: "FAILED",
-        createdAt: "2026-08-28T01:00:00.000Z",
-        updatedAt: "2026-08-28T01:00:30.000Z",
-        startedAt: "2026-08-28T01:00:00.100Z",
-        finishedAt: "2026-08-28T01:00:30.000Z",
-        error: {
-          code: "PIPELINE_DEADLINE_EXCEEDED",
-          message: "The bounded pipeline deadline elapsed.",
-          retryable: true,
-          stage: "PERSISTENCE",
-        },
-      }),
-    );
+    const waitForGrounding = jest.fn(async (): Promise<WsgsGroundingJob> => ({
+      schemaVersion: "1.0",
+      jobId: "job-failed-1",
+      groundingId: "grounding-failed-1",
+      requestId,
+      status: "FAILED",
+      createdAt: "2026-08-28T01:00:00.000Z",
+      updatedAt: "2026-08-28T01:00:30.000Z",
+      startedAt: "2026-08-28T01:00:00.100Z",
+      finishedAt: "2026-08-28T01:00:30.000Z",
+      error: {
+        code: "PIPELINE_DEADLINE_EXCEEDED",
+        message: "The bounded pipeline deadline elapsed.",
+        retryable: true,
+        stage: "PERSISTENCE",
+      },
+    }));
     const wsgs = {
       contractVersion: "sacs-wsgs-grounding/1.0",
       endpoint: "http://wsgs.test/",
