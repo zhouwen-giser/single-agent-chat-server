@@ -1,10 +1,11 @@
 {
   "phase": "S08",
   "date": "2026-08-29",
-  "decision": "BLOCKED_DOCKER_RECOVERY_AUTHORIZATION_REQUIRED",
+  "decision": "BLOCKED_WSGS_PIPELINE_DEADLINE",
   "marker": "WITHHELD",
   "runner": {
     "path": "scripts/phase-v04-s08-real-multiturn.mjs",
+    "wsgsSourceCommit": "00ab906afc4857b9c6f369ce3751d485e4d40ab9",
     "contractTests": {
       "pass": 3,
       "fail": 0,
@@ -15,51 +16,51 @@
       "fail": 0,
       "skip": 0
     },
+    "runtimeFailureRegression": {
+      "pass": 8,
+      "fail": 0,
+      "skip": 0
+    },
     "lint": "PASS_ZERO_WARNINGS",
     "typecheck": "PASS",
     "authorizationGate": "PASS_FAIL_CLOSED"
   },
   "requiredLiveEvidence": {
-    "realWsgsReadyHttp": "BLOCKED_CURRENT_DOCKER_CONTROL_PLANE_UNRESPONSIVE",
-    "realPostgres": "UNAVAILABLE_AFTER_DOCKER_OUTAGE_RECREATE_REQUIRED",
-    "vehicleInitialGrounding": "PASS_COMPLETED_ONE_MENTION_ONE_REFERENCE",
-    "vehiclePronounFollowUp": "BLOCKED_AC_M001_UPSTREAM_REFERENCE_REMAINS_STALE",
+    "realWsgsReadyHttp": "PASS_HTTP_200_STATUS_READY_REASONS_EMPTY",
+    "realGowmAvailability": "PASS_12_OF_12_CANARY_36_OF_36",
+    "realPostgres": "PASS_ISOLATED_DISPOSABLE_INSTANCE",
+    "vehicleInitialGrounding": "INTERMITTENT_COMPLETED_OR_FAILED_PIPELINE_DEADLINE",
+    "vehiclePronounFollowUp": "BLOCKED_AC_M001_PIPELINE_DEADLINE",
     "areaPronounFollowUp": "NOT_REACHED",
     "ambiguousChoiceValidateResume": "NOT_REACHED",
-    "expiredReferenceRevalidation": "NOT_REACHED_AC_M005_DEPENDS_ON_VALID_VALIDATE_RESULT",
+    "expiredReferenceRevalidation": "NOT_REACHED_AC_M005",
     "threadIsolation": "NOT_REACHED",
     "restartRecovery": "NOT_REACHED",
     "openAiAgUiSharedFocus": "NOT_REACHED",
     "replayNoDuplicateWsgs": "NOT_REACHED"
   },
-  "redactedUpstreamEvidence": {
-    "evidenceCommit": "83ba79ec47be31a1d377b72778ecdff33c4f6a59",
-    "operation": "VALIDATE_REFERENCES",
+  "upstreamRepairEvidence": {
+    "wsgsInstanceCommit": "00ab906afc4857b9c6f369ce3751d485e4d40ab9",
+    "wsgsValidationEvidenceHash": "sha256:3c5638a2eab2fad89a3f4e49e447c22d2f5661a232babf2eef3371f68f2923aa",
+    "groundReferences": "COMPLETED_ONE_MENTION_ONE_REFERENCE",
+    "validateReferences": "COMPLETED",
+    "sourceOperation": "VALIDATE_REFERENCES",
+    "revalidationRequired": false,
+    "validUntilState": "PRESENT_AND_FUTURE_AT_RECEIPT"
+  },
+  "latestRedactedFailure": {
+    "operation": "EXECUTE_WORLD_QUERY",
     "createHttpStatus": 202,
     "pollHttpStatus": 200,
-    "resultStatus": "COMPLETED",
-    "errorCode": null,
-    "errorStage": null,
-    "referenceProduct": {
-      "sourceOperation": "reference.resolve",
-      "revalidationRequired": true,
-      "validUntilState": "ABSENT"
-    },
-    "sacsFocusStatus": "STALE",
-    "sacsOutcome": "WORLD_GROUNDING_CONTEXT_UNAVAILABLE"
-  },
-  "upstreamRepairStatus": {
-    "wsgsInstanceCommit": "f63047ecca1272bdb6e3791101696a7a645632e8",
-    "wsgsProtocolFix": "CONFIRMED_RUNNING_SOURCE_OPERATION_VALIDATE_REFERENCES",
-    "gowmWorldObjectVersionBinding": "IMAGE_BUILT_NOT_CONFIRMED_RUNNING_ON_18063",
-    "currentReferenceState": "NOT_CURRENTLY_VERIFIABLE",
-    "requiredAvailability": "12_OF_12_NOT_VERIFIED",
-    "positiveResolveValidateCanary": "NOT_RUN",
-    "positiveSemanticRetest": "DEFERRED_UNTIL_DOCKER_RECOVERY_AND_FALSE_PLUS_VALID_UNTIL"
+    "jobStatus": "FAILED",
+    "resultPresent": false,
+    "errorCode": "PIPELINE_DEADLINE_EXCEEDED",
+    "errorStage": "PERSISTENCE",
+    "sacsOutcome": "WORLD_GROUNDING_FAILED"
   },
   "blocker": {
-    "code": "DOCKER_CONTROL_PLANE_RECOVERY_AUTHORIZATION_REQUIRED",
-    "detail": "The host Docker daemon/control-plane is globally unresponsive. WSGS readiness times out and the repaired GOWM image is not proven active on 18063. Restarting Docker Desktop or the engine can affect all shared containers and requires explicit user authorization."
+    "code": "WSGS_PIPELINE_DEADLINE_EXCEEDED",
+    "detail": "WSGS readiness and the positive reference-validation chain pass, but SACS live runs intermittently end EXECUTE_WORLD_QUERY as a terminal FAILED job with PIPELINE_DEADLINE_EXCEEDED at PERSISTENCE. AC-M001 and later ordered scenarios cannot pass until the runtime is stable."
   },
   "publication": {
     "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",

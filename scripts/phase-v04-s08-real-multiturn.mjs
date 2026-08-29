@@ -11,11 +11,14 @@ import {
   PostgresWorldFocusRepository,
   runMigrations,
 } from "../dist/packages/persistence/src/index.js";
-import { createWsgsHttpClient } from "../dist/packages/wsgs-http-adapter/src/index.js";
+import {
+  createWsgsHttpClient,
+  parseWsgsGroundingResult,
+} from "../dist/packages/wsgs-http-adapter/src/index.js";
 import { WorldGroundingRuntime } from "../dist/packages/world-grounding-runtime/src/index.js";
 
 const { Pool } = pg;
-const expectedWsgsCommit = "f63047ecca1272bdb6e3791101696a7a645632e8";
+const expectedWsgsCommit = "00ab906afc4857b9c6f369ce3751d485e4d40ab9";
 
 if (process.env.ALLOW_REAL_WSGS_MULTITURN !== "YES") {
   throw new Error("ALLOW_REAL_WSGS_MULTITURN=YES is required");
@@ -171,6 +174,22 @@ try {
                 ? "FUTURE"
                 : "EXPIRED",
         })),
+      })}`,
+    );
+  }
+  if (vehicleFollowUp.text.startsWith("WORLD_GROUNDING_")) {
+    throw new Error(
+      `S08_VEHICLE_FOLLOWUP_FAILED ${JSON.stringify({
+        sacsCode: vehicleFollowUp.text,
+        operations: posts
+          .slice(beforeVehicleFollowUp)
+          .map(({ operation }) => operation),
+        httpExchanges: httpExchanges.slice(-12),
+        latestGrounding: await boundedLatestGroundingDiagnostic(
+          pool,
+          principal.principalId,
+          vehicleThread,
+        ),
       })}`,
     );
   }
@@ -433,13 +452,19 @@ function captureGroundingPosts(posts, httpExchanges) {
     if (url.pathname.startsWith("/v1/groundings")) {
       let errorCode = null;
       let errorStage = null;
-      if (!response.ok) {
-        const body = await response
-          .clone()
-          .json()
-          .catch(() => undefined);
-        errorCode = body?.error?.code ?? body?.code ?? null;
-        errorStage = body?.error?.stage ?? body?.stage ?? null;
+      let contractDiagnostic;
+      const responseBody = await response
+        .clone()
+        .json()
+        .catch(() => undefined);
+      errorCode = responseBody?.error?.code ?? responseBody?.code ?? null;
+      errorStage = responseBody?.error?.stage ?? responseBody?.stage ?? null;
+      if (!isCreate) {
+        const request = posts.at(-1);
+        contractDiagnostic = boundedResultContractDiagnostic(
+          responseBody,
+          request,
+        );
       }
       httpExchanges.push({
         route: isCreate
@@ -450,9 +475,54 @@ function captureGroundingPosts(posts, httpExchanges) {
         status: response.status,
         errorCode,
         errorStage,
+        ...(contractDiagnostic === undefined ? {} : { contractDiagnostic }),
       });
     }
     return response;
+  };
+}
+
+function boundedResultContractDiagnostic(job, request) {
+  let issues = [];
+  if (job?.result !== undefined) {
+    try {
+      parseWsgsGroundingResult(job.result);
+    } catch (error) {
+      issues = Array.isArray(error?.issues)
+        ? error.issues.slice(0, 16).map((issue) => ({
+            path: issue.path
+              .map((segment) =>
+                typeof segment === "number" ? "[]" : segment,
+              )
+              .join("."),
+            code: issue.code,
+          }))
+        : [{ path: "", code: "UNKNOWN_PARSE_FAILURE" }];
+    }
+  }
+  return {
+    jobStatus: typeof job?.status === "string" ? job.status : null,
+    hasResult: job?.result !== undefined,
+    jobKeys:
+      job !== null && typeof job === "object"
+        ? Object.keys(job).sort().slice(0, 32)
+        : [],
+    resultKeys:
+      job.result !== null && typeof job.result === "object"
+        ? Object.keys(job.result).sort().slice(0, 48)
+        : [],
+    issues,
+    identityMatches:
+      request === undefined
+        ? null
+        : {
+            requestId: job.result?.requestId === request.requestId,
+            sourceMessageId:
+              job.result?.source?.messageId === request.source.messageId,
+            originalTextSha256:
+              job.result?.source?.originalTextSha256 ===
+              request.source.originalTextSha256,
+          },
   };
 }
 

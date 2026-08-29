@@ -2,88 +2,72 @@
 
 ## Decision
 
-S08 is `BLOCKED_DOCKER_RECOVERY_AUTHORIZATION_REQUIRED`. The Ready marker
-remains withheld.
+S08 is `BLOCKED_WSGS_PIPELINE_DEADLINE`. The
+`SACS_MULTITURN_WORLD_GROUNDING_READY` marker remains withheld.
 
-The authorized live run used the isolated WSGS v0.2 debug instance at the
-handed-off commit and an isolated disposable SACS PostgreSQL instance. The WSGS
-live and ready probes returned HTTP 200, the northbound contract matched, and
-all four required operations were advertised ready. Credentials were consumed
-only from the authorized process environment and are not present in this
-report, runner output, or repository.
+The authorized runner is locked to WSGS commit
+`00ab906afc4857b9c6f369ce3751d485e4d40ab9`. Credentials are consumed only
+from the authorized process environment and are not present in this report,
+runner output, or repository.
 
-## Redacted live evidence
+## Repaired upstream semantics
 
-The initial vehicle grounding completed and produced one mention and one
-reference product. Before using that reference in the pronoun follow-up, SACS
-correctly invoked `VALIDATE_REFERENCES` because the product required
-revalidation.
+The current GOWM 0.6.4 and WSGS instance has proved the previously blocked
+reference-validation transition:
 
+- WSGS readiness returned HTTP 200 with `status=ready` and no reasons across a
+  full readiness cache interval.
+- GOWM reported 12/12 required operations and 36/36 canary PASS.
+- `GROUND_REFERENCES` completed with one mention and one reference.
+- `VALIDATE_REFERENCES` completed with
+  `sourceOperation=VALIDATE_REFERENCES`, `revalidationRequired=false`, and a
+  present future `validUntil` at receipt.
+- The redacted validation evidence file hash is
+  `sha256:3c5638a2eab2fad89a3f4e49e447c22d2f5661a232babf2eef3371f68f2923aa`.
+
+These facts close the earlier typed-stale semantic blocker, but do not by
+themselves pass the SACS multi-turn matrix.
+
+## Current redacted live failure
+
+Repeated complete S08 runs reached real WSGS business execution. Initial
+vehicle grounding completed in some runs, but either the initial query or the
+vehicle follow-up later terminated as follows:
+
+- Operation: `EXECUTE_WORLD_QUERY`.
 - Create request: HTTP 202.
 - Poll requests: HTTP 200.
-- WSGS terminal result: `COMPLETED`.
-- WSGS `error.code`: null.
-- WSGS `error.stage`: null.
-- Returned product `sourceOperation`: `reference.resolve`.
-- Returned product `revalidationRequired`: true.
-- Returned product `validUntil`: absent.
+- Terminal job status: `FAILED`.
+- Result present: false.
+- WSGS `error.code`: `PIPELINE_DEADLINE_EXCEEDED`.
+- WSGS `error.stage`: `PERSISTENCE`.
 
-The successful HTTP and terminal statuses therefore did not produce a usable
-reference. SACS retained the focus item as `STALE` and failed closed with
-`WORLD_GROUNDING_CONTEXT_UNAVAILABLE` before sending a pronoun query that would
-have depended on it. Treating this product as current would violate the frozen
-policy requiring validation before use.
+The failure is intermittent and occurs after many valid `RUNNING` poll
+responses. AC-M001 therefore remains blocked; AC-M005 and the remaining
+ordered scenarios were not reached and are not reported as passed.
 
-This blocks AC-M001 (vehicle pronoun follow-up). AC-M005 (expired-reference
-revalidation) depends on the same validation transition and cannot pass until
-WSGS returns a product with current usable validity semantics. The remaining
-ordered live scenarios, including the area follow-up, PendingChoice validation
-and resume, thread isolation, restart recovery, shared OpenAI/AG-UI focus, and
-replay checks, were not reached and are not reported as passed.
+## SACS corrections and regression evidence
 
-## SACS regression evidence
+SACS preserves completed stale and expired references so they can be validated
+fail-closed instead of silently disappearing. Focused unit and PostgreSQL
+regression tests passed 14/14.
 
-SACS now preserves a completed-but-revalidation-required reference as `STALE`
-instead of dropping it. Focused unit and PostgreSQL integration regression
-tests passed 14/14. The runner contract passed 3/3 tests; lint passed with zero
-warnings and typecheck passed.
+The live failure also exposed a separate error-mapping bug: a contract-valid
+terminal `FAILED` job with an error and no result was incorrectly classified as
+`WORLD_GROUNDING_CONTRACT_VIOLATION`. SACS now maps that shape through the
+published WSGS error boundary and safely returns `WORLD_GROUNDING_FAILED`.
+The runtime unit suite passed 8/8; lint and typecheck passed.
+
+The harness records only bounded status, error code/stage, schema issue paths,
+field names, counts, booleans, and hashes. It does not print credentials, raw
+reference identifiers, or raw upstream business payloads.
 
 ## Required upstream resolution
 
-For a reference that can be validated, `VALIDATE_REFERENCES` must return a
-product that no longer requires revalidation and carries usable current
-validity semantics. SACS must not weaken its fail-closed handling of stale
-references. After the WSGS debug instance is refreshed, rerun the complete S08
-matrix from the first scenario.
+WSGS must eliminate or deterministically handle the PERSISTENCE-stage pipeline
+deadline so the complete ordered S08 matrix can run without a terminal failure.
+After the instance is refreshed and readiness is reconfirmed, rerun every S08
+scenario from the beginning.
 
 The SACS verification process did not restart or modify any shared WSGS, GOWM,
 GDPS, or database fixture.
-
-## Upstream repair status
-
-WSGS commit `f63047ecca1272bdb6e3791101696a7a645632e8` has been rebuilt into
-the running debug instance. The authorized handoff confirms that WSGS now
-publishes `sourceOperation=VALIDATE_REFERENCES`. The remaining stale result is
-from the upstream GOWM sample-world WORLD_OBJECT version binding:
-`revalidationRequired=true` and `validUntil` absent.
-
-Per the upstream handoff, the positive AC-M001 and AC-M005 semantic rerun is
-explicitly deferred until GOWM repair evidence shows
-`revalidationRequired=false` with a usable `validUntil`. Only the local runner
-contract, lint, and typecheck were rerun against the updated source lock; no
-business grounding request was issued to the refreshed instance in this step.
-
-## Current runtime blocker
-
-The host Docker daemon/control-plane is now globally unresponsive. WSGS
-`/health/live` previously returned HTTP 200, but current `/health/ready` probes
-time out. The GOWM WORLD_OBJECT repair image was built, but it has not been
-confirmed active on port 18063; current 12/12 operation availability is
-`NOT_VERIFIED`, and the positive resolve-to-validate canary is `NOT_RUN`.
-
-The earlier 18063 HTTP 200 and old canary cannot prove that the repaired image
-is running. Restarting Docker Desktop or the engine would temporarily affect
-all shared containers and requires explicit user authorization. After an
-authorized recovery, upstream must first prove healthy WSGS/GOWM readiness and
-`revalidationRequired=false` plus a usable `validUntil`; SACS must then recreate
-its disposable PostgreSQL instance and rerun the complete S08 matrix.

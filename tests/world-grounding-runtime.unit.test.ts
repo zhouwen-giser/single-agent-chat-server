@@ -4,6 +4,7 @@ import type { CompletedRequestResult } from "../packages/request-result/src/inde
 import type {
   WsgsGroundingRequest,
   WsgsGroundingResult,
+  WsgsGroundingJob,
   WsgsHttpClient,
 } from "../packages/wsgs-http-adapter/src/index.js";
 import {
@@ -116,6 +117,90 @@ describe("SACS v0.4 world grounding runtime", () => {
     expect(grounding.complete).toHaveBeenCalledTimes(1);
     expect(completeRequest).toHaveBeenCalledTimes(1);
     expect(claimRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("maps a valid terminal FAILED job without a result to a safe failure", async () => {
+    const requests = {
+      claimRequest: jest.fn(async () => ({
+        outcome: "acquired" as const,
+        requestId: "interaction-failed-job",
+      })),
+      completeRequest: jest.fn(async () => undefined),
+      authorizedRequestCreatedAt: jest.fn(
+        async () => "2026-08-28T01:00:00.000Z",
+      ),
+    } as unknown as WorldGroundingRuntimeOptions["requests"];
+    const fail = jest.fn(async () => ({ state: "FAILED" as const }));
+    const grounding = {
+      claim: jest.fn(async () => ({
+        kind: "CREATED" as const,
+        execution: { state: "GROUNDING_PENDING" },
+      })),
+      recordGroundingReady: jest.fn(),
+      complete: jest.fn(),
+      fail,
+      cancel: jest.fn(),
+    } as unknown as WorldGroundingRuntimeOptions["grounding"];
+    let requestId = "wsgs-request-pending";
+    const createGrounding = jest.fn(
+      async (request: WsgsGroundingRequest): Promise<WsgsGroundingJob> => {
+        requestId = request.requestId;
+        return {
+          schemaVersion: "1.0",
+          jobId: "job-failed-1",
+          groundingId: "grounding-failed-1",
+          requestId,
+          status: "ACCEPTED",
+          createdAt: "2026-08-28T01:00:00.000Z",
+          updatedAt: "2026-08-28T01:00:00.000Z",
+        };
+      },
+    );
+    const waitForGrounding = jest.fn(
+      async (): Promise<WsgsGroundingJob> => ({
+        schemaVersion: "1.0",
+        jobId: "job-failed-1",
+        groundingId: "grounding-failed-1",
+        requestId,
+        status: "FAILED",
+        createdAt: "2026-08-28T01:00:00.000Z",
+        updatedAt: "2026-08-28T01:00:30.000Z",
+        startedAt: "2026-08-28T01:00:00.100Z",
+        finishedAt: "2026-08-28T01:00:30.000Z",
+        error: {
+          code: "PIPELINE_DEADLINE_EXCEEDED",
+          message: "The bounded pipeline deadline elapsed.",
+          retryable: true,
+          stage: "PERSISTENCE",
+        },
+      }),
+    );
+    const wsgs = {
+      contractVersion: "sacs-wsgs-grounding/1.0",
+      endpoint: "http://wsgs.test/",
+      capabilities: jest.fn(async () => readyCapabilities()),
+      createGrounding,
+      getGrounding: jest.fn(),
+      waitForGrounding,
+      cancelGrounding: jest.fn(),
+    } as unknown as WsgsHttpClient;
+    const runtime = new WorldGroundingRuntime({
+      requests,
+      grounding,
+      wsgs,
+      sdarCompatibilityLock: unavailableLock,
+      nextLeaseOwner: () => "lease-owner-failed-job",
+    });
+
+    await expect(runtime.answerWorld(worldTurn())).resolves.toBe(
+      "WORLD_GROUNDING_FAILED",
+    );
+    expect(createGrounding).toHaveBeenCalledTimes(1);
+    expect(waitForGrounding).toHaveBeenCalledTimes(1);
+    expect(fail).toHaveBeenCalledWith(
+      expect.objectContaining({ failureCode: "WORLD_GROUNDING_FAILED" }),
+    );
+    expect(grounding.recordGroundingReady).not.toHaveBeenCalled();
   });
 
   it("recovers a persisted ambiguity after outer Message completion is interrupted", async () => {

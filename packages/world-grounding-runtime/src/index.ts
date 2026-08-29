@@ -1070,6 +1070,14 @@ async function resolveGroundingResult(
       ? await wsgs.waitForGrounding(created.groundingId, signal)
       : created;
   if (job.result === undefined) {
+    if (job.error !== undefined) {
+      throw new WsgsHttpError(
+        job.error.code,
+        undefined,
+        job.error.retryable,
+        job.error.stage,
+      );
+    }
     throw new WorldGroundingRuntimeError("WORLD_GROUNDING_CONTRACT_VIOLATION");
   }
   return job.result;
