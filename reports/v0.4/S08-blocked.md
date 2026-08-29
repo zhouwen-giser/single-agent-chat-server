@@ -2,11 +2,11 @@
 
 ## Decision
 
-S08 is `BLOCKED_WSGS_PIPELINE_DEADLINE`. The
+S08 is `BLOCKED_WSGS_PINNED_VALIDATION_UNAVAILABLE`. The
 `SACS_MULTITURN_WORLD_GROUNDING_READY` marker remains withheld.
 
 The authorized runner is locked to WSGS commit
-`00ab906afc4857b9c6f369ce3751d485e4d40ab9`. Credentials are consumed only
+`47c248cf2ee3553287dde97aaecea34ea3fc961a`. Credentials are consumed only
 from the authorized process environment and are not present in this report,
 runner output, or repository.
 
@@ -28,23 +28,29 @@ reference-validation transition:
 These facts close the earlier typed-stale semantic blocker, but do not by
 themselves pass the SACS multi-turn matrix.
 
-## Current redacted live failure
+## Deadline repair and current redacted live failure
 
-Repeated complete S08 runs reached real WSGS business execution. Initial
-vehicle grounding completed in some runs, but either the initial query or the
-vehicle follow-up later terminated as follows:
+The earlier deadline was traced upstream to a duplicate per-request semantic
+model probe. WSGS 47c248c removes that duplicate work and preserves the actual
+pipeline stage in deadline errors. The S08 harness now uses an explicit
+120000 ms execution policy while the production default remains unchanged.
+
+With that repair, the initial vehicle query completed and its result contract
+and request/source identity all passed. The immediate pronoun follow-up then
+terminated as follows:
 
 - Operation: `EXECUTE_WORLD_QUERY`.
 - Create request: HTTP 202.
 - Poll requests: HTTP 200.
 - Terminal job status: `FAILED`.
 - Result present: false.
-- WSGS `error.code`: `PIPELINE_DEADLINE_EXCEEDED`.
-- WSGS `error.stage`: `PERSISTENCE`.
+- WSGS `error.code`: `PINNED_VALIDATION_OPERATION_UNAVAILABLE`.
+- WSGS `error.stage`: `REFERENCE_GROUNDING`.
 
-The failure is intermittent and occurs after many valid `RUNNING` poll
-responses. AC-M001 therefore remains blocked; AC-M005 and the remaining
-ordered scenarios were not reached and are not reported as passed.
+The follow-up used the persisted `KnownWorldReference`; an independent positive
+`VALIDATE_REFERENCES` canary cannot substitute for this pinned-reference path.
+AC-M001 therefore remains blocked; AC-M005 and the remaining ordered scenarios
+were not reached and are not reported as passed.
 
 ## SACS corrections and regression evidence
 
@@ -64,10 +70,10 @@ reference identifiers, or raw upstream business payloads.
 
 ## Required upstream resolution
 
-WSGS must eliminate or deterministically handle the PERSISTENCE-stage pipeline
-deadline so the complete ordered S08 matrix can run without a terminal failure.
-After the instance is refreshed and readiness is reconfirmed, rerun every S08
-scenario from the beginning.
+WSGS must support the pinned-reference validation path used by a follow-up
+`EXECUTE_WORLD_QUERY` with `KnownWorldReference`. After the instance is
+refreshed and readiness is reconfirmed, rerun every S08 scenario from the
+beginning.
 
 The SACS verification process did not restart or modify any shared WSGS, GOWM,
 GDPS, or database fixture.

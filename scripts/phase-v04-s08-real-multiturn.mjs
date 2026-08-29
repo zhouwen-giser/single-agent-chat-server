@@ -4,6 +4,7 @@ import { execFileSync } from "node:child_process";
 
 import pg from "pg";
 
+import { planGroundingRequest } from "../dist/packages/grounding-request-planner/src/index.js";
 import {
   ConversationPersistenceRepository,
   GroundingPersistenceRepository,
@@ -18,7 +19,7 @@ import {
 import { WorldGroundingRuntime } from "../dist/packages/world-grounding-runtime/src/index.js";
 
 const { Pool } = pg;
-const expectedWsgsCommit = "00ab906afc4857b9c6f369ce3751d485e4d40ab9";
+const expectedWsgsCommit = "47c248cf2ee3553287dde97aaecea34ea3fc961a";
 
 if (process.env.ALLOW_REAL_WSGS_MULTITURN !== "YES") {
   throw new Error("ALLOW_REAL_WSGS_MULTITURN=YES is required");
@@ -400,7 +401,19 @@ function createRuntime(repositories, wsgs) {
     wsgs,
     sdarCompatibilityLock: unavailableSdarLock(),
     nextLeaseOwner: () => `s08-${randomUUID()}`,
+    requestPlanner: liveRequestPlanner,
   });
+}
+
+function liveRequestPlanner(turnPlan) {
+  const plan = planGroundingRequest(turnPlan);
+  return {
+    ...plan,
+    executionPolicy: {
+      ...plan.executionPolicy,
+      deadlineMs: 120_000,
+    },
+  };
 }
 
 async function createThread(requests, principalId, label) {

@@ -1,11 +1,12 @@
 {
   "phase": "S08",
   "date": "2026-08-29",
-  "decision": "BLOCKED_WSGS_PIPELINE_DEADLINE",
+  "decision": "BLOCKED_WSGS_PINNED_VALIDATION_UNAVAILABLE",
   "marker": "WITHHELD",
   "runner": {
     "path": "scripts/phase-v04-s08-real-multiturn.mjs",
-    "wsgsSourceCommit": "00ab906afc4857b9c6f369ce3751d485e4d40ab9",
+    "wsgsSourceCommit": "47c248cf2ee3553287dde97aaecea34ea3fc961a",
+    "liveExecutionDeadlineMs": 120000,
     "contractTests": {
       "pass": 3,
       "fail": 0,
@@ -29,8 +30,8 @@
     "realWsgsReadyHttp": "PASS_HTTP_200_STATUS_READY_REASONS_EMPTY",
     "realGowmAvailability": "PASS_12_OF_12_CANARY_36_OF_36",
     "realPostgres": "PASS_ISOLATED_DISPOSABLE_INSTANCE",
-    "vehicleInitialGrounding": "INTERMITTENT_COMPLETED_OR_FAILED_PIPELINE_DEADLINE",
-    "vehiclePronounFollowUp": "BLOCKED_AC_M001_PIPELINE_DEADLINE",
+    "vehicleInitialGrounding": "PASS_COMPLETED_CONTRACT_AND_IDENTITY_VALID",
+    "vehiclePronounFollowUp": "BLOCKED_AC_M001_PINNED_VALIDATION_OPERATION_UNAVAILABLE",
     "areaPronounFollowUp": "NOT_REACHED",
     "ambiguousChoiceValidateResume": "NOT_REACHED",
     "expiredReferenceRevalidation": "NOT_REACHED_AC_M005",
@@ -40,7 +41,7 @@
     "replayNoDuplicateWsgs": "NOT_REACHED"
   },
   "upstreamRepairEvidence": {
-    "wsgsInstanceCommit": "00ab906afc4857b9c6f369ce3751d485e4d40ab9",
+    "wsgsInstanceCommit": "47c248cf2ee3553287dde97aaecea34ea3fc961a",
     "wsgsValidationEvidenceHash": "sha256:3c5638a2eab2fad89a3f4e49e447c22d2f5661a232babf2eef3371f68f2923aa",
     "groundReferences": "COMPLETED_ONE_MENTION_ONE_REFERENCE",
     "validateReferences": "COMPLETED",
@@ -54,13 +55,13 @@
     "pollHttpStatus": 200,
     "jobStatus": "FAILED",
     "resultPresent": false,
-    "errorCode": "PIPELINE_DEADLINE_EXCEEDED",
-    "errorStage": "PERSISTENCE",
+    "errorCode": "PINNED_VALIDATION_OPERATION_UNAVAILABLE",
+    "errorStage": "REFERENCE_GROUNDING",
     "sacsOutcome": "WORLD_GROUNDING_FAILED"
   },
   "blocker": {
-    "code": "WSGS_PIPELINE_DEADLINE_EXCEEDED",
-    "detail": "WSGS readiness and the positive reference-validation chain pass, but SACS live runs intermittently end EXECUTE_WORLD_QUERY as a terminal FAILED job with PIPELINE_DEADLINE_EXCEEDED at PERSISTENCE. AC-M001 and later ordered scenarios cannot pass until the runtime is stable."
+    "code": "WSGS_PINNED_VALIDATION_OPERATION_UNAVAILABLE",
+    "detail": "WSGS 47c248c and a 120000 ms caller deadline complete the initial vehicle query. The follow-up EXECUTE_WORLD_QUERY with KnownWorldReference terminates FAILED because the pinned-reference validation path is unavailable. AC-M001 and later ordered scenarios cannot pass until that path is supported."
   },
   "publication": {
     "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",

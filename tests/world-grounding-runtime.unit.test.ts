@@ -1,6 +1,7 @@
 import { describe, expect, it, jest } from "@jest/globals";
 
 import type { CompletedRequestResult } from "../packages/request-result/src/index.js";
+import { planGroundingRequest } from "../packages/grounding-request-planner/src/index.js";
 import type {
   WsgsGroundingRequest,
   WsgsGroundingResult,
@@ -101,6 +102,16 @@ describe("SACS v0.4 world grounding runtime", () => {
       wsgs,
       sdarCompatibilityLock: unavailableLock,
       nextLeaseOwner: () => "lease-owner-1",
+      requestPlanner: (turnPlan) => {
+        const plan = planGroundingRequest(turnPlan);
+        return {
+          ...plan,
+          executionPolicy: {
+            ...plan.executionPolicy,
+            deadlineMs: 120_000,
+          },
+        };
+      },
     });
     const turn = worldTurn();
 
@@ -113,6 +124,9 @@ describe("SACS v0.4 world grounding runtime", () => {
     expect(first).toContain("does not establish");
     expect(replay).toBe(first);
     expect(createGrounding).toHaveBeenCalledTimes(1);
+    expect(createGrounding.mock.calls[0]?.[0].executionPolicy.deadlineMs).toBe(
+      120_000,
+    );
     expect(grounding.recordGroundingReady).toHaveBeenCalledTimes(1);
     expect(grounding.complete).toHaveBeenCalledTimes(1);
     expect(completeRequest).toHaveBeenCalledTimes(1);

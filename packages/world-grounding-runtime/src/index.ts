@@ -35,6 +35,7 @@ import {
   parseOperationalGroundingBundle,
   parseTurnPlan,
   type HybridPlanRealityCompare,
+  type GroundingRequestPlan,
   type OperationalGroundingBundle,
   type TurnPlan,
 } from "../../world-grounding-contract/src/index.js";
@@ -136,6 +137,7 @@ export interface WorldGroundingRuntimeOptions {
   readonly wsgs: WsgsHttpClient;
   readonly sdarCompatibilityLock: unknown;
   readonly nextLeaseOwner?: () => string;
+  readonly requestPlanner?: (turnPlan: TurnPlan) => GroundingRequestPlan;
 }
 
 interface ReadOnlyGroundingOverrides {
@@ -388,7 +390,11 @@ export class WorldGroundingRuntime {
     renderResult: (result: WsgsGroundingResult, observedAt: string) => string,
     overrides: ReadOnlyGroundingOverrides = {},
   ): Promise<{ readonly text: string; readonly result?: WsgsGroundingResult }> {
-    const plan = overrides.requestPlan ?? planGroundingRequest(turnPlan);
+    const plan =
+      overrides.requestPlan ??
+      parseGroundingRequestPlan(
+        (this.options.requestPlanner ?? planGroundingRequest)(turnPlan),
+      );
     let context: GroundingContextAssembly;
     try {
       context =
@@ -671,7 +677,11 @@ export class WorldGroundingRuntime {
       },
     });
     const validationPlan = parseGroundingRequestPlan({
-      ...planGroundingRequest(validationTurnPlan),
+      ...parseGroundingRequestPlan(
+        (this.options.requestPlanner ?? planGroundingRequest)(
+          validationTurnPlan,
+        ),
+      ),
       operation: "VALIDATE_REFERENCES",
       requestedProducts: ["RESOLVED_REFERENCES"],
     });
