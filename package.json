@@ -93,6 +93,8 @@
     "test:v04:s08:contract": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v04-s08-real-harness.contract.test.ts",
     "test:v04:s08:real": "pnpm build && node scripts/phase-v04-s08-real-multiturn.mjs",
     "verify:v04:s08": "pnpm verify:v04:s07 && pnpm test:v04:s08:contract && pnpm test:v04:s08:real",
+    "test:v04:s09": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/authority-fusion-input.unit.test.ts tests/authority-fusion-input.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts",
+    "verify:v04:s09": "pnpm verify:v04:s08 && pnpm test:v04:s09 && pnpm verify:architecture && pnpm lint && pnpm typecheck && pnpm build",
     "verify:p13:real-evidence": "node scripts/phase13-real-evidence.mjs",
     "verify:compose": "node scripts/phase13-compose.mjs",
     "verify:phase13": "node scripts/require-phase13-environment.mjs && pnpm verify:ci && pnpm verify:v03:real && pnpm docker:build && pnpm verify:container && pnpm verify:compose && pnpm generate:sbom",

@@ -81,6 +81,7 @@ export interface NormalizedTask {
   readonly errorCode?: string;
   readonly capabilityGap?: JsonValue;
   readonly nextAction?: string;
+  readonly publishedStructuredPlan?: JsonValue;
   readonly artifacts: readonly NormalizedArtifact[];
   readonly history?: readonly NormalizedMessage[];
 }

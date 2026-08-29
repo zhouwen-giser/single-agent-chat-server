@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.4:sdar-task-observation-v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "taskId",
+    "taskState",
+    "observedAt",
+    "correlation"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "2.0"
+    },
+    "taskId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "taskState": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "internalPhase": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "phaseMessage": {
+      "type": "string",
+      "maxLength": 8000
+    },
+    "observedAt": {
+      "$ref": "common.schema.json#/$defs/dateTime"
+    },
+    "correlation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "system",
+        "externalTaskId"
+      ],
+      "properties": {
+        "system": {
+          "const": "SDAR"
+        },
+        "externalTaskId": {
+          "$ref": "common.schema.json#/$defs/identifier"
+        },
+        "contextId": {
+          "$ref": "common.schema.json#/$defs/identifier"
+        }
+      }
+    },
+    "publishedStructuredPlan": {}
+  }
+}
