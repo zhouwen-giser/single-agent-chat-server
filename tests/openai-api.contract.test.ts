@@ -14,6 +14,9 @@ import {
 } from "../apps/server/src/api/openai-routes.js";
 import type { ServerConfig } from "../apps/server/src/config.js";
 import { createSecureLoggerOptions } from "../apps/server/src/observability/logging.js";
+import { legacyChatResultToInteractionEvents } from "../packages/interaction-runtime/src/index.js";
+import { assembleWorldExplanation } from "../packages/world-explanation-runtime/src/index.js";
+import { assemblyInput } from "./world-explanation-fixtures.js";
 
 const serviceKey = "phase-1-test-service-key-32-bytes-minimum";
 const jwtSecret = "phase-5-openwebui-jwt-secret-32-bytes-minimum";
@@ -577,6 +580,47 @@ describe("OpenAI-compatible HTTP contracts", () => {
       choices: [],
       usage: { total_tokens: 0 },
     });
+  });
+
+  it("returns the exact persisted world explanation text in SSE and non-SSE modes", async () => {
+    const explanation = assembleWorldExplanation(assemblyInput());
+    const runChat: NonNullable<BuildServerOptions["runChat"]> = (context) =>
+      legacyChatResultToInteractionEvents(
+        { kind: "world_explanation", explanation },
+        { runId: context.runId, threadId: context.threadId },
+      );
+    const nonStream = await createServer({ runChat }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: chatPayload(),
+    });
+    const stream = await createServer({ runChat }).inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      headers: chatHeaders,
+      payload: { ...chatPayload(), stream: true },
+    });
+    const streamedText = stream.body
+      .trim()
+      .split("\n\n")
+      .slice(0, -1)
+      .map(
+        (frame) =>
+          JSON.parse(frame.slice("data: ".length)) as {
+            choices: readonly { delta: { content?: string } }[];
+          },
+      )
+      .map((chunk) => chunk.choices[0]?.delta.content ?? "")
+      .join("");
+
+    expect(nonStream.statusCode).toBe(200);
+    expect(stream.statusCode).toBe(200);
+    expect(nonStream.json().choices[0].message.content).toBe(
+      explanation.renderedText,
+    );
+    expect(streamedText).toBe(explanation.renderedText);
+    expect(stream.body).not.toContain(explanation.explanationId);
   });
 
   it("emits async runner fragments as distinct SSE deltas", async () => {

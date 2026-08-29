@@ -90,6 +90,7 @@ try {
     grounding: activePersistence.groundingRepository,
     worldFocus: activePersistence.worldFocusRepository,
     authorityFusion: activePersistence.authorityFusionRepository,
+    worldExplanations: activePersistence.worldExplanationRepository,
     conversation: activePersistence.conversationRepository,
     wsgs: createWsgsHttpClient(parseWsgsHttpConfig(process.env)),
     sdarCompatibilityLock: sdarGroundingCompatibilityLock,

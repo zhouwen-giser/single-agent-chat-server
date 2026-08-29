@@ -19,6 +19,7 @@ import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
 import type { ClassificationError } from "../../../../src/agent/classification.js";
 import type { StructuredChatModel } from "../../../../src/agent/model.js";
 import type { TurnPlan } from "../../../../packages/world-grounding-contract/src/index.js";
+import type { WorldExplanationV1 } from "../../../../packages/world-explanation-contract/src/index.js";
 
 export interface ConversationApplicationRepository {
   listActiveTasksForChat(input: {
@@ -79,6 +80,9 @@ export interface WorldGroundingApplication {
   continuePendingChoice?(
     input: Omit<WorldGroundingTurn, "turnPlan">,
   ): Promise<string | undefined>;
+  answerWorldExplanation?(
+    input: WorldGroundingTurn,
+  ): Promise<WorldExplanationV1 | string>;
   answerWorld(input: WorldGroundingTurn): Promise<string>;
   compareHybrid(input: HybridWorldGroundingTurn): Promise<string>;
   submitOperational(input: WorldGroundingTurn): Promise<string>;
@@ -135,12 +139,23 @@ export class ConversationApplicationService {
       { configurable: { thread_id: turn.threadId } },
     );
     if (result.requestKind === "world_answer") {
-      return this.options.worldGrounding === undefined ||
+      if (
+        this.options.worldGrounding === undefined ||
         result.turnPlan === undefined
-        ? "WORLD_GROUNDING_RUNTIME_UNAVAILABLE"
-        : this.options.worldGrounding.answerWorld(
-            toWorldGroundingTurn(turn, result.turnPlan),
+      ) {
+        return "WORLD_GROUNDING_RUNTIME_UNAVAILABLE";
+      }
+      const groundingTurn = toWorldGroundingTurn(turn, result.turnPlan);
+      if (this.options.worldGrounding.answerWorldExplanation !== undefined) {
+        const explanation =
+          await this.options.worldGrounding.answerWorldExplanation(
+            groundingTurn,
           );
+        return typeof explanation === "string"
+          ? explanation
+          : { kind: "world_explanation", explanation };
+      }
+      return this.options.worldGrounding.answerWorld(groundingTurn);
     }
     if (result.requestKind === "grounded_task") {
       return this.options.worldGrounding === undefined ||

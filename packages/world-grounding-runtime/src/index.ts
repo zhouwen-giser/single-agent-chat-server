@@ -27,6 +27,8 @@ import type {
   GroundingPersistenceRepository,
   InteractionPersistenceRepository,
   JsonValue,
+  WorldExplanationFindingLink,
+  WorldExplanationRepository,
 } from "../../persistence/src/index.js";
 import type { NormalizedTask } from "../../sdar-a2a-adapter/src/index.js";
 import type { CompletedRequestResult } from "../../request-result/src/index.js";
@@ -49,6 +51,27 @@ import {
   type OperationalGroundingBundle,
   type TurnPlan,
 } from "../../world-grounding-contract/src/index.js";
+import {
+  DEFAULT_WORLD_EXPLANATION_RENDERER_POLICY,
+  hashCanonicalJson,
+  hashRendererPolicy,
+  parseRendererPolicy,
+  sha256Schema,
+  type ExplanationReference,
+  type ExplanationReplayKey,
+  type RendererPolicy,
+  type Sha256,
+  type WorldExplanationV1,
+} from "../../world-explanation-contract/src/index.js";
+import {
+  assembleWorldExplanation,
+  normalizeWsgsGeospatialExtension,
+  resolveExplanationLocale,
+} from "../../world-explanation-runtime/src/index.js";
+import {
+  assertWsgsGeospatialFindingsAuthorized,
+  parseWsgsGeospatialConsumerLock,
+} from "../../wsgs-geospatial-consumer/src/index.js";
 
 const sdarPublishedPlanSnapshotSchema = z.strictObject({
   taskId: z
@@ -112,6 +135,7 @@ export interface WorldGroundingRuntimeTurn {
   readonly threadId: string;
   readonly externalRequestId: string;
   readonly userText: string;
+  readonly locale?: string;
   readonly turnPlan: TurnPlan;
   readonly signal?: AbortSignal;
 }
@@ -145,6 +169,10 @@ export interface WorldGroundingRuntimeOptions {
     AuthorityFusionRepository,
     "findExact" | "saveOrReplay"
   >;
+  readonly worldExplanations?: Pick<
+    WorldExplanationRepository,
+    "findExact" | "saveOrReplay"
+  >;
   readonly conversation?: Pick<
     ConversationPersistenceRepository,
     "loadMessageByExternalId"
@@ -153,6 +181,8 @@ export interface WorldGroundingRuntimeOptions {
   readonly sdarCompatibilityLock: unknown;
   readonly nextLeaseOwner?: () => string;
   readonly requestPlanner?: (turnPlan: TurnPlan) => GroundingRequestPlan;
+  readonly worldExplanationContractHash?: Sha256;
+  readonly rendererPolicy?: RendererPolicy;
 }
 
 interface ReadOnlyGroundingOverrides {
@@ -172,10 +202,21 @@ export class WorldGroundingRuntime {
   private readonly contextAssembler?: GroundingContextAssembler;
   private readonly focusUpdater?: WorldFocusUpdater;
   private readonly pendingChoiceResolver = new PendingChoiceResolver();
+  private readonly rendererPolicy: RendererPolicy;
+  private readonly rendererPolicyHash: Sha256;
+  private readonly worldExplanationContractHash: Sha256;
 
   constructor(private readonly options: WorldGroundingRuntimeOptions) {
     this.lock = compatibilityLockSchema.parse(options.sdarCompatibilityLock);
     this.nextLeaseOwner = options.nextLeaseOwner ?? randomUUID;
+    this.rendererPolicy = parseRendererPolicy(
+      options.rendererPolicy ?? DEFAULT_WORLD_EXPLANATION_RENDERER_POLICY,
+    );
+    this.rendererPolicyHash = hashRendererPolicy(this.rendererPolicy);
+    this.worldExplanationContractHash = sha256Schema.parse(
+      options.worldExplanationContractHash ??
+        DEFAULT_WORLD_EXPLANATION_CONTRACT_HASH,
+    );
     this.contextAssembler =
       options.worldFocus === undefined
         ? undefined
@@ -187,6 +228,13 @@ export class WorldGroundingRuntime {
   }
 
   async answerWorld(input: WorldGroundingRuntimeTurn): Promise<string> {
+    const answer = await this.answerWorldExplanation(input);
+    return typeof answer === "string" ? answer : answer.renderedText;
+  }
+
+  async answerWorldExplanation(
+    input: WorldGroundingRuntimeTurn,
+  ): Promise<WorldExplanationV1 | string> {
     const turnPlan = parseTurnPlan(input.turnPlan);
     if (turnPlan.turnRoute !== "WORLD_ANSWER") {
       throw new WorldGroundingRuntimeError(
@@ -198,14 +246,126 @@ export class WorldGroundingRuntime {
       turnPlan,
     );
     if (revalidationFailure !== undefined) return revalidationFailure;
-    return (
-      await this.executeReadOnlyGrounding(
-        input,
-        turnPlan,
-        undefined,
-        (result) => renderSafeWorldAnswer(result),
-      )
-    ).text;
+    let persistedExplanation: WorldExplanationV1 | undefined;
+    const outcome = await this.executeReadOnlyGrounding(
+      input,
+      turnPlan,
+      undefined,
+      async (result, observedAt) => {
+        if (result.geospatialFindings === undefined) {
+          return renderSafeWorldAnswer(result);
+        }
+        try {
+          persistedExplanation = await this.createOrReplayWorldExplanation({
+            input,
+            result,
+            observedAt,
+          });
+        } catch {
+          return "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE";
+        }
+        return (
+          persistedExplanation?.renderedText ??
+          "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE"
+        );
+      },
+    );
+    if (persistedExplanation !== undefined) return persistedExplanation;
+    if (
+      outcome.result?.geospatialFindings !== undefined &&
+      this.options.worldExplanations !== undefined
+    ) {
+      const replay = await this.options.worldExplanations.findExact(
+        this.explanationReplayKey(input, outcome.result.resultHash),
+      );
+      if (replay !== undefined) return replay.explanation;
+    }
+    return outcome.text;
+  }
+
+  private async createOrReplayWorldExplanation(input: {
+    readonly input: WorldGroundingRuntimeTurn;
+    readonly result: WsgsGroundingResult;
+    readonly observedAt: string;
+  }): Promise<WorldExplanationV1 | undefined> {
+    if (
+      this.options.worldExplanations === undefined ||
+      input.result.geospatialFindings === undefined
+    ) {
+      return undefined;
+    }
+    const lock = parseWsgsGeospatialConsumerLock(
+      this.options.wsgs.geospatialConsumerLock,
+    );
+    assertWsgsGeospatialFindingsAuthorized(
+      input.result.geospatialFindings,
+      lock,
+    );
+    const replayKey = this.explanationReplayKey(
+      input.input,
+      input.result.resultHash,
+    );
+    const existing = await this.options.worldExplanations.findExact(replayKey);
+    if (existing !== undefined) return existing.explanation;
+    const normalized = normalizeWsgsGeospatialExtension({
+      extension: input.result.geospatialFindings,
+      expectedProfileSchemaHash: lock.geospatialProfile.profileSchemaHash,
+      resultStatus: input.result.status,
+      evidenceItemIds: input.result.evidenceItems.map(
+        ({ evidenceProductId }) => evidenceProductId,
+      ),
+      referenceProductIds: input.result.referenceProducts.map(
+        ({ productId }) => productId,
+      ),
+      limits: this.rendererPolicy.limits,
+    });
+    const references = projectExplanationReferences(input.result);
+    const explanation = assembleWorldExplanation({
+      grounding: {
+        groundingId: input.result.groundingId,
+        resultHash: input.result.resultHash,
+        status: input.result.status,
+      },
+      normalized,
+      references,
+      locale: replayKey.locale,
+      requestText: input.input.userText,
+      createdAt: input.observedAt,
+      evidenceItemIds: input.result.evidenceItems.map(
+        ({ evidenceProductId }) => evidenceProductId,
+      ),
+      receiptIds: uniqueStrings(
+        input.result.evidenceItems.flatMap(({ receiptIds }) => receiptIds),
+      ),
+      operationKeys: uniqueStrings(
+        input.result.evidenceItems.map(
+          ({ sourceOperation }) => sourceOperation,
+        ),
+      ),
+      consumerLockHash: lock.consumerLockHash,
+      findingProfileHash: input.result.geospatialFindings.profileSchemaHash,
+      rendererPolicy: this.rendererPolicy,
+    });
+    const stored = await this.options.worldExplanations.saveOrReplay({
+      ...replayKey,
+      explanation,
+      findingLinks: explanationFindingLinks(normalized.findings, references),
+    });
+    return stored.explanation.explanation;
+  }
+
+  private explanationReplayKey(
+    input: WorldGroundingRuntimeTurn,
+    groundingResultHash: Sha256,
+  ): ExplanationReplayKey {
+    return {
+      principalId: input.principalId,
+      threadId: input.threadId,
+      groundingResultHash,
+      locale: resolveExplanationLocale(input.locale, input.userText),
+      contractHash: this.worldExplanationContractHash,
+      rendererPolicyHash: this.rendererPolicyHash,
+    };
   }
 
   async compareHybrid(input: HybridGroundingRuntimeTurn): Promise<string> {
@@ -1148,17 +1308,12 @@ export function renderSafeWorldAnswer(result: WsgsGroundingResult): string {
       );
       continue;
     }
-    const payload =
-      evidence.safePayload === undefined
-        ? ""
-        : ` — ` + safeJson(evidence.safePayload);
     lines.push(
       `Evidence ` +
         safeText(evidence.evidenceProductId) +
         ` (` +
         evidence.upstreamStatus +
-        `)` +
-        payload,
+        `) was published. Its generic safePayload was not interpreted as a fact.`,
     );
   }
   if (
@@ -1239,7 +1394,10 @@ function createWsgsRequest(input: {
       messageId,
       originalText,
       originalTextSha256: `sha256:` + sha256Hex(originalText),
-      locale: "und",
+      locale: resolveExplanationLocale(
+        input.input.locale,
+        input.input.userText,
+      ),
       createdAt: input.createdAt,
     },
     requestedProducts: input.plan.requestedProducts,
@@ -1368,6 +1526,55 @@ function safeText(value: string): string {
 
 function safeJson(value: JsonValue): string {
   return safeText(JSON.stringify(value)).slice(0, 4_000);
+}
+
+export const DEFAULT_WORLD_EXPLANATION_CONTRACT_HASH = hashCanonicalJson({
+  schemaVersion: "sacs-world-explanation/1.0",
+  contract: "WorldExplanationV1",
+});
+
+function projectExplanationReferences(
+  result: WsgsGroundingResult,
+): readonly ExplanationReference[] {
+  return result.referenceProducts.map((reference) => ({
+    productId: reference.productId,
+    displayName: reference.displayName,
+    referenceKey: reference.referenceKey,
+    sourceWorldVersion: reference.sourceWorldVersion,
+    ...(reference.validUntil === undefined
+      ? {}
+      : { validUntil: reference.validUntil }),
+  }));
+}
+
+function explanationFindingLinks(
+  findings: readonly {
+    readonly findingId: string;
+    readonly subjectReferenceProductIds?: readonly string[];
+  }[],
+  references: readonly ExplanationReference[],
+): readonly WorldExplanationFindingLink[] {
+  const referencesByProductId = new Map(
+    references.map((reference) => [reference.productId, reference] as const),
+  );
+  return findings.flatMap((finding, index) =>
+    (finding.subjectReferenceProductIds ?? []).flatMap((productId) => {
+      const reference = referencesByProductId.get(productId);
+      return reference === undefined
+        ? []
+        : [
+            {
+              findingId: finding.findingId,
+              ordinal: index + 1,
+              referenceKey: reference.referenceKey,
+            },
+          ];
+    }),
+  );
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values)];
 }
 
 function safeRuntimeCode(

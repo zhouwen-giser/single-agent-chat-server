@@ -88,6 +88,16 @@ export class AgUiEventProjection {
             event,
           ),
         ];
+      case "world.explanation":
+        return [
+          custom("sacs.world-explanation.v1", { ...event.payload }, event),
+        ];
+      case "world.map_projection":
+        return [custom("sacs.map-projection.v1", { ...event.payload }, event)];
+      case "world.source_products":
+        return [
+          custom("sacs.world-source-products.v1", { ...event.payload }, event),
+        ];
       case "allowed_actions.changed":
         return this.allowedActions(event);
       case "input.required":
