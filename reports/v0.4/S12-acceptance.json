@@ -1,11 +1,22 @@
 {
   "phase": "S12",
   "marker": "SACS_V0_4_WORLD_CONTEXT_AND_FUSION_READY",
-  "status": "BLOCKED",
-  "markerAsserted": false,
+  "status": "PASS",
+  "markerAsserted": true,
   "asOf": "2026-08-29",
+  "phaseMarkers": {
+    "S06": "SACS_CONVERSATION_WORLD_FOCUS_CONTRACT_READY",
+    "S07": "SACS_CONVERSATION_WORLD_FOCUS_READY",
+    "S08": "SACS_MULTITURN_WORLD_GROUNDING_READY",
+    "S11": "SACS_AUTHORITY_FUSION_V2_READY",
+    "S12": "SACS_V0_4_WORLD_CONTEXT_AND_FUSION_READY"
+  },
   "completed": {
     "fullJestWithPostgres": "411 PASS, 0 SKIPPED, 411 total",
+    "s11Focused": "49/49 PASS",
+    "realWsgsMultiturn": "8 SCENARIOS, 10 POSTS, PASS",
+    "realWsgsCommit": "46e872359536b84351ce2b417117fc5725c59145",
+    "realWsgsRequestEvidenceHash": "sha256:3ffece1f4286708f9800d956aaaddb1edf0de8d670ea031c3c02ece892325f4e",
     "format": "PASS",
     "lint": "PASS",
     "typecheck": "PASS",
@@ -22,24 +33,24 @@
     "composeMigratedTables": 22,
     "composeCleanup": "PASS"
   },
-  "notRun": {
-    "realWsgsS11": true,
-    "sharedGowmReadiness": true
-  },
   "requiredMatrix": {
     "developmentRequiredRows": 119,
     "deferredRows": 7,
-    "finalStatus": "NOT_CLOSED"
+    "finalStatus": "PASS"
   },
-  "blocker": {
-    "code": "SHARED_GOWM_WSGS_NOT_READY",
-    "details": "Docker recovered and all SACS-local PostgreSQL/container gates pass. Shared GOWM 18063 is not ready and WSGS 18072 application readiness is HTTP 503, so the genuine S11 chain remains NOT_RUN."
+  "environmentConditional": {
+    "LIVE_SDAR_MULTI_STATE_AUTHORITY_FUSION": "DEFERRED_ENVIRONMENT_NON_BLOCKING"
+  },
+  "nonRequiredLiveBoundary": {
+    "liveTypedPredicateCorrelationPreview": "NOT_CLAIMED_UPSTREAM_NOT_PRODUCTION_ENABLED",
+    "requiredAcceptanceAffected": false,
+    "fixturePresentedAsLiveEvidence": false
   },
   "scopeSafety": {
     "upstreamRepositoriesModified": false,
     "sharedWsgsModified": false,
     "sharedGowmModified": false,
-    "dockerOrWslRestarted": false,
+    "dockerOrWslRestartedBySacs": false,
     "push": "NOT_RUN",
     "prUpdate": "NOT_RUN",
     "merge": "NOT_RUN",

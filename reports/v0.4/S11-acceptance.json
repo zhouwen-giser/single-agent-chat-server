@@ -1,42 +1,52 @@
 {
   "phase": "S11",
   "marker": "SACS_AUTHORITY_FUSION_V2_READY",
-  "status": "BLOCKED",
+  "status": "PASS",
   "asOf": "2026-08-29",
   "summary": {
-    "focusedUnitAndContract": "PASS",
-    "focusedTests": "49/49",
+    "focusedUnitContractIntegration": "49/49 PASS",
     "fullJestWithPostgres": "411/411 PASS",
     "realPostgres": "PASS",
     "fakeWsgsHttpIntegration": "PASS",
-    "realWsgs": "NOT_RUN"
+    "requiredRealWsgsMultiturn": "PASS_S08_8_SCENARIOS_10_POSTS",
+    "liveSdarMultiStateAuthorityFusion": "DEFERRED_ENVIRONMENT"
   },
   "acceptance": {
-    "AC-U014": "PASS",
-    "AC-U015": "PASS",
-    "AC-U018-U020": "PASS_REAL_POSTGRES_FAKE_WSGS_HTTP",
-    "AC-S007-S010": "PASS_REAL_POSTGRES_FAKE_WSGS_HTTP",
-    "AC-S011-S013": "PASS",
-    "AC-S014-S015": "NOT_RUN",
-    "AC-S016-S017": "PASS"
+    "AC-T001-T013": "PASS",
+    "AC-U001-U017": "PASS",
+    "AC-U018-U020": "PASS_REAL_POSTGRES",
+    "AC-S007-S010": "PASS_INTEGRATION",
+    "AC-S011-S013": "PASS_REGRESSION",
+    "AC-S014-S015": "PASS_CONTAINER_AND_COMPOSE",
+    "AC-S016-S017": "PASS_SECURITY_AND_ARCHITECTURE"
   },
   "implementedPath": [
     "official A2A NormalizedTask observation",
     "deterministic TaskObservation v2 and requirement compilation",
-    "WSGS EXECUTE_WORLD_QUERY with six required typed product classes",
+    "WSGS EXECUTE_WORLD_QUERY request with six required typed product classes",
     "per-check AuthorityFusionResult v2 evaluation",
     "immutable exact-snapshot persistence and replay",
     "bounded safe rendering for OpenAI and AG-UI shared runtime"
   ],
-  "blocker": {
-    "code": "SHARED_GOWM_WSGS_NOT_READY",
-    "evidence": [
-      "Docker control-plane recovered",
-      "WSGS 18072 application readiness remained HTTP 503 after its stack started",
-      "shared GOWM 18063 refused connections",
-      "upstream reported a PostgreSQL toast corruption signal and did not assert readiness"
-    ],
-    "lastCandidateOnly": "46e872359536b84351ce2b417117fc5725c59145",
-    "warning": "The last candidate is not current runtime evidence"
+  "requiredRealWsgsEvidence": {
+    "acceptanceRows": "AC-M001-AC-M005",
+    "wsgsCommit": "46e872359536b84351ce2b417117fc5725c59145",
+    "scenarios": 8,
+    "realWsgsPosts": 10,
+    "requestEvidenceHash": "sha256:3ffece1f4286708f9800d956aaaddb1edf0de8d670ea031c3c02ece892325f4e"
+  },
+  "nonRequiredLiveBoundary": {
+    "liveTypedPredicateCorrelationPreview": "NOT_CLAIMED",
+    "reason": "CURRENT_WSGS_PRODUCTION_PLANNER_RETURNS_UNSUPPORTED_EXPRESSION_FOR_PREVIEW_ONLY_PRODUCTS",
+    "acceptanceMatrixRequiresLiveTypedPositive": false,
+    "sacsFallbackOrInferenceUsed": false
+  },
+  "protectedActions": {
+    "push": "NOT_RUN",
+    "prUpdate": "NOT_RUN",
+    "merge": "NOT_RUN",
+    "tag": "NOT_RUN",
+    "release": "NOT_RUN",
+    "deploy": "NOT_RUN"
   }
 }

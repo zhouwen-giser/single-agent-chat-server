@@ -34,7 +34,7 @@
       "EXECUTE_WORLD_QUERY": 8,
       "VALIDATE_REFERENCES": 2
     },
-    "requestEvidenceHash": "sha256:38b853e99a179d5b56e23a57494c4d06af5b72e21384aae55154ae986ac18200"
+    "requestEvidenceHash": "sha256:3ffece1f4286708f9800d956aaaddb1edf0de8d670ea031c3c02ece892325f4e"
   },
   "acceptance": {
     "AC-M001": "PASS_VEHICLE_KNOWN_REFERENCE_FOLLOWUP",
