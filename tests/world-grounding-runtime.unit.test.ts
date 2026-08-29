@@ -467,6 +467,110 @@ describe("SACS v0.4 world grounding runtime", () => {
     expect(fixture.completeRequest).toHaveBeenCalledTimes(1);
   });
 
+  it("runs the S11 Task snapshot through typed WSGS predicate evidence", async () => {
+    const fixture = hybridRuntime((request) => ({
+      ...validResult(request),
+      evidenceItems: [
+        typedCorrelationEvidence("task-plan-1"),
+        typedPredicateEvidence("predicate-road-7", "SUPPORTED"),
+      ],
+    }));
+    const turn = hybridV2Turn("COMPLETED");
+    const response = await fixture.runtime.compareHybrid(turn);
+    const replay = await fixture.runtime.compareHybrid(turn);
+
+    expect(response).toContain("AUTHORITY_FUSION_V2_READY");
+    expect(response).toContain("Authority fusion CONSISTENT");
+    expect(response).toContain("Task: task-plan-1 (COMPLETED)");
+    expect(fixture.createGrounding).toHaveBeenCalledTimes(1);
+    expect(replay).toBe(response);
+    expect(fixture.createGrounding).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestedProducts: [
+          "RESOLVED_REFERENCES",
+          "WORLD_EVIDENCE",
+          "OPERATIONAL_TASKS",
+          "EVENT_TIMELINES",
+          "CORRELATION_FINDINGS",
+          "PREDICATE_EVALUATIONS",
+        ],
+        contextCapsule: expect.objectContaining({
+          externalCorrelationHints: expect.any(Array),
+          externalPredicates: [
+            expect.objectContaining({
+              value: expect.objectContaining({
+                predicateId: "predicate-road-7",
+              }),
+            }),
+          ],
+        }),
+      }),
+      expect.any(String),
+      undefined,
+    );
+  });
+
+  it("keeps a WORKING typed false observation UNKNOWN", async () => {
+    const fixture = hybridRuntime((request) => ({
+      ...validResult(request),
+      evidenceItems: [
+        typedPredicateEvidence("predicate-road-7", "NOT_SUPPORTED"),
+      ],
+    }));
+    const response = await fixture.runtime.compareHybrid(
+      hybridV2Turn("WORKING"),
+    );
+    expect(response).toContain("Authority fusion UNKNOWN");
+    expect(response).not.toContain("INCONSISTENT");
+  });
+
+  it("does not call WSGS when the Task has no published structure", async () => {
+    const fixture = hybridRuntime((request) => validResult(request));
+    const turn = hybridV2Turn("INPUT_REQUIRED");
+    await expect(
+      fixture.runtime.compareHybrid({
+        ...turn,
+        sdarTask: { ...turn.sdarTask, publishedStructuredPlan: undefined },
+      }),
+    ).resolves.toBe("AUTHORITY_FUSION_NOT_COMPARABLE");
+    expect(fixture.createGrounding).not.toHaveBeenCalled();
+  });
+
+  it("returns clarification and does not fuse a critical ambiguous reference", async () => {
+    const fixture = hybridRuntime((request) => {
+      const base = validResult(request);
+      const product = base.referenceProducts[0];
+      if (product === undefined) throw new Error("Missing ambiguity fixture");
+      return {
+        ...base,
+        status: "AMBIGUOUS",
+        referenceProducts: [
+          product,
+          {
+            ...product,
+            productId: "product-2",
+            displayName: "Road 7 alternate",
+          },
+        ],
+        ambiguities: [
+          {
+            ambiguityId: "ambiguity-critical",
+            mentionId: "mention-road-7",
+            surfaceText: "Road 7",
+            candidateProductIds: ["product-1", "product-2"],
+            reason: "MULTIPLE_PLAUSIBLE_MATCHES",
+          },
+        ],
+      };
+    });
+    const response = await fixture.runtime.compareHybrid(
+      hybridV2Turn("COMPLETED"),
+    );
+    expect(response).toContain("WORLD_GROUNDING_CLARIFICATION_REQUIRED");
+    expect(response).toContain("No candidate was selected automatically");
+    expect(fixture.authorityFusion.saveOrReplay).not.toHaveBeenCalled();
+  });
+
   it("never marks incomplete or authority-ambiguous evidence as preview-ready", async () => {
     const result = validResult(baseRequest());
     const inputs: readonly WsgsGroundingResult[] = [
@@ -568,6 +672,33 @@ function hybridTurn() {
   };
 }
 
+function hybridV2Turn(
+  state: "INPUT_REQUIRED" | "WORKING" | "COMPLETED" | "FAILED" | "CANCELED",
+) {
+  return {
+    ...worldTurn(),
+    turnPlan: hybridTurn().turnPlan,
+    sdarTask: {
+      taskId: "task-plan-1",
+      contextId: "context-plan-1",
+      state,
+      internalPhase: state.toLowerCase(),
+      phaseMessage: "Published Task status",
+      statusTimestamp: "2026-08-28T01:00:00.000Z",
+      publishedStructuredPlan: {
+        predicates: [
+          {
+            schemaUri: "urn:gowm:v0.4:external-predicate",
+            schemaHash: `sha256:${"e".repeat(64)}`,
+            value: { predicateId: "predicate-road-7" },
+          },
+        ],
+      },
+      artifacts: [],
+    },
+  };
+}
+
 function hybridRuntime(
   resultForRequest: (request: WsgsGroundingRequest) => WsgsGroundingResult,
 ) {
@@ -606,16 +737,133 @@ function hybridRuntime(
     waitForGrounding: jest.fn(),
     cancelGrounding: jest.fn(),
   } as unknown as WsgsHttpClient;
+  let focus = {
+    schemaVersion: "1.0" as const,
+    principalId: "principal-1",
+    threadId: "thread-1",
+    revision: 0,
+    references: [],
+    updatedAt: "2026-08-28T01:00:00.000Z",
+  };
+  const worldFocus = {
+    getFocus: jest.fn(async () => focus),
+    listUsableReferences: jest.fn(async () => []),
+    listReferencesRequiringValidation: jest.fn(async () => []),
+    applyReferences: jest.fn(
+      async (input: {
+        readonly groundingId: string;
+        readonly groundingResultHash: string;
+      }) => {
+        focus = {
+          ...focus,
+          revision: focus.revision + 1,
+          lastGroundingId: input.groundingId,
+          lastGroundingResultHash: input.groundingResultHash,
+        } as typeof focus;
+        return focus;
+      },
+    ),
+    createChoice: jest.fn(async (value: unknown) => value),
+  } as unknown as WorldFocusRepository;
+  const fusionRows = new Map<string, unknown>();
+  const authorityFusion = {
+    findExact: jest.fn(async (identity: object) =>
+      fusionRows.get(JSON.stringify(identity)),
+    ),
+    saveOrReplay: jest.fn(
+      async (input: {
+        readonly taskSnapshotHash: string;
+        readonly requirementHash: string;
+        readonly groundingResultHash: string;
+        readonly result: unknown;
+      }) => {
+        const identity = {
+          principalId: "principal-1",
+          threadId: "thread-1",
+          taskId: "task-plan-1",
+          taskSnapshotHash: input.taskSnapshotHash,
+          requirementHash: input.requirementHash,
+          groundingResultHash: input.groundingResultHash,
+        };
+        const fusion = { result: input.result };
+        fusionRows.set(JSON.stringify(identity), fusion);
+        return { created: true, fusion };
+      },
+    ),
+  } as unknown as NonNullable<WorldGroundingRuntimeOptions["authorityFusion"]>;
   return {
     runtime: new WorldGroundingRuntime({
       requests,
       grounding,
+      worldFocus,
+      authorityFusion,
       wsgs,
       sdarCompatibilityLock: unavailableLock,
       nextLeaseOwner: () => "hybrid-lease-owner",
     }),
     completeRequest,
     createGrounding,
+    authorityFusion,
+  };
+}
+
+function typedPredicateEvidence(
+  predicateId: string,
+  status: "SUPPORTED" | "NOT_SUPPORTED",
+): WsgsGroundingResult["evidenceItems"][number] {
+  return {
+    evidenceProductId: "evidence-" + predicateId,
+    productKind: "PREDICATE_EVALUATION",
+    authority: "GOWM",
+    sourceOperation: "predicate.evaluate",
+    upstreamStatus: "COMPLETED",
+    payloadSchemaUri: "urn:gowm:v0.4:predicate-evaluation",
+    payloadSchemaHash: `sha256:${"f".repeat(64)}`,
+    safePayload: {
+      evaluationId: "evaluation-" + predicateId,
+      predicateId,
+      status,
+      evaluatedAtWorldVersion: 42,
+      supportingEvidenceIds: [],
+      contradictingEvidenceIds: [],
+      assumptions: [],
+      warnings: [],
+      methodVersion: "1",
+    },
+    receiptIds: [],
+    evidenceIds: [],
+    unknowns: [],
+    warnings: [],
+  };
+}
+
+function typedCorrelationEvidence(
+  externalValue: string,
+): WsgsGroundingResult["evidenceItems"][number] {
+  return {
+    evidenceProductId: "evidence-correlation-" + externalValue,
+    productKind: "CORRELATION_FINDING",
+    authority: "GOWM",
+    sourceOperation: "correlation.find",
+    upstreamStatus: "COMPLETED",
+    payloadSchemaUri: "urn:gowm:v0.4:correlation-finding",
+    payloadSchemaHash: `sha256:${"1".repeat(64)}`,
+    safePayload: {
+      findingId: "finding-" + externalValue,
+      externalAuthority: "SDAR",
+      externalKind: "EXTERNAL_TASK",
+      externalValue,
+      relation: "REALIZES",
+      matchBasis: "PROPAGATED_CORRELATION_ID",
+      operationalEventIds: [],
+      evidenceIds: [],
+      worldVersion: 42,
+      methodVersion: "1",
+    },
+    receiptIds: [],
+    evidenceIds: [],
+    unknowns: [],
+    warnings: [],
   };
 }
 

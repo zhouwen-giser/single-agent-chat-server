@@ -95,12 +95,7 @@ export interface WorldGroundingTurn {
 }
 
 export interface HybridWorldGroundingTurn extends WorldGroundingTurn {
-  readonly sdarPlan: {
-    readonly taskId: string;
-    readonly observedStatus: "INPUT_REQUIRED";
-    readonly internalPhase: "awaiting_plan_confirmation";
-    readonly publishedSummary: string;
-  };
+  readonly sdarTask: NormalizedTask;
 }
 
 export class ConversationApplicationService {
@@ -163,16 +158,16 @@ export class ConversationApplicationService {
       ) {
         return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
       }
-      const sdarPlan = await this.readPublishedPlanSnapshot(
+      const sdarTask = await this.readPublishedTaskSnapshot(
         turn,
         result.targetTaskId,
       );
-      if (sdarPlan === undefined) {
+      if (sdarTask === undefined) {
         return "AUTHORITY_FUSION_PLAN_UNAVAILABLE";
       }
       return this.options.worldGrounding.compareHybrid({
         ...toWorldGroundingTurn(turn, result.turnPlan),
-        sdarPlan,
+        sdarTask,
       });
     }
     if (result.requestKind === "new_task") {
@@ -302,10 +297,10 @@ export class ConversationApplicationService {
     });
   }
 
-  private async readPublishedPlanSnapshot(
+  private async readPublishedTaskSnapshot(
     turn: ConversationApplicationTurn,
     taskId: string,
-  ): Promise<HybridWorldGroundingTurn["sdarPlan"] | undefined> {
+  ): Promise<NormalizedTask | undefined> {
     let observedTask: NormalizedTask | undefined;
     const fragments: string[] = [];
     let totalLength = 0;
@@ -333,25 +328,10 @@ export class ConversationApplicationService {
       void fragment;
     }
     const task = observedTask;
-    const publishedSummary = fragments.join("\n").trim();
-    if (
-      invalid ||
-      task === undefined ||
-      task.taskId !== taskId ||
-      task.state !== "INPUT_REQUIRED" ||
-      task.internalPhase !== "awaiting_plan_confirmation" ||
-      task.phaseMessage === undefined ||
-      task.phaseMessage.trim() === "" ||
-      publishedSummary.length === 0
-    ) {
+    if (invalid || task === undefined || task.taskId !== taskId) {
       return undefined;
     }
-    return {
-      taskId,
-      observedStatus: task.state,
-      internalPhase: task.internalPhase,
-      publishedSummary,
-    };
+    return task;
   }
 }
 

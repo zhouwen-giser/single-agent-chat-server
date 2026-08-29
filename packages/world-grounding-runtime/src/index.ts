@@ -2,6 +2,14 @@ import { createHash, randomUUID } from "node:crypto";
 
 import { z } from "zod";
 
+import {
+  AuthorityFusionEvaluator,
+  AuthorityFusionRenderer,
+  hashPlanRealityRequirements,
+  PlanRealityRequirementCompiler,
+  SdarTaskObservationAssembler,
+  type AuthorityFusionResultV2,
+} from "../../authority-fusion/src/index.js";
 import { planGroundingRequest } from "../../grounding-request-planner/src/index.js";
 import {
   GroundingContextAssembler,
@@ -14,11 +22,13 @@ import {
   type WorldFocusRepository,
 } from "../../conversation-world-focus/src/index.js";
 import type {
+  AuthorityFusionRepository,
   ConversationPersistenceRepository,
   GroundingPersistenceRepository,
   InteractionPersistenceRepository,
   JsonValue,
 } from "../../persistence/src/index.js";
+import type { NormalizedTask } from "../../sdar-a2a-adapter/src/index.js";
 import type { CompletedRequestResult } from "../../request-result/src/index.js";
 import {
   parseWsgsGroundingResult,
@@ -116,7 +126,8 @@ export type SdarPublishedPlanSnapshot = z.infer<
 >;
 
 export interface HybridGroundingRuntimeTurn extends WorldGroundingRuntimeTurn {
-  readonly sdarPlan: SdarPublishedPlanSnapshot;
+  readonly sdarTask?: NormalizedTask;
+  readonly sdarPlan?: SdarPublishedPlanSnapshot;
 }
 
 export interface WorldGroundingRuntimeOptions {
@@ -130,6 +141,10 @@ export interface WorldGroundingRuntimeOptions {
   > &
     Partial<Pick<GroundingPersistenceRepository, "get">>;
   readonly worldFocus?: WorldFocusRepository;
+  readonly authorityFusion?: Pick<
+    AuthorityFusionRepository,
+    "findExact" | "saveOrReplay"
+  >;
   readonly conversation?: Pick<
     ConversationPersistenceRepository,
     "loadMessageByExternalId"
@@ -200,19 +215,110 @@ export class WorldGroundingRuntime {
         "WORLD_GROUNDING_CONTRACT_VIOLATION",
       );
     }
-    const sdarPlan = sdarPublishedPlanSnapshotSchema.parse(input.sdarPlan);
-    const revalidationFailure = await this.revalidateWorldFocus(
-      input,
-      turnPlan,
-    );
-    if (revalidationFailure !== undefined) return revalidationFailure;
-    return (
-      await this.executeReadOnlyGrounding(
+    if (input.sdarTask === undefined) {
+      const sdarPlan = sdarPublishedPlanSnapshotSchema.parse(input.sdarPlan);
+      const revalidationFailure = await this.revalidateWorldFocus(
         input,
         turnPlan,
-        asJsonValue({ sdarPlan }),
-        (result, observedAt) =>
-          renderHybridAuthorityFusion(result, sdarPlan, observedAt),
+      );
+      if (revalidationFailure !== undefined) return revalidationFailure;
+      return (
+        await this.executeReadOnlyGrounding(
+          input,
+          turnPlan,
+          asJsonValue({ sdarPlan }),
+          (result, observedAt) =>
+            renderHybridAuthorityFusion(result, sdarPlan, observedAt),
+        )
+      ).text;
+    }
+    if (
+      this.options.worldFocus === undefined ||
+      this.contextAssembler === undefined
+    ) {
+      return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
+    }
+    const task = new SdarTaskObservationAssembler().assemble(input.sdarTask);
+    const focus = await this.options.worldFocus.getFocus({
+      principalId: input.principalId,
+      threadId: input.threadId,
+    });
+    const requirements = new PlanRealityRequirementCompiler().compile(
+      task,
+      focus,
+    );
+    if (requirements.comparability === "NOT_COMPARABLE") {
+      return "AUTHORITY_FUSION_NOT_COMPARABLE";
+    }
+    const requirementHash = hashPlanRealityRequirements(requirements);
+    if (
+      this.options.authorityFusion !== undefined &&
+      focus.lastGroundingResultHash !== undefined
+    ) {
+      const replay = await this.options.authorityFusion.findExact({
+        principalId: input.principalId,
+        threadId: input.threadId,
+        taskId: task.taskId,
+        taskSnapshotHash: requirements.taskSnapshotHash,
+        requirementHash,
+        groundingResultHash: focus.lastGroundingResultHash,
+      });
+      if (replay !== undefined) {
+        return renderAuthorityFusionV2(replay.result);
+      }
+    }
+    const fusionTurnPlan = parseTurnPlan({
+      ...turnPlan,
+      worldFocusUsage: {
+        ...turnPlan.worldFocusUsage,
+        externalCorrelationHints: requirements.correlationHints.length > 0,
+        externalPredicates: requirements.predicates.length > 0,
+      },
+    });
+    const revalidationFailure = await this.revalidateWorldFocus(
+      input,
+      fusionTurnPlan,
+    );
+    if (revalidationFailure !== undefined) return revalidationFailure;
+    const context = await this.contextAssembler.assemble({
+      principalId: input.principalId,
+      threadId: input.threadId,
+      turnPlan: fusionTurnPlan,
+      fusionRequirements: requirements,
+    });
+    return (
+      await this.executeReadOnlyGrounding(
+        { ...input, turnPlan: fusionTurnPlan },
+        fusionTurnPlan,
+        asJsonValue({
+          taskSnapshotHash: requirements.taskSnapshotHash,
+          requirementHash,
+        }),
+        async (result, observedAt) => {
+          if (result.status === "AMBIGUOUS") {
+            return renderSafeWorldAnswer(result);
+          }
+          if (!["COMPLETED", "PARTIAL"].includes(result.status)) {
+            return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
+          }
+          const fusion = new AuthorityFusionEvaluator({
+            now: () => new Date(observedAt),
+          }).evaluate({ task, requirements, grounding: result });
+          if (this.options.authorityFusion !== undefined) {
+            await this.options.authorityFusion.saveOrReplay({
+              principalId: input.principalId,
+              threadId: input.threadId,
+              taskId: task.taskId,
+              taskSnapshotHash: requirements.taskSnapshotHash,
+              requirementHash,
+              groundingId: result.groundingId,
+              groundingResultHash: result.resultHash,
+              result: fusion,
+            });
+          }
+          return renderAuthorityFusionV2(fusion);
+        },
+        { context },
       )
     ).text;
   }
@@ -387,7 +493,10 @@ export class WorldGroundingRuntime {
     input: WorldGroundingRuntimeTurn,
     turnPlan: TurnPlan,
     hashExtension: JsonValue | undefined,
-    renderResult: (result: WsgsGroundingResult, observedAt: string) => string,
+    renderResult: (
+      result: WsgsGroundingResult,
+      observedAt: string,
+    ) => string | Promise<string>,
     overrides: ReadOnlyGroundingOverrides = {},
   ): Promise<{ readonly text: string; readonly result?: WsgsGroundingResult }> {
     const plan =
@@ -552,7 +661,7 @@ export class WorldGroundingRuntime {
               overrides.originMessageId ?? input.externalRequestId,
           });
         }
-        response = renderResult(result, requestCreatedAt);
+        response = await renderResult(result, requestCreatedAt);
         if (
           ["COMPLETED", "PARTIAL"].includes(result.status) &&
           groundingClaim.execution.state !== "COMPLETED"
@@ -978,6 +1087,22 @@ export function renderHybridAuthorityFusion(
     `Composition: ${comparison.composition.authority} ${comparison.composition.relationship}`,
     comparison.composition.summary,
     `Grounding result hash: ${comparison.reality.resultHash}`,
+  ]
+    .join("\n")
+    .slice(0, 16_000);
+}
+
+export function renderAuthorityFusionV2(
+  result: AuthorityFusionResultV2,
+): string {
+  return [
+    "AUTHORITY_FUSION_V2_READY",
+    new AuthorityFusionRenderer().render(result),
+    `Task authority: ${result.task.authority}`,
+    `Task: ${result.task.taskId} (${result.task.state})`,
+    `Reality authority: ${result.reality.authority}`,
+    `Grounding: ${result.reality.groundingId}`,
+    `Grounding result hash: ${result.reality.resultHash}`,
   ]
     .join("\n")
     .slice(0, 16_000);

@@ -162,12 +162,13 @@ describe("SACS v0.4 world grounding application routing", () => {
     );
     expect(compareHybrid).toHaveBeenCalledWith(
       expect.objectContaining({
-        sdarPlan: {
+        sdarTask: expect.objectContaining({
           taskId: "task-plan-1",
-          observedStatus: "INPUT_REQUIRED",
+          state: "INPUT_REQUIRED",
           internalPhase: "awaiting_plan_confirmation",
-          publishedSummary: "Published plan: inspect Road 7 before dispatch.",
-        },
+          phaseMessage: "Inspect Road 7 before dispatch.",
+          artifacts: [],
+        }),
       }),
     );
     expect(observer).toHaveBeenCalledTimes(1);
@@ -244,8 +245,8 @@ describe("SACS v0.4 world grounding application routing", () => {
     expect(compareHybrid).not.toHaveBeenCalled();
   });
 
-  it("rejects a published Task observation that is not awaiting plan confirmation", async () => {
-    const compareHybrid = jest.fn(async () => "unused");
+  it("passes a FAILED published Task snapshot for read-only lifecycle fusion", async () => {
+    const compareHybrid = jest.fn(async () => "AUTHORITY_FUSION_V2_READY");
     const statusForTask = jest.fn(async function* (
       _input: unknown,
       _signal: AbortSignal | undefined,
@@ -280,9 +281,17 @@ describe("SACS v0.4 world grounding application routing", () => {
     });
 
     await expect(application.execute(turn())).resolves.toBe(
-      "AUTHORITY_FUSION_PLAN_UNAVAILABLE",
+      "AUTHORITY_FUSION_V2_READY",
     );
-    expect(compareHybrid).not.toHaveBeenCalled();
+    expect(compareHybrid).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sdarTask: expect.objectContaining({
+          taskId: "task-plan-1",
+          state: "FAILED",
+          internalPhase: "failed",
+        }),
+      }),
+    );
   });
 });
 

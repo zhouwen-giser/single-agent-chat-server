@@ -40,8 +40,10 @@ describe("deterministic GroundingRequestPlanner", () => {
       requirement: "COMPARE_PLAN_REALITY" as const,
       operation: "EXECUTE_WORLD_QUERY",
       requestedProducts: [
-        "WORLD_QUERY",
+        "RESOLVED_REFERENCES",
         "WORLD_EVIDENCE",
+        "OPERATIONAL_TASKS",
+        "EVENT_TIMELINES",
         "CORRELATION_FINDINGS",
         "PREDICATE_EVALUATIONS",
       ],
