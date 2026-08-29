@@ -31,6 +31,12 @@
     "lastGroundingResultHash": {
       "$ref": "common.schema.json#/$defs/sha256"
     },
+    "lastExplanationId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "lastExplanationHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
     "references": {
       "type": "array",
       "maxItems": 64,
@@ -41,5 +47,11 @@
     "updatedAt": {
       "$ref": "common.schema.json#/$defs/dateTime"
     }
+  },
+  "dependentRequired": {
+    "lastGroundingId": ["lastGroundingResultHash"],
+    "lastGroundingResultHash": ["lastGroundingId"],
+    "lastExplanationId": ["lastExplanationHash"],
+    "lastExplanationHash": ["lastExplanationId"]
   }
 }
