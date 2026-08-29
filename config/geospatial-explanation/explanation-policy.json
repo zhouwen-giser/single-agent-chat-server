@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "sacs-world-explanation-policy/1.0",
+  "policyId": "sacs-world-explanation-v1",
+  "renderer": "DETERMINISTIC_ONLY",
+  "factSources": ["TYPED_WORLD_FINDING"],
+  "nonFactSources": ["GENERIC_SAFE_PAYLOAD", "UNKNOWN_SCHEMA", "FREE_TEXT"],
+  "displayedFeatureSummaries": 5,
+  "emptyCollectionTextPolicy": "NO_MATCH_IN_CURRENT_DATA_NOT_ABSOLUTE_ABSENCE",
+  "sourceDisclosure": "STRUCTURED_PROVENANCE_WITH_OPTIONAL_BOUNDED_TEXT",
+  "numericPolicy": "PRESERVE_UPSTREAM_VALUE_AND_UNIT",
+  "localePolicy": "REQUEST_LOCALE_ELSE_DETERMINISTIC_SCRIPT_DETECTION"
+}

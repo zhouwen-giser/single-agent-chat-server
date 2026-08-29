@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "sacs-upstream-geospatial-profile-policy/1.0",
+  "requiredProfile": "sacs-wsgs-geospatial-findings/1.0",
+  "allowedTransportModes": ["REQUESTED_PRODUCTS", "RESULT_EXTENSION"],
+  "selectionAuthority": "AUTHORITATIVE_WSGS_HANDOFF_ONLY",
+  "requiredSchemaLocks": ["WorldFinding", "SourceProduct", "TypedGap"],
+  "rawSafePayloadFactFallback": false,
+  "directGdpsDecoding": false
+}

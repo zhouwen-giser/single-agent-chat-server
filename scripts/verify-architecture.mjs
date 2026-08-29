@@ -85,21 +85,39 @@ for (const file of files) {
     );
   }
   if (
-    /from ["'][^"']*(?:gowm|h3-js|proj4|postgis|@turf)[^"']*["']/iu.test(
+    /from ["'][^"']*(?:gdps|gowm|h3-js|proj4|postgis|@turf)[^"']*["']/iu.test(
       content,
     )
   ) {
     violations.push(
-      `${name}: direct GOWM, geometry, H3, CRS, or spatial client import is forbidden`,
+      `${name}: direct GDPS, GOWM, geometry, H3, CRS, or spatial client import is forbidden`,
     );
   }
   if (
-    /["'`]\/(?:gowm|gateway|spatial-query|geometry|h3)(?:\/|["'`])/iu.test(
+    /["'`]\/(?:gdps|gowm|gateway|spatial-query|geometry|h3)(?:\/|["'`])/iu.test(
       content,
     )
   ) {
     violations.push(
-      `${name}: direct GOWM Gateway or spatial endpoint path is forbidden`,
+      `${name}: direct GDPS, GOWM Gateway, or spatial endpoint path is forbidden`,
+    );
+  }
+  if (
+    name.startsWith("packages/world-explanation-runtime/") &&
+    /\bsafePayload\b/u.test(content)
+  ) {
+    violations.push(
+      `${name}: generic safePayload cannot enter the factual explanation runtime`,
+    );
+  }
+  if (
+    name.startsWith("packages/world-explanation-runtime/") &&
+    /conversation-model|OpenAiCompatibleConversationModel|StructuredChatModel/u.test(
+      content,
+    )
+  ) {
+    violations.push(
+      `${name}: deterministic explanation runtime cannot call a language model`,
     );
   }
   if (

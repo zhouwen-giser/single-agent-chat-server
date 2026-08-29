@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "sacs-geospatial-acceptance-evidence-map/1.0",
+  "entries": [
+    {
+      "acceptanceId": "AC-R001",
+      "evidence": [
+        {
+          "type": "OPENAI_HTTP_REAL_CHAIN",
+          "report": "reports/v0.4/geospatial/S24-real-e2e.json",
+          "caseId": "E2E-01"
+        }
+      ]
+    }
+  ],
+  "allowedEvidenceTypes": [
+    "SOURCE_LOCK",
+    "STATIC_GUARD",
+    "SCHEMA",
+    "UNIT",
+    "CONTRACT",
+    "REAL_POSTGRES",
+    "FAKE_WSGS_INTEGRATION",
+    "REAL_WSGS",
+    "RUNNING_GOWM_GATEWAY",
+    "REAL_GDPS_SOURCE",
+    "OPENAI_HTTP",
+    "AGUI_HTTP_SSE",
+    "RECOVERY",
+    "SECURITY",
+    "CI",
+    "GIT",
+    "REPORT_ASSERTION"
+  ]
+}
