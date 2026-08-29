@@ -410,7 +410,6 @@ export class WorldGroundingRuntime {
       turnPlan,
       asJsonValue({
         ...(hashExtension === undefined ? {} : { hashExtension }),
-        context,
         ...(overrides.source === undefined ? {} : { source: overrides.source }),
       }),
     );

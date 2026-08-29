@@ -19,7 +19,7 @@ import {
 import { WorldGroundingRuntime } from "../dist/packages/world-grounding-runtime/src/index.js";
 
 const { Pool } = pg;
-const expectedWsgsCommit = "47c248cf2ee3553287dde97aaecea34ea3fc961a";
+const expectedWsgsCommit = "7c7340a602b2c9c7963b1d8dc2ca210bd1baaefa";
 
 if (process.env.ALLOW_REAL_WSGS_MULTITURN !== "YES") {
   throw new Error("ALLOW_REAL_WSGS_MULTITURN=YES is required");
@@ -146,7 +146,7 @@ try {
     threadId: vehicleThread,
     protocol: "ag_ui",
     text: "它现在呢？",
-    usage: focusUsage(),
+    usage: knownReferenceUsage(),
   });
   if (vehicleFollowUp.text === "WORLD_GROUNDING_CONTEXT_UNAVAILABLE") {
     throw new Error(
@@ -212,7 +212,7 @@ try {
     principalId: principal.principalId,
     threadId: areaThread,
     protocol: "openai",
-    text: "A区内有哪些车辆？",
+    text: "A区有哪些车？",
     usage: emptyWorldFocus(),
   });
   assertWorldSuccess(areaFirst.text);
@@ -232,6 +232,7 @@ try {
     );
   }
   const areaAlias = areaFocus.references[0].displayName;
+  const areaFollowUpStart = posts.length;
   const areaFollowUp = await executeWorldTurn({
     runtime,
     conversation: repositories.conversation,
@@ -239,8 +240,36 @@ try {
     threadId: areaThread,
     protocol: "ag_ui",
     text: "那里附近还有什么？",
-    usage: focusUsage(),
+    usage: knownReferenceUsage(),
   });
+  if (areaFollowUp.text === "WORLD_GROUNDING_CONTEXT_UNAVAILABLE") {
+    throw new Error(
+      `S08_AREA_FOLLOWUP_CONTEXT_UNAVAILABLE ${JSON.stringify({
+        operations: posts.slice(areaFollowUpStart).map(({ operation }) => operation),
+        httpExchanges: httpExchanges.slice(-12),
+        latestGrounding: await boundedLatestGroundingDiagnostic(
+          pool,
+          principal.principalId,
+          areaThread,
+        ),
+        focusStatuses: (
+          await repositories.worldFocus.getFocus({
+            principalId: principal.principalId,
+            threadId: areaThread,
+          })
+        ).references.map(({ status, revalidationRequired, validUntil }) => ({
+          status,
+          revalidationRequired,
+          validUntilState:
+            validUntil === undefined
+              ? "ABSENT"
+              : Date.parse(validUntil) > Date.now()
+                ? "FUTURE"
+                : "EXPIRED",
+        })),
+      })}`,
+    );
+  }
   assertWorldSuccess(areaFollowUp.text);
   assertKnownContext(posts.at(-1), areaAlias);
 
@@ -326,7 +355,7 @@ try {
     threadId: vehicleThread,
     protocol: "openai",
     text: "它现在的位置是否仍然有效？",
-    usage: focusUsage(),
+    usage: knownReferenceUsage(),
   });
   assertWorldSuccess(expiredFollowUp.text);
   assert.deepEqual(
@@ -349,7 +378,7 @@ try {
     threadId: vehicleThread,
     protocol: "ag_ui",
     text: "它附近还有什么？",
-    usage: focusUsage(),
+    usage: knownReferenceUsage(),
   });
   assertWorldSuccess(restartFollowUp.text);
   assertKnownContext(posts.at(-1), vehicleAlias);
@@ -547,7 +576,11 @@ function assertKnownContext(request, expectedAlias) {
     ),
     `expected KnownWorldReference for ${expectedAlias}`,
   );
-  assert.ok(request.contextCapsule.priorGroundings.length > 0);
+  assert.equal(
+    request.contextCapsule.priorGroundings.length,
+    0,
+    "current-reference follow-up must not request PINNED prior grounding replay",
+  );
 }
 
 function assertWorldSuccess(text) {
@@ -567,11 +600,10 @@ function emptyWorldFocus() {
   };
 }
 
-function focusUsage() {
+function knownReferenceUsage() {
   return {
     ...emptyWorldFocus(),
     knownWorldReferences: true,
-    priorGrounding: true,
   };
 }
 

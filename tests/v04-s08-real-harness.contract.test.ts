@@ -13,20 +13,24 @@ describe("SACS v0.4 S08 genuine WSGS multi-turn harness", () => {
   it("fails closed without explicit live authorization and exact source", () => {
     expect(harness).toContain('ALLOW_REAL_WSGS_MULTITURN !== "YES"');
     expect(harness).toContain(
-      'expectedWsgsCommit = "47c248cf2ee3553287dde97aaecea34ea3fc961a"',
+      'expectedWsgsCommit = "7c7340a602b2c9c7963b1d8dc2ca210bd1baaefa"',
     );
     expect(harness).toContain('requiredEnvironment("WSGS_SOURCE_DIR")');
     expect(harness).toContain('requiredEnvironment("WSGS_BASE_URL")');
     expect(harness).toContain('requiredEnvironment("WSGS_BEARER_TOKEN")');
     expect(harness).toContain('requiredEnvironment("TEST_DATABASE_URL")');
     expect(harness).toContain("deadlineMs: 120_000");
+    expect(harness).toContain("usage: knownReferenceUsage()");
+    expect(harness).toContain(
+      "current-reference follow-up must not request PINNED prior grounding replay",
+    );
   });
 
   it("covers every required multi-turn behavior before emitting Ready", () => {
     for (const evidence of [
       "2号车在哪里？",
       "它现在呢？",
-      "A区内有哪些车辆？",
+      "A区有哪些车？",
       "那里附近还有什么？",
       "滨河路附近有哪些设备？",
       "第二个",

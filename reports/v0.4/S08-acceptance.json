@@ -1,24 +1,24 @@
 {
   "phase": "S08",
   "date": "2026-08-29",
-  "decision": "BLOCKED_WSGS_PINNED_VALIDATION_UNAVAILABLE",
+  "decision": "BLOCKED_GOWM_AREA_LAYER_FEATURE_AUTHORITY_VERSION_BINDING",
   "marker": "WITHHELD",
   "runner": {
     "path": "scripts/phase-v04-s08-real-multiturn.mjs",
-    "wsgsSourceCommit": "47c248cf2ee3553287dde97aaecea34ea3fc961a",
+    "wsgsSourceCommit": "7c7340a602b2c9c7963b1d8dc2ca210bd1baaefa",
     "liveExecutionDeadlineMs": 120000,
     "contractTests": {
       "pass": 3,
       "fail": 0,
       "skip": 0
     },
-    "focusedRegression": {
-      "pass": 14,
+    "runtimeRegression": {
+      "pass": 8,
       "fail": 0,
       "skip": 0
     },
-    "runtimeFailureRegression": {
-      "pass": 8,
+    "focusedReferenceRegression": {
+      "pass": 14,
       "fail": 0,
       "skip": 0
     },
@@ -30,38 +30,55 @@
     "realWsgsReadyHttp": "PASS_HTTP_200_STATUS_READY_REASONS_EMPTY",
     "realGowmAvailability": "PASS_12_OF_12_CANARY_36_OF_36",
     "realPostgres": "PASS_ISOLATED_DISPOSABLE_INSTANCE",
-    "vehicleInitialGrounding": "PASS_COMPLETED_CONTRACT_AND_IDENTITY_VALID",
-    "vehiclePronounFollowUp": "BLOCKED_AC_M001_PINNED_VALIDATION_OPERATION_UNAVAILABLE",
-    "areaPronounFollowUp": "NOT_REACHED",
+    "vehicleInitialGrounding": "PASS",
+    "vehiclePronounFollowUp": "PASS_AC_M001_KNOWN_REFERENCE_WITHOUT_PRIOR_GROUNDING",
+    "areaInitialGrounding": "PASS_REFERENCE_PERSISTED",
+    "areaPronounFollowUp": "BLOCKED_AC_M002_VALIDATION_REMAINS_STALE",
     "ambiguousChoiceValidateResume": "NOT_REACHED",
     "expiredReferenceRevalidation": "NOT_REACHED_AC_M005",
     "threadIsolation": "NOT_REACHED",
     "restartRecovery": "NOT_REACHED",
     "openAiAgUiSharedFocus": "NOT_REACHED",
-    "replayNoDuplicateWsgs": "NOT_REACHED"
+    "replayNoDuplicateWsgs": "PASS_AC_M010_AFTER_FOCUS_REVISION_FIX"
+  },
+  "contextPolicyEvidence": {
+    "taskPackageExample": "KNOWN_WORLD_REFERENCES_ONLY",
+    "knownWorldReferences": true,
+    "priorGrounding": false,
+    "pinnedPriorGroundingReplayRequiredForAcM001OrAcM005": false
   },
   "upstreamRepairEvidence": {
-    "wsgsInstanceCommit": "47c248cf2ee3553287dde97aaecea34ea3fc961a",
-    "wsgsValidationEvidenceHash": "sha256:3c5638a2eab2fad89a3f4e49e447c22d2f5661a232babf2eef3371f68f2923aa",
-    "groundReferences": "COMPLETED_ONE_MENTION_ONE_REFERENCE",
-    "validateReferences": "COMPLETED",
-    "sourceOperation": "VALIDATE_REFERENCES",
-    "revalidationRequired": false,
-    "validUntilState": "PRESENT_AND_FUTURE_AT_RECEIPT"
+    "wsgsInstanceCommit": "7c7340a602b2c9c7963b1d8dc2ca210bd1baaefa",
+    "executeKnownReferenceMerge": "PASS_AC_M001",
+    "vehicleFollowUpTerminalStatus": "PARTIAL_WITHOUT_ERROR",
+    "vehicleValidatedReferenceCount": 1
   },
   "latestRedactedFailure": {
-    "operation": "EXECUTE_WORLD_QUERY",
+    "acceptanceItem": "AC-M002",
+    "operation": "VALIDATE_REFERENCES",
     "createHttpStatus": 202,
     "pollHttpStatus": 200,
-    "jobStatus": "FAILED",
-    "resultPresent": false,
-    "errorCode": "PINNED_VALIDATION_OPERATION_UNAVAILABLE",
-    "errorStage": "REFERENCE_GROUNDING",
-    "sacsOutcome": "WORLD_GROUNDING_FAILED"
+    "jobStatus": "COMPLETED",
+    "resultStatus": "COMPLETED",
+    "resultPresent": true,
+    "referenceProductCount": 1,
+    "sourceOperation": "VALIDATE_REFERENCES",
+    "revalidationRequired": true,
+    "validUntilState": "ABSENT",
+    "errorCode": null,
+    "errorStage": null,
+    "sacsOutcome": "WORLD_GROUNDING_CONTEXT_UNAVAILABLE",
+    "persistedFocusStatus": "STALE"
+  },
+  "sacsCorrections": {
+    "focusRevisionExcludedFromReplayIdentity": true,
+    "wsgsRequestHashStillCoversContextCapsule": true,
+    "taskPackageAreaPromptRestoredExactly": true
   },
   "blocker": {
-    "code": "WSGS_PINNED_VALIDATION_OPERATION_UNAVAILABLE",
-    "detail": "WSGS 47c248c and a 120000 ms caller deadline complete the initial vehicle query. The follow-up EXECUTE_WORLD_QUERY with KnownWorldReference terminates FAILED because the pinned-reference validation path is unavailable. AC-M001 and later ordered scenarios cannot pass until that path is supported."
+    "code": "GOWM_AREA_LAYER_FEATURE_AUTHORITY_VERSION_BINDING_STALE",
+    "upstreamReason": "Pinned data snapshot is stale",
+    "detail": "WSGS 7c7340a passes the vehicle KnownWorldReference EXECUTE path and SACS replay. The exact AC-M002 area prompt persists the authoritative LAYER_FEATURE reference, but shared GOWM rejects its pinned version as STALE. WSGS correctly preserves revalidationRequired=true without validUntil, and SACS correctly refuses pronoun context."
   },
   "publication": {
     "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",

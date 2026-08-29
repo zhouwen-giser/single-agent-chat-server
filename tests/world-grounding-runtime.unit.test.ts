@@ -18,6 +18,7 @@ import {
   type WorldGroundingRuntimeOptions,
 } from "../packages/world-grounding-runtime/src/index.js";
 import type { TurnPlan } from "../packages/world-grounding-contract/src/index.js";
+import type { WorldFocusRepository } from "../packages/conversation-world-focus/src/index.js";
 
 const unavailableLock = {
   profile: "sacs-sdar-operational-grounding/1.0",
@@ -38,10 +39,20 @@ const unavailableLock = {
 describe("SACS v0.4 world grounding runtime", () => {
   it("runs one durable WSGS grounding and replays the stored safe answer", async () => {
     let storedResult: CompletedRequestResult | undefined;
-    const claimRequest = jest.fn(async () =>
-      storedResult === undefined
-        ? { outcome: "acquired" as const, requestId: "interaction-1" }
-        : { outcome: "replay" as const, result: storedResult },
+    const claims: Array<{
+      readonly externalRequestId: string;
+      readonly requestHash: string;
+    }> = [];
+    const claimRequest = jest.fn(
+      async (input: {
+        readonly externalRequestId: string;
+        readonly requestHash: string;
+      }) => {
+        claims.push(input);
+        return storedResult === undefined
+          ? { outcome: "acquired" as const, requestId: "interaction-1" }
+          : { outcome: "replay" as const, result: storedResult };
+      },
     );
     const completeRequest = jest.fn(
       async (input: { readonly result: CompletedRequestResult }) => {
@@ -96,9 +107,28 @@ describe("SACS v0.4 world grounding runtime", () => {
       waitForGrounding: jest.fn(),
       cancelGrounding: jest.fn(),
     } as unknown as WsgsHttpClient;
+    let focusRevision = 0;
+    const currentFocus = () => ({
+      schemaVersion: "1.0" as const,
+      principalId: "principal-1",
+      threadId: "thread-1",
+      revision: focusRevision,
+      references: [],
+      updatedAt: "2026-08-28T01:00:00.000Z",
+    });
+    const worldFocus = {
+      getFocus: jest.fn(async () => currentFocus()),
+      listUsableReferences: jest.fn(async () => []),
+      listReferencesRequiringValidation: jest.fn(async () => []),
+      applyReferences: jest.fn(async () => {
+        focusRevision += 1;
+        return currentFocus();
+      }),
+    } as unknown as WorldFocusRepository;
     const runtime = new WorldGroundingRuntime({
       requests,
       grounding,
+      worldFocus,
       wsgs,
       sdarCompatibilityLock: unavailableLock,
       nextLeaseOwner: () => "lease-owner-1",
@@ -131,6 +161,8 @@ describe("SACS v0.4 world grounding runtime", () => {
     expect(grounding.complete).toHaveBeenCalledTimes(1);
     expect(completeRequest).toHaveBeenCalledTimes(1);
     expect(claimRequest).toHaveBeenCalledTimes(2);
+    expect(focusRevision).toBe(1);
+    expect(claims[1]).toMatchObject(claims[0] ?? {});
   });
 
   it("maps a valid terminal FAILED job without a result to a safe failure", async () => {

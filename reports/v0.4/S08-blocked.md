@@ -2,67 +2,70 @@
 
 ## Decision
 
-S08 is `BLOCKED_WSGS_PINNED_VALIDATION_UNAVAILABLE`. The
+S08 is `BLOCKED_GOWM_AREA_LAYER_FEATURE_AUTHORITY_VERSION_BINDING`. The
 `SACS_MULTITURN_WORLD_GROUNDING_READY` marker remains withheld.
 
 The authorized runner is locked to WSGS commit
-`47c248cf2ee3553287dde97aaecea34ea3fc961a`. Credentials are consumed only
+`7c7340a602b2c9c7963b1d8dc2ca210bd1baaefa`. Credentials are consumed only
 from the authorized process environment and are not present in this report,
 runner output, or repository.
 
-## Repaired upstream semantics
+## Closed vehicle-reference and replay blockers
 
-The current GOWM 0.6.4 and WSGS instance has proved the previously blocked
-reference-validation transition:
+The WSGS EXECUTE path now merges resolver output with supplied
+`KnownWorldReference` values before reference validation. With the exact task
+package sequence `2号车在哪里？` then `它现在呢？`, the initial grounding
+persisted one reference and the follow-up passed AC-M001 with
+`knownWorldReferences=true` and `priorGrounding=false`.
 
-- WSGS readiness returned HTTP 200 with `status=ready` and no reasons across a
-  full readiness cache interval.
-- GOWM reported 12/12 required operations and 36/36 canary PASS.
-- `GROUND_REFERENCES` completed with one mention and one reference.
-- `VALIDATE_REFERENCES` completed with
-  `sourceOperation=VALIDATE_REFERENCES`, `revalidationRequired=false`, and a
-  present future `validUntil` at receipt.
-- The redacted validation evidence file hash is
-  `sha256:3c5638a2eab2fad89a3f4e49e447c22d2f5661a232babf2eef3371f68f2923aa`.
+That context policy follows the package's authoritative example. A
+`priorGrounding` is an independent pinned replay source and is not required by
+AC-M001 or AC-M005.
 
-These facts close the earlier typed-stale semantic blocker, but do not by
-themselves pass the SACS multi-turn matrix.
+The same live run exposed and closed a SACS replay defect. The outer idempotency
+hash included mutable Focus context, so the first result's Focus revision made
+an identical turn appear new. Focus context is now excluded from turn identity
+while the persisted WSGS request hash still covers the actual context capsule.
+The exact replay no longer sends a duplicate WSGS POST, passing AC-M010.
 
-## Deadline repair and current redacted live failure
+## Current redacted live blocker
 
-The earlier deadline was traced upstream to a duplicate per-request semantic
-model probe. WSGS 47c248c removes that duplicate work and preserves the actual
-pipeline stage in deadline errors. The S08 harness now uses an explicit
-120000 ms execution policy while the production default remains unchanged.
+The runner then used the exact AC-M002 task-package sequence:
+`A区有哪些车？` then `那里附近还有什么？`. The initial turn persisted an
+area reference. The follow-up performed fail-closed validation:
 
-With that repair, the initial vehicle query completed and its result contract
-and request/source identity all passed. The immediate pronoun follow-up then
-terminated as follows:
-
-- Operation: `EXECUTE_WORLD_QUERY`.
+- Operation: `VALIDATE_REFERENCES`.
 - Create request: HTTP 202.
 - Poll requests: HTTP 200.
-- Terminal job status: `FAILED`.
-- Result present: false.
-- WSGS `error.code`: `PINNED_VALIDATION_OPERATION_UNAVAILABLE`.
-- WSGS `error.stage`: `REFERENCE_GROUNDING`.
+- Terminal job and result status: `COMPLETED`.
+- Reference product count: 1.
+- `sourceOperation`: `VALIDATE_REFERENCES`.
+- `revalidationRequired`: true.
+- `validUntil`: absent.
+- WSGS `error.code` and `error.stage`: absent.
+- Persisted SACS Focus status: `STALE`.
+- Safe SACS outcome: `WORLD_GROUNDING_CONTEXT_UNAVAILABLE`.
 
-The follow-up used the persisted `KnownWorldReference`; an independent positive
-`VALIDATE_REFERENCES` canary cannot substitute for this pinned-reference path.
-AC-M001 therefore remains blocked; AC-M005 and the remaining ordered scenarios
-were not reached and are not reported as passed.
+SACS therefore did not supply stale context for the pronoun follow-up. AC-M002
+is blocked on a positive area-reference validation lease; later ordered S08
+scenarios remain `NOT_REACHED`, not passed.
 
-## SACS corrections and regression evidence
+Upstream isolated the failure to the shared GOWM A区 `LAYER_FEATURE`
+authority/version binding. The resolved identity matches the authoritative
+handoff object, excluding a same-name parse error. WSGS sends the resolved
+pinned version unchanged with `requireCurrentSnapshot=true`; GOWM returns
+`STALE` with reason `Pinned data snapshot is stale`. No SACS or WSGS layer
+may replace that version with a current/handoff value.
 
-SACS preserves completed stale and expired references so they can be validated
-fail-closed instead of silently disappearing. Focused unit and PostgreSQL
-regression tests passed 14/14.
+## Regression evidence
 
-The live failure also exposed a separate error-mapping bug: a contract-valid
-terminal `FAILED` job with an error and no result was incorrectly classified as
-`WORLD_GROUNDING_CONTRACT_VIOLATION`. SACS now maps that shape through the
-published WSGS error boundary and safely returns `WORLD_GROUNDING_FAILED`.
-The runtime unit suite passed 8/8; lint and typecheck passed.
+- S08 harness contract: 3/3 PASS.
+- World-grounding runtime regression: 8/8 PASS.
+- Focused reference/unit/PostgreSQL regression: 14/14 PASS.
+- Lint: PASS with zero warnings.
+- Typecheck: PASS.
+- Real WSGS readiness: HTTP 200, `status=ready`, reasons empty.
+- Isolated disposable PostgreSQL: accepting connections.
 
 The harness records only bounded status, error code/stage, schema issue paths,
 field names, counts, booleans, and hashes. It does not print credentials, raw
@@ -70,10 +73,11 @@ reference identifiers, or raw upstream business payloads.
 
 ## Required upstream resolution
 
-WSGS must support the pinned-reference validation path used by a follow-up
-`EXECUTE_WORLD_QUERY` with `KnownWorldReference`. After the instance is
-refreshed and readiness is reconfirmed, rerun every S08 scenario from the
-beginning.
+Shared GOWM must make the persisted A区 reference validate with
+`revalidationRequired=false` and a future `validUntil`, or publish a typed
+terminal error explaining why the area reference cannot be validated. After
+the authorized instance is refreshed and readiness is reconfirmed, rerun every
+S08 scenario from the beginning.
 
 The SACS verification process did not restart or modify any shared WSGS, GOWM,
 GDPS, or database fixture.
