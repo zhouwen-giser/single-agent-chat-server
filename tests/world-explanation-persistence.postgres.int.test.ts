@@ -7,6 +7,10 @@ import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import pg from "pg";
 
 import {
+  FindingReferenceResolver,
+  type WorldFocusReference,
+} from "../packages/conversation-world-focus/src/index.js";
+import {
   hashWorldExplanation,
   parseWorldExplanationV1,
   type ExplanationReplayKey,
@@ -39,6 +43,12 @@ const referenceKey = {
   id: "wrf_" + "1".repeat(32),
   version: "world-1",
 };
+const featureReferenceKey = {
+  namespace: "gowm" as const,
+  kind: "derived-feature",
+  id: "wrf_" + "2".repeat(32),
+  version: "world-1",
+};
 
 describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
   const adminPool = new Pool({ connectionString, max: 1 });
@@ -64,6 +74,43 @@ describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
     await pool.query(
       "INSERT INTO chat_service.conversation_thread(thread_id, principal_id) VALUES ('legacy-s19-thread', 'legacy-s19-principal')",
     );
+    for (const ordinal of [1, 2]) {
+      await pool.query(
+        `
+          INSERT INTO chat_service.interaction_request(
+            request_id, protocol, external_request_id, principal_id, thread_id,
+            request_hash, status, lease_owner, lease_until
+          ) VALUES (
+            $1, 'openai', $1, 'legacy-s19-principal', 'legacy-s19-thread',
+            $2, 'CLAIMED', 's19-upgrade', now() + interval '1 hour'
+          )
+        `,
+        ["legacy-s19-request-" + ordinal, String(ordinal).repeat(64)],
+      );
+      await pool.query(
+        `
+          INSERT INTO chat_service.grounding_execution(
+            grounding_id, principal_id, thread_id, interaction_request_id,
+            wsgs_request_id, idempotency_key, request_hash, wsgs_operation,
+            requested_products_json, context_usage_json, state,
+            wsgs_grounding_id, grounding_result_hash, grounding_result_json
+          ) VALUES (
+            $1, 'legacy-s19-principal', 'legacy-s19-thread', $2, $3, $4, $5,
+            'EXECUTE_WORLD_QUERY', '["WORLD_EVIDENCE"]'::jsonb, '{}'::jsonb,
+            'GROUNDING_READY', 'legacy-shared-wsgs-grounding', $6,
+            '{"status":"COMPLETED"}'::jsonb
+          )
+        `,
+        [
+          "legacy-s19-execution-" + ordinal,
+          "legacy-s19-request-" + ordinal,
+          "legacy-s19-wsgs-request-" + ordinal,
+          "legacy-s19-idempotency-" + ordinal,
+          String(ordinal + 2).repeat(64),
+          resultHash,
+        ],
+      );
+    }
     await runMigrations(pool);
   });
 
@@ -91,6 +138,11 @@ describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
     ).resolves.toMatchObject({
       rows: [{ principal_id: "legacy-s19-principal" }],
     });
+    await expect(
+      pool.query(
+        "SELECT count(*)::int AS count FROM chat_service.grounding_execution WHERE wsgs_grounding_id = 'legacy-shared-wsgs-grounding'",
+      ),
+    ).resolves.toMatchObject({ rows: [{ count: 2 }] });
   });
 
   it("AC-P003..P013/P018/P019 saves and exactly replays one scoped explanation", async () => {
@@ -193,6 +245,130 @@ describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
     });
 
     await expect(countExplanations(scope)).resolves.toBe(3);
+  });
+
+  it("AC-M004/M012/M013/M016/M021 resolves only an exact scoped finding projection", async () => {
+    const scope = await seedScope("finding-lookup");
+    const other = await seedScope("finding-lookup-other");
+    await seedReference(scope);
+    const identity = replayIdentity(scope);
+    const value = explanation(scope, "finding-lookup");
+    await repository.saveOrReplay({
+      ...identity,
+      explanation: value,
+      findingLinks: [{ findingId: "finding-1", ordinal: 1, referenceKey }],
+    });
+    const resolver = new FindingReferenceResolver(repository);
+    const selector = {
+      principalId: scope.principalId,
+      threadId: scope.threadId,
+      explanationId: value.explanationId,
+      explanationHash: value.explanationHash,
+      findingId: "finding-1",
+      findingOrdinal: 1,
+      now: "2026-08-29T12:00:00.000Z",
+    };
+
+    await expect(resolver.resolve(selector)).resolves.toMatchObject({
+      status: "RESOLVED",
+      focusRevision: 2,
+      explanationId: value.explanationId,
+      explanationHash: value.explanationHash,
+      referenceIdentityHash: expect.any(String),
+      knownWorldReference: {
+        referenceKey,
+        sourceMessageId: "message-1",
+      },
+    });
+    await expect(
+      resolver.resolve({ ...selector, threadId: other.threadId }),
+    ).resolves.toEqual({
+      status: "UNAVAILABLE",
+      reason: "EXPLANATION_UNAVAILABLE",
+    });
+    await expect(
+      resolver.resolve({ ...selector, principalId: other.principalId }),
+    ).resolves.toEqual({
+      status: "UNAVAILABLE",
+      reason: "EXPLANATION_UNAVAILABLE",
+    });
+    await expect(
+      resolver.resolve({
+        ...selector,
+        explanationHash: "sha256:" + "7".repeat(64),
+      }),
+    ).resolves.toEqual({
+      status: "UNAVAILABLE",
+      reason: "EXPLANATION_UNAVAILABLE",
+    });
+  });
+
+  it("AC-M005/M006/M007 resolves a persisted second feature only when it carries a stable key", async () => {
+    const scope = await seedScope("feature-lookup");
+    await seedReference(scope, {
+      referenceKey: featureReferenceKey,
+      productId: "product-feature-2",
+      displayName: "第二处",
+      referenceType: "derived-feature",
+    });
+    const identity = replayIdentity(scope);
+    const value = explanation(scope, "feature-lookup", {
+      featureSummaries: [
+        { featureId: "feature-1", displayName: "第一处" },
+        {
+          featureId: "feature-2",
+          displayName: "第二处",
+          referenceKey: featureReferenceKey,
+        },
+      ],
+    });
+    await repository.saveOrReplay({
+      ...identity,
+      explanation: value,
+      findingLinks: [
+        {
+          findingId: "finding-1",
+          ordinal: 1,
+          referenceKey: featureReferenceKey,
+        },
+      ],
+    });
+    const resolver = new FindingReferenceResolver(repository);
+    const common = {
+      principalId: scope.principalId,
+      threadId: scope.threadId,
+      explanationId: value.explanationId,
+      explanationHash: value.explanationHash,
+      findingId: "finding-1",
+      findingOrdinal: 1,
+      now: "2026-08-29T12:00:00.000Z",
+    };
+
+    await expect(
+      resolver.resolve({
+        ...common,
+        featureId: "feature-2",
+        featureOrdinal: 2,
+      }),
+    ).resolves.toMatchObject({
+      status: "RESOLVED",
+      featureId: "feature-2",
+      featureOrdinal: 2,
+      knownWorldReference: {
+        alias: "第二处",
+        referenceKey: featureReferenceKey,
+      },
+    });
+    await expect(
+      resolver.resolve({
+        ...common,
+        featureId: "feature-1",
+        featureOrdinal: 1,
+      }),
+    ).resolves.toEqual({
+      status: "CLARIFY",
+      reason: "STABLE_REFERENCE_REQUIRED",
+    });
   });
 
   it("AC-P023 serializes concurrent create into one deterministic record", async () => {
@@ -307,10 +483,10 @@ describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
             explanation_id, principal_id, thread_id, grounding_id,
             grounding_result_hash, locale, contract_version, contract_hash,
             renderer_policy_hash, explanation_status, explanation_json,
-            explanation_hash, created_at
+            explanation_hash, created_at, grounding_execution_id
           ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, 'COMPLETE',
-            $10::jsonb, $11, now()
+            $10::jsonb, $11, now(), $12
           )
         `,
         [
@@ -325,9 +501,68 @@ describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
           rendererPolicyHash,
           JSON.stringify(oversized),
           oversizedHash,
+          scope.groundingExecutionId,
         ],
       ),
     ).rejects.toThrow();
+
+    const corruptId = "explanation-corrupt-" + randomUUID();
+    const corruptHash = "sha256:" + "6".repeat(64);
+    const corrupt = {
+      ...value,
+      explanationId: corruptId,
+      explanationHash: corruptHash,
+      locale: "zh-HK",
+    };
+    await pool.query(
+      `
+        INSERT INTO chat_service.world_explanation(
+          explanation_id, principal_id, thread_id, grounding_id,
+          grounding_result_hash, locale, contract_version, contract_hash,
+          renderer_policy_hash, explanation_status, explanation_json,
+          explanation_hash, created_at, grounding_execution_id
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12,
+          $13::timestamptz, $14
+        )
+      `,
+      [
+        corruptId,
+        scope.principalId,
+        scope.threadId,
+        scope.wsgsGroundingId,
+        resultHash,
+        "zh-HK",
+        corrupt.schemaVersion,
+        contractHash,
+        rendererPolicyHash,
+        corrupt.explanationStatus,
+        JSON.stringify(corrupt),
+        corruptHash,
+        corrupt.createdAt,
+        scope.groundingExecutionId,
+      ],
+    );
+    await expect(
+      repository.findById({
+        principalId: scope.principalId,
+        threadId: scope.threadId,
+        explanationId: corruptId,
+      }),
+    ).rejects.toThrow("WORLD_EXPLANATION_HASH_MISMATCH");
+    await expect(
+      new FindingReferenceResolver(repository).resolve({
+        principalId: scope.principalId,
+        threadId: scope.threadId,
+        explanationId: corruptId,
+        explanationHash: corruptHash,
+        findingId: "finding-1",
+        findingOrdinal: 1,
+      }),
+    ).resolves.toEqual({
+      status: "UNAVAILABLE",
+      reason: "EXPLANATION_INTEGRITY_MISMATCH",
+    });
   });
 
   async function seedScope(label: string): Promise<TestScope> {
@@ -382,10 +617,23 @@ describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
         resultHash,
       ],
     );
-    return { principalId, threadId, wsgsGroundingId };
+    return {
+      principalId,
+      threadId,
+      groundingExecutionId,
+      wsgsGroundingId,
+    };
   }
 
-  async function seedReference(scope: TestScope): Promise<void> {
+  async function seedReference(
+    scope: TestScope,
+    input: {
+      readonly referenceKey?: WorldFocusReference["referenceKey"];
+      readonly productId?: string;
+      readonly displayName?: string;
+      readonly referenceType?: string;
+    } = {},
+  ): Promise<void> {
     await focusRepository.getFocus(scope);
     await focusRepository.applyReferences({
       principalId: scope.principalId,
@@ -395,10 +643,10 @@ describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
       groundingResultHash: resultHash,
       references: [
         {
-          referenceKey,
-          productId: "product-1",
-          displayName: "2号车",
-          referenceType: "vehicle",
+          referenceKey: input.referenceKey ?? referenceKey,
+          productId: input.productId ?? "product-1",
+          displayName: input.displayName ?? "2号车",
+          referenceType: input.referenceType ?? "vehicle",
           sourceMessageId: "message-1",
           sourceGroundingId: scope.wsgsGroundingId,
           sourceResultHash: resultHash,
@@ -423,6 +671,7 @@ describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
 interface TestScope {
   readonly principalId: string;
   readonly threadId: string;
+  readonly groundingExecutionId: string;
   readonly wsgsGroundingId: string;
 }
 
@@ -443,6 +692,11 @@ function explanation(
   overrides: {
     readonly groundingResultHash?: string;
     readonly rendererPolicyHash?: string;
+    readonly featureSummaries?: readonly {
+      readonly featureId: string;
+      readonly displayName?: string;
+      readonly referenceKey?: WorldFocusReference["referenceKey"];
+    }[];
   } = {},
 ): WorldExplanationV1 {
   const activeResultHash = overrides.groundingResultHash ?? resultHash;
@@ -469,6 +723,9 @@ function explanation(
         details: [],
         returnedCount: 1,
         truncated: false,
+        ...(overrides.featureSummaries === undefined
+          ? {}
+          : { featureSummaries: overrides.featureSummaries }),
         evidenceItemIds: ["evidence-1"],
         sourceProductIds: [],
       },

@@ -25,9 +25,9 @@ describe("SACS v0.4 S19 world explanation persistence contract", () => {
   });
 
   it("binds explanation ownership to the exact durable grounding", () => {
-    expect(migration).toContain("grounding_execution_wsgs_result_scope_unique");
+    expect(migration).toContain("grounding_execution_explanation_scope_unique");
     expect(migration).toContain(
-      "principal_id,\n    thread_id,\n    grounding_id,\n    grounding_result_hash",
+      "grounding_execution_id,\n    principal_id,\n    thread_id,\n    grounding_id,\n    grounding_result_hash",
     );
     expect(migration).toContain(
       "REFERENCES chat_service.conversation_thread(thread_id, principal_id)",

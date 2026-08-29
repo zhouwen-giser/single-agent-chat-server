@@ -5,11 +5,17 @@ import {
   hashWorldExplanation,
   parseExplanationReplayKey,
   parseWorldExplanationV1,
+  verifyWorldExplanationHash,
   type ExplanationReplayKey,
   type WorldExplanationV1,
 } from "../../world-explanation-contract/src/index.js";
 import {
+  findingReferenceSelectorSchema,
+  worldFocusReferenceSchema,
   worldReferenceIdentityHash,
+  type FindingReferenceSelector,
+  type ProjectedFindingReference,
+  type ScopedFindingProjection,
   type WorldFocusReference,
 } from "../../conversation-world-focus/src/index.js";
 
@@ -77,6 +83,84 @@ export class WorldExplanationRepository {
     return result.rows[0] === undefined ? undefined : mapRow(result.rows[0]);
   }
 
+  async findFindingProjection(
+    selectorValue: FindingReferenceSelector,
+  ): Promise<ScopedFindingProjection | undefined> {
+    const selector = findingReferenceSelectorSchema.parse(selectorValue);
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
+      const explanationResult = await client.query<WorldExplanationRow>(
+        `
+          SELECT *
+          FROM chat_service.world_explanation
+          WHERE principal_id = $1
+            AND thread_id = $2
+            AND explanation_id = $3
+            AND explanation_hash = $4
+        `,
+        [
+          selector.principalId,
+          selector.threadId,
+          selector.explanationId,
+          selector.explanationHash,
+        ],
+      );
+      const explanationRow = explanationResult.rows[0];
+      if (explanationRow === undefined) {
+        await client.query("COMMIT");
+        return undefined;
+      }
+      const focusResult = await client.query<{ revision: string | number }>(
+        `
+          SELECT revision
+          FROM chat_service.conversation_world_focus
+          WHERE principal_id = $1 AND thread_id = $2
+        `,
+        [selector.principalId, selector.threadId],
+      );
+      const focusRow = focusResult.rows[0];
+      if (focusRow === undefined) {
+        await client.query("COMMIT");
+        return undefined;
+      }
+      const referenceResult = await client.query<FindingProjectionReferenceRow>(
+        `
+            SELECT *
+            FROM chat_service.conversation_world_reference
+            WHERE principal_id = $1
+              AND thread_id = $2
+              AND source_explanation_id = $3
+              AND source_explanation_hash = $4
+              AND source_finding_id = $5
+              AND source_finding_ordinal = $6
+            ORDER BY reference_identity_hash
+          `,
+        [
+          selector.principalId,
+          selector.threadId,
+          selector.explanationId,
+          selector.explanationHash,
+          selector.findingId,
+          selector.findingOrdinal,
+        ],
+      );
+      const stored = mapRow(explanationRow);
+      const projection = {
+        focusRevision: Number(focusRow.revision),
+        explanation: stored.explanation,
+        references: referenceResult.rows.map(mapFindingProjectionReference),
+      };
+      await client.query("COMMIT");
+      return projection;
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async saveOrReplay(
     input: ExplanationReplayKey & {
       readonly explanation: WorldExplanationV1;
@@ -113,7 +197,11 @@ export class WorldExplanationRepository {
     try {
       await client.query("BEGIN");
       await assertAuthorizedScope(client, identity);
-      await assertAuthorizedGrounding(client, identity, explanation);
+      const groundingExecutionId = await assertAuthorizedGrounding(
+        client,
+        identity,
+        explanation,
+      );
       await ensureAndLockFocus(client, identity);
       const inserted = await client.query<WorldExplanationRow>(
         `
@@ -121,10 +209,10 @@ export class WorldExplanationRepository {
             explanation_id, principal_id, thread_id, grounding_id,
             grounding_result_hash, locale, contract_version, contract_hash,
             renderer_policy_hash, explanation_status, explanation_json,
-            explanation_hash, created_at
+            explanation_hash, created_at, grounding_execution_id
           ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb,
-            $12, $13::timestamptz
+            $12, $13::timestamptz, $14
           )
           ON CONFLICT DO NOTHING
           RETURNING *
@@ -143,6 +231,7 @@ export class WorldExplanationRepository {
           explanationJson,
           explanation.explanationHash,
           explanation.createdAt,
+          groundingExecutionId,
         ],
       );
       const createdRow = inserted.rows[0];
@@ -188,6 +277,7 @@ interface WorldExplanationRow {
   explanation_id: string;
   principal_id: string;
   thread_id: string;
+  grounding_execution_id: string;
   grounding_id: string;
   grounding_result_hash: string;
   locale: string;
@@ -198,6 +288,26 @@ interface WorldExplanationRow {
   explanation_json: unknown;
   explanation_hash: string;
   created_at: Date;
+}
+
+interface FindingProjectionReferenceRow {
+  reference_identity_hash: string;
+  reference_key_json: unknown;
+  product_id: string;
+  display_name: string;
+  reference_type: string;
+  source_message_id: string;
+  source_grounding_id: string;
+  source_result_hash: string;
+  source_world_version: string | number;
+  source_explanation_id: string | null;
+  source_explanation_hash: string | null;
+  source_finding_id: string | null;
+  source_finding_ordinal: number | null;
+  valid_until: Date | null;
+  revalidation_required: boolean;
+  status: WorldFocusReference["status"];
+  last_used_at: Date;
 }
 
 async function assertAuthorizedScope(
@@ -223,16 +333,18 @@ async function assertAuthorizedGrounding(
   client: PoolClient,
   identity: ExplanationReplayKey,
   explanation: WorldExplanationV1,
-): Promise<void> {
+): Promise<string> {
   const grounding = await client.query<{
+    grounding_id: string;
     grounding_result_hash: string | null;
   }>(
     `
-      SELECT grounding_result_hash
+      SELECT grounding_id, grounding_result_hash
       FROM chat_service.grounding_execution
       WHERE principal_id = $1
         AND thread_id = $2
         AND wsgs_grounding_id = $3
+      ORDER BY grounding_id
       FOR SHARE
     `,
     [
@@ -246,16 +358,16 @@ async function assertAuthorizedGrounding(
       "World explanation grounding is not authorized for principal",
     );
   }
-  if (
-    !grounding.rows.some(
-      ({ grounding_result_hash: resultHash }) =>
-        resultHash === identity.groundingResultHash,
-    )
-  ) {
+  const matching = grounding.rows.find(
+    ({ grounding_result_hash: resultHash }) =>
+      resultHash === identity.groundingResultHash,
+  );
+  if (matching === undefined) {
     throw new PersistenceConflictError(
       "World explanation grounding result hash does not match durable grounding",
     );
   }
+  return matching.grounding_id;
 }
 
 async function ensureAndLockFocus(
@@ -367,6 +479,15 @@ function validateFindingLinks(
         "World explanation finding link does not match deterministic order",
       );
     }
+    if (
+      !stableReferenceKeysForFinding(explanation, value.findingId).has(
+        referenceKeyIdentity(value.referenceKey),
+      )
+    ) {
+      throw new PersistenceConflictError(
+        "World explanation finding link lacks a stable explanation reference",
+      );
+    }
     const referenceIdentityHash = worldReferenceIdentityHash(
       value.referenceKey,
     );
@@ -437,6 +558,7 @@ function replayKeyValues(identity: ExplanationReplayKey): string[] {
 }
 
 function mapRow(row: WorldExplanationRow): StoredWorldExplanation {
+  const explanation = verifyWorldExplanationHash(row.explanation_json);
   return {
     explanationId: row.explanation_id,
     principalId: row.principal_id,
@@ -449,7 +571,79 @@ function mapRow(row: WorldExplanationRow): StoredWorldExplanation {
     rendererPolicyHash: row.renderer_policy_hash,
     explanationStatus: row.explanation_status,
     explanationHash: row.explanation_hash,
-    explanation: parseWorldExplanationV1(row.explanation_json),
+    explanation,
     createdAt: row.created_at,
   };
+}
+
+function mapFindingProjectionReference(
+  row: FindingProjectionReferenceRow,
+): ProjectedFindingReference {
+  return {
+    sourceMessageId: row.source_message_id,
+    focusReference: worldFocusReferenceSchema.parse({
+      referenceIdentityHash: row.reference_identity_hash,
+      referenceKey: row.reference_key_json,
+      productId: row.product_id,
+      displayName: row.display_name,
+      referenceType: row.reference_type,
+      sourceGroundingId: row.source_grounding_id,
+      sourceResultHash: row.source_result_hash,
+      sourceWorldVersion: Number(row.source_world_version),
+      ...(row.source_explanation_id === null
+        ? {}
+        : { sourceExplanationId: row.source_explanation_id }),
+      ...(row.source_explanation_hash === null
+        ? {}
+        : { sourceExplanationHash: row.source_explanation_hash }),
+      ...(row.source_finding_id === null
+        ? {}
+        : { sourceFindingId: row.source_finding_id }),
+      ...(row.source_finding_ordinal === null
+        ? {}
+        : { sourceFindingOrdinal: row.source_finding_ordinal }),
+      ...(row.valid_until === null
+        ? {}
+        : { validUntil: row.valid_until.toISOString() }),
+      revalidationRequired: row.revalidation_required,
+      status: row.status,
+      lastUsedAt: row.last_used_at.toISOString(),
+    }),
+  };
+}
+
+function stableReferenceKeysForFinding(
+  explanation: WorldExplanationV1,
+  findingId: string,
+): ReadonlySet<string> {
+  const keys = new Set<string>(
+    explanation.references.map(({ referenceKey }) =>
+      referenceKeyIdentity(referenceKey),
+    ),
+  );
+  const finding = explanation.findings.find(
+    (candidate) => candidate.findingId === findingId,
+  );
+  for (const feature of finding?.featureSummaries ?? []) {
+    if (feature.referenceKey !== undefined) {
+      keys.add(referenceKeyIdentity(feature.referenceKey));
+    }
+  }
+  for (const feature of explanation.mapProjection?.features ?? []) {
+    if (feature.findingId === findingId && "referenceKey" in feature) {
+      keys.add(referenceKeyIdentity(feature.referenceKey));
+    }
+  }
+  return keys;
+}
+
+function referenceKeyIdentity(
+  referenceKey: WorldFocusReference["referenceKey"],
+): string {
+  return [
+    referenceKey.namespace,
+    referenceKey.kind,
+    referenceKey.id,
+    referenceKey.version,
+  ].join("\u0000");
 }

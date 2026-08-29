@@ -72,11 +72,55 @@ describe("SACS v0.4 S07 conversation world focus runtime", () => {
     });
   });
 
+  it("fails closed before emitting an invalid MapSelection", async () => {
+    const repository = {
+      getFocus: jest.fn(async () => focus()),
+      listUsableReferences: jest.fn(async () => []),
+    } as unknown as WorldFocusRepository;
+    const assembler = new GroundingContextAssembler(repository);
+    const invalid = await assembler.assemble({
+      principalId: "principal-1",
+      threadId: "thread-1",
+      turnPlan: turnPlan({ mapSelections: true }),
+      mapSelections: [
+        {
+          selectionId: "selection-no-hash",
+          kind: "AREA",
+          revision: 1,
+          geometry: { type: "Polygon" },
+        },
+      ],
+      now,
+    });
+    const reference = expectDefined(focus().references[0]);
+    const valid = await assembler.assemble({
+      principalId: "principal-1",
+      threadId: "thread-1",
+      turnPlan: turnPlan({ mapSelections: true }),
+      mapSelections: [
+        {
+          selectionId: "selection-reference",
+          kind: "FEATURE",
+          revision: 1,
+          referenceKey: reference.referenceKey,
+        },
+      ],
+      now,
+    });
+
+    expect(invalid.contextCapsule.mapSelections).toEqual([]);
+    expect(valid.contextCapsule.mapSelections).toHaveLength(1);
+  });
+
   it("resolves only exact ordinals or exact display names", () => {
     const resolver = new PendingChoiceResolver();
     const choice = pendingChoice();
 
     expect(resolver.resolve("第二个", choice)).toMatchObject({
+      kind: "SELECTED",
+      candidate: { productId: "product-2" },
+    });
+    expect(resolver.resolve("第二处", choice)).toMatchObject({
       kind: "SELECTED",
       candidate: { productId: "product-2" },
     });
@@ -89,6 +133,7 @@ describe("SACS v0.4 S07 conversation world focus runtime", () => {
       reason: "CHOICE_INPUT_NOT_DETERMINISTIC",
     });
     expect(isDeterministicChoiceControl("第3个")).toBe(true);
+    expect(isDeterministicChoiceControl("第二处")).toBe(true);
     expect(isDeterministicChoiceControl("大概第二个")).toBe(false);
   });
 

@@ -1,6 +1,7 @@
 ALTER TABLE chat_service.grounding_execution
-  ADD CONSTRAINT grounding_execution_wsgs_result_scope_unique
+  ADD CONSTRAINT grounding_execution_explanation_scope_unique
   UNIQUE (
+    grounding_id,
     principal_id,
     thread_id,
     wsgs_grounding_id,
@@ -14,6 +15,9 @@ CREATE TABLE chat_service.world_explanation (
   ),
   principal_id text NOT NULL REFERENCES chat_service.principal(principal_id),
   thread_id text NOT NULL,
+  grounding_execution_id text NOT NULL CHECK (
+    char_length(grounding_execution_id) BETWEEN 1 AND 256
+  ),
   grounding_id text NOT NULL CHECK (
     char_length(grounding_id) BETWEEN 1 AND 256
     AND grounding_id ~ '^[A-Za-z0-9][A-Za-z0-9._:-]*$'
@@ -52,11 +56,13 @@ CREATE TABLE chat_service.world_explanation (
   FOREIGN KEY (thread_id, principal_id)
     REFERENCES chat_service.conversation_thread(thread_id, principal_id),
   FOREIGN KEY (
+    grounding_execution_id,
     principal_id,
     thread_id,
     grounding_id,
     grounding_result_hash
   ) REFERENCES chat_service.grounding_execution(
+    grounding_id,
     principal_id,
     thread_id,
     wsgs_grounding_id,

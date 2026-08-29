@@ -18,6 +18,8 @@ import type {
   TurnPlan,
 } from "../../world-grounding-contract/src/index.js";
 
+import { validateMapSelectionsForFocus } from "./map-selection-validation.js";
+
 const identifier = z
   .string()
   .min(1)
@@ -287,7 +289,13 @@ export class GroundingContextAssembler {
           ]
         : [];
     const mapSelections = input.turnPlan.worldFocusUsage.mapSelections
-      ? [...(input.mapSelections ?? [])]
+      ? (validateMapSelectionsForFocus({
+          principalId: input.principalId,
+          threadId: input.threadId,
+          focus,
+          selections: input.mapSelections ?? [],
+          ...(input.now === undefined ? {} : { now: input.now }),
+        }) ?? [])
       : [];
     const fusion = input.fusionRequirements;
     const externalCorrelationHints =
@@ -594,6 +602,9 @@ function deterministicOrdinal(value: string): number | undefined {
     第一个: 1,
     第二个: 2,
     第三个: 3,
+    第一处: 1,
+    第二处: 2,
+    第三处: 3,
   };
   return ordinals[value];
 }
@@ -601,3 +612,6 @@ function deterministicOrdinal(value: string): number | undefined {
 function asObject(value: object): Record<string, unknown> {
   return JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
 }
+
+export * from "./finding-reference-resolver.js";
+export * from "./map-selection-validation.js";
