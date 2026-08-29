@@ -1,11 +1,11 @@
 {
   "phase": "S08",
   "date": "2026-08-29",
-  "decision": "BLOCKED_WSGS_PENDING_CHOICE_RESUME_PERSISTENCE",
-  "marker": "WITHHELD",
+  "decision": "PASS",
+  "marker": "SACS_MULTITURN_WORLD_GROUNDING_READY",
   "runner": {
     "path": "scripts/phase-v04-s08-real-multiturn.mjs",
-    "wsgsSourceCommit": "7c7340a602b2c9c7963b1d8dc2ca210bd1baaefa",
+    "wsgsSourceCommit": "46e872359536b84351ce2b417117fc5725c59145",
     "liveExecutionDeadlineMs": 120000,
     "contractTests": {
       "pass": 3,
@@ -26,21 +26,27 @@
     "typecheck": "PASS",
     "authorizationGate": "PASS_FAIL_CLOSED"
   },
-  "requiredLiveEvidence": {
-    "realWsgsReadyHttp": "PASS_HTTP_200_STATUS_READY_REASONS_EMPTY",
-    "realGowmAvailability": "PASS_12_OF_12_CANARY_36_OF_36",
-    "realPostgres": "PASS_ISOLATED_DISPOSABLE_INSTANCE",
-    "vehicleInitialGrounding": "PASS",
-    "vehiclePronounFollowUp": "PASS_AC_M001_KNOWN_REFERENCE_WITHOUT_PRIOR_GROUNDING",
-    "areaInitialGrounding": "PASS_REFERENCE_PERSISTED",
-    "areaPronounFollowUp": "PASS_AC_M002_VALIDATED_REFERENCE_AND_PARTIAL_EXECUTE",
-    "ambiguousChoiceInitial": "PASS_AMBIGUOUS_TWO_CANDIDATES",
-    "ambiguousChoiceValidateResume": "BLOCKED_AC_M003_RESUME_EXECUTE_PERSISTENCE",
-    "expiredReferenceRevalidation": "NOT_REACHED_AC_M005",
-    "threadIsolation": "NOT_REACHED",
-    "restartRecovery": "NOT_REACHED",
-    "openAiAgUiSharedFocus": "NOT_REACHED",
-    "replayNoDuplicateWsgs": "PASS_AC_M010_AFTER_FOCUS_REVISION_FIX"
+  "liveEvidence": {
+    "database": "ISOLATED_EPHEMERAL",
+    "scenarios": 8,
+    "realWsgsPosts": 10,
+    "operationCounts": {
+      "EXECUTE_WORLD_QUERY": 8,
+      "VALIDATE_REFERENCES": 2
+    },
+    "requestEvidenceHash": "sha256:38b853e99a179d5b56e23a57494c4d06af5b72e21384aae55154ae986ac18200"
+  },
+  "acceptance": {
+    "AC-M001": "PASS_VEHICLE_KNOWN_REFERENCE_FOLLOWUP",
+    "AC-M002": "PASS_AREA_KNOWN_REFERENCE_FOLLOWUP",
+    "AC-M003": "PASS_AMBIGUOUS_VALIDATE_AND_RESUME",
+    "AC-M004": "PASS_NO_PENDING_CHOICE_CLARIFICATION",
+    "AC-M005": "PASS_EXPIRED_REFERENCE_REVALIDATED_FIRST",
+    "AC-M006": "PASS_THREAD_ISOLATION",
+    "AC-M007": "PASS_RESTART_FOCUS_RESTORE",
+    "AC-M008": "PASS_OPENAI_AGUI_SHARED_FOCUS",
+    "AC-M009": "PASS_WSGS_PRONOUN_AUTHORITY",
+    "AC-M010": "PASS_REPLAY_NO_DUPLICATE_WSGS"
   },
   "contextPolicyEvidence": {
     "taskPackageExample": "KNOWN_WORLD_REFERENCES_ONLY",
@@ -48,39 +54,11 @@
     "priorGrounding": false,
     "pinnedPriorGroundingReplayRequiredForAcM001OrAcM005": false
   },
-  "upstreamRepairEvidence": {
-    "wsgsInstanceCommit": "7c7340a602b2c9c7963b1d8dc2ca210bd1baaefa",
-    "executeKnownReferenceMerge": "PASS_AC_M001",
-    "vehicleFollowUpTerminalStatus": "PARTIAL_WITHOUT_ERROR",
-    "vehicleValidatedReferenceCount": 1,
-    "gowmAreaAuthorityVersionRepair": "PASS_IN_SACS_AC_M002_CHAIN",
-    "areaFollowUpTerminalStatus": "PARTIAL_WITHOUT_ERROR",
-    "areaValidatedReferenceCount": 1
-  },
-  "latestRedactedFailure": {
-    "acceptanceItem": "AC-M003",
-    "operations": [
-      "VALIDATE_REFERENCES",
-      "EXECUTE_WORLD_QUERY"
-    ],
-    "failedOperation": "EXECUTE_WORLD_QUERY",
-    "createHttpStatus": 202,
-    "pollHttpStatus": 200,
-    "jobStatus": "FAILED",
-    "resultPresent": false,
-    "errorCode": "WORKER_PIPELINE_FAILED",
-    "errorStage": "PERSISTENCE",
-    "sacsOutcome": "WORLD_GROUNDING_FAILED",
-    "originMessagePreserved": true
-  },
   "sacsCorrections": {
     "focusRevisionExcludedFromReplayIdentity": true,
     "wsgsRequestHashStillCoversContextCapsule": true,
-    "taskPackageAreaPromptRestoredExactly": true
-  },
-  "blocker": {
-    "code": "WSGS_PENDING_CHOICE_RESUME_EXECUTE_PERSISTENCE",
-    "detail": "The repaired shared GOWM now passes AC-M002 in SACS. AC-M003 persists a two-candidate ambiguity and deterministically selects the second candidate. WSGS validation advances to the resume EXECUTE, which terminates FAILED without a result at stage PERSISTENCE."
+    "taskPackageAreaPromptRestoredExactly": true,
+    "failedWsgsJobMappedThroughPublishedErrorBoundary": true
   },
   "publication": {
     "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",

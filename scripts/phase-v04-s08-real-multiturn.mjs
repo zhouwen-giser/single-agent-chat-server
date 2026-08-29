@@ -19,7 +19,7 @@ import {
 import { WorldGroundingRuntime } from "../dist/packages/world-grounding-runtime/src/index.js";
 
 const { Pool } = pg;
-const expectedWsgsCommit = "7c7340a602b2c9c7963b1d8dc2ca210bd1baaefa";
+const expectedWsgsCommit = "46e872359536b84351ce2b417117fc5725c59145";
 
 if (process.env.ALLOW_REAL_WSGS_MULTITURN !== "YES") {
   throw new Error("ALLOW_REAL_WSGS_MULTITURN=YES is required");
