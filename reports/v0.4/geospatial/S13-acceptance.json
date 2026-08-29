@@ -1,0 +1,36 @@
+{
+  "phase": "S13",
+  "status": "PASS_WITH_EXTERNAL_BLOCKERS",
+  "marker": "SACS_GEOSPATIAL_BASELINE_LOCKED",
+  "markerAsserted": true,
+  "sourceLock": "reports/v0.4/geospatial/S13-source-lock.json",
+  "acceptance": {
+    "AC-B001": "PASS",
+    "AC-B002": "PASS",
+    "AC-B003": "PASS",
+    "AC-B004": "PASS",
+    "AC-B005": "PASS",
+    "AC-B006": "PASS",
+    "AC-B007": "PASS",
+    "AC-B008": "PASS",
+    "AC-B009": "PASS",
+    "AC-B010": "PASS",
+    "AC-B011": "PASS",
+    "AC-B012": "PASS",
+    "AC-B013": "PASS",
+    "AC-B014": "PASS",
+    "AC-B015": "PASS",
+    "AC-B016": "PASS",
+    "AC-B017": "PASS",
+    "AC-B018": "PASS",
+    "AC-B019": "PASS",
+    "AC-B020": "PASS",
+    "AC-B021": "PASS",
+    "AC-B022": "PASS"
+  },
+  "nextGate": {
+    "status": "BLOCKED",
+    "code": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+    "reason": "WSGS PR #6 does not publish the authoritative SACS geospatial consumer bundle required by S14."
+  }
+}

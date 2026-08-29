@@ -1,8 +1,21 @@
 # Project status
 
-Status: `SACS_V0_4_DEVELOPMENT_BLOCKED` — S00 through S04 and the S05 internal
-Authority Fusion implementation are complete, while the S05 live Gate and the
-v0.4 stable candidate remain ineligible on external hard prerequisites.
+Status: `SACS_V0_4_GEOSPATIAL_EXPLANATION_IN_PROGRESS` — S00 through S12 are
+complete at the published PR #15 head, and S13 has locked the new geospatial
+explanation baseline on a dedicated local stacked branch. S14 and S24 remain
+fail-closed on an absent authoritative WSGS geospatial consumer handoff and a
+non-ready WSGS application endpoint; no fixture is counted as live evidence.
+
+The current goal starts from PR #15 head `2dcbbe1c` on
+`codex/sacs-v0.4-geospatial-explanation`. Its source reconciliation, PR/CI
+state, four-repository observations and pre-change 411-test baseline are in
+[`S13-source-lock.json`](reports/v0.4/geospatial/S13-source-lock.json) and the
+[`S13 completion report`](reports/v0.4/geospatial/S13-completion.md).
+
+The detailed S00–S05 history below is retained as historical evidence. The
+later S06–S12 development closure is recorded in
+[`S12-completion.md`](reports/v0.4/S12-completion.md); it must not be inferred
+from the older phase summaries.
 
 S00 locks actual fetched SACS main `f60083c`, WSGS candidate `3f9aa7c`, and
 SDAR main `b0caf69`. All 32 frozen `sacs-wsgs-grounding/1.0` artifact hashes

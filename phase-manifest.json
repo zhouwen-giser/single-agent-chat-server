@@ -1,7 +1,7 @@
 {
   "project": "single-agent-chat-server",
-  "version": "0.1.0",
-  "branch": "feature/single-sdar-chat-entry-v0.1",
+  "version": "0.4.0",
+  "branch": "codex/sacs-v0.4-geospatial-explanation",
   "phases": [
     {
       "id": 0,
@@ -61,6 +61,27 @@
     }
   ],
   "completionMarker": "SINGLE_AGENT_CHAT_SERVER_GOAL_COMPLETE",
+  "v04IntegrationPhases": [
+    { "id": "S00-S05", "status": "COMPLETE" },
+    { "id": "S06-S12", "status": "COMPLETE" },
+    {
+      "id": "S13",
+      "status": "PASS_WITH_EXTERNAL_BLOCKERS",
+      "marker": "SACS_GEOSPATIAL_BASELINE_LOCKED"
+    },
+    {
+      "id": "S14",
+      "status": "BLOCKED",
+      "blocker": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY"
+    },
+    { "id": "S15-S23", "status": "IN_PROGRESS" },
+    {
+      "id": "S24",
+      "status": "BLOCKED",
+      "blocker": "SACS_GEOSPATIAL_LIVE_ENVIRONMENT_NOT_READY"
+    }
+  ],
+  "currentGoalCompletionMarker": "SACS_V0_4_WORLD_GROUNDING_GEOSPATIAL_EXPLANATION_COMPLETE",
   "taskPackageRevision": "R2",
   "sdarA2aBaseline": {
     "specPatch": "1.0.1",
