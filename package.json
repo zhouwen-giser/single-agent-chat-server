@@ -122,7 +122,7 @@
   "devDependencies": {
     "@ag-ui/client": "0.0.57",
     "@jest/globals": "29.7.0",
-    "@langchain/langgraph-cli": "1.4.3",
+    "@langchain/langgraph-cli": "1.4.4",
     "@tsconfig/recommended": "1.0.13",
     "@types/jest": "29.5.14",
     "@types/node": "22.19.11",
