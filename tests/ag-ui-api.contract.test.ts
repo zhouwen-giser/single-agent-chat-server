@@ -14,6 +14,11 @@ import type { FastifyInstance } from "fastify";
 import { buildServer } from "../apps/server/src/bootstrap.js";
 import type { ServerConfig } from "../apps/server/src/config.js";
 import {
+  createAnalysisAgUiV03RunHandler,
+  type AnalysisAgUiV03RunHandler,
+} from "../packages/ag-ui-analysis-adapter/src/index.js";
+import type { AuthorizedWsgsAnalysisConsumer } from "../packages/wsgs-analysis-consumer/src/index.js";
+import {
   createInteractionAgUiRunHandler,
   createTextAgUiRunHandler,
   type AgUiRunHandler,
@@ -162,6 +167,109 @@ describe("AG-UI HTTP/SSE endpoint", () => {
         userRole: "user",
       },
     ]);
+  });
+
+  it("keeps v0.2 as default and does not advertise v0.3 without an analysis handler", async () => {
+    const resolved: Array<Record<string, string>> = [];
+    const server = createServer("v0.2 remains available", resolved);
+    const v02 = await server.inject({
+      method: "POST",
+      url: "/ag-ui",
+      headers: { ...headers, accept: "text/event-stream" },
+      payload: runInput(),
+    });
+    const v03Capabilities = await server.inject({
+      method: "GET",
+      url: "/ag-ui/capabilities",
+      headers: {
+        ...headers,
+        "x-sacs-ag-ui-profile": "sacs-ag-ui-v0.3",
+      },
+    });
+    const v03 = await server.inject({
+      method: "POST",
+      url: "/ag-ui",
+      headers: {
+        ...headers,
+        accept: "text/event-stream",
+        "x-sacs-ag-ui-profile": "sacs-ag-ui-v0.3",
+      },
+      payload: { ...runInput(), runId: "run-v03" },
+    });
+
+    expect(decodeEvents(v02.body).at(-1)?.type).toBe(EventType.RUN_FINISHED);
+    expect(v03Capabilities.statusCode).toBe(503);
+    expect(v03Capabilities.json().error.code).toBe("profile_unavailable");
+    expect(v03.statusCode).toBe(503);
+    expect(v03.json().error.code).toBe("profile_unavailable");
+    expect(v03.body).not.toContain("v0.2 remains available");
+    expect(resolved).toHaveLength(1);
+  });
+
+  it("serves the explicit v0.3 profile only through its isolated handler", async () => {
+    const runAgUiV03 = createAnalysisAgUiV03RunHandler(
+      createTextAgUiRunHandler(async () => "v0.3 analysis handler"),
+      {
+        consumer: readyWsgsAnalysisConsumer(),
+        analysisControlReady: true,
+      },
+    );
+    const server = createServer(
+      "v0.2 handler",
+      [],
+      undefined,
+      undefined,
+      runAgUiV03,
+    );
+    const capabilities = await server.inject({
+      method: "GET",
+      url: "/ag-ui/capabilities",
+      headers: {
+        ...headers,
+        "x-sacs-ag-ui-profile": "sacs-ag-ui-v0.3",
+      },
+    });
+    const response = await server.inject({
+      method: "POST",
+      url: "/ag-ui",
+      headers: {
+        ...headers,
+        accept: "text/event-stream",
+        "x-sacs-ag-ui-profile": "sacs-ag-ui-v0.3",
+      },
+      payload: { ...runInput(), runId: "run-v03" },
+    });
+
+    expect(capabilities.statusCode).toBe(200);
+    expect(capabilities.headers.vary).toContain("x-sacs-ag-ui-profile");
+    expect(capabilities.json()).toMatchObject({
+      custom: { sacsProfile: "sacs-ag-ui-v0.3" },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain("v0.3 analysis handler");
+    expect(response.body).not.toContain("v0.2 handler");
+  });
+
+  it("does not unlock v0.3 for an unregistered generic handler", async () => {
+    const generic = createTextAgUiRunHandler(async () => "not analysis-ready");
+    const server = createServer(
+      "v0.2 handler",
+      [],
+      undefined,
+      undefined,
+      generic as AnalysisAgUiV03RunHandler,
+    );
+    const response = await server.inject({
+      method: "GET",
+      url: "/ag-ui/capabilities",
+      headers: {
+        ...headers,
+        "x-sacs-ag-ui-profile": "sacs-ag-ui-v0.3",
+      },
+    });
+
+    expect(response.statusCode).toBe(503);
+    expect(response.json().error.code).toBe("profile_unavailable");
   });
 
   it("publishes schema-valid persisted world explanation, map, and source events before completion", async () => {
@@ -319,6 +427,33 @@ describe("AG-UI HTTP/SSE endpoint", () => {
     expect(response.body).not.toContain("stack");
   });
 
+  it("synthesizes a safe terminal error when a handler ends nonterminally", async () => {
+    const incomplete: AgUiRunHandler = async function* (context) {
+      yield EventSchemas.parse({
+        type: EventType.RUN_STARTED,
+        threadId: context.input.threadId,
+        runId: context.input.runId,
+      });
+    };
+    const response = await createServer(
+      "unused",
+      [],
+      undefined,
+      incomplete,
+    ).inject({
+      method: "POST",
+      url: "/ag-ui",
+      headers: { ...headers, accept: "text/event-stream" },
+      payload: runInput(),
+    });
+
+    expect(decodeEvents(response.body).map(({ type }) => type)).toEqual([
+      EventType.RUN_STARTED,
+      EventType.RUN_ERROR,
+    ]);
+    expect(response.body).toContain("interaction_incomplete");
+  });
+
   it("persists exactly the assistant deltas published through official SSE", async () => {
     const persist = jest.fn(async () => undefined);
     const server = createServer("published AG-UI answer", [], persist);
@@ -404,6 +539,7 @@ function createServer(
     typeof buildServer
   >[0]["persistAgUiAssistantMessages"],
   runAgUiOverride?: AgUiRunHandler,
+  runAgUiV03Override?: AnalysisAgUiV03RunHandler,
 ): FastifyInstance {
   const answerFunction =
     typeof answer === "string" ? async () => answer : answer;
@@ -428,6 +564,9 @@ function createServer(
     },
     runChat: async () => "openai remains isolated",
     runAgUi: runAgUiOverride ?? createTextAgUiRunHandler(answerFunction),
+    ...(runAgUiV03Override === undefined
+      ? {}
+      : { runAgUiV03: runAgUiV03Override }),
     ...(persistAgUiAssistantMessages === undefined
       ? {}
       : { persistAgUiAssistantMessages }),
@@ -446,6 +585,18 @@ function runInput(): RunAgentInput {
     context: [],
     forwardedProps: {},
   };
+}
+
+function readyWsgsAnalysisConsumer(): AuthorizedWsgsAnalysisConsumer {
+  return {
+    status: "READY",
+    marker: "SACS_WSGS_ANALYSIS_CONSUMER_READY",
+    profile: "sacs-wsgs-analysis-presentation/1.0",
+    lock: {
+      status: "READY",
+      provenance: "AUTHORITATIVE_WSGS_HANDOFF",
+    },
+  } as AuthorizedWsgsAnalysisConsumer;
 }
 
 function decodeEvents(body: string): AGUIEvent[] {

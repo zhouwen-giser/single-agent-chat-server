@@ -2,6 +2,7 @@ import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
 import pg from "pg";
 
 import { createPostgresCheckpointer } from "./checkpoint.js";
+import { AnalysisRepository } from "./analysis-repository.js";
 import { AuthorityFusionRepository } from "./authority-fusion-repository.js";
 import type { PersistenceConfig } from "./config.js";
 import { ConversationPersistenceRepository } from "./conversation-repository.js";
@@ -17,6 +18,7 @@ import { ChatPersistenceRepository } from "./repository.js";
 const { Pool } = pg;
 
 export interface PersistenceRuntime {
+  readonly analysisRepository: AnalysisRepository;
   readonly repository: ChatPersistenceRepository;
   readonly interactionRepository: InteractionPersistenceRepository;
   readonly groundingRepository: GroundingPersistenceRepository;
@@ -50,6 +52,7 @@ export async function setupPersistence(
     checkpointer = await createPostgresCheckpointer(config.connectionString);
     const activeCheckpointer = checkpointer;
     return {
+      analysisRepository: new AnalysisRepository(pool),
       repository: new ChatPersistenceRepository(
         pool,
         config.idempotencyLeaseMs,

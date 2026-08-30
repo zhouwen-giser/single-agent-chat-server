@@ -7,12 +7,17 @@ import Fastify, {
 } from "fastify";
 
 import type { AgUiRunHandler } from "../../../packages/ag-ui-interaction-adapter/src/index.js";
+import type { AnalysisAgUiV03RunHandler } from "../../../packages/ag-ui-analysis-adapter/src/index.js";
 import { openAiError } from "../../../packages/openai-api-contract/src/index.js";
 import {
   registerAgUiRoutes,
   type AgUiRoutesOptions,
   type ResolveAgUiThread,
 } from "./api/ag-ui-routes.js";
+import {
+  registerAnalysisRoutes,
+  type AnalysisRoutesOptions,
+} from "./api/analysis-routes.js";
 import { registerHealthRoutes } from "./api/health-routes.js";
 import {
   registerOpenAiRoutes,
@@ -46,7 +51,9 @@ export interface BuildServerOptions
   readonly telemetry?: SecureTelemetry;
   readonly resolveAgUiThread?: ResolveAgUiThread;
   readonly runAgUi?: AgUiRunHandler;
+  readonly runAgUiV03?: AnalysisAgUiV03RunHandler;
   readonly persistAgUiAssistantMessages?: AgUiRoutesOptions["persistAssistantMessages"];
+  readonly analysisControl?: AnalysisRoutesOptions["service"];
   readonly rateLimiter?: FixedWindowRateLimiter;
 }
 
@@ -126,6 +133,9 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     rateLimiter,
     resolveThread: options.resolveAgUiThread ?? unavailableAgUiThread,
     ...(options.runAgUi === undefined ? {} : { runAgUi: options.runAgUi }),
+    ...(options.runAgUiV03 === undefined
+      ? {}
+      : { runAgUiV03: options.runAgUiV03 }),
     ...(options.persistAgUiAssistantMessages === undefined
       ? {}
       : {
@@ -143,6 +153,14 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
           conversationModelReadinessCheck:
             options.conversationModelReadinessCheck,
         }),
+  });
+  void server.register(registerAnalysisRoutes, {
+    config: options.config,
+    rateLimiter,
+    ...(options.analysisControl === undefined
+      ? {}
+      : { service: options.analysisControl }),
+    ...(options.now === undefined ? {} : { now: options.now }),
   });
   void server.register(registerOpenAiRoutes, {
     prefix: "/v1",
