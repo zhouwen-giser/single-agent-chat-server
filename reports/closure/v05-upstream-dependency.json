@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "sacs-upstream-dependency-report/1.0",
+  "dependencyId": "WSGS_ANALYSIS_PRESENTATION_CONTROL_HANDOFF",
+  "owner": "WSGS",
+  "status": "MISSING",
+  "requiredArtifacts": [
+    "WSGS_ANALYSIS_CONSUMER_LOCK.json",
+    "WSGS_ANALYSIS_PLAN_SCHEMA_LOCK.json",
+    "WSGS_ANALYSIS_EVENT_SCHEMA_LOCK.json",
+    "WSGS_TOOL_INTERACTION_SCHEMA_LOCK.json",
+    "WSGS_REVISION_CONTROL_SCHEMA_LOCK.json",
+    "WSGS_CANCEL_SCHEMA_LOCK.json",
+    "WSGS_INTERVENTION_SCHEMA_LOCK.json",
+    "CHECKSUMS.json"
+  ],
+  "blockingGates": [
+    "C08",
+    "C11",
+    "C12",
+    "C13"
+  ],
+  "details": {
+    "marker": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+    "authoritativeArtifactsObserved": 0,
+    "instanceReadinessDoesNotSubstituteForHandoff": true,
+    "credentialsReadOrPersisted": false
+  }
+}

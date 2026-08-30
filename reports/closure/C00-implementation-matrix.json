@@ -1,0 +1,217 @@
+{
+  "schemaVersion": "sacs-v04-v05-closure-implementation-matrix/1.0",
+  "generatedAt": "2026-08-30T18:07:13+08:00",
+  "status": "NOT_RUN",
+  "sources": {
+    "sacs": {
+      "status": "LOCAL_ONLY",
+      "sha": "8d611e3195c786854f2d0efd18ac19000441ab4a"
+    },
+    "wsgs": {
+      "status": "NOT_RUN",
+      "packageGenerationSha": "65c3716f956c688f48e08a43322548b75af849b8"
+    },
+    "gdps": {
+      "status": "NOT_RUN",
+      "packageGenerationSha": "574b6aa90364c67e2f59baf7714013cdd3d48526"
+    },
+    "gowm": {
+      "status": "NOT_RUN",
+      "packageGenerationSha": "f2894d86eeca121f9cea76c70797ece3b091d51f"
+    }
+  },
+  "v04": {
+    "branch": "codex/sacs-v0.4-geospatial-explanation",
+    "headSha": "8262685ea04c3adf908993860ce626fb6832a3c2",
+    "items": [
+      {
+        "id": "WorldExplanationV1",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "FindingNormalizer",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "DeterministicRenderer",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "OpenAIAgUiProjection",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "Migration0013",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "ExactReplay",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "GapPolicy",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "CurrentnessPolicy",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "AuthorityBoundary",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "AuthoritativeWsgsGeospatialHandoff",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": []
+      },
+      {
+        "id": "StructuredSelectionIngress",
+        "status": "MISSING",
+        "evidence": []
+      },
+      {
+        "id": "RealGapCurrentnessEvidence",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": []
+      },
+      {
+        "id": "Real18CaseE2E",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": []
+      },
+      {
+        "id": "ComposeRestartOutageRecovery",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": []
+      },
+      {
+        "id": "ExactHeadCI",
+        "status": "MISSING",
+        "evidence": []
+      },
+      {
+        "id": "StackedPullRequest",
+        "status": "MISSING",
+        "evidence": []
+      }
+    ]
+  },
+  "v05": {
+    "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "headSha": "8d611e3195c786854f2d0efd18ac19000441ab4a",
+    "items": [
+      {
+        "id": "AgUiV03Negotiation",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "AnalysisLifecycle",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "EventStoreProjection",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "ObserverFirstPolicy",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "MapFocusProjection",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "ToolInteractionDescriptor",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "ProposalApi",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "RevisionRecompile",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "InterruptCancelResume",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "SnapshotRecovery",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "ReferenceClient",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "TimeWindowSemantics",
+        "status": "IMPLEMENTED_LOCAL_ONLY",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      }
+    ]
+  }
+}

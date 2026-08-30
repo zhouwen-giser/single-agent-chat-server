@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:upstream-dependency-report:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "dependencyId",
+    "owner",
+    "status",
+    "requiredArtifacts",
+    "blockingGates"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-upstream-dependency-report/1.0"
+    },
+    "dependencyId": {
+      "type": "string"
+    },
+    "owner": {
+      "enum": [
+        "WSGS",
+        "GOWM",
+        "GDPS",
+        "ENVIRONMENT"
+      ]
+    },
+    "status": {
+      "enum": [
+        "READY",
+        "MISSING",
+        "DRIFTED",
+        "UNAVAILABLE"
+      ]
+    },
+    "requiredArtifacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blockingGates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "observedSourceSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "details": {
+      "type": "object"
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:structured-world-selection:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "selectionId",
+    "principalId",
+    "threadId",
+    "groundingId",
+    "explanationId",
+    "selectionKind",
+    "selectionRevision",
+    "sourceHash",
+    "selectedAt",
+    "expiresAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-structured-world-selection/1.0"
+    },
+    "selectionId": {
+      "type": "string"
+    },
+    "principalId": {
+      "type": "string"
+    },
+    "threadId": {
+      "type": "string"
+    },
+    "groundingId": {
+      "type": "string"
+    },
+    "explanationId": {
+      "type": "string"
+    },
+    "selectionKind": {
+      "enum": [
+        "FINDING_FEATURE",
+        "MAP_FEATURE",
+        "REFERENCE_SET_MEMBER"
+      ]
+    },
+    "findingId": {
+      "type": "string"
+    },
+    "featureId": {
+      "type": "string"
+    },
+    "referenceKey": {
+      "type": "object"
+    },
+    "upstreamSelectionToken": {
+      "type": "string"
+    },
+    "selectionRevision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sourceHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "selectedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "referenceKey"
+      ]
+    },
+    {
+      "required": [
+        "upstreamSelectionToken"
+      ]
+    }
+  ]
+}

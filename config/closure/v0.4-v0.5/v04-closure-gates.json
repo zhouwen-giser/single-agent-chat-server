@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "sacs-v04-closure-gates/1.0",
+  "preserveImplemented": [
+    "WorldExplanationV1",
+    "FindingNormalizer",
+    "DeterministicRenderer",
+    "OpenAIAgUiProjection",
+    "Migration0013",
+    "ExactReplay",
+    "GapPolicy",
+    "CurrentnessPolicy",
+    "AuthorityBoundary"
+  ],
+  "requiredRemaining": [
+    "AuthoritativeWsgsGeospatialHandoff",
+    "StructuredSelectionIngress",
+    "RealGapCurrentnessEvidence",
+    "Real18CaseE2E",
+    "ComposeRestartOutageRecovery",
+    "ExactHeadCI",
+    "StackedPullRequest"
+  ],
+  "mergeReadyRequiresZeroRequiredNonPass": true
+}

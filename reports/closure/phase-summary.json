@@ -1,0 +1,299 @@
+{
+  "schemaVersion": "sacs-v04-v05-closure-phase-summary/1.0",
+  "decisions": {
+    "v04": "BLOCKED_UPSTREAM",
+    "v05": "BLOCKED_PREREQUISITE"
+  },
+  "counts": {
+    "overall": {
+      "required": 298,
+      "PASS": 0,
+      "FAIL": 0,
+      "NOT_RUN": 129,
+      "BLOCKED": 169
+    },
+    "tracks": {
+      "GLOBAL": {
+        "required": 31,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 15,
+        "BLOCKED": 16
+      },
+      "V0_4": {
+        "required": 102,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 29,
+        "BLOCKED": 73
+      },
+      "V0_5": {
+        "required": 165,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 85,
+        "BLOCKED": 80
+      }
+    },
+    "phases": {
+      "C00": {
+        "required": 15,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 15,
+        "BLOCKED": 0
+      },
+      "C01": {
+        "required": 34,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 29,
+        "BLOCKED": 5
+      },
+      "C02": {
+        "required": 14,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 14
+      },
+      "C03": {
+        "required": 16,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 16
+      },
+      "C04": {
+        "required": 12,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 12
+      },
+      "C05": {
+        "required": 18,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 18
+      },
+      "C06": {
+        "required": 8,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 8
+      },
+      "C07": {
+        "required": 8,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 8,
+        "BLOCKED": 0
+      },
+      "C08": {
+        "required": 23,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 10,
+        "BLOCKED": 13
+      },
+      "C09": {
+        "required": 24,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 24,
+        "BLOCKED": 0
+      },
+      "C10": {
+        "required": 28,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 28,
+        "BLOCKED": 0
+      },
+      "C11": {
+        "required": 30,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 30
+      },
+      "C12": {
+        "required": 30,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 15,
+        "BLOCKED": 15
+      },
+      "C13": {
+        "required": 22,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 22
+      },
+      "C14": {
+        "required": 16,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 16
+      }
+    }
+  },
+  "phases": {
+    "C00": {
+      "status": "NOT_RUN",
+      "acceptance": {
+        "required": 15,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 15,
+        "BLOCKED": 0
+      }
+    },
+    "C01": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 34,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 29,
+        "BLOCKED": 5
+      }
+    },
+    "C02": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 14,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 14
+      }
+    },
+    "C03": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 16,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 16
+      }
+    },
+    "C04": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 12,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 12
+      }
+    },
+    "C05": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 18,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 18
+      }
+    },
+    "C06": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 8,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 8
+      }
+    },
+    "C07": {
+      "status": "NOT_RUN",
+      "acceptance": {
+        "required": 8,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 8,
+        "BLOCKED": 0
+      }
+    },
+    "C08": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 23,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 10,
+        "BLOCKED": 13
+      }
+    },
+    "C09": {
+      "status": "NOT_RUN",
+      "acceptance": {
+        "required": 24,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 24,
+        "BLOCKED": 0
+      }
+    },
+    "C10": {
+      "status": "NOT_RUN",
+      "acceptance": {
+        "required": 28,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 28,
+        "BLOCKED": 0
+      }
+    },
+    "C11": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 30,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 30
+      }
+    },
+    "C12": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 30,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 15,
+        "BLOCKED": 15
+      }
+    },
+    "C13": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 22,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 22
+      }
+    },
+    "C14": {
+      "status": "BLOCKED",
+      "acceptance": {
+        "required": 16,
+        "PASS": 0,
+        "FAIL": 0,
+        "NOT_RUN": 0,
+        "BLOCKED": 16
+      }
+    }
+  },
+  "protectedActionsPerformed": []
+}

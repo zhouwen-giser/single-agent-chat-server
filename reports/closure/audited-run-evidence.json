@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "sacs-v04-v05-audited-run-evidence/1.0",
+  "observedAt": "2026-08-30T10:03:37.8328244Z",
+  "source": {
+    "worktreeHead": "8d611e3195c786854f2d0efd18ac19000441ab4a",
+    "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "scopeFiles": [
+      {
+        "path": "tests/analysis-persistence.postgres.int.test.ts",
+        "sha256": "sha256:e2598bbd7b74ceaccad35905d567f8edc1e918f0b33712ba0cae5716562c6772"
+      },
+      {
+        "path": "packages/persistence/src/analysis-repository.ts",
+        "sha256": "sha256:9bedbed46cae759a491b31d0cc53d83a205be16eb22e2979f8c0cc0665ceec67"
+      },
+      {
+        "path": "packages/persistence/src/runtime.ts",
+        "sha256": "sha256:3211ad47d227883af89a87b82236a14014f3475e9e4664e7dccce86d545ef6fd"
+      },
+      {
+        "path": "migrations/0015_interactive_analysis.sql",
+        "sha256": "sha256:ddeb49f042d1be8cbc8c0da71e7a7dd220ed6a49f38ac1da9f7e43e9f9847039"
+      }
+    ],
+    "scopeHash": "sha256:51e0e1292ba2754d97d7ac24fbd5d87da54e7dd5c30e7aea203d414ec47aade0"
+  },
+  "wsgs": {
+    "status": "PASS",
+    "endpoint": "http://127.0.0.1:18277",
+    "readiness": {
+      "httpStatus": 200
+    },
+    "runtimeRevision": "b3315cbb5dce9635911a90ac095b93b1efab8e70",
+    "request": {
+      "operation": "GROUND_REFERENCES",
+      "authentication": "NONE",
+      "executionPolicyReadOnly": true,
+      "submitHttpStatus": 202,
+      "pollHttpStatuses": [
+        200
+      ]
+    },
+    "terminal": {
+      "status": "COMPLETED",
+      "resultStatus": "COMPLETED",
+      "errorCode": null,
+      "errorStage": null,
+      "referenceProductCount": 1,
+      "capabilityGapCount": 0,
+      "resultHash": "sha256:1458ab0e3570611925f206e025d06f2742c98f1b3316377bf0db760cffa4b45c"
+    },
+    "limitations": [
+      "No bearer credential was used or persisted.",
+      "This is a base-operation smoke, not authoritative geospatial or analysis-presentation handoff evidence.",
+      "No GOWM/GDPS/STAS claim is made by this smoke record."
+    ]
+  },
+  "realPostgres": {
+    "status": "PASS",
+    "suite": "tests/analysis-persistence.postgres.int.test.ts",
+    "suitesPassed": 1,
+    "testsPassed": 7,
+    "testsFailed": 0,
+    "containerRemovedAfterRun": true,
+    "sharedServicesModified": false,
+    "assertionNodes": [
+      "atomically appends an event and restores its exact projection snapshot",
+      "replays an exact duplicate but rejects event or sequence collisions",
+      "rolls back event insertion when the projection is invalid",
+      "switches active revisions with CAS and preserves late events as audit only",
+      "keeps a queued revision inactive until the old run is terminal, then activates and starts atomically",
+      "enforces scoped proposal idempotency and one pending proposal",
+      "enforces run-attempt uniqueness and append-only events in PostgreSQL"
+    ]
+  },
+  "security": {
+    "credentialsPrintedOrPersisted": false,
+    "rawReferenceIdsPersisted": false
+  }
+}

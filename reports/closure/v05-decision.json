@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "sacs-closure-decision/1.0",
+  "track": "V0_5",
+  "decision": "BLOCKED_PREREQUISITE",
+  "sourceSha": "8d611e3195c786854f2d0efd18ac19000441ab4a",
+  "acceptance": {
+    "required": 165,
+    "pass": 0,
+    "fail": 0,
+    "notRun": 85,
+    "blocked": 80
+  },
+  "blockers": [
+    "SACS_V04_GEOSPATIAL_EXPLANATION_BASELINE_NOT_READY",
+    "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+    "ROW_LEVEL_LOCAL_AND_REAL_QUALIFICATION_NOT_RUN"
+  ],
+  "nonClaims": [
+    "The historical v0.5 aggregate test report is supplementary and is not per-acceptance exact-head evidence.",
+    "No real WSGS analysis plan, event, revision, cancel, intervention, or recovery chain is claimed.",
+    "DEVELOPMENT_READY_BLOCKED_LIVE is not claimed while local required rows remain NOT_RUN."
+  ],
+  "pullRequest": {
+    "state": "NOT_RUN",
+    "exactHeadCi": "NOT_RUN",
+    "protectedActionsPerformed": []
+  }
+}
