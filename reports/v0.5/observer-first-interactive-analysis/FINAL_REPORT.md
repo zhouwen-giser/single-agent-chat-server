@@ -13,9 +13,9 @@ PostgreSQL was not run, and the required A14 real chain is unavailable.
 ## Source and branch state
 
 - Branch: `codex/sacs-v0.5-observer-first-interactive-analysis`
-- Starting commit: `0d67125ba1e8f2d69ad07480bacbe7ecf5bab774`
-- Intake commit: `a664077`
-- Implementation commit: `80685ec`
+- Starting commit: `8262685`
+- Intake commit after local stack reconciliation: `072e34b`
+- Implementation commit after local stack reconciliation: `36df690`
 - Task-package SHA-256:
   `44497cd392ca7b0892da707af97c37f7364ed993d05a89e0b89da51a4bdf128f`
 
@@ -56,7 +56,8 @@ The candidate adds:
 
 - strict Analysis Session, immutable Revision, Run, Node, Event, Projection,
   Proposal, Intervention, focus, map and timeline contracts;
-- append-only migration `0014_interactive_analysis.sql` and principal/thread
+- append-only migration `0015_interactive_analysis.sql` after the v0.4
+  structured-selection migration, with principal/thread
   scoped repository access;
 - event integrity, two-phase event acceptance, transactional projection and
   active-run/revision isolation;

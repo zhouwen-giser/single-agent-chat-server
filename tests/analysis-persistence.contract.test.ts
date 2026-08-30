@@ -5,7 +5,7 @@ import { describe, expect, it } from "@jest/globals";
 import { AnalysisRepository } from "../packages/persistence/src/index.js";
 
 const migration = readFileSync(
-  new URL("../migrations/0014_interactive_analysis.sql", import.meta.url),
+  new URL("../migrations/0015_interactive_analysis.sql", import.meta.url),
   "utf8",
 );
 const repository = readFileSync(
@@ -21,8 +21,9 @@ describe("SACS v0.5 interactive analysis persistence contract", () => {
     const files = readdirSync(new URL("../migrations", import.meta.url))
       .filter((file) => /^\d{4}_[a-z0-9_]+\.sql$/u.test(file))
       .sort();
-    expect(files.at(-2)).toBe("0013_world_explanation.sql");
-    expect(files.at(-1)).toBe("0014_interactive_analysis.sql");
+    expect(files.at(-3)).toBe("0013_world_explanation.sql");
+    expect(files.at(-2)).toBe("0014_structured_world_selection.sql");
+    expect(files.at(-1)).toBe("0015_interactive_analysis.sql");
   });
 
   it("creates exactly the seven required analysis tables", () => {
