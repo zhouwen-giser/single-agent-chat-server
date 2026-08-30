@@ -81,10 +81,7 @@ export function createAnalysisAgUiV03RunHandler(
       throw new Error("AG_UI_ANALYSIS_PROFILE_MISMATCH");
     }
     for await (const event of handler(context)) {
-      const validated = assertSacsAgUiEvent(
-        event,
-        SACS_AG_UI_V03_PROFILE_ID,
-      );
+      const validated = assertSacsAgUiEvent(event, SACS_AG_UI_V03_PROFILE_ID);
       if (validated.type === EventType.STATE_SNAPSHOT) {
         parseAndVerifyAgUiSharedStateV03(validated.snapshot);
       }

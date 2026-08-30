@@ -64,10 +64,8 @@ describe("SACS v0.5 interactive analysis persistence contract", () => {
     expect(repository).toContain("async createRevision");
     expect(repository).toContain("AND active_revision_id = $7");
     expect(repository).toContain("AND latest_revision_number = $8");
-    expect(repository).toContain("input.revision.status === \"QUEUED\"");
-    expect(repository).toContain(
-      "async activateQueuedRevisionAndStartRun",
-    );
+    expect(repository).toContain('input.revision.status === "QUEUED"');
+    expect(repository).toContain("async activateQueuedRevisionAndStartRun");
     expect(repository).toContain("Active analysis run is not terminal");
   });
 

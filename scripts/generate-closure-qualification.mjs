@@ -24,8 +24,7 @@ const configRoot = resolve(root, "config/closure/v0.4-v0.5");
 const contractsRoot = resolve(root, "contracts/closure/v0.4-v0.5");
 const reportRoot = resolve(root, "reports/closure");
 
-const MATRIX_RELATIVE =
-  "acceptance/closure/v0.4-v0.5/acceptance-matrix.csv";
+const MATRIX_RELATIVE = "acceptance/closure/v0.4-v0.5/acceptance-matrix.csv";
 const EXPECTED_TRACK_COUNTS = Object.freeze({
   GLOBAL: 31,
   V0_4: 102,
@@ -125,7 +124,8 @@ const qualificationSourceLock = JSON.parse(
 );
 
 const git = captureGitSnapshot(qualificationSourceLock);
-const generatedAt = git.headCommittedAt ?? `${manifest.generatedAt}T00:00:00.000Z`;
+const generatedAt =
+  git.headCommittedAt ?? `${manifest.generatedAt}T00:00:00.000Z`;
 const auditedRunEvidence = await buildAuditedRunEvidence(git);
 const evidenceIndex = await buildEvidenceIndex(auditedRunEvidence);
 const expectedCrosswalk = buildCrosswalk(rows, evidenceIndex);
@@ -281,19 +281,10 @@ const outputs = new Map([
     json(implementationMatrix),
   ],
   [resolve(reportRoot, "C00-branch-pr-ci.json"), json(branchPrCi)],
-  [
-    resolve(reportRoot, "v04-upstream-dependency.json"),
-    json(v04Dependency),
-  ],
-  [
-    resolve(reportRoot, "v05-upstream-dependency.json"),
-    json(v05Dependency),
-  ],
+  [resolve(reportRoot, "v04-upstream-dependency.json"), json(v04Dependency)],
+  [resolve(reportRoot, "v05-upstream-dependency.json"), json(v05Dependency)],
   [resolve(reportRoot, "v04-remote-delivery.json"), json(remoteDelivery)],
-  [
-    resolve(reportRoot, "audited-run-evidence.json"),
-    json(auditedRunEvidence),
-  ],
+  [resolve(reportRoot, "audited-run-evidence.json"), json(auditedRunEvidence)],
   [resolve(reportRoot, "evidence-index.json"), json(evidenceIndex)],
   [resolve(reportRoot, "acceptance-ledger.json"), json(acceptanceLedger)],
   [
@@ -304,10 +295,7 @@ const outputs = new Map([
     resolve(reportRoot, "package-contract-conflicts.json"),
     json(packageConflicts),
   ],
-  [
-    resolve(reportRoot, "v04-gap-currentness.json"),
-    json(v04GapCurrentness),
-  ],
+  [resolve(reportRoot, "v04-gap-currentness.json"), json(v04GapCurrentness)],
   [resolve(reportRoot, "v04-real-e2e.json"), json(v04RealE2e)],
   [resolve(reportRoot, "v05-real-e2e.json"), json(v05RealE2e)],
   [resolve(reportRoot, "v04-decision.json"), json(v04Decision)],
@@ -655,13 +643,17 @@ function nonClaimsFor(row) {
   const claims = [];
   const evidence = splitEvidence(row.evidence);
   if (evidence.some((type) => type.startsWith("REAL_"))) {
-    claims.push("Historical fixture or blocked reports do not satisfy live evidence.");
+    claims.push(
+      "Historical fixture or blocked reports do not satisfy live evidence.",
+    );
   }
   if (hasReportEvidenceConflict(row)) {
     claims.push("REPORT is not silently aliased to REPORT_ASSERTION.");
   }
   if (row.phase === "C00") {
-    claims.push("Task-package generation baselines are not current source truth.");
+    claims.push(
+      "Task-package generation baselines are not current source truth.",
+    );
   }
   return claims;
 }
@@ -793,7 +785,10 @@ async function buildEvidenceIndex(auditedEvidence) {
         bytes: 0,
         sha256: null,
         promotable: false,
-        limitations: [...definition.limitations, "The referenced file is absent."],
+        limitations: [
+          ...definition.limitations,
+          "The referenced file is absent.",
+        ],
       });
     }
   }
@@ -902,13 +897,28 @@ function postgresAssertionFor(acceptanceId) {
   if (["AC-V5-LIFECYCLE-008", "AC-V5-LIFECYCLE-009"].includes(acceptanceId)) {
     return "replays an exact duplicate but rejects event or sequence collisions";
   }
-  if (["AC-V5-LIFECYCLE-010", "AC-V5-LIFECYCLE-012", "AC-V5-STEER-007"].includes(acceptanceId)) {
+  if (
+    ["AC-V5-LIFECYCLE-010", "AC-V5-LIFECYCLE-012", "AC-V5-STEER-007"].includes(
+      acceptanceId,
+    )
+  ) {
     return "switches active revisions with CAS and preserves late events as audit only";
   }
-  if (["AC-V5-STEER-006", "AC-V5-STEER-008", "AC-V5-STEER-009", "AC-V5-STEER-010"].includes(acceptanceId)) {
+  if (
+    [
+      "AC-V5-STEER-006",
+      "AC-V5-STEER-008",
+      "AC-V5-STEER-009",
+      "AC-V5-STEER-010",
+    ].includes(acceptanceId)
+  ) {
     return "enforces scoped proposal idempotency and one pending proposal";
   }
-  if (["AC-V5-STEER-019", "AC-V5-STEER-020", "AC-V5-LIFECYCLE-002"].includes(acceptanceId)) {
+  if (
+    ["AC-V5-STEER-019", "AC-V5-STEER-020", "AC-V5-LIFECYCLE-002"].includes(
+      acceptanceId,
+    )
+  ) {
     return "keeps a queued revision inactive until the old run is terminal, then activates and starts atomically";
   }
   if (["AC-V5-LIFECYCLE-003", "AC-V5-LIFECYCLE-005"].includes(acceptanceId)) {
@@ -922,7 +932,9 @@ function buildPackageConflicts(matrixRows) {
     .filter((row) => splitEvidence(row.evidence).includes("REPORT"))
     .map(({ id }) => id);
   if (reportRows.length !== 24) {
-    throw new Error(`Expected 24 REPORT conflict rows, received ${reportRows.length}`);
+    throw new Error(
+      `Expected 24 REPORT conflict rows, received ${reportRows.length}`,
+    );
   }
   return {
     schemaVersion: "sacs-v04-v05-package-contract-conflicts/1.0",
@@ -1008,7 +1020,13 @@ function buildSourceLock({
   };
 }
 
-function buildImplementationMatrix({ generatedAt: at, git: snapshot, manifest: packageManifest, v04Gates: v4, v05Gates: v5 }) {
+function buildImplementationMatrix({
+  generatedAt: at,
+  git: snapshot,
+  manifest: packageManifest,
+  v04Gates: v4,
+  v05Gates: v5,
+}) {
   return {
     schemaVersion: "sacs-v04-v05-closure-implementation-matrix/1.0",
     generatedAt: at,
@@ -1108,7 +1126,13 @@ function buildBranchPrCi({ generatedAt: at, git: snapshot }) {
   };
 }
 
-function buildDependency({ dependencyId, owner, marker, requiredArtifacts, blockingGates }) {
+function buildDependency({
+  dependencyId,
+  owner,
+  marker,
+  requiredArtifacts,
+  blockingGates,
+}) {
   return {
     schemaVersion: "sacs-upstream-dependency-report/1.0",
     dependencyId,
@@ -1142,7 +1166,14 @@ function buildRemoteDelivery({ generatedAt: at, git: snapshot }) {
   };
 }
 
-function buildDecision({ track, decision, sourceSha, counts: trackCounts, blockers, nonClaims }) {
+function buildDecision({
+  track,
+  decision,
+  sourceSha,
+  counts: trackCounts,
+  blockers,
+  nonClaims,
+}) {
   return {
     schemaVersion: "sacs-closure-decision/1.0",
     track,
@@ -1168,7 +1199,9 @@ function buildDecision({ track, decision, sourceSha, counts: trackCounts, blocke
 function buildRealE2e({ track, sourceSha, rows: caseRows, blocker }) {
   const expectedCount = track === "V0_4" ? 18 : 22;
   if (caseRows.length !== expectedCount) {
-    throw new Error(`${track} expected ${expectedCount} E2E rows, received ${caseRows.length}`);
+    throw new Error(
+      `${track} expected ${expectedCount} E2E rows, received ${caseRows.length}`,
+    );
   }
   return {
     schemaVersion: "sacs-real-e2e-report/1.0",
@@ -1190,7 +1223,9 @@ function buildRealE2e({ track, sourceSha, rows: caseRows, blocker }) {
 
 function buildGapCurrentness(caseRows, sourceSha) {
   if (caseRows.length !== 12) {
-    throw new Error(`V0_4 gap/currentness expected 12 rows, received ${caseRows.length}`);
+    throw new Error(
+      `V0_4 gap/currentness expected 12 rows, received ${caseRows.length}`,
+    );
   }
   return {
     schemaVersion: "sacs-v04-gap-currentness-report/1.0",
@@ -1209,16 +1244,26 @@ function buildGapCurrentness(caseRows, sourceSha) {
   };
 }
 
-function buildPhaseSummary({ entries: ledgerEntries, counts: allCounts, v04Decision: v4, v05Decision: v5 }) {
+function buildPhaseSummary({
+  entries: ledgerEntries,
+  counts: allCounts,
+  v04Decision: v4,
+  v05Decision: v5,
+}) {
   return {
     schemaVersion: "sacs-v04-v05-closure-phase-summary/1.0",
     decisions: { v04: v4.decision, v05: v5.decision },
     counts: allCounts,
     phases: Object.fromEntries(
       Object.keys(EXPECTED_PHASE_COUNTS).map((phase) => {
-        const phaseEntries = ledgerEntries.filter((entry) => entry.phase === phase);
+        const phaseEntries = ledgerEntries.filter(
+          (entry) => entry.phase === phase,
+        );
         const summary = summarize(phaseEntries);
-        return [phase, { status: aggregateStatus(summary), acceptance: summary }];
+        return [
+          phase,
+          { status: aggregateStatus(summary), acceptance: summary },
+        ];
       }),
     ),
     protectedActionsPerformed: [],
@@ -1286,7 +1331,9 @@ function captureGitSnapshot(sourceLock) {
       actualHeadSha,
     ]);
   } catch {
-    throw new Error("Qualification source commit is missing or not an ancestor");
+    throw new Error(
+      "Qualification source commit is missing or not an ancestor",
+    );
   }
   const headCommittedAt = gitValue([
     "show",
@@ -1376,7 +1423,9 @@ function gitLines(arguments_) {
 
 function verifyMatrix(matrixRows) {
   if (matrixRows.length !== 298) {
-    throw new Error(`Expected 298 acceptance rows, received ${matrixRows.length}`);
+    throw new Error(
+      `Expected 298 acceptance rows, received ${matrixRows.length}`,
+    );
   }
   const ids = new Set();
   for (const row of matrixRows) {
@@ -1402,7 +1451,9 @@ function verifyLedger(ledgerEntries, crosswalk) {
     }
     ids.add(entry.acceptanceId);
     if (!ALLOWED_STATUSES.has(entry.status)) {
-      throw new Error(`${entry.acceptanceId} has invalid status ${entry.status}`);
+      throw new Error(
+        `${entry.acceptanceId} has invalid status ${entry.status}`,
+      );
     }
     if (entry.status === "PASS") {
       const supplied = new Set(
@@ -1410,9 +1461,13 @@ function verifyLedger(ledgerEntries, crosswalk) {
           .filter(({ promotable }) => promotable)
           .map(({ type }) => type),
       );
-      const missing = entry.requiredEvidenceTypes.filter((type) => !supplied.has(type));
+      const missing = entry.requiredEvidenceTypes.filter(
+        (type) => !supplied.has(type),
+      );
       if (missing.length > 0) {
-        throw new Error(`${entry.acceptanceId} cannot PASS without ${missing.join(", ")}`);
+        throw new Error(
+          `${entry.acceptanceId} cannot PASS without ${missing.join(", ")}`,
+        );
       }
     } else if (entry.missingEvidenceTypes.length === 0) {
       throw new Error(`${entry.acceptanceId} lacks explicit missing evidence`);
@@ -1423,16 +1478,24 @@ function verifyLedger(ledgerEntries, crosswalk) {
 function verifyTrackDecision(decision, policy) {
   const policyKey = decision.track === "V0_4" ? "v04" : "v05";
   if (!policy[policyKey].allowed.includes(decision.decision)) {
-    throw new Error(`${decision.track} uses forbidden decision ${decision.decision}`);
+    throw new Error(
+      `${decision.track} uses forbidden decision ${decision.decision}`,
+    );
   }
   const acceptance = decision.acceptance;
   if (
-    acceptance.pass + acceptance.fail + acceptance.notRun + acceptance.blocked !==
+    acceptance.pass +
+      acceptance.fail +
+      acceptance.notRun +
+      acceptance.blocked !==
     acceptance.required
   ) {
     throw new Error(`${decision.track} acceptance counts do not sum`);
   }
-  if (decision.decision === "MERGE_READY" || decision.decision === "REAL_READY") {
+  if (
+    decision.decision === "MERGE_READY" ||
+    decision.decision === "REAL_READY"
+  ) {
     if (
       acceptance.fail !== 0 ||
       acceptance.notRun !== 0 ||
@@ -1490,7 +1553,9 @@ function verifyGroupedCounts(rowsValue, key, expected) {
   );
   for (const [value, count] of Object.entries(expected)) {
     if (actual[value] !== count) {
-      throw new Error(`${key} ${value}: expected ${count}, received ${actual[value]}`);
+      throw new Error(
+        `${key} ${value}: expected ${count}, received ${actual[value]}`,
+      );
     }
   }
 }
@@ -1511,7 +1576,9 @@ async function emitOutputs(outputs, verifyOnly) {
     }
   }
   if (drift.length > 0) {
-    throw new Error(`Closure qualification artifact drift: ${drift.join(", ")}`);
+    throw new Error(
+      `Closure qualification artifact drift: ${drift.join(", ")}`,
+    );
   }
 }
 
@@ -1598,6 +1665,8 @@ function parseCsv(value) {
     (row) => row.length > 1 || row[0]?.length > 0,
   );
   return body.map((row) =>
-    Object.fromEntries(headers.map((header, index) => [header, row[index] ?? ""])),
+    Object.fromEntries(
+      headers.map((header, index) => [header, row[index] ?? ""]),
+    ),
   );
 }

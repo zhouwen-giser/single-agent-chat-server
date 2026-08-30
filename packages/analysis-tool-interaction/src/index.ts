@@ -113,10 +113,7 @@ export function validateAndApplyPublicArgsPatch(
   );
   for (const operation of patch) {
     assertEditablePath(operation.path, descriptor.editablePaths);
-    if (
-      operation.op !== "remove" &&
-      !("value" in operation)
-    ) {
+    if (operation.op !== "remove" && !("value" in operation)) {
       throw new AnalysisControlError(
         422,
         "PATCH_VALUE_REQUIRED",

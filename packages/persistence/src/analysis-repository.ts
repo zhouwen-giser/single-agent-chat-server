@@ -368,10 +368,7 @@ export class AnalysisRepository {
           input.queuedRevisionNumber,
         ],
       );
-      const queued = requiredRow(
-        queuedResult.rows,
-        "queued revision lookup",
-      );
+      const queued = requiredRow(queuedResult.rows, "queued revision lookup");
       if (
         queued.status !== "QUEUED" ||
         queued.parent_revision_id !== input.expectedActiveRevisionId
