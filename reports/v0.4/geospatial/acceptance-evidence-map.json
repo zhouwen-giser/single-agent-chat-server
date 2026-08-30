@@ -2025,7 +2025,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C001",
           "assertionLocator": "AC-C001: Finding discriminated union",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2057,7 +2057,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C002",
           "assertionLocator": "AC-C002: Point measurement typed",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2089,7 +2089,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C003",
           "assertionLocator": "AC-C003: Point classification typed",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2121,7 +2121,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C004",
           "assertionLocator": "AC-C004: Feature collection typed",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2153,7 +2153,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C005",
           "assertionLocator": "AC-C005: Profile typed",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2185,7 +2185,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C006",
           "assertionLocator": "AC-C006: Qualified explanation typed",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2217,7 +2217,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C007",
           "assertionLocator": "AC-C007: Catalog typed",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2249,7 +2249,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C008",
           "assertionLocator": "AC-C008: Finding IDs bounded",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2281,7 +2281,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C009",
           "assertionLocator": "AC-C009: Finding evidence IDs",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2313,7 +2313,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C010",
           "assertionLocator": "AC-C010: Source product identity",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2345,7 +2345,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C011",
           "assertionLocator": "AC-C011: Content hash",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2377,7 +2377,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C012",
           "assertionLocator": "AC-C012: Descriptor hash",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2409,7 +2409,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C013",
           "assertionLocator": "AC-C013: No productVersion",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2441,7 +2441,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C014",
           "assertionLocator": "AC-C014: Typed gaps",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2473,7 +2473,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C015",
           "assertionLocator": "AC-C015: Map projection union",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2505,7 +2505,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C016",
           "assertionLocator": "AC-C016: WorldExplanation identity",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2537,7 +2537,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C017",
           "assertionLocator": "AC-C017: Grounding identity",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2569,7 +2569,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C018",
           "assertionLocator": "AC-C018: Explanation statuses",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2601,7 +2601,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C019",
           "assertionLocator": "AC-C019: Question kinds",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2633,7 +2633,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C020",
           "assertionLocator": "AC-C020: Rendered text bound",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2665,7 +2665,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C021",
           "assertionLocator": "AC-C021: Explanation findings",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2697,7 +2697,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C022",
           "assertionLocator": "AC-C022: Explanation references",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2729,7 +2729,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C023",
           "assertionLocator": "AC-C023: Sanitized source products",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2761,7 +2761,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C024",
           "assertionLocator": "AC-C024: Provenance closure fields",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2793,7 +2793,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C025",
           "assertionLocator": "AC-C025: Replay key",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2825,7 +2825,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C026",
           "assertionLocator": "AC-C026: World focus projection",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2857,7 +2857,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C027",
           "assertionLocator": "AC-C027: Currentness result",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2889,7 +2889,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C028",
           "assertionLocator": "AC-C028: Normalization report",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2921,7 +2921,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C029",
           "assertionLocator": "AC-C029: Renderer policy",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2953,7 +2953,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C030",
           "assertionLocator": "AC-C030: Canonical hash tests",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -2985,7 +2985,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C031",
           "assertionLocator": "AC-C031: Schema examples",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -3017,7 +3017,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-C032",
           "assertionLocator": "AC-C032: S15 marker",
-          "sourceSha256": "sha256:a2d61c60e3dbbb496e4b08237060826f32df36e2a78ef5577116c5343287bcc9",
+          "sourceSha256": "sha256:5170d1c3df18e4e24f2681692d9d463d942621d6be6057e868d417e0a0d920bf",
           "claimStatus": "PASS"
         },
         {
@@ -6524,7 +6524,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P001",
           "assertionLocator": "AC-P001: Migration 0013",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6533,7 +6533,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P001",
           "assertionLocator": "AC-P001: Migration 0013",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6583,7 +6583,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P002",
           "assertionLocator": "AC-P002: World explanation table",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6592,7 +6592,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P002",
           "assertionLocator": "AC-P002: World explanation table",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6642,7 +6642,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P003",
           "assertionLocator": "AC-P003: Principal FK",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6651,7 +6651,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P003",
           "assertionLocator": "AC-P003: Principal FK",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6701,7 +6701,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P004",
           "assertionLocator": "AC-P004: Thread FK",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6710,7 +6710,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P004",
           "assertionLocator": "AC-P004: Thread FK",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6760,7 +6760,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P005",
           "assertionLocator": "AC-P005: Grounding identity",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6769,7 +6769,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P005",
           "assertionLocator": "AC-P005: Grounding identity",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6819,7 +6819,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P006",
           "assertionLocator": "AC-P006: Locale stored",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6828,7 +6828,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P006",
           "assertionLocator": "AC-P006: Locale stored",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6878,7 +6878,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P007",
           "assertionLocator": "AC-P007: Contract hash stored",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6887,7 +6887,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P007",
           "assertionLocator": "AC-P007: Contract hash stored",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6937,7 +6937,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P008",
           "assertionLocator": "AC-P008: Renderer policy hash stored",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6946,7 +6946,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P008",
           "assertionLocator": "AC-P008: Renderer policy hash stored",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -6996,7 +6996,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P009",
           "assertionLocator": "AC-P009: Explanation JSON",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7005,7 +7005,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P009",
           "assertionLocator": "AC-P009: Explanation JSON",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7055,7 +7055,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P010",
           "assertionLocator": "AC-P010: Explanation hash",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7064,7 +7064,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P010",
           "assertionLocator": "AC-P010: Explanation hash",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7114,7 +7114,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P011",
           "assertionLocator": "AC-P011: Unique replay key",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7123,7 +7123,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P011",
           "assertionLocator": "AC-P011: Unique replay key",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7173,7 +7173,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P012",
           "assertionLocator": "AC-P012: Immutable identity",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7182,7 +7182,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P012",
           "assertionLocator": "AC-P012: Immutable identity",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7232,7 +7232,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P013",
           "assertionLocator": "AC-P013: Exact replay",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7241,7 +7241,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P013",
           "assertionLocator": "AC-P013: Exact replay",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7291,7 +7291,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P014",
           "assertionLocator": "AC-P014: No second WSGS POST",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7300,7 +7300,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P014",
           "assertionLocator": "AC-P014: No second WSGS POST",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7350,7 +7350,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P015",
           "assertionLocator": "AC-P015: New renderer policy",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7359,7 +7359,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P015",
           "assertionLocator": "AC-P015: New renderer policy",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7409,7 +7409,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P016",
           "assertionLocator": "AC-P016: New contract hash",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7418,7 +7418,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P016",
           "assertionLocator": "AC-P016: New contract hash",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7468,7 +7468,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P017",
           "assertionLocator": "AC-P017: Cross-protocol replay",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7477,7 +7477,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P017",
           "assertionLocator": "AC-P017: Cross-protocol replay",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7527,7 +7527,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P018",
           "assertionLocator": "AC-P018: World focus pointers",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7536,7 +7536,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P018",
           "assertionLocator": "AC-P018: World focus pointers",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7586,7 +7586,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P019",
           "assertionLocator": "AC-P019: Optional finding identity columns",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7595,7 +7595,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P019",
           "assertionLocator": "AC-P019: Optional finding identity columns",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7645,7 +7645,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P020",
           "assertionLocator": "AC-P020: No large geometry duplication",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7654,7 +7654,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P020",
           "assertionLocator": "AC-P020: No large geometry duplication",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7704,7 +7704,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P021",
           "assertionLocator": "AC-P021: No product catalog table",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7713,7 +7713,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P021",
           "assertionLocator": "AC-P021: No product catalog table",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7763,7 +7763,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P022",
           "assertionLocator": "AC-P022: Real PostgreSQL migration",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7772,7 +7772,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P022",
           "assertionLocator": "AC-P022: Real PostgreSQL migration",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7822,7 +7822,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P023",
           "assertionLocator": "AC-P023: Concurrent create",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7831,7 +7831,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P023",
           "assertionLocator": "AC-P023: Concurrent create",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7881,7 +7881,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P024",
           "assertionLocator": "AC-P024: Restart recovery",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7890,7 +7890,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P024",
           "assertionLocator": "AC-P024: Restart recovery",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7940,7 +7940,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P025",
           "assertionLocator": "AC-P025: S19 marker",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
@@ -7949,7 +7949,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-P025",
           "assertionLocator": "AC-P025: S19 marker",
-          "sourceSha256": "sha256:d3f31279b53dad3b1ceb831e145fe0958f93fdb12f795fb74fd3e993b6ddc1ad",
+          "sourceSha256": "sha256:6e54e66515e2f0dd09bfc3add24f495380678fce9eb3b62af8b59d55f254d7b7",
           "claimStatus": "PASS"
         },
         {
