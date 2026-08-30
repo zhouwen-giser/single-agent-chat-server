@@ -14,12 +14,16 @@ const migration = readFileSync(
 const sha256 = "sha256:" + "a".repeat(64);
 
 describe("SACS v0.4 S19 world explanation persistence contract", () => {
-  it("adds one contiguous append-only migration after 0012", () => {
+  it("keeps the world explanation migration contiguous after 0012", () => {
     const files = readdirSync(new URL("../migrations", import.meta.url))
       .filter((file) => /^\d{4}_[a-z0-9_]+\.sql$/u.test(file))
       .sort();
-    expect(files.at(-2)).toBe("0012_authority_fusion.sql");
-    expect(files.at(-1)).toBe("0013_world_explanation.sql");
+    const explanationIndex = files.indexOf("0013_world_explanation.sql");
+    expect(explanationIndex).toBeGreaterThan(0);
+    expect(files.at(explanationIndex - 1)).toBe("0012_authority_fusion.sql");
+    expect(files.at(explanationIndex + 1)).toBe(
+      "0014_structured_world_selection.sql",
+    );
     expect(migration).toContain("CREATE TABLE chat_service.world_explanation");
     expect(migration).not.toMatch(/CREATE TABLE .*product_catalog/iu);
   });
