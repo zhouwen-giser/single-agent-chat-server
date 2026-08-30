@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "sacs-analysis-agui-event-mapping/1.0",
+  "mappings": [
+    [
+      "analysis.run.started",
+      "RUN_STARTED"
+    ],
+    [
+      "analysis.plan.published",
+      "STATE_SNAPSHOT+ACTIVITY_SNAPSHOT"
+    ],
+    [
+      "analysis.phase.started",
+      "STEP_STARTED"
+    ],
+    [
+      "analysis.phase.finished",
+      "STEP_FINISHED"
+    ],
+    [
+      "analysis.tool.published",
+      "TOOL_CALL_START+TOOL_CALL_ARGS+TOOL_CALL_END"
+    ],
+    [
+      "analysis.tool.completed",
+      "TOOL_CALL_RESULT+STATE_DELTA"
+    ],
+    [
+      "analysis.node.progress",
+      "ACTIVITY_DELTA"
+    ],
+    [
+      "analysis.layer.available",
+      "STATE_DELTA"
+    ],
+    [
+      "analysis.intervention.required",
+      "STATE_SNAPSHOT+ACTIVITY_SNAPSHOT+RUN_FINISHED_INTERRUPT"
+    ],
+    [
+      "analysis.run.completed",
+      "TEXT_MESSAGE+RUN_FINISHED"
+    ]
+  ],
+  "toolResultPolicy": "BOUNDED_SUMMARY_ONLY",
+  "largeGeometryInToolResult": false
+}

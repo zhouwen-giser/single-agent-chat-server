@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "sacs-v05-limits/1.0",
+  "maxNodes": 256,
+  "maxEdges": 1024,
+  "maxMapLayers": 256,
+  "maxInlineGeoJsonBytes": 1048576,
+  "maxInlineFeatures": 256,
+  "maxPinnedFocus": 64,
+  "maxEditablePaths": 64,
+  "maxJsonPatchOperations": 64,
+  "maxPublicArgsBytes": 262144,
+  "maxAnalysisStateBytes": 4194304,
+  "maxActivityStateBytes": 2097152,
+  "maxPendingSubmittedProposals": 1,
+  "maxAutomaticRetry": 1,
+  "hardCeilingsImmutableAtRuntime": true
+}

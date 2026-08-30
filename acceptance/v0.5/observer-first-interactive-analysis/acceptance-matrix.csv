@@ -1,0 +1,419 @@
+id,required,phase,area,scenario,expected,evidence
+AC-A00-001,yes,A00,Baseline,SACS source reconciliation,Actual main/base/PR head recorded,SOURCE_LOCK
+AC-A00-002,yes,A00,Baseline,v0.4 World Grounding,Base ancestry proven,SOURCE_LOCK
+AC-A00-003,yes,A00,Prerequisite,v0.4 Geospatial Explanation,Completed branch/merge found or precise blocker,SOURCE_LOCK
+AC-A00-004,yes,A00,Baseline,WSGS source,Actual PR/head/state recorded,SOURCE_LOCK
+AC-A00-005,yes,A00,Baseline,GDPS source,Actual merged v0.2/main recorded,SOURCE_LOCK
+AC-A00-006,yes,A00,Baseline,GOWM source,Main and repair PR state recorded,SOURCE_LOCK
+AC-A00-007,yes,A00,Environment,Running environment,Actual WSGS/GOWM/GDPS availability recorded,LIVE_DISCOVERY
+AC-A00-008,yes,A00,AGUI,AG-UI core version,Exact installed version recorded,CONTRACT
+AC-A00-009,yes,A00,AGUI,AG-UI client version,Exact installed version recorded,CONTRACT
+AC-A00-010,yes,A00,AGUI,AG-UI encoder version,Exact installed version recorded,CONTRACT
+AC-A00-011,yes,A00,AGUI,AG-UI Step schema,Actual package accepts required events,CONTRACT
+AC-A00-012,yes,A00,AGUI,AG-UI ToolCall schema,Actual package accepts required events,CONTRACT
+AC-A00-013,yes,A00,AGUI,AG-UI Interrupt schema,Actual package accepts required contract,CONTRACT
+AC-A00-014,yes,A00,AGUI,AG-UI Resume schema,Actual package accepts required contract,CONTRACT
+AC-A00-015,yes,A00,Regression,AG-UI v0.2 regression,Official client baseline passes,AGUI_OFFICIAL_CLIENT
+AC-A00-016,yes,A00,Database,Migration inventory,Actual next append-only migration selected,STATIC_GUARD
+AC-A00-017,yes,A00,Delivery,Stacked branch,Correct base selected,GIT
+AC-A00-018,yes,A00,Delivery,No PR15 pollution,v0.5 not added to PR15,GIT
+AC-A00-019,yes,A00,Delivery,No force push,Shared history preserved,GIT
+AC-A00-020,yes,A00,Evidence,A00 report,Machine-readable source/prerequisite report,REPORT_ASSERTION
+AC-A01-001,yes,A01,Handoff,Consumer lock checksum,Authoritative WSGS bundle verifies,UPSTREAM_LOCK
+AC-A01-002,yes,A01,Handoff,WSGS SHA,Lock matches actual WSGS candidate,UPSTREAM_LOCK
+AC-A01-003,yes,A01,Handoff,Plan schema,Exact bytes/hash validated,SCHEMA
+AC-A01-004,yes,A01,Handoff,Event schema,Exact bytes/hash validated,SCHEMA
+AC-A01-005,yes,A01,Handoff,Tool interaction schema,Exact bytes/hash validated,SCHEMA
+AC-A01-006,yes,A01,Handoff,Revision compile schema,Exact bytes/hash validated,SCHEMA
+AC-A01-007,yes,A01,Handoff,Cancel schema,Exact bytes/hash validated,SCHEMA
+AC-A01-008,yes,A01,Handoff,Intervention schema,Exact bytes/hash validated,SCHEMA
+AC-A01-009,yes,A01,Handoff,Transport mode,Streaming or polling explicitly declared,CONTRACT
+AC-A01-010,yes,A01,Events,Sequence semantics,Monotonic and idempotent semantics declared,CONTRACT
+AC-A01-011,yes,A01,Events,Recovery semantics,Snapshot/live behavior declared,CONTRACT
+AC-A01-012,yes,A01,Contracts,Generated TypeScript,No hand-written drift,STATIC_GUARD
+AC-A01-013,yes,A01,Contracts,Generate --check,Generated outputs stable,STATIC_GUARD
+AC-A01-014,yes,A01,Architecture,No route guessing,Endpoints come from lock,STATIC_GUARD
+AC-A01-015,yes,A01,Safety,Missing handoff,Fail-closed blocker,UNIT
+AC-A01-016,yes,A01,Architecture,No inferred tool calls,Final evidence cannot fabricate process,STATIC_GUARD
+AC-A01-017,yes,A01,Events,Unknown event type,No fake progress,UNIT
+AC-A01-018,yes,A01,Events,Duplicate exact event,Idempotent,UNIT
+AC-A01-019,yes,A01,Events,Sequence collision,Protocol failure,UNIT
+AC-A01-020,yes,A01,Events,Old plan event,Cannot mutate active revision,UNIT
+AC-A02-001,yes,A02,Lifecycle,Session contract,Ownership/autonomy/status typed,SCHEMA
+AC-A02-002,yes,A02,Lifecycle,Revision contract,Immutable plan definition typed,SCHEMA
+AC-A02-003,yes,A02,Lifecycle,Run contract,Attempt/lineage typed,SCHEMA
+AC-A02-004,yes,A02,Lifecycle,Node contract,Three status axes typed,SCHEMA
+AC-A02-005,yes,A02,Lifecycle,Analysis event contract,Sequence/hash typed,SCHEMA
+AC-A02-006,yes,A02,Lifecycle,Projection contract,State/activity revision typed,SCHEMA
+AC-A02-007,yes,A02,Lifecycle,Proposal contract,CAS/idempotency/edit typed,SCHEMA
+AC-A02-008,yes,A02,Lifecycle,Intervention contract,Interrupt/request/response typed,SCHEMA
+AC-A02-009,yes,A02,Database,Revision number uniqueness,Unique per analysis,REAL_POSTGRES
+AC-A02-010,yes,A02,Database,Run attempt uniqueness,Unique per revision,REAL_POSTGRES
+AC-A02-011,yes,A02,Revision,Node set disjointness,Reuse/invalidate/rerun overlap rejected,UNIT
+AC-A02-012,yes,A02,Revision,Parent plan hash,Mismatch rejected,UNIT
+AC-A02-013,yes,A02,Lifecycle,Retry semantics,"Retry creates Run, not Revision",UNIT
+AC-A02-014,yes,A02,Lifecycle,Input change semantics,Creates immutable Revision,UNIT
+AC-A02-015,yes,A02,Lifecycle,Default Observer,New session defaults to OBSERVER,UNIT
+AC-A02-016,yes,A02,Lifecycle,Archived analysis,Cannot accept proposal,UNIT
+AC-A02-017,yes,A02,Lifecycle,Analysis ownership,Principal/thread bound,SECURITY
+AC-A02-018,yes,A02,Integrity,Canonical hashes,Plan/state/event hashes deterministic,UNIT
+AC-A03-001,yes,A03,Persistence,Append-only events,No event update/delete path,STATIC_GUARD
+AC-A03-002,yes,A03,Persistence,Event ID unique,Exact duplicate safe,REAL_POSTGRES
+AC-A03-003,yes,A03,Persistence,Analysis sequence primary key,Ordering durable,REAL_POSTGRES
+AC-A03-004,yes,A03,Persistence,Upstream sequence unique,Duplicate collision detected,REAL_POSTGRES
+AC-A03-005,yes,A03,Persistence,Projection row,State/activity snapshots durable,REAL_POSTGRES
+AC-A03-006,yes,A03,Persistence,Persist before publish,Commit precedes AG-UI emission,INTEGRATION
+AC-A03-007,yes,A03,Persistence,Atomic event+projection,Same transaction,REAL_POSTGRES
+AC-A03-008,yes,A03,Persistence,CAS active revision,Stale switch conflicts,REAL_POSTGRES
+AC-A03-009,yes,A03,Recovery,SACS restart,Projection restored,REAL_POSTGRES
+AC-A03-010,yes,A03,Recovery,Browser reconnect,Snapshot created from projection,INTEGRATION
+AC-A03-011,yes,A03,Ordering,Late event audit,Stored without active mutation,REAL_POSTGRES
+AC-A03-012,yes,A03,Limits,Projection size limit,Fail closed,SECURITY
+AC-A03-013,yes,A03,Integrity,State hash,Canonical deterministic,UNIT
+AC-A03-014,yes,A03,Integrity,Activity hash,Canonical deterministic,UNIT
+AC-A03-015,yes,A03,Database,Migration upgrade,Existing schema upgrades append-only,REAL_POSTGRES
+AC-A03-016,yes,A03,Database,Migration replay,Checksums stable,REAL_POSTGRES
+AC-A04-001,yes,A04,Policy,Read-only clear,AUTO_CONTINUE,UNIT
+AC-A04-002,yes,A04,Policy,Read-only long,NOTIFY_ONLY,UNIT
+AC-A04-003,yes,A04,Policy,User suggestion,QUEUE_REVISION,UNIT
+AC-A04-004,yes,A04,Policy,Reference ambiguity,INTERRUPT_REQUIRED,UNIT
+AC-A04-005,yes,A04,Policy,Product ambiguity,INTERRUPT_REQUIRED,UNIT
+AC-A04-006,yes,A04,Policy,Permission requirement,INTERRUPT_REQUIRED,UNIT
+AC-A04-007,yes,A04,Policy,Budget approval,INTERRUPT_REQUIRED,UNIT
+AC-A04-008,yes,A04,Policy,Controlled operation,INTERRUPT_REQUIRED,UNIT
+AC-A04-009,yes,A04,Policy,Irreversible operation,INTERRUPT_REQUIRED,UNIT
+AC-A04-010,yes,A04,Policy,Explicit stop/change,INTERRUPT_REQUIRED,UNIT
+AC-A04-011,yes,A04,Policy,Data gap,AUTO_CONTINUE terminal explanation,UNIT
+AC-A04-012,yes,A04,Policy,Coverage gap,AUTO_CONTINUE terminal explanation,UNIT
+AC-A04-013,yes,A04,Policy,Capability gap,AUTO_CONTINUE terminal explanation,UNIT
+AC-A04-014,yes,A04,Policy,Policy priority,Security/risk overrides convenience,UNIT
+AC-A04-015,yes,A04,Policy,Policy deterministic,Same input same decision/hash,UNIT
+AC-A04-016,yes,A04,Policy,Decision persistence,Policy evidence stored,REAL_POSTGRES
+AC-A04-017,yes,A04,Policy,No per-tool approval default,Observer invariant,STATIC_GUARD
+AC-A04-018,yes,A04,Policy,Unattended completion,Zero interrupts,REAL_CHAIN
+AC-A05-001,yes,A05,Compatibility,v0.2 capability unchanged,Old client remains valid,AGUI_OFFICIAL_CLIENT
+AC-A05-002,yes,A05,AGUI,v0.3 profile negotiation,Explicit client request,CONTRACT
+AC-A05-003,yes,A05,AGUI,Unknown profile,Fail or deterministic fallback,CONTRACT
+AC-A05-004,yes,A05,AGUI,RUN mapping,Lifecycle correct,UNIT
+AC-A05-005,yes,A05,AGUI,STEP mapping,Phase lifecycle correct,UNIT
+AC-A05-006,yes,A05,AGUI,ToolCall lifecycle,Start/args/end/result correlated,UNIT
+AC-A05-007,yes,A05,AGUI,Tool public args only,No execution secrets,SECURITY
+AC-A05-008,yes,A05,AGUI,Activity snapshot,Full DAG,UNIT
+AC-A05-009,yes,A05,AGUI,Activity delta,Node update only,UNIT
+AC-A05-010,yes,A05,AGUI,State snapshot,Full v0.3 state,UNIT
+AC-A05-011,yes,A05,AGUI,State delta,RFC6902 revision guard,UNIT
+AC-A05-012,yes,A05,AGUI,Delta conflict,Triggers snapshot refresh,REFERENCE_CLIENT
+AC-A05-013,yes,A05,AGUI,Tool result summary,Bounded IDs/summary,SECURITY
+AC-A05-014,yes,A05,AGUI,Full geometry excluded from tool result,Map state only,SECURITY
+AC-A05-015,yes,A05,AGUI,Interrupt snapshots first,Recoverable state,AGUI_OFFICIAL_CLIENT
+AC-A05-016,yes,A05,AGUI,Text after explanation,Shared explanation identity,INTEGRATION
+AC-A05-017,yes,A05,AGUI,resumable false,No false capability claim,CONTRACT
+AC-A05-018,yes,A05,AGUI,v0.2/v0.3 stream isolation,No event leakage,AGUI_OFFICIAL_CLIENT
+AC-A06-001,yes,A06,Map,Inline GeoJSON,Small safe geometry,UNIT
+AC-A06-002,yes,A06,Map,Reference Set,Stable references,UNIT
+AC-A06-003,yes,A06,Map,Payload Reference,Opaque payload ref,UNIT
+AC-A06-004,yes,A06,Map,Base context layer,Role correct,UNIT
+AC-A06-005,yes,A06,Map,Task context layer,Role correct,UNIT
+AC-A06-006,yes,A06,Map,Query input layer,Role correct,UNIT
+AC-A06-007,yes,A06,Map,Tool scope layer,Role correct,UNIT
+AC-A06-008,yes,A06,Map,Intermediate layer,Role correct,UNIT
+AC-A06-009,yes,A06,Map,Final finding layer,Role correct,UNIT
+AC-A06-010,yes,A06,Map,Focus layer,Role correct,UNIT
+AC-A06-011,yes,A06,Map,Gap layer,Role correct,UNIT
+AC-A06-012,yes,A06,Focus,Execution focus,System-driven,UNIT
+AC-A06-013,yes,A06,Focus,Inspection focus local,Click produces no server mutation,REFERENCE_CLIENT
+AC-A06-014,yes,A06,Focus,Intervention focus,Only necessary candidates,UNIT
+AC-A06-015,yes,A06,Focus,Pinned focus,Explicit command only,INTEGRATION
+AC-A06-016,yes,A06,Focus,Conversation focus,Stable identity only,UNIT
+AC-A06-017,yes,A06,Map,Authoritative geometry,Never editable,UNIT
+AC-A06-018,yes,A06,Map,User override,Separate selector identity,UNIT
+AC-A06-019,yes,A06,Map,Superseded layer,Inspectable/non-current,REFERENCE_CLIENT
+AC-A06-020,yes,A06,Map,Layer load failure,Analysis remains available,REFERENCE_CLIENT
+AC-A06-021,yes,A06,Map,Style token only,No backend visual styling lock-in,CONTRACT
+AC-A06-022,yes,A06,Map,Map browse,Zero backend analysis commands,REAL_CHAIN
+AC-A07-001,yes,A07,ToolInteraction,Execution/public args hashes,Separated,CONTRACT
+AC-A07-002,yes,A07,ToolInteraction,Public edit schema,URI/hash required,CONTRACT
+AC-A07-003,yes,A07,ToolInteraction,Editable path allowlist,Strict,UNIT
+AC-A07-004,yes,A07,ToolInteraction,Editor hints,Typed,SCHEMA
+AC-A07-005,yes,A07,Editor,Map point editor,Supported,REFERENCE_CLIENT
+AC-A07-006,yes,A07,Editor,Map line editor,Supported,REFERENCE_CLIENT
+AC-A07-007,yes,A07,Editor,Map polygon editor,Supported,REFERENCE_CLIENT
+AC-A07-008,yes,A07,Editor,Map radius editor,Supported,REFERENCE_CLIENT
+AC-A07-009,yes,A07,Editor,Number range editor,Supported,REFERENCE_CLIENT
+AC-A07-010,yes,A07,Editor,Time range editor,Supported,REFERENCE_CLIENT
+AC-A07-011,yes,A07,Editor,Enum multiselect,Supported,REFERENCE_CLIENT
+AC-A07-012,yes,A07,Editor,Authorized candidate select,No arbitrary ID,SECURITY
+AC-A07-013,yes,A07,Editor,Not editable,No edit UI,REFERENCE_CLIENT
+AC-A07-014,yes,A07,ToolInteraction,Authority fields absent,No principal/scope/provider,SECURITY
+AC-A07-015,yes,A07,ToolInteraction,Source fingerprints read-only,No hash editing,SECURITY
+AC-A07-016,yes,A07,ToolInteraction,Expiration,Expired edit rejected,UNIT
+AC-A07-017,yes,A07,ToolInteraction,Geometry override,Does not mutate reference,UNIT
+AC-A07-018,yes,A07,ToolInteraction,Public args size,Bounded,SECURITY
+AC-A08-001,yes,A08,ControlAPI,Proposal endpoint,Authenticated,CONTRACT
+AC-A08-002,yes,A08,ControlAPI,Analysis GET,Ownership-scoped,SECURITY
+AC-A08-003,yes,A08,ControlAPI,Snapshot GET,Ownership-scoped,SECURITY
+AC-A08-004,yes,A08,ControlAPI,Cancel endpoint,Authenticated,CONTRACT
+AC-A08-005,yes,A08,ControlAPI,Intervention resolve endpoint,Authenticated,CONTRACT
+AC-A08-006,yes,A08,ControlAPI,Revision CAS,Stale request 409,REAL_POSTGRES
+AC-A08-007,yes,A08,ControlAPI,Unknown node,Rejected,UNIT
+AC-A08-008,yes,A08,ControlAPI,Public args hash,Mismatch rejected,UNIT
+AC-A08-009,yes,A08,ControlAPI,Edit schema hash,Mismatch rejected,UNIT
+AC-A08-010,yes,A08,ControlAPI,Patch ops,Only add/remove/replace/test,UNIT
+AC-A08-011,yes,A08,ControlAPI,move/copy patch,Rejected,UNIT
+AC-A08-012,yes,A08,ControlAPI,Forbidden path,422,UNIT
+AC-A08-013,yes,A08,ControlAPI,Root replacement,Rejected unless schema explicitly permits,UNIT
+AC-A08-014,yes,A08,ControlAPI,Post-patch schema,Invalid 422,UNIT
+AC-A08-015,yes,A08,ControlAPI,Geometry structural budget,Fail closed,SECURITY
+AC-A08-016,yes,A08,ControlAPI,Idempotent replay,Same key and payload,REAL_POSTGRES
+AC-A08-017,yes,A08,ControlAPI,Idempotency conflict,Same key different payload,REAL_POSTGRES
+AC-A08-018,yes,A08,ControlAPI,One pending proposal,Second rejected,REAL_POSTGRES
+AC-A08-019,yes,A08,ControlAPI,Suggest mode,Current run continues,REAL_WSGS
+AC-A08-020,yes,A08,ControlAPI,Interrupt mode,Observer policy governs,REAL_WSGS
+AC-A08-021,yes,A08,ControlAPI,Apply-after mode,Unavailable in v0.5,CONTRACT
+AC-A08-022,yes,A08,ControlAPI,Proposal expiry,410,UNIT
+AC-A09-001,yes,A09,Revision,Complete public args,"Forwarded to WSGS, not tool execution",CONTRACT
+AC-A09-002,yes,A09,Revision,WSGS compile invoked,Real control port,REAL_WSGS
+AC-A09-003,yes,A09,Revision,No SACS plan patch,Static architecture,STATIC_GUARD
+AC-A09-004,yes,A09,Revision,New plan ID/hash,Stored,REAL_POSTGRES
+AC-A09-005,yes,A09,Revision,Parent plan hash,Verified,UNIT
+AC-A09-006,yes,A09,Revision,Reuse set from WSGS,No SACS calculation,STATIC_GUARD
+AC-A09-007,yes,A09,Revision,Set IDs exist,Validated,UNIT
+AC-A09-008,yes,A09,Revision,Sets disjoint,Validated,UNIT
+AC-A09-009,yes,A09,Revision,New Revision atomic,Database transaction,REAL_POSTGRES
+AC-A09-010,yes,A09,Revision,Suggest current run,Continues,REAL_WSGS
+AC-A09-011,yes,A09,Revision,New revision queue,While previous active,REAL_POSTGRES
+AC-A09-012,yes,A09,Revision,New run scheduling,Starts safely,REAL_WSGS
+AC-A09-013,yes,A09,Revision,Old layer relevance,SUPERSEDED,REFERENCE_CLIENT
+AC-A09-014,yes,A09,Revision,Old result retained,Auditable,REAL_POSTGRES
+AC-A09-015,yes,A09,Revision,Revision lineage,Parent IDs correct,REAL_POSTGRES
+AC-A09-016,yes,A09,Revision,Compile timeout,Proposal COMPILE_FAILED,UNIT
+AC-A09-017,yes,A09,Revision,WSGS unavailable,Safe retryable failure,REAL_WSGS
+AC-A09-018,yes,A09,Revision,Source advanced revision,Cause recorded,REAL_POSTGRES
+AC-A10-001,yes,A10,Intervention,Reference ambiguity,Interrupt required,REAL_WSGS
+AC-A10-002,yes,A10,Intervention,Product ambiguity,Interrupt required,REAL_WSGS
+AC-A10-003,yes,A10,Intervention,Gap no interrupt,Automatic terminal explanation,REAL_WSGS
+AC-A10-004,yes,A10,Intervention,Persist intervention,Before run finish,REAL_POSTGRES
+AC-A10-005,yes,A10,Intervention,Snapshot before interrupt,State/activity complete,AGUI_OFFICIAL_CLIENT
+AC-A10-006,yes,A10,Intervention,Resume ownership,Same principal/thread,SECURITY
+AC-A10-007,yes,A10,Intervention,Resume schema,Validated,CONTRACT
+AC-A10-008,yes,A10,Intervention,Parent run lineage,Correct,AGUI_OFFICIAL_CLIENT
+AC-A10-009,yes,A10,Cancel,Cancel request state,CANCEL_REQUESTED,UNIT
+AC-A10-010,yes,A10,Cancel,Cancel acknowledgement,Then CANCELLED,REAL_WSGS
+AC-A10-011,yes,A10,Cancel,Cancel unsupported,Old run continues/new revision queued,REAL_WSGS
+AC-A10-012,yes,A10,Cancel,Cancel completed run,Idempotent terminal response,UNIT
+AC-A10-013,yes,A10,Intervention,Closed intervention,Cannot re-resolve inconsistently,UNIT
+AC-A10-014,yes,A10,Intervention,Expired intervention,410,UNIT
+AC-A10-015,yes,A10,Intervention,Interrupt and apply,New revision,REAL_WSGS
+AC-A10-016,yes,A10,Intervention,Audit hashes,Request/response persisted,REAL_POSTGRES
+AC-A11-001,yes,A11,Timeline,Analysis time window,Shared,UNIT
+AC-A11-002,yes,A11,Timeline,Source time semantics,Per-source typed,UNIT
+AC-A11-003,yes,A11,Timeline,Playback cursor local,No server command,REFERENCE_CLIENT
+AC-A11-004,yes,A11,Timeline,Playback rate local,No server command,REFERENCE_CLIENT
+AC-A11-005,yes,A11,Timeline,Submit time window,Creates Proposal,REAL_WSGS
+AC-A11-006,yes,A11,Timeline,GDPS historical display,CURRENT_BACKGROUND,UNIT
+AC-A11-007,yes,A11,Timeline,No historical product,Static guard,STATIC_GUARD
+AC-A11-008,yes,A11,Timeline,SDAR task time,PLANNED distinction,UNIT
+AC-A11-009,yes,A11,Timeline,GOWM observation time,LIVE/HISTORICAL distinction,UNIT
+AC-A11-010,yes,A11,Timeline,STAS valid/event time,Declared semantics,UNIT
+AC-A12-001,yes,A12,Client,v0.3 decoder,All allowed events,REFERENCE_CLIENT
+AC-A12-002,yes,A12,Client,State snapshot reducer,Replaces state,REFERENCE_CLIENT
+AC-A12-003,yes,A12,Client,State delta reducer,Revision test,REFERENCE_CLIENT
+AC-A12-004,yes,A12,Client,Delta failure,Requests snapshot,REFERENCE_CLIENT
+AC-A12-005,yes,A12,Client,Activity snapshot reducer,Builds DAG,REFERENCE_CLIENT
+AC-A12-006,yes,A12,Client,Activity delta reducer,Updates nodes,REFERENCE_CLIENT
+AC-A12-007,yes,A12,Client,Tool store,Correlates toolCallId,REFERENCE_CLIENT
+AC-A12-008,yes,A12,Client,Map reducer,Layers/focus,REFERENCE_CLIENT
+AC-A12-009,yes,A12,Client,Inspection local,No command,REFERENCE_CLIENT
+AC-A12-010,yes,A12,Client,Pin command,Explicit,REFERENCE_CLIENT
+AC-A12-011,yes,A12,Client,Proposal client,CAS/idempotency,REFERENCE_CLIENT
+AC-A12-012,yes,A12,Client,Intervention client,Resume association,REFERENCE_CLIENT
+AC-A12-013,yes,A12,Client,MapEngineAdapter,Engine-neutral,CONTRACT
+AC-A12-014,yes,A12,Client,No Cesium dependency,Backend/client core engine-neutral,STATIC_GUARD
+AC-A12-015,yes,A12,Client,Headless harness,Runs in CI,CI
+AC-A12-016,yes,A12,Client,v0.2 reference client,Regression pass,AGUI_OFFICIAL_CLIENT
+AC-A13-001,yes,A13,Recovery,Browser disconnect,Does not cancel run,INTEGRATION
+AC-A13-002,yes,A13,Recovery,Reconnect snapshot,State/activity restored,INTEGRATION
+AC-A13-003,yes,A13,Recovery,Duplicate upstream event,Idempotent,REAL_POSTGRES
+AC-A13-004,yes,A13,Recovery,Sequence collision,Protocol failure,REAL_POSTGRES
+AC-A13-005,yes,A13,Recovery,Late plan event,Audit only,REAL_POSTGRES
+AC-A13-006,yes,A13,Recovery,WSGS outage,Safe failure/recovery,REAL_WSGS
+AC-A13-007,yes,A13,Recovery,SACS restart,Projection restored,REAL_POSTGRES
+AC-A13-008,yes,A13,Recovery,Database transient failure,No false event publish,REAL_POSTGRES
+AC-A13-009,yes,A13,Recovery,Layer load error,Finding/text remains,REFERENCE_CLIENT
+AC-A13-010,yes,A13,Security,Secret redaction,No token/endpoint/asset URI,SECURITY
+AC-A13-011,yes,A13,Security,Foreign scope,No identity leak,SECURITY
+AC-A13-012,yes,A13,Limits,State size,Limit enforced,SECURITY
+AC-A13-013,yes,A13,Limits,Activity size,Limit enforced,SECURITY
+AC-A13-014,yes,A13,Limits,Inline GeoJSON size,Limit enforced,SECURITY
+AC-A13-015,yes,A13,Limits,Patch count,Limit enforced,SECURITY
+AC-A13-016,yes,A13,Limits,Public args size,Limit enforced,SECURITY
+AC-A13-017,yes,A13,Limits,Automatic retry,At most one,UNIT
+AC-A13-018,yes,A13,Architecture,No direct downstream,Architecture guard,STATIC_GUARD
+AC-A13-019,yes,A13,Architecture,No spatial library,Architecture guard,STATIC_GUARD
+AC-A13-020,yes,A13,Architecture,No event inference,Architecture guard,STATIC_GUARD
+AC-A01-EVENT-01,yes,A01,WSGSEvent,PLAN_PUBLISHED,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-02,yes,A01,WSGSEvent,NODE_READY,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-03,yes,A01,WSGSEvent,NODE_STARTED,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-04,yes,A01,WSGSEvent,NODE_PROGRESS,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-05,yes,A01,WSGSEvent,TOOL_INTERACTION_PUBLISHED,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-06,yes,A01,WSGSEvent,TOOL_COMPLETED,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-07,yes,A01,WSGSEvent,TOOL_FAILED,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-08,yes,A01,WSGSEvent,MAP_ARTIFACT_AVAILABLE,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-09,yes,A01,WSGSEvent,FINDING_AVAILABLE,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-10,yes,A01,WSGSEvent,INTERVENTION_REQUIRED,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A01-EVENT-11,yes,A01,WSGSEvent,ANALYSIS_COMPLETED,"Strict decode, ordering, idempotency and projection mapping",CONTRACT/UNIT
+AC-A06-STYLE-01,yes,A06,MapStyle,base.context,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-02,yes,A06,MapStyle,task.context,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-03,yes,A06,MapStyle,analysis.input,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-04,yes,A06,MapStyle,analysis.scope,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-05,yes,A06,MapStyle,analysis.intermediate,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-06,yes,A06,MapStyle,finding.primary,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-07,yes,A06,MapStyle,finding.candidate,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-08,yes,A06,MapStyle,focus.execution,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-09,yes,A06,MapStyle,focus.intervention,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-10,yes,A06,MapStyle,focus.pinned,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-11,yes,A06,MapStyle,gap.data,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-12,yes,A06,MapStyle,gap.coverage,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-13,yes,A06,MapStyle,gap.ambiguity,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A06-STYLE-14,yes,A06,MapStyle,source.stale,Contract accepted and reference-client theme resolved,CONTRACT/REFERENCE_CLIENT
+AC-A14-E2E-01,yes,A14,RealE2E,AUTO-01: A区有哪些高地？,zero interrupts; success,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-02,yes,A14,RealE2E,VIEW-01: map pan/zoom/hover/click,zero backend analysis commands,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-03,yes,A14,RealE2E,PIN-01: pin 2号车,pinned focus updated; no analysis,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-04,yes,A14,RealE2E,PROPOSE-01: change radius 1000m to 600m,current run continues; queued revision,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-05,yes,A14,RealE2E,PROPOSE-02: change slope 15-30 to 15-25,WSGS recompile and partial rerun,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-06,yes,A14,RealE2E,REUSE-01: reuse reference/current-position nodes,WSGS reuse decision displayed,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-07,yes,A14,RealE2E,REVISION-01: old map layers,superseded but inspectable,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-08,yes,A14,RealE2E,AMBIGUITY-01: 滨河路附近有哪些排水沟？,interrupt required,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-09,yes,A14,RealE2E,INTERRUPT-01: resolve road candidate,resume with parent run,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-10,yes,A14,RealE2E,USER-STOP-01: 立即停止并应用修改,cancel requested then acknowledged,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-11,yes,A14,RealE2E,CANCEL-FAIL-01: upstream cannot cancel,old run continues; new revision queued,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-12,yes,A14,RealE2E,GAP-DATA-01: missing product,automatic explanation; zero interrupts,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-13,yes,A14,RealE2E,GAP-CAP-01: missing capability,automatic explanation; zero interrupts,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-14,yes,A14,RealE2E,CONFLICT-01: stale revision proposal,409 ANALYSIS_REVISION_CONFLICT,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-15,yes,A14,RealE2E,CONFLICT-02: same idempotency key different request,409 IDEMPOTENCY_CONFLICT,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-16,yes,A14,RealE2E,EDIT-01: edit forbidden path,422 EDIT_PATH_NOT_ALLOWED,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-17,yes,A14,RealE2E,EDIT-02: invalid public args,422 PUBLIC_ARGS_SCHEMA_INVALID,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-18,yes,A14,RealE2E,DELTA-01: out-of-order state delta,snapshot resync,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-19,yes,A14,RealE2E,EVENT-01: duplicate upstream event,idempotent,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-20,yes,A14,RealE2E,EVENT-02: same sequence different payload,protocol failure,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-21,yes,A14,RealE2E,EVENT-03: late old-plan event,audit only; active state unchanged,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-22,yes,A14,RealE2E,DISCONNECT-01: browser disconnect,analysis continues,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-23,yes,A14,RealE2E,RECONNECT-01: new observer connection,state/activity snapshots,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-24,yes,A14,RealE2E,LAYER-01: layer load fails,analysis finding remains available,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-25,yes,A14,RealE2E,FOCUS-01: inspection vs execution focus,independent,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-26,yes,A14,RealE2E,TIME-01: historical window with GDPS,CURRENT_BACKGROUND,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-27,yes,A14,RealE2E,PARITY-01: OpenAI and AG-UI,same explanation/revision identity,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-E2E-28,yes,A14,RealE2E,SECURITY-01: foreign scope layer,no identity leak,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-A14-FINAL-01,yes,A14,Final,v0.4 base ancestry,Candidate contains actual base,CI/REPORT/GIT
+AC-A14-FINAL-02,yes,A14,Final,WSGS handoff SHA,Actual authoritative lock,CI/REPORT/GIT
+AC-A14-FINAL-03,yes,A14,Final,AG-UI v0.2 regression,Pass,CI/REPORT/GIT
+AC-A14-FINAL-04,yes,A14,Final,AG-UI v0.3 official contract,Pass,CI/REPORT/GIT
+AC-A14-FINAL-05,yes,A14,Final,Real WSGS events,Not reconstructed,CI/REPORT/GIT
+AC-A14-FINAL-06,yes,A14,Final,Real Gateway evidence,Traceable,CI/REPORT/GIT
+AC-A14-FINAL-07,yes,A14,Final,Real GDPS/STAS source,Traceable,CI/REPORT/GIT
+AC-A14-FINAL-08,yes,A14,Final,Real PostgreSQL,All lifecycle data durable,CI/REPORT/GIT
+AC-A14-FINAL-09,yes,A14,Final,Zero-interrupt autonomous case,Pass,CI/REPORT/GIT
+AC-A14-FINAL-10,yes,A14,Final,Map browse zero-command case,Pass,CI/REPORT/GIT
+AC-A14-FINAL-11,yes,A14,Final,Proposal/revision case,Pass,CI/REPORT/GIT
+AC-A14-FINAL-12,yes,A14,Final,Ambiguity interrupt case,Pass,CI/REPORT/GIT
+AC-A14-FINAL-13,yes,A14,Final,Cancel acknowledgement case,Pass,CI/REPORT/GIT
+AC-A14-FINAL-14,yes,A14,Final,Disconnect recovery case,Pass,CI/REPORT/GIT
+AC-A14-FINAL-15,yes,A14,Final,No direct downstream,Architecture pass,CI/REPORT/GIT
+AC-A14-FINAL-16,yes,A14,Final,No spatial calculation,Architecture pass,CI/REPORT/GIT
+AC-A14-FINAL-17,yes,A14,Final,All SACS regressions,Pass,CI/REPORT/GIT
+AC-A14-FINAL-18,yes,A14,Final,Docker image 0.5.0,Build/metadata pass,CI/REPORT/GIT
+AC-A14-FINAL-19,yes,A14,Final,Compose readiness,Pass,CI/REPORT/GIT
+AC-A14-FINAL-20,yes,A14,Final,SBOM,Generated,CI/REPORT/GIT
+AC-A14-FINAL-21,yes,A14,Final,Evidence map,Every row mapped,CI/REPORT/GIT
+AC-A14-FINAL-22,yes,A14,Final,No aggregate pass,Independent statuses,CI/REPORT/GIT
+AC-A14-FINAL-23,yes,A14,Final,Task branch remote SHA,Exact,CI/REPORT/GIT
+AC-A14-FINAL-24,yes,A14,Final,Draft PR,Correct stacked base,CI/REPORT/GIT
+AC-A14-FINAL-25,yes,A14,Final,No protected action,No merge/tag/release/deploy,CI/REPORT/GIT
+AC-SCHEMA-001,yes,A02,Schema,acceptance-evidence-map.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-002,yes,A02,Schema,agui-state-v03.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-003,yes,A02,Schema,analysis-change-proposal.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-004,yes,A02,Schema,analysis-event.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-005,yes,A02,Schema,analysis-intervention.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-006,yes,A02,Schema,analysis-node-state.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-007,yes,A02,Schema,analysis-projection.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-008,yes,A02,Schema,analysis-revision.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-009,yes,A02,Schema,analysis-run.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-010,yes,A02,Schema,analysis-session.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-011,yes,A02,Schema,focus-target.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-012,yes,A02,Schema,map-layer-descriptor.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-013,yes,A02,Schema,map-shared-state.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-014,yes,A02,Schema,observer-policy-decision.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-015,yes,A02,Schema,timeline-projection.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-016,yes,A02,Schema,tool-interaction-descriptor.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-017,yes,A02,Schema,wsgs-analysis-consumer-lock.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-018,yes,A02,Schema,wsgs-analysis-event.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-SCHEMA-019,yes,A02,Schema,wsgs-analysis-plan.schema.json,Draft 2020-12 valid and implementation contract tests present,SCHEMA
+AC-NONGOAL-01,yes,A13,NonGoal,MVT,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-NONGOAL-02,yes,A13,NonGoal,RASTER_TILE,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-NONGOAL-03,yes,A13,NonGoal,CZML,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-NONGOAL-04,yes,A13,NonGoal,PRESENTATION_PROXY,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-NONGOAL-05,yes,A13,NonGoal,FULL_EVENT_CURSOR_REPLAY,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-NONGOAL-06,yes,A13,NonGoal,AGUI_RESUMABLE_TRUE,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-NONGOAL-07,yes,A13,NonGoal,WEBSOCKET_STEERING,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-NONGOAL-08,yes,A13,NonGoal,APPLY_AFTER_CURRENT_NODE,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-NONGOAL-09,yes,A13,NonGoal,FULL_PRODUCTION_CESIUM_UI,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-NONGOAL-10,yes,A13,NonGoal,LARGE_SCALE_TRAJECTORY_PLAYBACK,Not implemented or falsely advertised in v0.5,STATIC_GUARD
+AC-EDGE-001,yes,A01,EdgeCase,empty plan nodes,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-002,yes,A02,EdgeCase,duplicate plan node IDs,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-003,yes,A03,EdgeCase,plan graph cycle,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-004,yes,A05,EdgeCase,missing dependency,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-005,yes,A06,EdgeCase,editable path absent from schema,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-006,yes,A07,EdgeCase,public args __proto__ key,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-007,yes,A08,EdgeCase,JSON Patch move/copy,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-008,yes,A09,EdgeCase,JSON Patch root replacement,reject by default,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-009,yes,A10,EdgeCase,non-finite coordinate,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-010,yes,A11,EdgeCase,coordinate count above ceiling,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-011,yes,A12,EdgeCase,proposal after expiry,410,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-012,yes,A13,EdgeCase,proposal after archive,409,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-013,yes,A01,EdgeCase,cancel completed run,idempotent terminal response,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-014,yes,A02,EdgeCase,resolve closed intervention differently,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-015,yes,A03,EdgeCase,cross-thread lookup,non-disclosure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-016,yes,A05,EdgeCase,cross-principal proposal,non-disclosure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-017,yes,A06,EdgeCase,foreign payload reference,non-disclosure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-018,yes,A07,EdgeCase,snapshot hash mismatch,fail closed,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-019,yes,A08,EdgeCase,activity revision mismatch,full snapshot,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-020,yes,A09,EdgeCase,state snapshot after delta,replace shared state,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-021,yes,A10,EdgeCase,same event ID different payload,protocol failure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-022,yes,A11,EdgeCase,same sequence exact duplicate,ignore,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-023,yes,A12,EdgeCase,plan revision regression,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-024,yes,A13,EdgeCase,new plan missing parent relation,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-025,yes,A01,EdgeCase,node sets overlap,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-026,yes,A02,EdgeCase,user draft not submitted,no server mutation,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-027,yes,A03,EdgeCase,pin unstable feature,visual only,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-028,yes,A05,EdgeCase,map selection without stable identity,not conversation focus,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-029,yes,A06,EdgeCase,data gap plus factual finding,contract failure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-030,yes,A07,EdgeCase,tool result contains large geometry,reject/bound,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-031,yes,A08,EdgeCase,ToolCallResult wrong toolCallId,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-032,yes,A09,EdgeCase,interrupt without prior snapshot,contract failure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-033,yes,A10,EdgeCase,resume wrong thread,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-034,yes,A11,EdgeCase,resume wrong principal,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-035,yes,A12,EdgeCase,resume expired interrupt,410,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-036,yes,A13,EdgeCase,old run event after supersede,audit only,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-037,yes,A01,EdgeCase,compile timeout,COMPILE_FAILED,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-038,yes,A02,EdgeCase,WSGS unavailable during compile,safe failure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-039,yes,A03,EdgeCase,database commit succeeds SSE fails,snapshot recovery,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-040,yes,A05,EdgeCase,SSE disconnect mid tool args,snapshot recovery,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-041,yes,A06,EdgeCase,v0.2 client sees v0.3 event,profile isolation,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-042,yes,A07,EdgeCase,v0.3 request omitted,deterministic profile policy,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-043,yes,A08,EdgeCase,unknown custom event,no state authority,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-044,yes,A09,EdgeCase,map layer loading error,text unaffected,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-045,yes,A10,EdgeCase,historical source stale,not current,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-046,yes,A11,EdgeCase,multiple local drafts,allowed locally,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-047,yes,A12,EdgeCase,multiple submitted proposals,server rejects second,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-048,yes,A13,EdgeCase,CURRENT_BACKGROUND mislabeled historical,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-049,yes,A01,EdgeCase,user override mutates GOWM reference,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-050,yes,A02,EdgeCase,productId arbitrary text edit,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-051,yes,A03,EdgeCase,operationId edit attempt,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-052,yes,A05,EdgeCase,dataScope edit attempt,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-053,yes,A06,EdgeCase,descriptorHash edit attempt,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-054,yes,A07,EdgeCase,current run changed in-place,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-055,yes,A08,EdgeCase,retry creates revision,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-056,yes,A09,EdgeCase,new args without WSGS compile,reject,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-057,yes,A10,EdgeCase,SACS computes reuse nodes,architecture failure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-058,yes,A11,EdgeCase,Gap triggers interrupt,policy failure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT
+AC-EDGE-059,yes,A12,EdgeCase,read-only tool asks approval,policy failure,UNIT/CONTRACT/SECURITY/REFERENCE_CLIENT

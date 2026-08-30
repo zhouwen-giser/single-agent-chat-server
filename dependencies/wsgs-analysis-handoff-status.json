@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "sacs-wsgs-analysis-handoff-status/1.0",
+  "profile": "sacs-wsgs-analysis-presentation/1.0",
+  "provenance": "TASK_PACKAGE_PROVISIONAL",
+  "status": "BLOCKED",
+  "marker": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+  "blocker": {
+    "code": "AUTHORITATIVE_WSGS_ANALYSIS_HANDOFF_MISSING",
+    "safeDetail": "The task-package proposal is not an authoritative WSGS handoff and cannot authorize analysis presentation or control traffic."
+  },
+  "requiredArtifacts": [
+    "WSGS_ANALYSIS_CONSUMER_LOCK.json",
+    "WSGS_ANALYSIS_PLAN_SCHEMA_LOCK.json",
+    "WSGS_ANALYSIS_EVENT_SCHEMA_LOCK.json",
+    "WSGS_TOOL_INTERACTION_SCHEMA_LOCK.json",
+    "WSGS_REVISION_CONTROL_SCHEMA_LOCK.json",
+    "WSGS_CANCEL_SCHEMA_LOCK.json",
+    "WSGS_INTERVENTION_SCHEMA_LOCK.json",
+    "CHECKSUMS.json"
+  ],
+  "observedAuthoritativeArtifacts": []
+}

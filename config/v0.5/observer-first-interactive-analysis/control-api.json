@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "sacs-analysis-control-api/1.0",
+  "routes": [
+    [
+      "POST",
+      "/api/v1/analyses/{analysisId}/proposals"
+    ],
+    [
+      "GET",
+      "/api/v1/analyses/{analysisId}"
+    ],
+    [
+      "GET",
+      "/api/v1/analyses/{analysisId}/snapshot"
+    ],
+    [
+      "POST",
+      "/api/v1/analyses/{analysisId}/cancel"
+    ],
+    [
+      "POST",
+      "/api/v1/analyses/{analysisId}/interventions/{interventionId}:resolve"
+    ]
+  ],
+  "proposalModes": [
+    "SUGGEST_NEXT_REVISION",
+    "INTERRUPT_AND_APPLY"
+  ],
+  "excludedProposalModes": [
+    "APPLY_AFTER_CURRENT_NODE"
+  ],
+  "maxPendingSubmittedProposalsPerAnalysis": 1,
+  "idempotencyRequired": true,
+  "compareAndSwapRequired": true
+}
