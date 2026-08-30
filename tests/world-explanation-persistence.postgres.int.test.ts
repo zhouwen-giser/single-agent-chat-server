@@ -122,14 +122,15 @@ describeWithPostgres("SACS v0.4 S19 world explanation PostgreSQL", () => {
     }
   });
 
-  it("AC-P001/P022 upgrades 0010 through 0013 without legacy data loss", async () => {
+  it("AC-P001/P022 upgrades 0010 through 0014 without legacy data loss", async () => {
     const versions = await pool.query<{ version: string }>(
       "SELECT version FROM chat_service.schema_migrations ORDER BY version",
     );
-    expect(versions.rows.map(({ version }) => version).slice(-3)).toEqual([
+    expect(versions.rows.map(({ version }) => version).slice(-4)).toEqual([
       "0011_conversation_world_focus.sql",
       "0012_authority_fusion.sql",
       "0013_world_explanation.sql",
+      "0014_structured_world_selection.sql",
     ]);
     await expect(
       pool.query(

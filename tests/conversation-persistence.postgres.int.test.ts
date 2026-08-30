@@ -641,7 +641,9 @@ describeWithPostgres("protocol-neutral conversation persistence", () => {
       const versions = await pool.query<{ version: string }>(
         "SELECT version FROM chat_service.schema_migrations ORDER BY version",
       );
-      expect(versions.rows.at(-1)?.version).toBe("0013_world_explanation.sql");
+      expect(versions.rows.at(-1)?.version).toBe(
+        "0014_structured_world_selection.sql",
+      );
     } finally {
       await rm(directory, { recursive: true, force: true });
       await runMigrations(pool);
