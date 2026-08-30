@@ -85,6 +85,15 @@ async function startMock(
           task: taskJson(options.taskState ?? "TASK_STATE_WORKING", {
             internalPhase: "executing",
             phaseMessage: "working",
+            publishedStructuredPlan: {
+              predicates: [
+                {
+                  schemaUri: "urn:gowm:v0.4:external-predicate",
+                  schemaHash: "sha256:" + "a".repeat(64),
+                  value: { operation: "within" },
+                },
+              ],
+            },
           }),
         }) +
         String.fromCharCode(10, 10);
@@ -250,6 +259,15 @@ describe("official SDAR A2A adapter HTTP+JSON contract", () => {
           state: "WORKING",
           internalPhase: "executing",
           phaseMessage: "working",
+          publishedStructuredPlan: {
+            predicates: [
+              {
+                schemaUri: "urn:gowm:v0.4:external-predicate",
+                schemaHash: "sha256:" + "a".repeat(64),
+                value: { operation: "within" },
+              },
+            ],
+          },
         }),
       },
     ]);

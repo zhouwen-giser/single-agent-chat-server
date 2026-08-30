@@ -278,6 +278,14 @@ export function normalizeTask(task: Task): NormalizedTask {
     ...(metadataString(metadata, "nextAction", 512) === undefined
       ? {}
       : { nextAction: metadataString(metadata, "nextAction", 512) }),
+    ...(metadata?.publishedStructuredPlan === undefined
+      ? {}
+      : {
+          publishedStructuredPlan: normalizeJsonValue(
+            metadata.publishedStructuredPlan,
+            "A2A publishedStructuredPlan",
+          ),
+        }),
     artifacts,
     history,
   };

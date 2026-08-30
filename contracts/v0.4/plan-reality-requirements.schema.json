@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.4:plan-reality-requirements",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "taskId",
+    "taskSnapshotHash",
+    "correlationHints",
+    "predicates",
+    "comparability"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "taskId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "taskSnapshotHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "correlationHints": {
+      "type": "array",
+      "maxItems": 32
+    },
+    "predicates": {
+      "type": "array",
+      "maxItems": 32
+    },
+    "comparability": {
+      "enum": [
+        "COMPARABLE",
+        "PARTIALLY_COMPARABLE",
+        "NOT_COMPARABLE"
+      ]
+    },
+    "reasonCodes": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      }
+    }
+  }
+}

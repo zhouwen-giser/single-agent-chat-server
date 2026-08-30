@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1.0",
+  "observedOn": "2026-08-28",
+  "timePrecision": "day",
+  "branch": "codex/sacs-v0.4-wsgs-world-grounding",
+  "targetVersion": "0.4.0",
+  "repositories": {
+    "sacs": {
+      "repository": "https://github.com/zhouwen-giser/single-agent-chat-server.git",
+      "ref": "origin/main",
+      "commit": "f60083c03c2c0aa602ab711090b6ff79c1b77d3e",
+      "tree": "a0105d9b4e215749632ece13d4ee2812083b66d8",
+      "version": "0.3.0"
+    },
+    "wsgs": {
+      "repository": "https://github.com/zhouwen-giser/world-semantic-grounding-service.git",
+      "ref": "origin/codex/wsgs-v0.2-gowm-0.6.3-integration",
+      "commit": "3f9aa7cb8542573d2658a132644a9c649544737b",
+      "tree": "55a8a06c376a3c77c88e7cdb99f37ce423f6e629",
+      "version": "0.2.0",
+      "contractLockBlob": "43af3610c932d68f509606b20a99b5bfea1d01eb",
+      "candidateDecision": "BLOCKED",
+      "acceptance": {
+        "required": 279,
+        "pass": 195,
+        "fail": 0,
+        "notRun": 17,
+        "blocked": 67
+      },
+      "developmentReadiness": {
+        "manifestDecision": "DEVELOPMENT_READY",
+        "verification": "VERIFIED_DEVELOPMENT_READY",
+        "productionQualified": false,
+        "testedCommit": "75c6d2731094087efd0c203814fcb8fa8b6fefe3",
+        "developmentAcceptance": {
+          "total": 63,
+          "pass": 63,
+          "fail": 0,
+          "notRun": 0
+        },
+        "developmentLedgerHash": "sha256:fd2def26d5c34a68121fad531d336d46358b334213dfdefcb09c9e628f73bc74",
+        "realPipelineEvidenceHash": "sha256:c31e95285a1cc39994f8037e109942865477717827752806ea96d5a5901917a4",
+        "handoffBlob": "fd88f58fb8afeb5e5e5742e21feb854560648219",
+        "readyReportBlob": "f2c3d4bc8df7224cbc34ceeb80d1bbcbad374c9c",
+        "ledgerBlob": "f0dfee4c5026d4883107ba4d762eadbbb88be8f7",
+        "realPipelineEvidenceBlob": "a0c9b1a4652b9827bf75117f1ea14120ced3f1e2",
+        "stableRecipes": ["R1", "R2", "R3", "R4", "R5", "R6"],
+        "missingEvidence": []
+      },
+      "markers": {
+        "GOWM_0_6_3_CONTRACT_LOCKED": true,
+        "EXECUTABLE_GROUNDING_PIPELINE_READY": false,
+        "REFERENCE_GROUNDING_READY": false,
+        "SEMANTIC_QUERY_COMPILER_READY": false,
+        "GOWM_REAL_E2E_READY": false,
+        "WSGS_V0_2_STABLE_CANDIDATE_COMPLETE": false
+      }
+    },
+    "sdar": {
+      "repository": "https://github.com/zhouwen-giser/skill-driven-agent-runtime.git",
+      "ref": "origin/main",
+      "commit": "b0caf69e9f83bc6702e1c0a85e7ca158c3781d4b",
+      "tree": "11da5c8e7faf032b69e32b239690ea59bd66b690",
+      "version": "1.4.1",
+      "groundingExtension": "UNAVAILABLE"
+    },
+    "gowmIndirect": {
+      "version": "0.6.3",
+      "commit": "17dd221330d9af540ec815a39eca96550690299a"
+    }
+  },
+  "northbound": {
+    "contractVersion": "sacs-wsgs-grounding/1.0",
+    "operations": [
+      "GROUND_REFERENCES",
+      "COMPILE_WORLD_QUERY",
+      "EXECUTE_WORLD_QUERY",
+      "VALIDATE_REFERENCES"
+    ],
+    "lockedArtifactCount": 32
+  },
+  "a2a": {
+    "specPatch": "1.0.1",
+    "wire": "1.0",
+    "binding": "HTTP+JSON",
+    "sdk": "@a2a-js/sdk@1.0.0-beta.0"
+  },
+  "runtime": {
+    "node": "v22.14.0",
+    "pnpm": "11.13.1",
+    "git": "2.35.1.windows.2"
+  },
+  "immutableMigrations": {
+    "migrations/0001_initial_persistence.sql": "sha256:7345a7b5778b6f6c2d888263b84849a78b8f4facd68bca5eca8fba3d5a95a975",
+    "migrations/0002_events_and_recovery.sql": "sha256:179af2eec27f5ef27b66e6b57ce01742e986790682c7690962a2226d0414439d",
+    "migrations/0003_submission_lease.sql": "sha256:54d793c4c64c0c8b17d9a42e4444c68aad55d01ad89ce89548c33b2264064485",
+    "migrations/0004_interaction_gateway.sql": "sha256:0f1f6a66b0d1910acf612f0eceaaed6f7ba061b94499c788c067b570989b45ca",
+    "migrations/0005_interrupt_resume.sql": "sha256:debdedf869186e39aa73c096b88dab49f60708563ff539f39556aa6065ac8ac7",
+    "migrations/0006_durable_agui_runs.sql": "sha256:fba6c71d73bee278be5a6ed6dc7bcc651626d84208078b9fe3f28dfbee13b77a",
+    "migrations/0007_conversation_history.sql": "sha256:dcb052c107810b4b9ec8d6d03e6ef84a3d0670e730a36f1b53f45a8e4bf4d91f",
+    "migrations/0008_multi_task_directory.sql": "sha256:459e14c7b1bbe62911a7d7fd8fb662722285f01e78fad581bd0909317d5274d9",
+    "migrations/0009_request_result_union.sql": "sha256:2b2eec946e2be640ad701158cd6b77db0a184c81ed9d75ee8d34bf0ef950bda6"
+  },
+  "dependencyLockSha256": "sha256:81b87584144b96dea4bbd44a06a76f7d64711767a467bc2d0868c043f76b2c91"
+}

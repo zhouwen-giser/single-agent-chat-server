@@ -1,0 +1,50 @@
+{
+  "phase": "S06",
+  "date": "2026-08-29",
+  "decision": "PASS",
+  "marker": "SACS_CONVERSATION_WORLD_FOCUS_CONTRACT_READY",
+  "deliverables": {
+    "conversationWorldFocusContract": "IMPLEMENTED",
+    "worldFocusReferenceContract": "IMPLEMENTED_OPAQUE_REFERENCE_KEY",
+    "pendingGroundingChoiceContract": "IMPLEMENTED",
+    "groundingContinuationContract": "IMPLEMENTED",
+    "wsgsContextSubcontracts": "EXACT_FROZEN_SCHEMAS",
+    "migration0011": "IMPLEMENTED",
+    "postgresRepository": "IMPLEMENTED",
+    "restartRecovery": "PASS",
+    "revisionCompareAndSwap": "PASS",
+    "principalThreadIsolation": "PASS"
+  },
+  "automatedEvidence": {
+    "s06PhaseTests": {
+      "pass": 12,
+      "fail": 0,
+      "skip": 0
+    },
+    "fullRealPostgresIntegration": {
+      "pass": 99,
+      "fail": 0,
+      "skip": 0
+    },
+    "migrationGate": "PASS_11_CONTIGUOUS_APPEND_ONLY",
+    "productionSourceFilesChecked": 82,
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "diffCheck": "PASS"
+  },
+  "invariants": {
+    "migrations0001Through0010ByteImmutable": true,
+    "referenceIdentityIgnoresVersion": true,
+    "referenceKeyOpaque": true,
+    "geometryStored": false,
+    "fullGroundingResultCopied": false,
+    "maximumReferencesPerFocus": 64,
+    "singleOpenChoicePerPrincipalThread": true
+  },
+  "publication": {
+    "commit": "LOCAL_PHASE_COMMIT_REQUIRED",
+    "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",
+    "pullRequestUpdate": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION"
+  }
+}

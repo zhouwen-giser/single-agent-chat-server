@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.4:authority-fusion-record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fusionId",
+    "principalId",
+    "threadId",
+    "taskId",
+    "taskSnapshotHash",
+    "requirementHash",
+    "groundingId",
+    "groundingResultHash",
+    "fusionResultHash",
+    "createdAt"
+  ],
+  "properties": {
+    "fusionId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "principalId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "threadId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "taskId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "taskSnapshotHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "requirementHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "groundingId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "groundingResultHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "fusionResultHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "createdAt": {
+      "$ref": "common.schema.json#/$defs/dateTime"
+    }
+  }
+}

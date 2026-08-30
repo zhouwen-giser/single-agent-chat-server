@@ -1,0 +1,83 @@
+{
+  "$id": "https://schemas.sacs.local/v0.4/grounding-request-plan.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GroundingRequestPlan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannedBy",
+    "operation",
+    "requestedProducts",
+    "contextUsage",
+    "executionPolicy"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "plannedBy": { "const": "SACS_DETERMINISTIC_V1" },
+    "operation": {
+      "enum": [
+        "GROUND_REFERENCES",
+        "COMPILE_WORLD_QUERY",
+        "EXECUTE_WORLD_QUERY",
+        "VALIDATE_REFERENCES"
+      ]
+    },
+    "requestedProducts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "MENTIONS",
+          "RESOLVED_REFERENCES",
+          "DERIVED_REFERENCES",
+          "REFERENCE_SETS",
+          "GROUNDING_GRAPH",
+          "WORLD_QUERY",
+          "WORLD_EVIDENCE",
+          "OPERATIONAL_TASKS",
+          "EVENT_TIMELINES",
+          "CORRELATION_FINDINGS",
+          "PREDICATE_EVALUATIONS"
+        ]
+      }
+    },
+    "contextUsage": {
+      "$ref": "https://schemas.sacs.local/v0.4/turn-plan.schema.json#/$defs/worldFocusUsage"
+    },
+    "executionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnly",
+        "deadlineMs",
+        "maxQueryOperations",
+        "maxCandidatesPerMention",
+        "maxResultBytes",
+        "allowApproximation"
+      ],
+      "properties": {
+        "readOnly": { "const": true },
+        "deadlineMs": { "type": "integer", "minimum": 100, "maximum": 120000 },
+        "maxQueryOperations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "maxCandidatesPerMention": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "maxResultBytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 67108864
+        },
+        "allowApproximation": { "type": "boolean" }
+      }
+    }
+  }
+}

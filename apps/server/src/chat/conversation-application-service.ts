@@ -13,10 +13,12 @@ import type {
   ConversationProtocol,
 } from "../../../../packages/conversation-context/src/index.js";
 import type { LegacyChatResult } from "../../../../packages/interaction-runtime/src/index.js";
+import type { NormalizedTask } from "../../../../packages/sdar-a2a-adapter/src/index.js";
 import type { TaskBinding } from "../../../../packages/persistence/src/index.js";
 import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
 import type { ClassificationError } from "../../../../src/agent/classification.js";
 import type { StructuredChatModel } from "../../../../src/agent/model.js";
+import type { TurnPlan } from "../../../../packages/world-grounding-contract/src/index.js";
 
 export interface ConversationApplicationRepository {
   listActiveTasksForChat(input: {
@@ -55,6 +57,7 @@ export interface ConversationApplicationServiceOptions {
   readonly checkpointer?: BaseCheckpointSaver;
   readonly coordinator: SdarTaskCoordinator;
   readonly model?: StructuredChatModel;
+  readonly worldGrounding?: WorldGroundingApplication;
   readonly onClassificationError?: (error: ClassificationError) => void;
   readonly assembleContext?: (input: {
     readonly principalId: string;
@@ -72,6 +75,29 @@ export interface ConversationApplicationServiceOptions {
   }) => Promise<ClientHistoryImportResult>;
 }
 
+export interface WorldGroundingApplication {
+  continuePendingChoice?(
+    input: Omit<WorldGroundingTurn, "turnPlan">,
+  ): Promise<string | undefined>;
+  answerWorld(input: WorldGroundingTurn): Promise<string>;
+  compareHybrid(input: HybridWorldGroundingTurn): Promise<string>;
+  submitOperational(input: WorldGroundingTurn): Promise<string>;
+}
+
+export interface WorldGroundingTurn {
+  readonly protocol: ConversationProtocol;
+  readonly principalId: string;
+  readonly threadId: string;
+  readonly externalRequestId: string;
+  readonly userText: string;
+  readonly turnPlan: TurnPlan;
+  readonly signal?: AbortSignal;
+}
+
+export interface HybridWorldGroundingTurn extends WorldGroundingTurn {
+  readonly sdarTask: NormalizedTask;
+}
+
 export class ConversationApplicationService {
   private readonly graph;
 
@@ -87,6 +113,16 @@ export class ConversationApplicationService {
     const conversationContext = turn.utilityRequest
       ? fallbackContext(turn.threadId, [])
       : await this.prepareContext(turn);
+    if (
+      !turn.utilityRequest &&
+      this.options.worldGrounding?.continuePendingChoice !== undefined
+    ) {
+      const continuation =
+        await this.options.worldGrounding.continuePendingChoice(
+          toWorldGroundingControlTurn(turn),
+        );
+      if (continuation !== undefined) return continuation;
+    }
     const result = await this.graph.invoke(
       {
         messages: [{ role: "user", content: turn.userText }],
@@ -98,6 +134,42 @@ export class ConversationApplicationService {
       },
       { configurable: { thread_id: turn.threadId } },
     );
+    if (result.requestKind === "world_answer") {
+      return this.options.worldGrounding === undefined ||
+        result.turnPlan === undefined
+        ? "WORLD_GROUNDING_RUNTIME_UNAVAILABLE"
+        : this.options.worldGrounding.answerWorld(
+            toWorldGroundingTurn(turn, result.turnPlan),
+          );
+    }
+    if (result.requestKind === "grounded_task") {
+      return this.options.worldGrounding === undefined ||
+        result.turnPlan === undefined
+        ? "SDAR_GROUNDING_EXTENSION_UNAVAILABLE"
+        : this.options.worldGrounding.submitOperational(
+            toWorldGroundingTurn(turn, result.turnPlan),
+          );
+    }
+    if (result.requestKind === "hybrid_compare") {
+      if (
+        this.options.worldGrounding === undefined ||
+        result.turnPlan === undefined ||
+        result.targetTaskId === undefined
+      ) {
+        return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
+      }
+      const sdarTask = await this.readPublishedTaskSnapshot(
+        turn,
+        result.targetTaskId,
+      );
+      if (sdarTask === undefined) {
+        return "AUTHORITY_FUSION_PLAN_UNAVAILABLE";
+      }
+      return this.options.worldGrounding.compareHybrid({
+        ...toWorldGroundingTurn(turn, result.turnPlan),
+        sdarTask,
+      });
+    }
     if (result.requestKind === "new_task") {
       const input = {
         ...toTaskTurn(turn),
@@ -224,6 +296,71 @@ export class ConversationApplicationService {
       bindingId: binding.bindingId,
     });
   }
+
+  private async readPublishedTaskSnapshot(
+    turn: ConversationApplicationTurn,
+    taskId: string,
+  ): Promise<NormalizedTask | undefined> {
+    let observedTask: NormalizedTask | undefined;
+    const fragments: string[] = [];
+    let totalLength = 0;
+    let invalid = false;
+    const observer: TaskCoordinatorObserver = (observation) => {
+      turn.coordinatorObserver?.(observation);
+      if (observation.source !== "task") return;
+      observedTask = observation.value;
+      for (const fragment of observation.fragments) {
+        if (fragments.length >= 128 || totalLength + fragment.length > 8_000) {
+          invalid = true;
+          return;
+        }
+        fragments.push(fragment);
+        totalLength += fragment.length;
+      }
+    };
+    for await (const fragment of this.options.coordinator.statusForTask(
+      { chatId: turn.chatId, userId: turn.userId, taskId },
+      turn.signal,
+      observer,
+    )) {
+      // The observer is the authoritative published snapshot. Iteration ensures
+      // the official A2A getTask() operation and persistence complete.
+      void fragment;
+    }
+    const task = observedTask;
+    if (invalid || task === undefined || task.taskId !== taskId) {
+      return undefined;
+    }
+    return task;
+  }
+}
+
+function toWorldGroundingTurn(
+  turn: ConversationApplicationTurn,
+  turnPlan: TurnPlan,
+): WorldGroundingTurn {
+  return {
+    protocol: turn.protocol,
+    principalId: turn.userId,
+    threadId: turn.threadId,
+    externalRequestId: turn.userMessageId,
+    userText: turn.userText,
+    turnPlan,
+    ...(turn.signal === undefined ? {} : { signal: turn.signal }),
+  };
+}
+
+function toWorldGroundingControlTurn(
+  turn: ConversationApplicationTurn,
+): Omit<WorldGroundingTurn, "turnPlan"> {
+  return {
+    protocol: turn.protocol,
+    principalId: turn.userId,
+    threadId: turn.threadId,
+    externalRequestId: turn.userMessageId,
+    userText: turn.userText,
+    ...(turn.signal === undefined ? {} : { signal: turn.signal }),
+  };
 }
 
 function fallbackContext(

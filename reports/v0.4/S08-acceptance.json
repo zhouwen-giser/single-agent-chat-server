@@ -1,0 +1,67 @@
+{
+  "phase": "S08",
+  "date": "2026-08-29",
+  "decision": "PASS",
+  "marker": "SACS_MULTITURN_WORLD_GROUNDING_READY",
+  "runner": {
+    "path": "scripts/phase-v04-s08-real-multiturn.mjs",
+    "wsgsSourceCommit": "46e872359536b84351ce2b417117fc5725c59145",
+    "liveExecutionDeadlineMs": 120000,
+    "contractTests": {
+      "pass": 3,
+      "fail": 0,
+      "skip": 0
+    },
+    "runtimeRegression": {
+      "pass": 8,
+      "fail": 0,
+      "skip": 0
+    },
+    "focusedReferenceRegression": {
+      "pass": 14,
+      "fail": 0,
+      "skip": 0
+    },
+    "lint": "PASS_ZERO_WARNINGS",
+    "typecheck": "PASS",
+    "authorizationGate": "PASS_FAIL_CLOSED"
+  },
+  "liveEvidence": {
+    "database": "ISOLATED_EPHEMERAL",
+    "scenarios": 8,
+    "realWsgsPosts": 10,
+    "operationCounts": {
+      "EXECUTE_WORLD_QUERY": 8,
+      "VALIDATE_REFERENCES": 2
+    },
+    "requestEvidenceHash": "sha256:3ffece1f4286708f9800d956aaaddb1edf0de8d670ea031c3c02ece892325f4e"
+  },
+  "acceptance": {
+    "AC-M001": "PASS_VEHICLE_KNOWN_REFERENCE_FOLLOWUP",
+    "AC-M002": "PASS_AREA_KNOWN_REFERENCE_FOLLOWUP",
+    "AC-M003": "PASS_AMBIGUOUS_VALIDATE_AND_RESUME",
+    "AC-M004": "PASS_NO_PENDING_CHOICE_CLARIFICATION",
+    "AC-M005": "PASS_EXPIRED_REFERENCE_REVALIDATED_FIRST",
+    "AC-M006": "PASS_THREAD_ISOLATION",
+    "AC-M007": "PASS_RESTART_FOCUS_RESTORE",
+    "AC-M008": "PASS_OPENAI_AGUI_SHARED_FOCUS",
+    "AC-M009": "PASS_WSGS_PRONOUN_AUTHORITY",
+    "AC-M010": "PASS_REPLAY_NO_DUPLICATE_WSGS"
+  },
+  "contextPolicyEvidence": {
+    "taskPackageExample": "KNOWN_WORLD_REFERENCES_ONLY",
+    "knownWorldReferences": true,
+    "priorGrounding": false,
+    "pinnedPriorGroundingReplayRequiredForAcM001OrAcM005": false
+  },
+  "sacsCorrections": {
+    "focusRevisionExcludedFromReplayIdentity": true,
+    "wsgsRequestHashStillCoversContextCapsule": true,
+    "taskPackageAreaPromptRestoredExactly": true,
+    "failedWsgsJobMappedThroughPublishedErrorBoundary": true
+  },
+  "publication": {
+    "push": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION",
+    "pullRequestUpdate": "WITHHELD_PENDING_DIRECT_USER_AUTHORIZATION"
+  }
+}

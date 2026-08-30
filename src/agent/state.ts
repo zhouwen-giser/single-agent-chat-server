@@ -3,10 +3,14 @@ import { Annotation, messagesStateReducer } from "@langchain/langgraph";
 
 import type { ConversationContext } from "../../packages/conversation-context/src/index.js";
 import type { TaskSummary } from "../../packages/task-directory/src/index.js";
+import type { TurnPlan } from "../../packages/world-grounding-contract/src/index.js";
 
 export const requestKinds = [
   "utility",
   "general_chat",
+  "world_answer",
+  "grounded_task",
+  "hybrid_compare",
   "new_task",
   "list_tasks",
   "status",
@@ -37,6 +41,7 @@ export const StateAnnotation = Annotation.Root({
   openWebUiChatId: Annotation<string>,
   utilityRequest: Annotation<boolean>,
   requestKind: Annotation<RequestKind>,
+  turnPlan: Annotation<TurnPlan | undefined>,
   followUpAction: Annotation<FollowUpAction | undefined>,
   activeTasks: Annotation<TaskSummary[]>({
     reducer: (_current, update) => update,

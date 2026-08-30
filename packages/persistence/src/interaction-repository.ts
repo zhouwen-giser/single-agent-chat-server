@@ -782,6 +782,33 @@ export class InteractionPersistenceRepository {
     return claim;
   }
 
+  async authorizedRequestCreatedAt(input: {
+    readonly requestId: string;
+    readonly principalId: string;
+    readonly threadId: string;
+  }): Promise<string> {
+    const result = await this.pool.query<{ created_at: Date }>(
+      `
+        SELECT request.created_at
+        FROM chat_service.interaction_request request
+        JOIN chat_service.conversation_thread thread
+          ON thread.thread_id = request.thread_id
+        WHERE request.request_id = $1
+          AND request.principal_id = $2
+          AND request.thread_id = $3
+          AND thread.principal_id = $2
+      `,
+      [input.requestId, input.principalId, input.threadId],
+    );
+    const row = result.rows[0];
+    if (row === undefined) {
+      throw new PersistenceAuthorizationError(
+        "Interaction request is not authorized for principal",
+      );
+    }
+    return row.created_at.toISOString();
+  }
+
   async completeRequest(input: {
     readonly requestId: string;
     readonly principalId: string;

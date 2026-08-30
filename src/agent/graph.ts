@@ -59,6 +59,7 @@ export function createSingleAgentChatGraph(
     if (result.error !== undefined) onClassificationError?.(result.error);
     return {
       requestKind: result.requestKind,
+      turnPlan: result.turnPlan,
       followUpAction: result.followUpAction,
       targetTaskId: result.targetTaskId,
       taskText: result.taskText,
@@ -87,6 +88,19 @@ export function createSingleAgentChatGraph(
             context,
             currentUserText: state.userText,
           }),
+        ],
+      };
+    }
+    if (
+      ["world_answer", "grounded_task", "hybrid_compare"].includes(
+        state.requestKind,
+      )
+    ) {
+      return {
+        responseFragments: [
+          state.requestKind === "hybrid_compare"
+            ? "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE"
+            : "WORLD_GROUNDING_RUNTIME_UNAVAILABLE",
         ],
       };
     }

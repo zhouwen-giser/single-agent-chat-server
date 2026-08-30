@@ -1,0 +1,46 @@
+{
+  "phase": "S02",
+  "date": "2026-08-28",
+  "decision": "PASS_CONTRACT_IMPLEMENTATION_NOT_REAL_E2E",
+  "deliverables": {
+    "groundingRequestPlanner": "IMPLEMENTED_DETERMINISTIC",
+    "wsgsHttpAdapter": "IMPLEMENTED_ISOLATED",
+    "runtimeIntegration": "NOT_STARTED",
+    "realWsgsE2e": "NOT_RUN"
+  },
+  "plannerMappings": {
+    "RESOLVE_REFERENCES": "GROUND_REFERENCES",
+    "ANSWER_WORLD_QUERY": "EXECUTE_WORLD_QUERY",
+    "VALIDATE_REFERENCES": "VALIDATE_REFERENCES",
+    "COMPARE_PLAN_REALITY": "EXECUTE_WORLD_QUERY",
+    "NONE": "FAIL_CLOSED"
+  },
+  "adapter": {
+    "contractVersion": "sacs-wsgs-grounding/1.0",
+    "fixedRoutes": [
+      "GET /v1/capabilities",
+      "POST /v1/groundings",
+      "GET /v1/groundings/{groundingId}",
+      "POST /v1/groundings/{groundingId}:cancel"
+    ],
+    "identityInBody": false,
+    "boundedPolling": true,
+    "boundedResponse": true,
+    "sanitizedErrors": true
+  },
+  "automatedEvidence": {
+    "s02Tests": {
+      "pass": 12,
+      "fail": 0
+    },
+    "productionSourceFilesChecked": 78,
+    "lint": "PASS",
+    "typecheck": "PASS"
+  },
+  "externalBlockers": {
+    "wsgsProductionQualified": false,
+    "sdarGroundingExtension": "UNAVAILABLE",
+    "stableCandidateEligible": false
+  },
+  "requiredDisposition": "SACS_V0_4_STABLE_CANDIDATE_BLOCKED"
+}

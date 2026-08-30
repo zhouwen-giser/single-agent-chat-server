@@ -1,0 +1,118 @@
+{
+  "$id": "https://schemas.sacs.local/v0.4/hybrid-plan-reality-compare.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HybridPlanRealityCompare",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "mode",
+    "generatedAt",
+    "plan",
+    "reality",
+    "composition"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "mode": { "const": "HYBRID_PLAN_REALITY_COMPARE" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority",
+        "taskId",
+        "observedStatus",
+        "publishedSummary",
+        "observedAt"
+      ],
+      "properties": {
+        "authority": { "const": "SDAR" },
+        "taskId": { "$ref": "#/$defs/identifier" },
+        "observedStatus": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "publishedSummary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        },
+        "observedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "reality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority",
+        "groundingId",
+        "resultHash",
+        "sourceWorldVersion",
+        "evidenceItemIds",
+        "observedAt"
+      ],
+      "properties": {
+        "authority": { "const": "WSGS_GOWM" },
+        "groundingId": { "$ref": "#/$defs/identifier" },
+        "resultHash": { "$ref": "#/$defs/sha256" },
+        "sourceWorldVersion": { "type": "integer", "minimum": 0 },
+        "evidenceItemIds": {
+          "type": "array",
+          "maxItems": 128,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "observedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority", "relationship", "summary", "differences"],
+      "properties": {
+        "authority": { "const": "SACS" },
+        "relationship": { "const": "COMPARE_ONLY" },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 8000 },
+        "differences": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["subject", "planned", "observed"],
+            "properties": {
+              "subject": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              "planned": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "observed": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

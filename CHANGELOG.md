@@ -1,5 +1,50 @@
 # Changelog
 
+## Unreleased — SACS v0.4 development
+
+### Added
+
+- S00 exact source locks for SACS, WSGS 0.2.0, indirect GOWM 0.6.3, and SDAR.
+- A byte-level verifier for all 32 frozen `sacs-wsgs-grounding/1.0` artifacts.
+- An explicit fail-closed SDAR grounding-extension compatibility lock and S00
+  contract Gate.
+- Strict v0.4 TurnPlan, deterministic GroundingRequestPlan, validated
+  OperationalGroundingBundle, and hybrid plan/reality comparison contracts.
+- Negative contract and architecture Gates preventing model-selected WSGS/GOWM
+  details, overbroad context, stale operational references, text downgrade,
+  and direct spatial or Provider access.
+- A deterministic GroundingRequestPlanner and isolated WSGS HTTP adapter with
+  fixed routes, transport-only authentication, bounded responses/polling, and
+  sanitized protocol failures.
+- Append-only PostgreSQL grounding execution/events with the required
+  seven-state lifecycle, composite request authorization, exactly-once WSGS
+  and SDAR reservation identities, immutable outputs, terminal closure, and
+  expired-lease recovery.
+- Production v0.4 TurnPlan routing and one isolated WorldGroundingRuntime shared
+  by OpenAI and AG-UI, with durable one-call WSGS execution and safe Message
+  replay.
+- Strict WSGS reference, evidence, and ambiguity result subcontracts plus
+  deterministic safe world-answer rendering that never infers absence from
+  unresolved or NO_DATA outcomes.
+- A validated-reference OperationalGroundingBundle builder and exact
+  fail-closed SDAR extension Gate with no raw-text or ungrounded downgrade.
+- A read-only Authority Fusion Preview that resolves one authorized Task,
+  reads bounded published SDAR plan state through official A2A `getTask()`,
+  requires completed unambiguous WSGS/GOWM evidence, and composes the two
+  authorities without mutation or invented semantic conclusions.
+- Durable hybrid-preview identity including the observed SDAR snapshot, so a
+  stored preview replays without a second WSGS POST and cannot be reused for a
+  different plan observation.
+
+### Candidate status
+
+The WSGS candidate is blocked and current SDAR lacks
+`sacs-sdar-operational-grounding/1.0`. S00 through S04 and the S05 internal
+implementation therefore record `SACS_V0_4_STABLE_CANDIDATE_BLOCKED`. S05 real
+PostgreSQL plus production-adapter/injected-fetch evidence is not live
+SDAR+WSGS/GOWM E2E. The live Gate also requires explicit current-task
+credential authorization, so `AUTHORITY_FUSION_PREVIEW_READY` is withheld.
+
 ## 0.3.0 — qualified release candidate
 
 ### Added

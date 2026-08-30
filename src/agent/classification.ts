@@ -9,6 +9,10 @@ import {
 } from "../../packages/task-directory/src/index.js";
 import type { StructuredChatModel } from "./model.js";
 import type { FollowUpAction, RequestKind } from "./state.js";
+import {
+  turnPlanSchema,
+  type TurnPlan,
+} from "../../packages/world-grounding-contract/src/index.js";
 
 export interface ClassificationInput extends ConversationModelInput {
   readonly utilityRequest: boolean;
@@ -21,6 +25,7 @@ export interface ClassificationResult {
   readonly taskText?: string;
   readonly includeTerminalTasks?: boolean;
   readonly responseText?: string;
+  readonly turnPlan?: TurnPlan;
   readonly error?:
     | "invalid_structured_classification"
     | "invalid_state_classification"
@@ -51,6 +56,8 @@ export async function classifyTurn(
       error: "conversation_model_unavailable",
     };
   }
+  const v04Plan = turnPlanSchema.safeParse(rawDecision);
+  if (v04Plan.success) return classifyTurnPlan(v04Plan.data, input);
   const parsed = turnDecisionSchema.safeParse(rawDecision);
   if (!parsed.success) {
     return {
@@ -88,6 +95,81 @@ export async function classifyTurn(
       );
     case "task_cancel":
       return classifyMutable("cancel", decision.selector, directory(input));
+  }
+}
+
+function classifyTurnPlan(
+  plan: TurnPlan,
+  input: ClassificationInput,
+): ClassificationResult {
+  const withPlan = { turnPlan: plan } as const;
+  switch (plan.turnRoute) {
+    case "GENERAL_CHAT":
+      return { requestKind: "general_chat", ...withPlan };
+    case "WORLD_ANSWER":
+      return { requestKind: "world_answer", ...withPlan };
+    case "SDAR_TASK":
+      return plan.groundingRequirement === "NONE"
+        ? {
+            requestKind: "new_task",
+            taskText: input.currentUserText,
+            ...withPlan,
+          }
+        : { requestKind: "grounded_task", ...withPlan };
+    case "TASK_QUERY":
+      return { ...classifyTaskDirective(plan, input), ...withPlan };
+    case "HYBRID_PLAN_REALITY_COMPARE": {
+      const selected = classifyTaskDirective(plan, input);
+      return selected.requestKind === "status" &&
+        selected.targetTaskId !== undefined
+        ? {
+            requestKind: "hybrid_compare",
+            targetTaskId: selected.targetTaskId,
+            ...withPlan,
+          }
+        : { ...selected, ...withPlan };
+    }
+    case "CLARIFICATION":
+      return {
+        requestKind: "general_chat",
+        responseText: plan.clarification,
+        ...withPlan,
+      };
+  }
+}
+
+function classifyTaskDirective(
+  plan: TurnPlan,
+  input: ClassificationInput,
+): ClassificationResult {
+  const directive = plan.taskDirective;
+  if (directive === undefined) {
+    return {
+      requestKind: "general_chat",
+      responseText:
+        "I could not determine a safe Task operation; nothing was sent.",
+      error: "invalid_state_classification",
+    };
+  }
+  switch (directive.action) {
+    case "CREATE":
+      return { requestKind: "new_task", taskText: input.currentUserText };
+    case "LIST":
+      return {
+        requestKind: "list_tasks",
+        includeTerminalTasks: directive.includeTerminal,
+      };
+    case "STATUS":
+      return classifyStatus(directive.selector, directory(input));
+    case "FOLLOW_UP":
+      return classifyMutable(
+        "follow_up",
+        directive.selector,
+        directory(input),
+        directive.followUpAction,
+      );
+    case "CANCEL":
+      return classifyMutable("cancel", directive.selector, directory(input));
   }
 }
 

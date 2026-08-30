@@ -1,0 +1,61 @@
+{
+  "phase": "S12",
+  "marker": "SACS_V0_4_WORLD_CONTEXT_AND_FUSION_READY",
+  "status": "PASS",
+  "markerAsserted": true,
+  "asOf": "2026-08-29",
+  "phaseMarkers": {
+    "S06": "SACS_CONVERSATION_WORLD_FOCUS_CONTRACT_READY",
+    "S07": "SACS_CONVERSATION_WORLD_FOCUS_READY",
+    "S08": "SACS_MULTITURN_WORLD_GROUNDING_READY",
+    "S11": "SACS_AUTHORITY_FUSION_V2_READY",
+    "S12": "SACS_V0_4_WORLD_CONTEXT_AND_FUSION_READY"
+  },
+  "completed": {
+    "fullJestWithPostgres": "411 PASS, 0 SKIPPED, 411 total",
+    "s11Focused": "49/49 PASS",
+    "realWsgsMultiturn": "8 SCENARIOS, 10 POSTS, PASS",
+    "realWsgsCommit": "46e872359536b84351ce2b417117fc5725c59145",
+    "realWsgsRequestEvidenceHash": "sha256:3ffece1f4286708f9800d956aaaddb1edf0de8d670ea031c3c02ece892325f4e",
+    "format": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "migrationStaticGate": "PASS",
+    "architecture": "PASS",
+    "secretPatternGate": "PASS",
+    "productionSourceFilesChecked": 84,
+    "trackedFilesSecretChecked": 618,
+    "dockerBuild": "PASS",
+    "containerMetadata": "PASS",
+    "compose": "PASS",
+    "composeReadyHttp": 200,
+    "composeMigratedTables": 22,
+    "composeCleanup": "PASS"
+  },
+  "requiredMatrix": {
+    "developmentRequiredRows": 119,
+    "deferredRows": 7,
+    "finalStatus": "PASS"
+  },
+  "environmentConditional": {
+    "LIVE_SDAR_MULTI_STATE_AUTHORITY_FUSION": "DEFERRED_ENVIRONMENT_NON_BLOCKING"
+  },
+  "nonRequiredLiveBoundary": {
+    "liveTypedPredicateCorrelationPreview": "NOT_CLAIMED_UPSTREAM_NOT_PRODUCTION_ENABLED",
+    "requiredAcceptanceAffected": false,
+    "fixturePresentedAsLiveEvidence": false
+  },
+  "scopeSafety": {
+    "upstreamRepositoriesModified": false,
+    "sharedWsgsModified": false,
+    "sharedGowmModified": false,
+    "dockerOrWslRestartedBySacs": false,
+    "push": "NOT_RUN",
+    "prUpdate": "NOT_RUN",
+    "merge": "NOT_RUN",
+    "tag": "NOT_RUN",
+    "release": "NOT_RUN",
+    "deploy": "NOT_RUN"
+  }
+}

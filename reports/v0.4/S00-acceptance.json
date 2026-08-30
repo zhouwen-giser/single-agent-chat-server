@@ -1,0 +1,65 @@
+{
+  "phase": "S00",
+  "status": "PASS_WITH_EXTERNAL_BLOCKERS",
+  "observedOn": "2026-08-28",
+  "acceptance": {
+    "S00-001": {
+      "status": "PASS",
+      "evidence": "SACS origin/main f60083c03c2c0aa602ab711090b6ff79c1b77d3e and target branch ancestry verified"
+    },
+    "S00-002": {
+      "status": "PASS",
+      "evidence": "Latest WSGS candidate 3f9aa7cb8542573d2658a132644a9c649544737b reports version 0.2.0 and commits the tested 75c6d2731094087efd0c203814fcb8fa8b6fefe3 development handoff"
+    },
+    "S00-003": {
+      "status": "PASS",
+      "evidence": "32 of 32 sacs-wsgs-grounding/1.0 artifact SHA-256 values match the exact WSGS Git object"
+    },
+    "S00-004": {
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": "WSGS Development Ready is verified at 63/63 PASS with all referenced artifacts present, but productionQualified=false and the task-book Stable Candidate markers remain absent; the historical stable-candidate decision remains BLOCKED."
+    },
+    "S00-005": {
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": "SDAR b0caf69e9f83bc6702e1c0a85e7ca158c3781d4b has zero exact profile matches for sacs-sdar-operational-grounding/1.0"
+    },
+    "S00-006": {
+      "status": "PASS",
+      "evidence": "Migrations 0001 through 0009 match their S00 SHA-256 lock"
+    }
+  },
+  "automatedGate": {
+    "command": "pnpm verify:v04:s00",
+    "status": "PASS_WITH_EXTERNAL_BLOCKERS",
+    "result": {
+      "wsgsContractArtifactsVerified": 32,
+      "wsgsCandidateDecision": "BLOCKED",
+      "wsgsDevelopmentReadiness": "VERIFIED_DEVELOPMENT_READY",
+      "wsgsMissingDevelopmentArtifacts": 0,
+      "sdarGroundingExtension": "UNAVAILABLE",
+      "stableCandidateEligible": false
+    }
+  },
+  "regression": {
+    "command": "pnpm verify:phase1 && pnpm verify:architecture && pnpm verify:secrets",
+    "status": "PASS_WITH_DATABASE_SUITES_SKIPPED",
+    "unit": { "pass": 103, "fail": 0, "skip": 0 },
+    "contract": { "pass": 84, "fail": 0, "skip": 0 },
+    "integration": { "pass": 5, "fail": 0, "skip": 84 },
+    "build": "PASS",
+    "architectureProductionFiles": 75,
+    "secretScanTrackedFiles": 542,
+    "databaseEvidenceClaimed": false
+  },
+  "publication": {
+    "status": "PUBLISHED_DRAFT_INITIAL_CI_PASSED",
+    "draftPr": "https://github.com/zhouwen-giser/single-agent-chat-server/pull/15",
+    "initialHeadSha": "8aee956d96fba49622f3ce60dfbcc8194b4ca506",
+    "ciRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/33139809965",
+    "quality": "PASS",
+    "container": "PASS",
+    "prState": "OPEN_DRAFT_MERGEABLE_CLEAN"
+  },
+  "stableCandidateEligible": false,
+  "requiredDisposition": "SACS_V0_4_STABLE_CANDIDATE_BLOCKED"
+}

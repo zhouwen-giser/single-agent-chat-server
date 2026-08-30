@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.4:world-focus-reference",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "referenceIdentityHash",
+    "referenceKey",
+    "productId",
+    "displayName",
+    "referenceType",
+    "sourceGroundingId",
+    "sourceResultHash",
+    "sourceWorldVersion",
+    "revalidationRequired",
+    "status",
+    "lastUsedAt"
+  ],
+  "properties": {
+    "referenceIdentityHash": {
+      "$ref": "common.schema.json#/$defs/hexSha256"
+    },
+    "referenceKey": {
+      "$ref": "common.schema.json#/$defs/referenceKey"
+    },
+    "productId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "referenceType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "sourceGroundingId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "sourceResultHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "sourceWorldVersion": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "validUntil": {
+      "$ref": "common.schema.json#/$defs/dateTime"
+    },
+    "revalidationRequired": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": ["VALID", "STALE", "EXPIRED", "UNKNOWN"]
+    },
+    "lastUsedAt": {
+      "$ref": "common.schema.json#/$defs/dateTime"
+    }
+  }
+}

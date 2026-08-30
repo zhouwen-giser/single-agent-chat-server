@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.4:grounding-continuation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "choiceId",
+    "controlMessageId",
+    "selectedProductId",
+    "validationOperation",
+    "resumeSourcePolicy",
+    "state"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "choiceId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "controlMessageId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "selectedProductId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "validationOperation": {
+      "const": "VALIDATE_REFERENCES"
+    },
+    "resumeSourcePolicy": {
+      "const": "RESTORE_ORIGIN_MESSAGE"
+    },
+    "state": {
+      "enum": [
+        "CHOICE_SELECTED",
+        "VALIDATING",
+        "VALIDATED",
+        "RESUMING_ORIGIN_QUERY",
+        "COMPLETED",
+        "FAILED"
+      ]
+    }
+  }
+}

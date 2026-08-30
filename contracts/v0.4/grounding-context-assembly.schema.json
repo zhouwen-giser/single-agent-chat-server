@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.4:grounding-context-assembly",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "focusRevision",
+    "knownWorldReferences",
+    "priorGroundings",
+    "mapSelections",
+    "externalCorrelationHints",
+    "externalPredicates",
+    "source"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "focusRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "knownWorldReferences": {
+      "type": "array",
+      "maxItems": 64
+    },
+    "priorGroundings": {
+      "type": "array",
+      "maxItems": 16
+    },
+    "mapSelections": {
+      "type": "array",
+      "maxItems": 32
+    },
+    "externalCorrelationHints": {
+      "type": "array",
+      "maxItems": 32
+    },
+    "externalPredicates": {
+      "type": "array",
+      "maxItems": 32
+    },
+    "source": {
+      "enum": ["CURRENT_FOCUS", "CONTINUATION", "AUTHORITY_FUSION", "EMPTY"]
+    }
+  }
+}

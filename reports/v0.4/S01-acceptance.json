@@ -1,0 +1,50 @@
+{
+  "phase": "S01",
+  "date": "2026-08-28",
+  "decision": "PASS_INTERNAL_CONTRACTS_WITH_EXTERNAL_BLOCKERS",
+  "deliverables": {
+    "turnPlan": "FROZEN",
+    "groundingRequestPlan": "FROZEN",
+    "operationalGroundingBundle": "FROZEN_INTERNAL_ONLY",
+    "hybridPlanRealityCompare": "FROZEN_PREVIEW_CONTRACT",
+    "architectureBoundary": "ENFORCED"
+  },
+  "authority": {
+    "conversationModel": [
+      "TurnRoute",
+      "GroundingRequirement",
+      "AnswerMode",
+      "Task selector/action",
+      "World-focus usage",
+      "Clarification"
+    ],
+    "deterministicPlanner": [
+      "WSGS Operation",
+      "WSGS requested products",
+      "read-only execution policy"
+    ],
+    "sdar": "published plan and Task status",
+    "wsgsGowm": "world reference and observed reality",
+    "sacs": "bounded routing and compare-only composition"
+  },
+  "automatedEvidence": {
+    "contractTests": {
+      "pass": 17,
+      "fail": 0
+    },
+    "s00LockTests": {
+      "pass": 6,
+      "fail": 0
+    },
+    "productionSourceFilesChecked": 76,
+    "typecheck": "PASS"
+  },
+  "externalBlockers": {
+    "wsgsStableCandidate": "BLOCKED",
+    "wsgsDevelopmentReadiness": "VERIFIED_DEVELOPMENT_READY",
+    "wsgsProductionQualified": false,
+    "sdarGroundingExtension": "UNAVAILABLE",
+    "stableCandidateEligible": false
+  },
+  "requiredDisposition": "SACS_V0_4_STABLE_CANDIDATE_BLOCKED"
+}

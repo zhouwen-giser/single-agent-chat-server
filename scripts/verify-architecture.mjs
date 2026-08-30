@@ -26,7 +26,7 @@ for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
     throw new Error(`Out-of-bound production dependency: ${dependency}`);
   }
   if (
-    /(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|(?:^|[/@_-])smpp(?:$|[/@_-])|agent.?mesh|agent.?registry|copilotkit|clickhouse)/iu.test(
+    /(?:modelcontextprotocol|(?:^|[/@_-])mcp(?:$|[/@_-])|(?:^|[/@_-])smpp(?:$|[/@_-])|agent.?mesh|agent.?registry|copilotkit|clickhouse|h3-js|proj4|postgis|@turf)/iu.test(
       dependency,
     )
   ) {
@@ -77,10 +77,29 @@ for (const file of files) {
   if (
     /\bfetch\s*\(/u.test(content) &&
     !name.startsWith("packages/sdar-a2a-adapter/") &&
+    !name.startsWith("packages/wsgs-http-adapter/") &&
     !name.startsWith("packages/conversation-model/")
   ) {
     violations.push(
-      `${name}: network fetch outside the isolated A2A or conversation-model adapter`,
+      `${name}: network fetch outside an isolated SDAR, WSGS, or conversation-model adapter`,
+    );
+  }
+  if (
+    /from ["'][^"']*(?:gowm|h3-js|proj4|postgis|@turf)[^"']*["']/iu.test(
+      content,
+    )
+  ) {
+    violations.push(
+      `${name}: direct GOWM, geometry, H3, CRS, or spatial client import is forbidden`,
+    );
+  }
+  if (
+    /["'`]\/(?:gowm|gateway|spatial-query|geometry|h3)(?:\/|["'`])/iu.test(
+      content,
+    )
+  ) {
+    violations.push(
+      `${name}: direct GOWM Gateway or spatial endpoint path is forbidden`,
     );
   }
   if (
