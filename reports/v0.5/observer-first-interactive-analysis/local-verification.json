@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "sacs-v05-local-verification/1.0",
+  "implementationCommit": "80685ecf5df8076033c8fd3e58bdb98828494d34",
+  "scopePolicy": "V05_AND_DIRECTLY_AFFECTED_BOUNDARIES_ONLY",
+  "status": "PASS_WITH_EXTERNAL_BLOCKERS",
+  "checks": [
+    {
+      "name": "focused-jest",
+      "status": "PASS",
+      "suitePass": 16,
+      "suiteSkip": 1,
+      "testPass": 116,
+      "testSkip": 7,
+      "testTotal": 123,
+      "note": "The skipped suite is the real PostgreSQL integration suite because TEST_DATABASE_URL was not supplied."
+    },
+    {
+      "name": "typescript-typecheck",
+      "status": "PASS"
+    },
+    {
+      "name": "scoped-eslint",
+      "status": "PASS",
+      "note": "Only v0.5 and directly affected TypeScript files were linted. Repository parser configuration excludes .mjs; both new scripts were validated by direct execution."
+    },
+    {
+      "name": "v05-architecture",
+      "status": "PASS",
+      "files": 108
+    },
+    {
+      "name": "existing-architecture-regression",
+      "status": "PASS",
+      "files": 112
+    },
+    {
+      "name": "migration-gate",
+      "status": "PASS",
+      "contiguousMigrations": 14
+    },
+    {
+      "name": "v05-acceptance-ledger-check",
+      "status": "PASS",
+      "ledger": {
+        "pass": 0,
+        "fail": 0,
+        "notRun": 347,
+        "blocked": 71,
+        "total": 418
+      },
+      "packageContractConflicts": 3
+    },
+    {
+      "name": "typescript-build",
+      "status": "PASS"
+    },
+    {
+      "name": "secret-pattern-gate",
+      "status": "PASS",
+      "files": 780
+    },
+    {
+      "name": "git-diff-check",
+      "status": "PASS"
+    },
+    {
+      "name": "real-postgresql",
+      "status": "NOT_RUN",
+      "reasonCode": "TEST_DATABASE_URL_NOT_SUPPLIED"
+    },
+    {
+      "name": "real-wsgs-and-a14-chain",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_ANALYSIS_HANDOFF_MISSING"
+    },
+    {
+      "name": "docker-container-and-live-e2e",
+      "status": "NOT_RUN",
+      "reasonCode": "OUTSIDE_MINIMAL_LOCAL_VERIFICATION_SCOPE"
+    }
+  ]
+}

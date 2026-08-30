@@ -1,27 +1,31 @@
 # Project status
 
-Status: `SACS_V0_4_WORLD_GROUNDING_GEOSPATIAL_EXPLANATION_BLOCKED` — S13 and
-the local S15-S19/S23 implementation gates pass on the dedicated stacked
-branch. S14, S20-S22 and S24 remain fail-closed: the authoritative WSGS-owned
-geospatial consumer bundle is absent, the frozen northbound contracts do not
-define a trusted Finding/MapSelection envelope, and no REAL_WSGS geospatial
-chain or exact-head CI/Git publication evidence exists. No fixture, isolated
-PostgreSQL run, container health, or four-operation capability response is
-counted as live geospatial authority evidence.
+Status: `SACS_V0_5_OBSERVER_FIRST_INTERACTIVE_ANALYSIS_BLOCKED` — bounded
+v0.5 local contracts, components and fail-closed scaffolding are committed on
+`codex/sacs-v0.5-observer-first-interactive-analysis`, but qualification is
+blocked by the inherited v0.4 geospatial prerequisite, the absent authoritative
+eight-file WSGS analysis handoff, missing real PostgreSQL evidence, and the
+unavailable A14 official-client/real-service chain.
 
-The current goal starts from PR #15 head `2dcbbe1c` on
-`codex/sacs-v0.4-geospatial-explanation`. Its source reconciliation, PR/CI
-state, four-repository observations and pre-change 411-test baseline are in
-[`S13-source-lock.json`](reports/v0.4/geospatial/S13-source-lock.json) and the
-[`S13 completion report`](reports/v0.4/geospatial/S13-completion.md).
+Crash-safe cancel/intervention reconciliation is also withheld: the
+authoritative WSGS idempotency/status/recovery semantics needed for a durable
+intent/outbox loop are not present, so the repository does not guess them.
 
-The current local closure is recorded in
-[`FINAL_REPORT.md`](reports/v0.4/geospatial/FINAL_REPORT.md) and the independent
-305-row [`acceptance-ledger.json`](reports/v0.4/geospatial/acceptance-ledger.json):
-189 PASS, 0 FAIL, 3 NOT_RUN and 113 BLOCKED. The final local regression passed
-60 suites / 456 tests, with 15 suites / 109 tests skipped (565 total).
+The task package was imported byte-for-byte and its 418-row intake ledger
+remains truthful at 0 PASS, 0 FAIL, 347 NOT_RUN and 71 BLOCKED. Focused local
+verification passed 16 suites / 116 tests; one real PostgreSQL suite / 7 tests
+was skipped because `TEST_DATABASE_URL` was not supplied. No fixture or local
+unit result is counted as REAL_WSGS, real PostgreSQL, runtime, CI or publication
+evidence.
 
-The detailed S00–S05 history below is retained as historical evidence. The
+See the v0.5 [final report](reports/v0.5/observer-first-interactive-analysis/FINAL_REPORT.md),
+[source lock](reports/v0.5/observer-first-interactive-analysis/source-lock.json),
+and [local verification](reports/v0.5/observer-first-interactive-analysis/local-verification.json).
+Production remains fail-closed: AG-UI v0.3 is not advertised and analysis
+control returns `SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY` until a verified
+authoritative runtime is composed.
+
+The detailed v0.4 S00–S05 history below is retained as historical evidence. The
 later S06–S12 development closure is recorded in
 [`S12-completion.md`](reports/v0.4/S12-completion.md); it must not be inferred
 from the older phase summaries.

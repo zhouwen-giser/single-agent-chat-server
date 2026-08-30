@@ -26,7 +26,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 
 FROM node:22.14.0-bookworm-slim AS runtime
 LABEL org.opencontainers.image.title="single-agent-chat-server" \
-      org.opencontainers.image.version="0.4.0" \
+      org.opencontainers.image.version="0.5.0" \
       org.opencontainers.image.licenses="Apache-2.0"
 ENV NODE_ENV=production
 WORKDIR /app

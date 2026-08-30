@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "sacs-v05-source-lock/1.0",
+  "capturedAt": "2026-08-30T03:32:10.7783468Z",
+  "repository": "single-agent-chat-server",
+  "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+  "startingCommit": "0d67125ba1e8f2d69ad07480bacbe7ecf5bab774",
+  "localCommits": [
+    {
+      "sha": "a6640774f736b5cb5118df8af5154bd1c9352c83",
+      "subject": "chore(v0.5): lock task package and WSGS analysis intake"
+    },
+    {
+      "sha": "80685ecf5df8076033c8fd3e58bdb98828494d34",
+      "subject": "feat(v0.5): implement observer-first interactive analysis"
+    }
+  ],
+  "taskPackage": {
+    "path": "D:/downloads/SACS_v0.5_Observer_First_Interactive_Analysis_Codex_Goal.zip",
+    "bytes": 84415,
+    "sha256": "sha256:44497cd392ca7b0892da707af97c37f7364ed993d05a89e0b89da51a4bdf128f",
+    "safeEntries": 73,
+    "schemas": 19,
+    "phases": 15,
+    "e2eCases": 28,
+    "acceptanceRows": 418
+  },
+  "upstream": {
+    "v04GeospatialBaseline": "BLOCKED",
+    "wsgsAnalysisHandoff": "BLOCKED",
+    "wsgsMarker": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+    "requiredHandoffArtifacts": 8,
+    "observedAuthoritativeArtifacts": 0
+  },
+  "publication": {
+    "remote": "origin",
+    "push": "NOT_RUN",
+    "pullRequestCreateOrUpdate": "NOT_RUN",
+    "ci": "NOT_RUN",
+    "merge": "NOT_RUN",
+    "tag": "NOT_RUN",
+    "release": "NOT_RUN",
+    "deploy": "NOT_RUN"
+  }
+}

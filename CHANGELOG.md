@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased — SACS v0.4 development
+## Unreleased — SACS v0.5 development
+
+### Added
+
+- Observer-first analysis contracts and policy, durable Analysis Session /
+  Revision / Run / Node persistence, and fail-closed WSGS analysis handoff.
+- Explicit AG-UI v0.3 profile negotiation with authoritative Step, Tool Call,
+  Activity, State, map, focus, and timeline projection boundaries.
+- Bounded Proposal, revision recompile, cancel, intervention, snapshot recovery,
+  and headless reference-client coordination surfaces.
+
+### Candidate status
+
+The local v0.5 implementation remains blocked from promotion until the
+authoritative WSGS analysis handoff bundle, real PostgreSQL evidence, and the
+required SACS-to-WSGS-to-GOWM-to-GDPS/STAS acceptance chain are available.
+Explicit AG-UI v0.3 execution therefore fails closed unless an authoritative
+analysis handler is configured; the default v0.2 interaction profile is
+unchanged.
+
+## SACS v0.4 development
 
 ### Added
 

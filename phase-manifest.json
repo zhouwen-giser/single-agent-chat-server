@@ -1,7 +1,7 @@
 {
   "project": "single-agent-chat-server",
-  "version": "0.4.0",
-  "branch": "codex/sacs-v0.4-geospatial-explanation",
+  "version": "0.5.0",
+  "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
   "phases": [
     {
       "id": 0,
@@ -92,8 +92,40 @@
       "blocker": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
     }
   ],
-  "currentGoalCompletionMarker": "SACS_V0_4_WORLD_GROUNDING_GEOSPATIAL_EXPLANATION_BLOCKED",
-  "taskPackageRevision": "R1",
+  "v05IntegrationPhases": [
+    {
+      "id": "A00",
+      "name": "baseline-and-ag-ui-compatibility",
+      "status": "BLOCKED",
+      "blocker": "SACS_V04_GEOSPATIAL_EXPLANATION_BASELINE_NOT_READY"
+    },
+    {
+      "id": "A01",
+      "name": "wsgs-analysis-consumer",
+      "status": "BLOCKED",
+      "blocker": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY"
+    },
+    {
+      "id": "A02-A09,A11-A12",
+      "status": "LOCAL_COMPONENTS_IMPLEMENTED",
+      "qualification": "NOT_RUN",
+      "blocker": "ROW_LEVEL_REQUIRED_EVIDENCE_NOT_COMPLETE"
+    },
+    {
+      "id": "A10,A13",
+      "status": "LOCAL_CONTRACTS_AND_FAIL_CLOSED_PRIMITIVES",
+      "qualification": "BLOCKED",
+      "blocker": "AUTHORITATIVE_CONTROL_RECOVERY_SEMANTICS_MISSING"
+    },
+    {
+      "id": "A14",
+      "name": "real-e2e-final",
+      "status": "BLOCKED",
+      "blocker": "SACS_INTERACTIVE_LIVE_ENVIRONMENT_NOT_READY"
+    }
+  ],
+  "currentGoalCompletionMarker": "SACS_V0_5_OBSERVER_FIRST_INTERACTIVE_ANALYSIS_BLOCKED",
+  "taskPackageRevision": "SACS-v0.5-observer-first-interactive-analysis",
   "sdarA2aBaseline": {
     "specPatch": "1.0.1",
     "wireVersion": "1.0",
