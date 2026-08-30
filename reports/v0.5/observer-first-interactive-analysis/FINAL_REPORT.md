@@ -7,8 +7,8 @@
 A bounded local v0.5 component/scaffold candidate is implemented and its
 focused checks pass. The product upgrade is not implementation-complete,
 qualified or promotion-ready: the inherited v0.4 geospatial prerequisite is
-blocked, the authoritative eight-file WSGS analysis handoff is absent, real
-PostgreSQL was not run, and the required A14 real chain is unavailable.
+blocked, the authoritative eight-file WSGS analysis handoff is absent, and
+the required A14 real chain is unavailable.
 
 ## Source and branch state
 
@@ -16,6 +16,7 @@ PostgreSQL was not run, and the required A14 real chain is unavailable.
 - Starting commit: `8262685`
 - Intake commit after local stack reconciliation: `072e34b`
 - Implementation commit after local stack reconciliation: `36df690`
+- Migration-stack verification commit: `9ce9b22`
 - Task-package SHA-256:
   `44497cd392ca7b0892da707af97c37f7364ed993d05a89e0b89da51a4bdf128f`
 
@@ -102,13 +103,17 @@ Per the request to reduce unnecessary tests, only v0.5 and directly affected
 boundaries were run:
 
 - focused Jest: 16 suites / 116 tests PASS;
-- real PostgreSQL suite: 1 suite / 7 tests SKIPPED because
-  `TEST_DATABASE_URL` was not supplied;
+- real PostgreSQL suite: 1 suite / 7 tests PASS on a dedicated ephemeral
+  PostgreSQL 16 container; the exact container was removed afterward;
+- one supplementary read-only `GROUND_REFERENCES` call to isolated WSGS
+  `18277`: HTTP 202, terminal HTTP 200 / `COMPLETED`, one reference product,
+  no error and no capability gap. This does not satisfy either missing
+  authoritative handoff or the A14 analysis chain;
 - TypeScript typecheck and build: PASS;
 - scoped ESLint: PASS;
-- v0.5 architecture: PASS across 108 files;
-- existing architecture regression: PASS across 112 files;
-- migration gate: PASS across 14 contiguous append-only migrations;
+- v0.5 architecture: PASS across 111 files;
+- existing architecture regression: PASS across 115 files;
+- migration gate: PASS across 15 contiguous append-only migrations;
 - acceptance artifact drift check: PASS, with the three preserved conflicts;
 - secret-pattern gate: PASS across 780 files;
 - Git diff check: PASS.
@@ -121,7 +126,6 @@ not run.
 - `SACS_V04_GEOSPATIAL_EXPLANATION_BASELINE_NOT_READY`
 - `SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY`
 - `AUTHORITATIVE_CONTROL_RECOVERY_SEMANTICS_MISSING`
-- `TEST_DATABASE_URL_NOT_SUPPLIED`
 - `SACS_INTERACTIVE_LIVE_ENVIRONMENT_NOT_READY`
 - `EXACT_HEAD_CI_AND_GIT_PUBLICATION_NOT_RUN`
 
