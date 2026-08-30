@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:22.14.0-bookworm-slim AS toolchain
+FROM node:26.8.1-bookworm-slim AS toolchain
 ENV PNPM_HOME=/pnpm
 ENV PATH=${PNPM_HOME}:${PATH}
 RUN corepack enable && corepack prepare pnpm@11.13.1 --activate
@@ -24,7 +24,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile
 
-FROM node:22.14.0-bookworm-slim AS runtime
+FROM node:26.8.1-bookworm-slim AS runtime
 LABEL org.opencontainers.image.title="single-agent-chat-server" \
       org.opencontainers.image.version="0.4.0" \
       org.opencontainers.image.licenses="Apache-2.0"
