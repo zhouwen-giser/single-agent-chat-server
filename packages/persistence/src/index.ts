@@ -29,6 +29,13 @@ export {
   type StoredWorldExplanation,
   type WorldExplanationFindingLink,
 } from "./world-explanation-repository.js";
+export {
+  StructuredWorldSelectionRepository,
+  type StructuredWorldSelectionRepositoryOptions,
+  type StructuredWorldSelectionScope,
+  type UpstreamSelectionTokenValidation,
+  type VerifyUpstreamSelectionToken,
+} from "./structured-world-selection-repository.js";
 export type {
   AgentCardSnapshot,
   ClientThreadBinding,

@@ -49,6 +49,7 @@ import {
   createSdarAgUiTaskRecoverySource,
 } from "./chat/sdar-agui-runner.js";
 import { createSdarChatRunner } from "./chat/sdar-chat-runner.js";
+import { resolveStructuredMapSelections } from "./chat/structured-selection-resolver.js";
 import { loadServerConfig } from "./config.js";
 import { instrumentChatModel } from "./observability/instrumented-chat-model.js";
 import { instrumentSdarClient } from "./observability/instrumented-sdar-client.js";
@@ -202,6 +203,11 @@ try {
       worldGrounding,
       assembleContext,
       importHistory: historyImporter.import.bind(historyImporter),
+      resolveStructuredSelections: (input) =>
+        resolveStructuredMapSelections(
+          activePersistence.structuredWorldSelectionRepository,
+          input,
+        ),
       onClassificationError: (error) => {
         if (error === "ambiguous_task_reference") {
           telemetry.recordAmbiguousTaskReference();
@@ -223,6 +229,17 @@ try {
       rawConversationModel?.readiness() ?? Promise.resolve(false),
     resolveChatThread: (input) =>
       activePersistence.repository.getOrCreateThread(input),
+    saveSelection: (selection, now) =>
+      activePersistence.structuredWorldSelectionRepository.saveOrReplay(
+        selection,
+        now,
+      ),
+    findSelection: (scope, selectionId, now) =>
+      activePersistence.structuredWorldSelectionRepository.findActive(
+        scope,
+        selectionId,
+        now,
+      ),
     resolveAgUiThread: async (input) => {
       const principal =
         await activePersistence.interactionRepository.resolvePrincipal({

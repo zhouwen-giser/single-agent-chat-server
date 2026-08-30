@@ -305,7 +305,9 @@ export const explanationReferenceSchema = z.strictObject({
   displayName: z.string().min(1).max(512),
   referenceKey: referenceKeySchema,
   sourceWorldVersion: z.number().int().nonnegative(),
+  sourceOperation: z.string().min(1).max(128).optional(),
   validUntil: dateTimeSchema.optional(),
+  revalidationRequired: z.boolean().optional(),
 });
 
 export const sanitizedExplanationSourceProductSchema = z.strictObject({
@@ -425,6 +427,178 @@ export const sourceCurrentnessSchema = z
       });
     }
   });
+
+export const structuredWorldSelectionKinds = [
+  "FINDING_FEATURE",
+  "MAP_FEATURE",
+  "REFERENCE_SET_MEMBER",
+] as const;
+
+export const structuredWorldSelectionSchema = z
+  .strictObject({
+    schemaVersion: z.literal("sacs-structured-world-selection/1.0"),
+    selectionId: identifierSchema,
+    principalId: identifierSchema,
+    threadId: identifierSchema,
+    groundingId: identifierSchema,
+    explanationId: identifierSchema,
+    selectionKind: z.enum(structuredWorldSelectionKinds),
+    findingId: identifierSchema.optional(),
+    featureId: identifierSchema.optional(),
+    referenceKey: referenceKeySchema.optional(),
+    upstreamSelectionToken: z.string().min(1).max(2_048).optional(),
+    selectionRevision: z.number().int().min(1),
+    sourceHash: sha256Schema,
+    selectedAt: dateTimeSchema,
+    expiresAt: dateTimeSchema,
+  })
+  .superRefine((value, context) => {
+    if (
+      (value.referenceKey === undefined) ===
+      (value.upstreamSelectionToken === undefined)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["referenceKey"],
+        message:
+          "exactly one stable ReferenceKey or upstream selection token is required",
+      });
+    }
+    if (
+      (value.selectionKind === "FINDING_FEATURE" ||
+        value.selectionKind === "MAP_FEATURE") &&
+      value.findingId === undefined
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["findingId"],
+        message: "finding-backed selections require a finding identity",
+      });
+    }
+    if (
+      (value.selectionKind === "FINDING_FEATURE" ||
+        value.selectionKind === "MAP_FEATURE") &&
+      value.featureId === undefined
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["featureId"],
+        message: "feature selections require a feature identity",
+      });
+    }
+    if (Date.parse(value.expiresAt) <= Date.parse(value.selectedAt)) {
+      context.addIssue({
+        code: "custom",
+        path: ["expiresAt"],
+        message: "selection expiry must be later than selection time",
+      });
+    }
+  });
+
+export function calculateStructuredWorldSelectionSourceHash(input: {
+  readonly explanation: WorldExplanationV1;
+  readonly selection: Omit<StructuredWorldSelection, "sourceHash">;
+}): Sha256 {
+  const finding =
+    input.selection.findingId === undefined
+      ? undefined
+      : input.explanation.findings.find(
+          ({ findingId }) => findingId === input.selection.findingId,
+        );
+  if (input.selection.findingId !== undefined && finding === undefined) {
+    throw new Error("STRUCTURED_SELECTION_FINDING_NOT_IN_EXPLANATION");
+  }
+  const feature = findStructuredSelectionFeature(
+    input.explanation,
+    input.selection.selectionKind,
+    input.selection.findingId,
+    input.selection.featureId,
+  );
+  if (input.selection.featureId !== undefined && feature === undefined) {
+    throw new Error("STRUCTURED_SELECTION_FEATURE_NOT_IN_EXPLANATION");
+  }
+  const reference =
+    input.selection.referenceKey === undefined
+      ? undefined
+      : input.explanation.references.find(
+          ({ referenceKey }) =>
+            canonicalJson(referenceKey) ===
+            canonicalJson(input.selection.referenceKey),
+        );
+  if (input.selection.referenceKey !== undefined && reference === undefined) {
+    throw new Error("STRUCTURED_SELECTION_REFERENCE_NOT_IN_EXPLANATION");
+  }
+  if (
+    input.selection.referenceKey !== undefined &&
+    input.selection.selectionKind !== "REFERENCE_SET_MEMBER" &&
+    (feature === undefined ||
+      !("referenceKey" in feature) ||
+      canonicalJson(feature.referenceKey) !==
+        canonicalJson(input.selection.referenceKey))
+  ) {
+    throw new Error("STRUCTURED_SELECTION_REFERENCE_NOT_BOUND_TO_FEATURE");
+  }
+  if (
+    reference !== undefined &&
+    (reference.sourceOperation !== "VALIDATE_REFERENCES" ||
+      reference.revalidationRequired !== false ||
+      reference.validUntil === undefined ||
+      Date.parse(reference.validUntil) <=
+        Date.parse(input.selection.selectedAt))
+  ) {
+    throw new Error("STRUCTURED_SELECTION_REFERENCE_REVALIDATION_REQUIRED");
+  }
+  const sourceProducts = (finding?.sourceProductIds ?? [])
+    .map((sourceProductId) =>
+      input.explanation.sourceProducts.find(
+        (candidate) => candidate.sourceProductId === sourceProductId,
+      ),
+    )
+    .filter(
+      (value): value is WorldExplanationV1["sourceProducts"][number] =>
+        value !== undefined,
+    )
+    .sort((left, right) =>
+      left.sourceProductId.localeCompare(right.sourceProductId),
+    );
+  return hashCanonicalJson({
+    schemaVersion: "sacs-structured-selection-source/1.0",
+    explanationHash: input.explanation.explanationHash,
+    groundingResultHash: input.explanation.grounding.resultHash,
+    selectionKind: input.selection.selectionKind,
+    finding: finding ?? null,
+    feature: feature ?? null,
+    reference: reference ?? null,
+    upstreamSelectionTokenHash:
+      input.selection.upstreamSelectionToken === undefined
+        ? null
+        : hashCanonicalJson(input.selection.upstreamSelectionToken),
+    sourceProducts,
+  });
+}
+
+function findStructuredSelectionFeature(
+  explanation: WorldExplanationV1,
+  selectionKind: StructuredWorldSelection["selectionKind"],
+  findingId: string | undefined,
+  featureId: string | undefined,
+): JsonObject | undefined {
+  if (featureId === undefined) return undefined;
+  if (selectionKind === "FINDING_FEATURE") {
+    const rendered = explanation.findings
+      .find((finding) => finding.findingId === findingId)
+      ?.featureSummaries?.find((feature) => feature.featureId === featureId);
+    return rendered as unknown as JsonObject | undefined;
+  }
+  if (selectionKind === "MAP_FEATURE") {
+    const projected = explanation.mapProjection?.features.find(
+      (feature) =>
+        feature.findingId === findingId && feature.featureId === featureId,
+    );
+    return projected as unknown as JsonObject | undefined;
+  }
+  return undefined;
+}
 
 export const normalizationIssueCodes = [
   "UNKNOWN_FINDING_KIND",
@@ -589,6 +763,9 @@ export type WorldFocusExplanationProjection = z.infer<
   typeof worldFocusExplanationProjectionSchema
 >;
 export type SourceCurrentness = z.infer<typeof sourceCurrentnessSchema>;
+export type StructuredWorldSelection = z.infer<
+  typeof structuredWorldSelectionSchema
+>;
 export type FindingNormalizationIssue = z.infer<
   typeof findingNormalizationIssueSchema
 >;

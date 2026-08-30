@@ -45,6 +45,7 @@ export interface ChatRunnerContext {
   readonly openWebUi: OpenWebUiRequestContext;
   readonly threadId: string;
   readonly runId: string;
+  readonly worldSelectionIds?: readonly string[];
   readonly signal?: AbortSignal;
 }
 
@@ -217,6 +218,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
         openWebUi,
         threadId: thread.threadId,
         runId: id,
+        worldSelectionIds: parsed.data.sacs_world_selection_ids ?? [],
         signal: abortController.signal,
       });
     } catch (error) {

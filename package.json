@@ -130,6 +130,7 @@
     "preflight:v04:s24": "node scripts/phase-v04-s24-geospatial-preflight.mjs",
     "verify:v04:s24": "pnpm test:v04:s24:preflight && pnpm preflight:v04:s24 && node scripts/generate-v04-geospatial-acceptance.mjs --check --phase S24",
     "verify:v04:s24:require-ready-preflight": "pnpm test:v04:s24:preflight && node scripts/phase-v04-s24-geospatial-preflight.mjs --require-ready",
+    "test:closure:v04:selection": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/structured-world-selection.contract.test.ts tests/structured-world-selection-api.contract.test.ts tests/structured-world-selection-resolver.unit.test.ts tests/structured-world-selection-persistence.postgres.int.test.ts",
     "verify:p13:real-evidence": "node scripts/phase13-real-evidence.mjs",
     "verify:compose": "node scripts/phase13-compose.mjs",
     "verify:phase13": "node scripts/require-phase13-environment.mjs && pnpm verify:ci && pnpm verify:v03:real && pnpm docker:build && pnpm verify:container && pnpm verify:compose && pnpm generate:sbom",

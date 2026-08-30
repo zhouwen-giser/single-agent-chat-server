@@ -9,6 +9,7 @@ import { InteractionPersistenceRepository } from "./interaction-repository.js";
 import { GroundingPersistenceRepository } from "./grounding-repository.js";
 import { PostgresWorldFocusRepository } from "./world-focus-repository.js";
 import { WorldExplanationRepository } from "./world-explanation-repository.js";
+import { StructuredWorldSelectionRepository } from "./structured-world-selection-repository.js";
 import { runMigrations } from "./migrations.js";
 import type { PersistenceObservationSink } from "./observation.js";
 import { ChatPersistenceRepository } from "./repository.js";
@@ -21,6 +22,7 @@ export interface PersistenceRuntime {
   readonly groundingRepository: GroundingPersistenceRepository;
   readonly worldFocusRepository: PostgresWorldFocusRepository;
   readonly worldExplanationRepository: WorldExplanationRepository;
+  readonly structuredWorldSelectionRepository: StructuredWorldSelectionRepository;
   readonly authorityFusionRepository: AuthorityFusionRepository;
   readonly conversationRepository: ConversationPersistenceRepository;
   readonly checkpointer: PostgresSaver;
@@ -65,6 +67,8 @@ export async function setupPersistence(
       ),
       worldFocusRepository: new PostgresWorldFocusRepository(pool),
       worldExplanationRepository: new WorldExplanationRepository(pool),
+      structuredWorldSelectionRepository:
+        new StructuredWorldSelectionRepository(pool),
       authorityFusionRepository: new AuthorityFusionRepository(pool),
       conversationRepository: new ConversationPersistenceRepository(
         pool,

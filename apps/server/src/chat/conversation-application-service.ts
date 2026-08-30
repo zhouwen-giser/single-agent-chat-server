@@ -19,6 +19,7 @@ import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
 import type { ClassificationError } from "../../../../src/agent/classification.js";
 import type { StructuredChatModel } from "../../../../src/agent/model.js";
 import type { TurnPlan } from "../../../../packages/world-grounding-contract/src/index.js";
+import type { MapSelection } from "../../../../packages/wsgs-http-adapter/src/index.js";
 import type { WorldExplanationV1 } from "../../../../packages/world-explanation-contract/src/index.js";
 import type { HybridAuthoritySeparatedResult } from "../../../../packages/world-grounding-runtime/src/index.js";
 
@@ -50,6 +51,7 @@ export interface ConversationApplicationTurn {
   readonly userMessageId: string;
   readonly currentUserExternalMessageId?: string;
   readonly utilityRequest: boolean;
+  readonly mapSelections?: readonly MapSelection[];
   readonly coordinatorObserver?: TaskCoordinatorObserver;
   readonly signal?: AbortSignal;
 }
@@ -98,6 +100,7 @@ export interface WorldGroundingTurn {
   readonly externalRequestId: string;
   readonly userText: string;
   readonly turnPlan: TurnPlan;
+  readonly mapSelections?: readonly MapSelection[];
   readonly signal?: AbortSignal;
 }
 
@@ -373,6 +376,9 @@ function toWorldGroundingTurn(
     externalRequestId: turn.userMessageId,
     userText: turn.userText,
     turnPlan,
+    ...(turn.mapSelections === undefined
+      ? {}
+      : { mapSelections: turn.mapSelections }),
     ...(turn.signal === undefined ? {} : { signal: turn.signal }),
   };
 }

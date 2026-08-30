@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 const contentPartSchema = z.record(z.string(), z.unknown());
+const worldSelectionIdSchema = z
+  .string()
+  .min(1)
+  .max(256)
+  .regex(/^[A-Za-z0-9][A-Za-z0-9._:-]*$/u);
 
 export const chatMessageSchema = z
   .object({
@@ -30,6 +35,11 @@ export const chatCompletionRequestSchema = z
       .union([z.string().max(1024), z.array(z.string().max(1024)).max(4)])
       .optional(),
     user: z.string().min(1).max(256).optional(),
+    sacs_world_selection_ids: z
+      .array(worldSelectionIdSchema)
+      .max(32)
+      .refine((values) => new Set(values).size === values.length)
+      .optional(),
     stream_options: z
       .object({ include_usage: z.boolean().optional() })
       .passthrough()

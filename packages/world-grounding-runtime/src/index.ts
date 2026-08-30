@@ -42,6 +42,7 @@ import type { CompletedRequestResult } from "../../request-result/src/index.js";
 import {
   parseWsgsGroundingResult,
   WsgsHttpError,
+  type MapSelection,
   type WsgsGroundingJob,
   type WsgsGroundingContextCapsule,
   type WsgsGroundingRequest,
@@ -144,6 +145,7 @@ export interface WorldGroundingRuntimeTurn {
   readonly userText: string;
   readonly locale?: string;
   readonly turnPlan: TurnPlan;
+  readonly mapSelections?: readonly MapSelection[];
   readonly signal?: AbortSignal;
 }
 
@@ -980,6 +982,9 @@ export class WorldGroundingRuntime {
       principalId: input.principalId,
       threadId: input.threadId,
       turnPlan,
+      ...(input.mapSelections === undefined
+        ? {}
+        : { mapSelections: input.mapSelections }),
     });
     const usage = turnPlan.worldFocusUsage;
     const capsule = assembled.contextCapsule;
@@ -1680,9 +1685,13 @@ function projectExplanationReferences(
     displayName: reference.displayName,
     referenceKey: reference.referenceKey,
     sourceWorldVersion: reference.sourceWorldVersion,
+    sourceOperation: reference.sourceOperation,
     ...(reference.validUntil === undefined
       ? {}
       : { validUntil: reference.validUntil }),
+    ...(reference.revalidationRequired === undefined
+      ? {}
+      : { revalidationRequired: reference.revalidationRequired }),
   }));
 }
 
