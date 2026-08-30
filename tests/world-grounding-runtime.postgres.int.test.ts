@@ -513,6 +513,7 @@ describeWithPostgres("SACS v0.4 world runtime on PostgreSQL and HTTP", () => {
       contentText: originText,
     });
     const posts: WsgsGroundingRequest[] = [];
+    const validUntil = new Date(Date.now() + 5 * 60_000).toISOString();
     const runtime = new WorldGroundingRuntime({
       requests,
       grounding,
@@ -543,7 +544,7 @@ describeWithPostgres("SACS v0.4 world runtime on PostgreSQL and HTTP", () => {
             return jsonResponse(
               posts.length === 1
                 ? ambiguousResultFor(body)
-                : selectedResultFor(body, posts.length),
+                : selectedResultFor(body, posts.length, validUntil),
             );
           }
           return jsonResponse({ error: "unexpected" }, 404);
@@ -984,7 +985,11 @@ function ambiguousResultFor(request: WsgsGroundingRequest) {
   };
 }
 
-function selectedResultFor(request: WsgsGroundingRequest, ordinal: number) {
+function selectedResultFor(
+  request: WsgsGroundingRequest,
+  ordinal: number,
+  validUntil: string,
+) {
   const result = resultFor(request);
   const firstProduct = expectDefined(result.referenceProducts[0]);
   return {
@@ -1002,7 +1007,7 @@ function selectedResultFor(request: WsgsGroundingRequest, ordinal: number) {
           version: String(42 + ordinal),
         },
         sourceWorldVersion: 42 + ordinal,
-        validUntil: "2026-08-30T00:00:00.000Z",
+        validUntil,
         revalidationRequired: false,
       },
     ],

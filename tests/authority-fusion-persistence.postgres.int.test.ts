@@ -60,14 +60,15 @@ describeWithPostgres("SACS v0.4 S10 Authority Fusion PostgreSQL", () => {
     }
   });
 
-  it("applies 0011 through 0013 after 0010 without legacy data loss", async () => {
+  it("applies 0011 through 0014 after 0010 without legacy data loss", async () => {
     const versions = await pool.query<{ version: string }>(
       "SELECT version FROM chat_service.schema_migrations ORDER BY version",
     );
-    expect(versions.rows.map(({ version }) => version).slice(-3)).toEqual([
+    expect(versions.rows.map(({ version }) => version).slice(-4)).toEqual([
       "0011_conversation_world_focus.sql",
       "0012_authority_fusion.sql",
       "0013_world_explanation.sql",
+      "0014_structured_world_selection.sql",
     ]);
     await expect(
       pool.query(
