@@ -720,6 +720,7 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
         "0012_authority_fusion.sql",
         "0013_world_explanation.sql",
         "0014_structured_world_selection.sql",
+        "0015_interactive_analysis.sql",
       ]);
     } finally {
       await rm(directory, { recursive: true, force: true });
