@@ -3534,7 +3534,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N001",
           "assertionLocator": "AC-N001: Profile hash",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3579,7 +3579,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N002",
           "assertionLocator": "AC-N002: Finding ID uniqueness",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3624,7 +3624,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N003",
           "assertionLocator": "AC-N003: SourceProduct ID uniqueness",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3669,7 +3669,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N004",
           "assertionLocator": "AC-N004: Finding evidence closure",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3714,7 +3714,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N005",
           "assertionLocator": "AC-N005: Finding source closure",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3759,7 +3759,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N006",
           "assertionLocator": "AC-N006: Source evidence closure",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3804,7 +3804,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N007",
           "assertionLocator": "AC-N007: Reference closure",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3849,7 +3849,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N008",
           "assertionLocator": "AC-N008: Status compatibility",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3894,7 +3894,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N009",
           "assertionLocator": "AC-N009: Point geometry",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3939,7 +3939,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N010",
           "assertionLocator": "AC-N010: Measurement finite",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -3984,7 +3984,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N011",
           "assertionLocator": "AC-N011: Unit presence",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4029,7 +4029,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N012",
           "assertionLocator": "AC-N012: Class code",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4074,7 +4074,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N013",
           "assertionLocator": "AC-N013: Feature count parity",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4119,7 +4119,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N014",
           "assertionLocator": "AC-N014: Truncated",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4164,7 +4164,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N015",
           "assertionLocator": "AC-N015: Feature identity",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4209,7 +4209,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N016",
           "assertionLocator": "AC-N016: Feature locator",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4254,7 +4254,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N017",
           "assertionLocator": "AC-N017: Geometry budget",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4299,7 +4299,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N018",
           "assertionLocator": "AC-N018: Feature budget",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4344,7 +4344,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N019",
           "assertionLocator": "AC-N019: Profile order",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4389,7 +4389,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N020",
           "assertionLocator": "AC-N020: Profile budget",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4434,7 +4434,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N021",
           "assertionLocator": "AC-N021: Qualified explanation",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4479,7 +4479,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N022",
           "assertionLocator": "AC-N022: Catalog result",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4524,7 +4524,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N023",
           "assertionLocator": "AC-N023: Unknown finding kind",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4569,7 +4569,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N024",
           "assertionLocator": "AC-N024: Unknown profile",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4614,7 +4614,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N025",
           "assertionLocator": "AC-N025: Generic safePayload",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4659,7 +4659,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N026",
           "assertionLocator": "AC-N026: Asset URI redaction",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4704,7 +4704,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N027",
           "assertionLocator": "AC-N027: Foreign scope leak",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4749,7 +4749,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N028",
           "assertionLocator": "AC-N028: Unknown published attributes",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4794,7 +4794,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N029",
           "assertionLocator": "AC-N029: Normalization report",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4839,7 +4839,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N030",
           "assertionLocator": "AC-N030: Determinism",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4884,7 +4884,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N031",
           "assertionLocator": "AC-N031: Fuzz/hostile JSON",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -4929,7 +4929,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-N032",
           "assertionLocator": "AC-N032: S16 marker",
-          "sourceSha256": "sha256:9331f67fa5b969ff5afa3be6a4edd28b35925893e4aa47181edc090f48e8e375"
+          "sourceSha256": "sha256:e940ab008984292057dad400c05671c939755533584458ea6de4cfe9844a6bcd"
         }
       ]
     },
@@ -6232,7 +6232,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A001",
           "assertionLocator": "AC-A001: OpenAI uses persisted text",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6277,7 +6277,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A002",
           "assertionLocator": "AC-A002: OpenAI explanation identity",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6322,7 +6322,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A003",
           "assertionLocator": "AC-A003: AGUI world explanation event",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6367,7 +6367,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A004",
           "assertionLocator": "AC-A004: AGUI map projection event",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6412,7 +6412,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A005",
           "assertionLocator": "AC-A005: AGUI sources event",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6457,7 +6457,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A006",
           "assertionLocator": "AC-A006: Cross-protocol hash",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6502,7 +6502,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A007",
           "assertionLocator": "AC-A007: Cross-protocol findings",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6547,7 +6547,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A008",
           "assertionLocator": "AC-A008: Cross-protocol gaps",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6592,7 +6592,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A009",
           "assertionLocator": "AC-A009: Map upstream geometry",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6637,7 +6637,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A010",
           "assertionLocator": "AC-A010: Map ReferenceKey",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6682,7 +6682,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A011",
           "assertionLocator": "AC-A011: Map payloadRef",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6727,7 +6727,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A012",
           "assertionLocator": "AC-A012: Map exactly-one locator",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6772,7 +6772,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A013",
           "assertionLocator": "AC-A013: Map labels",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6817,7 +6817,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A014",
           "assertionLocator": "AC-A014: Map feature count",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6862,7 +6862,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A015",
           "assertionLocator": "AC-A015: Large geometry fallback",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6907,7 +6907,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A016",
           "assertionLocator": "AC-A016: No buffer",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6952,7 +6952,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A017",
           "assertionLocator": "AC-A017: No distance calculation",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -6997,7 +6997,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A018",
           "assertionLocator": "AC-A018: No area calculation",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -7042,7 +7042,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A019",
           "assertionLocator": "AC-A019: No asset URI",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -7087,7 +7087,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A020",
           "assertionLocator": "AC-A020: AGUI schema validation",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -7132,7 +7132,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A021",
           "assertionLocator": "AC-A021: OpenAI SSE/non-SSE parity",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -7177,7 +7177,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A022",
           "assertionLocator": "AC-A022: AGUI replay",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -7222,7 +7222,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A023",
           "assertionLocator": "AC-A023: Protocol error safety",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -7267,7 +7267,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A024",
           "assertionLocator": "AC-A024: Custom event order",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -7312,7 +7312,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A025",
           "assertionLocator": "AC-A025: Activity/status projection",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -7357,7 +7357,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-A026",
           "assertionLocator": "AC-A026: S18 marker",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         }
       ]
     },
@@ -10689,7 +10689,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F001",
           "assertionLocator": "AC-F001: Evaluator unchanged",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -10782,7 +10782,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F002",
           "assertionLocator": "AC-F002: Geospatial finding contextual",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -10875,7 +10875,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F003",
           "assertionLocator": "AC-F003: No task failure inference",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -10968,7 +10968,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F004",
           "assertionLocator": "AC-F004: No plan violation inference",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11061,7 +11061,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F005",
           "assertionLocator": "AC-F005: No route feasibility inference",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11154,7 +11154,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F006",
           "assertionLocator": "AC-F006: No visibility inference",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11247,7 +11247,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F007",
           "assertionLocator": "AC-F007: Typed predicate still supported",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11340,7 +11340,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F008",
           "assertionLocator": "AC-F008: Typed correlation still supported",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11433,7 +11433,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F009",
           "assertionLocator": "AC-F009: Hybrid three sections",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11526,7 +11526,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F010",
           "assertionLocator": "AC-F010: Task status from SDAR",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11619,7 +11619,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F011",
           "assertionLocator": "AC-F011: World explanation from WSGS/GOWM",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11712,7 +11712,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F012",
           "assertionLocator": "AC-F012: Composition compare-only",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11805,7 +11805,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F013",
           "assertionLocator": "AC-F013: Partial world evidence",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11898,7 +11898,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F014",
           "assertionLocator": "AC-F014: Data gap",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -11991,7 +11991,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F015",
           "assertionLocator": "AC-F015: OpenAI/AGUI hybrid parity",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -12084,7 +12084,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F016",
           "assertionLocator": "AC-F016: Replay identity",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -12177,7 +12177,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F017",
           "assertionLocator": "AC-F017: Regression 49 checks",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
@@ -12270,7 +12270,7 @@
           "scope": "PRIMARY",
           "acceptanceId": "AC-F018",
           "assertionLocator": "AC-F018: S23 marker",
-          "sourceSha256": "sha256:3a7a6e709a5df8bf6528e04c830ecab41cb087fa0ebfd56c8ecfdce2dc943aca"
+          "sourceSha256": "sha256:6925fb11f9ea8ee8a65255e2cc8c22f6254aa76ef489dbd1b0514c4d22116102"
         },
         {
           "type": "REAL_POSTGRES",
