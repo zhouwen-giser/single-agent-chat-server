@@ -4,11 +4,13 @@
 
 **BLOCKED** — 0 PASS, 0 FAIL, 15 NOT_RUN, 15 BLOCKED (30 required).
 
-## Source
+## Source and publication
 
-- Qualification source branch: `codex/sacs-v0.5-observer-first-interactive-analysis`
-- Pinned qualification source: `8d611e3195c786854f2d0efd18ac19000441ab4a`
-- Remote/PR/CI refresh: `NOT_RUN`
+- V4 qualification source: `codex/sacs-v0.4-geospatial-explanation@951a1d81d640d24de60ce6eacc8bb6f95eb6ac35`
+- V4 remote/PR/CI: exact remote SHA, Draft PR #17, CI `PASS`
+- V5 qualification source: `codex/sacs-v0.5-observer-first-interactive-analysis@718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c`
+- V5 remote/PR/CI: exact remote SHA, Draft PR #18, CI `PASS`
+- Closure report commit: external to report content and not a qualification source
 - Audited WSGS base-operation smoke: `PARTIAL / SUPPLEMENTARY`
 
 ## Acceptance
@@ -48,8 +50,8 @@
 
 ## Evidence policy
 
-Every acceptance row is explicit. Historical reports are supplementary unless exact source scope and assertion locators are proven. Fixture evidence cannot satisfy live rows, and `REPORT` is not aliased to `REPORT_ASSERTION`.
+Every acceptance row is explicit. Historical reports are supplementary unless exact source scope and assertion locators are proven. Fixture evidence cannot satisfy live rows, and `REPORT` is not aliased to `REPORT_ASSERTION`. A Draft PR or pending CI does not alter the qualification decision.
 
 ## Protected actions
 
-No push, PR mutation, merge, tag, release, deployment, shared-infrastructure restart, or credential persistence is claimed.
+Push and Draft PR creation/update were performed under explicit authorization. No merge, tag, release, deployment, shared-infrastructure restart, or credential persistence is claimed.

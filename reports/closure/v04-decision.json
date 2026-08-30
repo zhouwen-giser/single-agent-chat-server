@@ -2,13 +2,13 @@
   "schemaVersion": "sacs-closure-decision/1.0",
   "track": "V0_4",
   "decision": "BLOCKED_UPSTREAM",
-  "sourceSha": "8262685ea04c3adf908993860ce626fb6832a3c2",
+  "sourceSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
   "acceptance": {
     "required": 102,
-    "pass": 0,
+    "pass": 10,
     "fail": 0,
-    "notRun": 29,
-    "blocked": 73
+    "notRun": 23,
+    "blocked": 69
   },
   "blockers": [
     "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
@@ -18,11 +18,19 @@
   "nonClaims": [
     "No authoritative WSGS geospatial bundle was observed by this report-generation pass.",
     "No real SACS-to-WSGS-to-GOWM-to-GDPS case is promoted from historical blocked evidence.",
-    "No exact-head PR or hosted CI success is claimed."
+    "PR #17 is DRAFT; exact-head hosted CI is PASS."
   ],
   "pullRequest": {
-    "state": "NOT_RUN",
-    "exactHeadCi": "NOT_RUN",
-    "protectedActionsPerformed": []
+    "number": 17,
+    "state": "DRAFT",
+    "baseBranch": "main",
+    "headBranch": "codex/sacs-v0.4-geospatial-explanation",
+    "headSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "exactHeadCi": "PASS",
+    "protectedActionsPerformed": [
+      "PUSH",
+      "PULL_REQUEST_CREATE_OR_UPDATE"
+    ],
+    "closureReportCommitIsQualificationSource": false
   }
 }

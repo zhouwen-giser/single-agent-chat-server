@@ -87,6 +87,22 @@ const V05_POSTGRES_EVIDENCE_IDS = new Set([
   "AC-V5-STEER-019",
   "AC-V5-STEER-020",
 ]);
+const V04_PUBLICATION_PASS_IDS = new Set([
+  "AC-C00-003",
+  "AC-C00-005",
+  "AC-C00-006",
+  "AC-V4-DELIVERY-001",
+  "AC-V4-DELIVERY-002",
+  "AC-V4-DELIVERY-003",
+  "AC-V4-DELIVERY-005",
+  "AC-V4-DELIVERY-006",
+  "AC-V4-DELIVERY-007",
+  "AC-V4-DELIVERY-008",
+  "AC-V4-DELIVERY-009",
+  "AC-V4-DELIVERY-010",
+  "AC-V4-DELIVERY-012",
+]);
+const V05_PUBLICATION_PASS_IDS = new Set(["AC-C00-007"]);
 
 if (importPackageRoot) {
   if (checkOnly) {
@@ -122,12 +138,18 @@ const v05Gates = JSON.parse(
 const qualificationSourceLock = JSON.parse(
   await readFile(resolve(configRoot, "qualification-source-lock.json"), "utf8"),
 );
+const publicationEvidence = JSON.parse(
+  await readFile(resolve(configRoot, "publication-evidence.json"), "utf8"),
+);
 
-const git = captureGitSnapshot(qualificationSourceLock);
-const generatedAt =
-  git.headCommittedAt ?? `${manifest.generatedAt}T00:00:00.000Z`;
+const git = captureGitSnapshot(qualificationSourceLock, publicationEvidence);
+verifyPublicationEvidence(publicationEvidence, git);
+const generatedAt = publicationEvidence.observedAt;
 const auditedRunEvidence = await buildAuditedRunEvidence(git);
-const evidenceIndex = await buildEvidenceIndex(auditedRunEvidence);
+const evidenceIndex = await buildEvidenceIndex(
+  auditedRunEvidence,
+  publicationEvidence,
+);
 const expectedCrosswalk = buildCrosswalk(rows, evidenceIndex);
 const entries = buildLedgerEntries(rows, expectedCrosswalk, evidenceIndex);
 verifyLedger(entries, expectedCrosswalk);
@@ -149,8 +171,9 @@ const v04Decision = buildDecision({
   nonClaims: [
     "No authoritative WSGS geospatial bundle was observed by this report-generation pass.",
     "No real SACS-to-WSGS-to-GOWM-to-GDPS case is promoted from historical blocked evidence.",
-    "No exact-head PR or hosted CI success is claimed.",
+    `PR #${publicationEvidence.v04.pullRequest.number} is DRAFT; exact-head hosted CI is ${publicationEvidence.v04.ci.state}.`,
   ],
+  publication: publicationEvidence.v04,
 });
 const v05Decision = buildDecision({
   track: "V0_5",
@@ -167,6 +190,7 @@ const v05Decision = buildDecision({
     "No real WSGS analysis plan, event, revision, cancel, intervention, or recovery chain is claimed.",
     "DEVELOPMENT_READY_BLOCKED_LIVE is not claimed while local required rows remain NOT_RUN.",
   ],
+  publication: publicationEvidence.v05,
 });
 
 verifyTrackDecision(v04Decision, finalDecisionPolicy);
@@ -178,6 +202,7 @@ const sourceLock = buildSourceLock({
   manifest,
   taskPackageLock,
   auditedRunEvidence,
+  publicationEvidence,
 });
 const implementationMatrix = buildImplementationMatrix({
   generatedAt,
@@ -185,8 +210,13 @@ const implementationMatrix = buildImplementationMatrix({
   manifest,
   v04Gates,
   v05Gates,
+  publicationEvidence,
 });
-const branchPrCi = buildBranchPrCi({ generatedAt, git });
+const branchPrCi = buildBranchPrCi({
+  generatedAt,
+  git,
+  publicationEvidence,
+});
 const v04Dependency = buildDependency({
   dependencyId: "WSGS_GEospatial_PRESENTATION_HANDOFF",
   owner: "WSGS",
@@ -216,7 +246,7 @@ const v05Dependency = buildDependency({
   ],
   blockingGates: ["C08", "C11", "C12", "C13"],
 });
-const remoteDelivery = buildRemoteDelivery({ generatedAt, git });
+const remoteDelivery = buildRemoteDelivery({ git, publicationEvidence });
 const acceptanceLedger = {
   schemaVersion: "sacs-v04-v05-closure-acceptance-ledger/1.0",
   sourceMatrix: {
@@ -271,6 +301,7 @@ const phaseSummary = buildPhaseSummary({
   counts,
   v04Decision,
   v05Decision,
+  publicationEvidence,
 });
 
 const outputs = new Map([
@@ -311,6 +342,7 @@ const outputs = new Map([
       packageConflicts,
       evidenceIndex,
       auditedRunEvidence,
+      publicationEvidence,
     }),
   ],
 ]);
@@ -319,7 +351,7 @@ for (const phase of Object.keys(EXPECTED_PHASE_COUNTS)) {
   const phaseEntries = entries.filter((entry) => entry.phase === phase);
   outputs.set(
     resolve(reportRoot, `${phase}-phase-report.md`),
-    phaseReport(phase, phaseEntries, git),
+    phaseReport(phase, phaseEntries, git, publicationEvidence),
   );
 }
 
@@ -442,21 +474,29 @@ function buildCrosswalk(matrixRows, evidence) {
           .map(({ type }) => type),
       );
       const requiredEvidenceTypes = splitEvidence(row.evidence);
+      const missingEvidenceTypes = requiredEvidenceTypes.filter(
+        (type) => !suppliedTypes.has(type),
+      );
+      const publicationPass =
+        classification.status === "NOT_RUN" &&
+        missingEvidenceTypes.length === 0 &&
+        (V04_PUBLICATION_PASS_IDS.has(row.id) ||
+          V05_PUBLICATION_PASS_IDS.has(row.id));
+      const status = publicationPass ? "PASS" : classification.status;
       return {
         acceptanceId: row.id,
         track: row.track,
         phase: row.phase,
         requiredEvidenceTypes,
-        initialStatus: classification.status,
-        reasonCode:
-          classification.status === "NOT_RUN" && suppliedTypes.size > 0
+        initialStatus: status,
+        reasonCode: publicationPass
+          ? "EXACT_PUBLICATION_EVIDENCE_VERIFIED"
+          : classification.status === "NOT_RUN" && suppliedTypes.size > 0
             ? "REQUIRED_EVIDENCE_ALL_OF_INCOMPLETE"
             : classification.reasonCode,
         dependencies: classification.dependencies,
         blockerMarkers: classification.blockerMarkers,
-        missingEvidenceTypes: requiredEvidenceTypes.filter(
-          (type) => !suppliedTypes.has(type),
-        ),
+        missingEvidenceTypes,
         reusePolicy: reusePolicyFor(row),
         candidateEvidenceIds: candidates,
         contractConflicts: hasReportEvidenceConflict(row)
@@ -532,21 +572,6 @@ function classifyRow(row) {
       "V04_REAL_WSGS_QUALIFICATION_BLOCKED_BY_HANDOFF",
       ["SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY"],
       ["V04_WSGS_GEOSPATIAL_HANDOFF"],
-    );
-  }
-  if (
-    row.phase === "C01" &&
-    [
-      "AC-V4-DELIVERY-003",
-      "AC-V4-DELIVERY-004",
-      "AC-V4-DELIVERY-005",
-      "AC-V4-DELIVERY-006",
-    ].includes(row.id)
-  ) {
-    return blocked(
-      "REMOTE_PUBLICATION_NOT_AUTHORIZED_BY_CURRENT_REQUEST",
-      ["REMOTE_PUBLICATION_WITHHELD"],
-      ["REMOTE_PUBLICATION_AUTHORIZATION"],
     );
   }
   if (row.id === "AC-V4-DELIVERY-011") {
@@ -636,6 +661,20 @@ function candidateEvidenceFor(row) {
   if (["AC-C00-014", "AC-V4-HANDOFF-014"].includes(row.id)) {
     result.push("CURRENT_WSGS_18277_GROUNDING_SMOKE");
   }
+  if (V04_PUBLICATION_PASS_IDS.has(row.id)) {
+    result.push(
+      "V04_PUBLICATION_SOURCE",
+      "V04_PUBLICATION_GIT",
+      "V04_PUBLICATION_CI",
+    );
+  }
+  if (V05_PUBLICATION_PASS_IDS.has(row.id)) {
+    result.push(
+      "V05_PUBLICATION_SOURCE",
+      "V05_PUBLICATION_GIT",
+      "V05_PUBLICATION_CI",
+    );
+  }
   return [...new Set(result)];
 }
 
@@ -658,8 +697,11 @@ function nonClaimsFor(row) {
   return claims;
 }
 
-async function buildEvidenceIndex(auditedEvidence) {
+async function buildEvidenceIndex(auditedEvidence, publication) {
   const auditedEvidenceBytes = Buffer.from(json(auditedEvidence), "utf8");
+  const publicationEvidenceBytes = await readFile(
+    resolve(configRoot, "publication-evidence.json"),
+  );
   const definitions = [
     {
       evidenceId: "V04_ACCEPTANCE_LEDGER_HISTORICAL",
@@ -762,6 +804,16 @@ async function buildEvidenceIndex(auditedEvidence) {
         "It does not prove either authoritative handoff bundle, geospatial typed findings, analysis events, revision control, cancel, intervention, GOWM, or GDPS/STAS.",
       ],
     },
+    ...publicationEvidenceDefinitions(
+      "V04",
+      publication.v04,
+      publicationEvidenceBytes,
+    ),
+    ...publicationEvidenceDefinitions(
+      "V05",
+      publication.v05,
+      publicationEvidenceBytes,
+    ),
   ];
 
   const entries = [];
@@ -802,6 +854,55 @@ async function buildEvidenceIndex(auditedEvidence) {
     },
     entries,
   };
+}
+
+function publicationEvidenceDefinitions(prefix, track, bytes) {
+  const path = "config/closure/v0.4-v0.5/publication-evidence.json";
+  const trackName = prefix.toLowerCase();
+  const common = {
+    path,
+    scope: "PRIMARY",
+    fixture: false,
+    inlineBytes: bytes,
+  };
+  return [
+    {
+      ...common,
+      evidenceId: `${prefix}_PUBLICATION_SOURCE`,
+      type: "SOURCE",
+      promotable: true,
+      limitations: [
+        `Limited to the pinned ${trackName} qualification source ${track.qualificationSourceSha}.`,
+        "Does not establish an authoritative upstream handoff or a live business chain.",
+      ],
+    },
+    {
+      ...common,
+      evidenceId: `${prefix}_PUBLICATION_GIT`,
+      type: "GIT",
+      promotable: true,
+      limitations: [
+        `Limited to the exact pushed branch and Draft PR #${track.pullRequest.number}.`,
+        "Draft publication does not imply merge readiness.",
+      ],
+    },
+    {
+      ...common,
+      evidenceId: `${prefix}_PUBLICATION_CI`,
+      type: "CI",
+      promotable: track.ci.state === "PASS",
+      limitations:
+        track.ci.state === "PASS"
+          ? [
+              `Hosted CI was observed PASS for ${track.ci.observedForSha}.`,
+              "CI success does not satisfy live or upstream-handoff evidence.",
+            ]
+          : [
+              `Hosted CI is ${track.ci.state} for ${track.ci.observedForSha}.`,
+              "A pending or failed CI observation cannot satisfy CI evidence.",
+            ],
+    },
+  ];
 }
 
 async function buildAuditedRunEvidence(gitSnapshot) {
@@ -884,6 +985,12 @@ async function buildAuditedRunEvidence(gitSnapshot) {
 }
 
 function assertionLocatorFor(evidenceId, row) {
+  if (evidenceId.startsWith("V04_PUBLICATION_")) {
+    return `publication-evidence.json#/v04 :: ${row.id}`;
+  }
+  if (evidenceId.startsWith("V05_PUBLICATION_")) {
+    return `publication-evidence.json#/v05 :: ${row.id}`;
+  }
   if (evidenceId === "V05_REAL_POSTGRES_7_TESTS") {
     return `tests/analysis-persistence.postgres.int.test.ts :: ${postgresAssertionFor(row.acceptanceId)}`;
   }
@@ -979,12 +1086,13 @@ function buildSourceLock({
   manifest: packageManifest,
   taskPackageLock: lock,
   auditedRunEvidence: audited,
+  publicationEvidence: publication,
 }) {
   return {
     schemaVersion: "sacs-v04-v05-closure-source-lock/1.0",
     capturedAt: at,
-    status: "NOT_RUN",
-    reasonCode: "REMOTE_UPSTREAM_SOURCE_AND_CI_REFRESH_NOT_RUN",
+    status: "PARTIAL",
+    reasonCode: "SACS_PUBLICATION_OBSERVED_UPSTREAM_REFRESH_INCOMPLETE",
     taskPackage: {
       name: packageManifest.name,
       packageVersion: packageManifest.packageVersion,
@@ -992,7 +1100,16 @@ function buildSourceLock({
       manifestSha256: lock.manifestSha256,
       integrity: lock.integrity,
     },
-    sacs: snapshot,
+    sacs: {
+      ...snapshot,
+      worktreeHeadSha: null,
+      worktreeHeadIdentity: "EXTERNAL_TO_REPORT_CONTENT",
+    },
+    publication: {
+      v04: publicationSummary(publication.v04),
+      v05: publicationSummary(publication.v05),
+      closureReportCommit: publication.closureReportCommit,
+    },
     packageGenerationBaselines: packageManifest.knownBaselines,
     upstreamCurrentSources: {
       wsgs: { status: "NOT_RUN", sourceSha: null },
@@ -1014,7 +1131,7 @@ function buildSourceLock({
     },
     nonClaims: [
       "Package-generation SHAs are context, not current source truth.",
-      "No remote fetch or authenticated capability request was performed by the report generator.",
+      "The report generator consumes the pinned publication observation and does not perform a network refresh.",
       "The recorded ordinary grounding POST does not establish either authoritative handoff or a downstream GOWM/GDPS/STAS chain.",
     ],
   };
@@ -1026,13 +1143,17 @@ function buildImplementationMatrix({
   manifest: packageManifest,
   v04Gates: v4,
   v05Gates: v5,
+  publicationEvidence: publication,
 }) {
   return {
     schemaVersion: "sacs-v04-v05-closure-implementation-matrix/1.0",
     generatedAt: at,
-    status: "NOT_RUN",
+    status: "PARTIAL",
     sources: {
-      sacs: { status: "LOCAL_ONLY", sha: snapshot.headSha },
+      sacs: {
+        status: `PUBLISHED_CI_${publication.v05.ci.state}`,
+        sha: publication.v05.qualificationSourceSha,
+      },
       wsgs: {
         status: "NOT_RUN",
         packageGenerationSha: packageManifest.knownBaselines.wsgs,
@@ -1052,7 +1173,10 @@ function buildImplementationMatrix({
       items: [
         ...v4.preserveImplemented.map((id) => ({
           id,
-          status: "IMPLEMENTED_LOCAL_ONLY",
+          status:
+            publication.v04.ci.state === "PASS"
+              ? "IMPLEMENTED_AND_VERIFIED"
+              : "IMPLEMENTED_REMOTE_NO_CI",
           evidence: ["reports/v0.4/geospatial/acceptance-ledger.json"],
         })),
         ...v4.requiredRemaining.map((id) => ({
@@ -1065,12 +1189,15 @@ function buildImplementationMatrix({
     v05: {
       branch: "codex/sacs-v0.5-observer-first-interactive-analysis",
       headSha: snapshot.v05.localSha,
+      remoteBranchFound: true,
       items: v5.coreScope.map((id) => ({
         id,
         status:
           id === "RevisionRecompile" || id === "InterruptCancelResume"
             ? "BLOCKED_UPSTREAM"
-            : "IMPLEMENTED_LOCAL_ONLY",
+            : publication.v05.ci.state === "PASS"
+              ? "IMPLEMENTED_AND_VERIFIED"
+              : "IMPLEMENTED_REMOTE_NO_CI",
         evidence: [
           "reports/v0.5/observer-first-interactive-analysis/local-verification.json",
         ],
@@ -1093,35 +1220,42 @@ function statusForV04Remaining(id) {
   return "MISSING";
 }
 
-function buildBranchPrCi({ generatedAt: at, git: snapshot }) {
+function buildBranchPrCi({
+  generatedAt: at,
+  git: snapshot,
+  publicationEvidence: publication,
+}) {
   return {
     schemaVersion: "sacs-v04-v05-branch-pr-ci/1.0",
     capturedAt: at,
-    status: "NOT_RUN",
-    remoteRefresh: "NOT_RUN",
+    status:
+      publication.v04.ci.state === "PASS" && publication.v05.ci.state === "PASS"
+        ? "PUBLISHED_CI_PASS"
+        : "PUBLISHED_CI_PENDING",
+    remoteRefresh: "PINNED_OBSERVATION",
     v04: {
       branch: "codex/sacs-v0.4-geospatial-explanation",
-      localSha: snapshot.v04.localSha,
-      trackingSha: snapshot.v04.trackingSha,
-      cachedRemoteSha: snapshot.v04.cachedRemoteSha,
-      pullRequest: "NOT_RUN",
-      ci: "NOT_RUN",
+      localSha: publication.v04.qualificationSourceSha,
+      trackingSha: publication.v04.trackingSha,
+      cachedRemoteSha: publication.v04.remoteSha,
+      pullRequest: publication.v04.pullRequest,
+      ci: publication.v04.ci,
     },
     v05: {
       branch: "codex/sacs-v0.5-observer-first-interactive-analysis",
-      localSha: snapshot.v05.localSha,
-      trackingSha: snapshot.v05.trackingSha,
-      cachedRemoteSha: snapshot.v05.cachedRemoteSha,
-      pullRequest: "NOT_RUN",
-      ci: "NOT_RUN",
+      localSha: publication.v05.qualificationSourceSha,
+      trackingSha: publication.v05.trackingSha,
+      cachedRemoteSha: publication.v05.remoteSha,
+      pullRequest: publication.v05.pullRequest,
+      ci: publication.v05.ci,
     },
     protectedActions: {
-      push: "NOT_RUN",
-      pullRequestCreateOrUpdate: "NOT_RUN",
-      merge: "NOT_RUN",
-      tag: "NOT_RUN",
-      release: "NOT_RUN",
-      deploy: "NOT_RUN",
+      push: "PERFORMED",
+      pullRequestCreateOrUpdate: "PERFORMED",
+      merge: "NOT_PERFORMED",
+      tag: "NOT_PERFORMED",
+      release: "NOT_PERFORMED",
+      deploy: "NOT_PERFORMED",
     },
   };
 }
@@ -1149,20 +1283,34 @@ function buildDependency({
   };
 }
 
-function buildRemoteDelivery({ generatedAt: at, git: snapshot }) {
+function buildRemoteDelivery({ publicationEvidence: publication }) {
+  const track = publication.v04;
   return {
-    schemaVersion: "sacs-remote-delivery-candidate/1.0",
-    capturedAt: at,
-    status: "BLOCKED",
-    reasonCode: "CURRENT_REMOTE_PUBLICATION_NOT_AUTHORIZED_OR_REFRESHED",
-    branch: "codex/sacs-v0.4-geospatial-explanation",
-    localSha: snapshot.v04.localSha,
-    trackingSha: snapshot.v04.trackingSha,
-    remoteSha: snapshot.v04.cachedRemoteSha,
-    prState: "NOT_RUN",
-    ciState: "NOT_RUN",
-    workflowRunIds: [],
-    protectedActionsPerformed: [],
+    schemaVersion: "sacs-remote-delivery-report/1.0",
+    branch: track.branch,
+    localSha: track.qualificationSourceSha,
+    trackingSha: track.trackingSha,
+    remoteSha: track.remoteSha,
+    prState: track.pullRequest.state,
+    ciState: track.ci.state,
+    pullRequestNumber: track.pullRequest.number,
+    workflowRunIds: track.ci.workflowRunIds,
+  };
+}
+
+function publicationSummary(track) {
+  return {
+    branch: track.branch,
+    qualificationSourceSha: track.qualificationSourceSha,
+    trackingSha: track.trackingSha,
+    remoteSha: track.remoteSha,
+    push: track.push.state,
+    pullRequestNumber: track.pullRequest.number,
+    pullRequestState: track.pullRequest.state,
+    pullRequestBaseBranch: track.pullRequest.baseBranch,
+    ciState: track.ci.state,
+    ciObservedForSha: track.ci.observedForSha,
+    workflowRunIds: track.ci.workflowRunIds,
   };
 }
 
@@ -1173,6 +1321,7 @@ function buildDecision({
   counts: trackCounts,
   blockers,
   nonClaims,
+  publication,
 }) {
   return {
     schemaVersion: "sacs-closure-decision/1.0",
@@ -1189,9 +1338,14 @@ function buildDecision({
     blockers,
     nonClaims,
     pullRequest: {
-      state: "NOT_RUN",
-      exactHeadCi: "NOT_RUN",
-      protectedActionsPerformed: [],
+      number: publication.pullRequest.number,
+      state: publication.pullRequest.state,
+      baseBranch: publication.pullRequest.baseBranch,
+      headBranch: publication.pullRequest.headBranch,
+      headSha: publication.pullRequest.headSha,
+      exactHeadCi: publication.ci.state,
+      protectedActionsPerformed: ["PUSH", "PULL_REQUEST_CREATE_OR_UPDATE"],
+      closureReportCommitIsQualificationSource: false,
     },
   };
 }
@@ -1249,6 +1403,7 @@ function buildPhaseSummary({
   counts: allCounts,
   v04Decision: v4,
   v05Decision: v5,
+  publicationEvidence: publication,
 }) {
   return {
     schemaVersion: "sacs-v04-v05-closure-phase-summary/1.0",
@@ -1266,11 +1421,15 @@ function buildPhaseSummary({
         ];
       }),
     ),
-    protectedActionsPerformed: [],
+    publication: {
+      v04: publicationSummary(publication.v04),
+      v05: publicationSummary(publication.v05),
+    },
+    protectedActionsPerformed: ["PUSH", "PULL_REQUEST_CREATE_OR_UPDATE"],
   };
 }
 
-function phaseReport(phase, phaseEntries, gitSnapshot) {
+function phaseReport(phase, phaseEntries, gitSnapshot, publication) {
   const summary = summarize(phaseEntries);
   const status = aggregateStatus(summary);
   const rows = phaseEntries
@@ -1279,7 +1438,7 @@ function phaseReport(phase, phaseEntries, gitSnapshot) {
         `| ${entry.acceptanceId} | ${entry.status} | ${escapeMarkdown(entry.scenario)} | ${entry.reasonCode} | ${escapeMarkdown(entry.missingEvidenceTypes.join(", "))} |`,
     )
     .join("\n");
-  return `# Closure Qualification Phase Report — ${phase}\n\n## Status\n\n**${status}** — ${summary.PASS} PASS, ${summary.FAIL} FAIL, ${summary.NOT_RUN} NOT_RUN, ${summary.BLOCKED} BLOCKED (${summary.required} required).\n\n## Source\n\n- Qualification source branch: \`${gitSnapshot.branch}\`\n- Pinned qualification source: \`${gitSnapshot.headSha}\`\n- Remote/PR/CI refresh: \`NOT_RUN\`\n- Audited WSGS base-operation smoke: \`PARTIAL / SUPPLEMENTARY\`\n\n## Acceptance\n\n| ID | status | scenario | reason | missing evidence |\n|---|---|---|---|---|\n${rows}\n\n## Evidence policy\n\nEvery acceptance row is explicit. Historical reports are supplementary unless exact source scope and assertion locators are proven. Fixture evidence cannot satisfy live rows, and \`REPORT\` is not aliased to \`REPORT_ASSERTION\`.\n\n## Protected actions\n\nNo push, PR mutation, merge, tag, release, deployment, shared-infrastructure restart, or credential persistence is claimed.\n`;
+  return `# Closure Qualification Phase Report — ${phase}\n\n## Status\n\n**${status}** — ${summary.PASS} PASS, ${summary.FAIL} FAIL, ${summary.NOT_RUN} NOT_RUN, ${summary.BLOCKED} BLOCKED (${summary.required} required).\n\n## Source and publication\n\n- V4 qualification source: \`${publication.v04.branch}@${publication.v04.qualificationSourceSha}\`\n- V4 remote/PR/CI: exact remote SHA, Draft PR #${publication.v04.pullRequest.number}, CI \`${publication.v04.ci.state}\`\n- V5 qualification source: \`${publication.v05.branch}@${publication.v05.qualificationSourceSha}\`\n- V5 remote/PR/CI: exact remote SHA, Draft PR #${publication.v05.pullRequest.number}, CI \`${publication.v05.ci.state}\`\n- Closure report commit: external to report content and not a qualification source\n- Audited WSGS base-operation smoke: \`PARTIAL / SUPPLEMENTARY\`\n\n## Acceptance\n\n| ID | status | scenario | reason | missing evidence |\n|---|---|---|---|---|\n${rows}\n\n## Evidence policy\n\nEvery acceptance row is explicit. Historical reports are supplementary unless exact source scope and assertion locators are proven. Fixture evidence cannot satisfy live rows, and \`REPORT\` is not aliased to \`REPORT_ASSERTION\`. A Draft PR or pending CI does not alter the qualification decision.\n\n## Protected actions\n\nPush and Draft PR creation/update were performed under explicit authorization. No merge, tag, release, deployment, shared-infrastructure restart, or credential persistence is claimed.\n`;
 }
 
 function finalReport({
@@ -1290,6 +1449,7 @@ function finalReport({
   packageConflicts: conflicts,
   evidenceIndex: evidence,
   auditedRunEvidence: audited,
+  publicationEvidence: publication,
 }) {
   const phaseRows = Object.entries(EXPECTED_PHASE_COUNTS)
     .map(([phase, required]) => {
@@ -1306,24 +1466,35 @@ function finalReport({
         `| ${entry.evidenceId} | ${entry.scope} | ${entry.promotable ? "yes" : "no"} | ${escapeMarkdown(entry.path)} |`,
     )
     .join("\n");
-  return `# SACS v0.4 / v0.5 Closure and Qualification Final Report\n\n## Outcome\n\n- V4 decision: **${v4.decision}**\n- V5 decision: **${v5.decision}**\n- GLOBAL rows are reported independently and are not folded into either decision denominator.\n\n## Exact qualification sources\n\n- Pinned SACS qualification source: \`${snapshot.branch}@${snapshot.headSha}\`\n- V4 local source: \`codex/sacs-v0.4-geospatial-explanation@${snapshot.v04.localSha ?? "NOT_FOUND"}\`\n- V5 qualification source: \`codex/sacs-v0.5-observer-first-interactive-analysis@${snapshot.v05.localSha ?? "NOT_FOUND"}\`\n- The closure artifact commit is intentionally not treated as product qualification source.\n- Remote/PR/CI refresh: \`NOT_RUN\`\n\n## Independent acceptance denominators\n\n- GLOBAL: ${allCounts.tracks.GLOBAL.PASS} PASS, ${allCounts.tracks.GLOBAL.FAIL} FAIL, ${allCounts.tracks.GLOBAL.NOT_RUN} NOT_RUN, ${allCounts.tracks.GLOBAL.BLOCKED} BLOCKED / ${allCounts.tracks.GLOBAL.required}\n- V0_4: ${allCounts.tracks.V0_4.PASS} PASS, ${allCounts.tracks.V0_4.FAIL} FAIL, ${allCounts.tracks.V0_4.NOT_RUN} NOT_RUN, ${allCounts.tracks.V0_4.BLOCKED} BLOCKED / ${allCounts.tracks.V0_4.required}\n- V0_5: ${allCounts.tracks.V0_5.PASS} PASS, ${allCounts.tracks.V0_5.FAIL} FAIL, ${allCounts.tracks.V0_5.NOT_RUN} NOT_RUN, ${allCounts.tracks.V0_5.BLOCKED} BLOCKED / ${allCounts.tracks.V0_5.required}\n\nNo aggregate PASS is calculated.\n\n## Phase accounting\n\n| phase | required | PASS | FAIL | NOT_RUN | BLOCKED | status |\n|---|---:|---:|---:|---:|---:|---|\n${phaseRows}\n\n## V4 decision\n\n**${v4.decision}**. The checked-in historical reports do not contain an authoritative five-artifact WSGS geospatial handoff or a completed real 18-case chain. Existing isolated PostgreSQL evidence remains supplementary and is never promoted to REAL_WSGS.\n\n## V5 decision\n\n**${v5.decision}**. The current focused local run and isolated PostgreSQL suite pass, but closure-package per-acceptance SCHEMA/UNIT mappings remain incomplete, the prior 418-row ledger contains zero PASS, and the authoritative eight-artifact WSGS analysis handoff is absent. Therefore \`DEVELOPMENT_READY_BLOCKED_LIVE\` is not claimed.\n\n## Candidate and audited evidence\n\n| evidence | scope | promotable | path |\n|---|---|---|---|\n${evidenceRows}\n\n## Canonical package conflicts\n\n${conflictRows}\n\nThe 24 rows requiring \`REPORT\` remain BLOCKED because the canonical template allowlists \`REPORT_ASSERTION\` instead. No silent alias is applied.\n\n## Audited runtime evidence\n\n- WSGS \`${audited.wsgs.endpoint}\` readiness returned HTTP ${audited.wsgs.readiness.httpStatus}.\n- One unauthenticated, read-only \`GROUND_REFERENCES\` request completed with one reference product, zero capability gaps, and no error code/stage.\n- Runtime OCI revision: \`${audited.wsgs.runtimeRevision}\`.\n- Isolated PostgreSQL: \`${audited.realPostgres.suite}\` passed 1 suite / 7 tests; the container was removed afterward.\n\nThe WSGS smoke is only base-operation evidence and does not promote any authoritative geospatial/analysis handoff or GOWM/GDPS/STAS row. PostgreSQL evidence is attached only to the lifecycle/proposal assertions actually exercised; rows still lack their remaining all-of evidence.\n\n## Real E2E and environment\n\nNo geospatial 18-case chain, analysis 22-case chain, shared-service failure injection, or SACS/container restart was performed by this reporting pass. Readiness and one ordinary grounding operation cannot replace either authoritative handoff bundle.\n\n## Security and protected actions\n\nNo bearer token, raw world reference ID, or response body is persisted. No push, PR mutation, merge, tag, release, deployment, or shared-infrastructure mutation is claimed.\n`;
+  return `# SACS v0.4 / v0.5 Closure and Qualification Final Report\n\n## Outcome\n\n- V4 decision: **${v4.decision}**\n- V5 decision: **${v5.decision}**\n- GLOBAL rows are reported independently and are not folded into either decision denominator.\n\n## Exact qualification and publication sources\n\n- V4 qualification source: \`${publication.v04.branch}@${publication.v04.qualificationSourceSha}\`\n- V4 publication: exact pushed remote SHA; Draft PR #${publication.v04.pullRequest.number} targeting \`${publication.v04.pullRequest.baseBranch}\`; exact-head CI \`${publication.v04.ci.state}\`.\n- V5 qualification source: \`${publication.v05.branch}@${publication.v05.qualificationSourceSha}\`\n- V5 publication: exact pushed remote SHA; Draft PR #${publication.v05.pullRequest.number} targeting \`${publication.v05.pullRequest.baseBranch}\`; exact-head CI \`${publication.v05.ci.state}\`.\n- The closure artifact commit is resolved externally by Git/PR and intentionally is not embedded in its own content or treated as a product qualification source.\n\n## Independent acceptance denominators\n\n- GLOBAL: ${allCounts.tracks.GLOBAL.PASS} PASS, ${allCounts.tracks.GLOBAL.FAIL} FAIL, ${allCounts.tracks.GLOBAL.NOT_RUN} NOT_RUN, ${allCounts.tracks.GLOBAL.BLOCKED} BLOCKED / ${allCounts.tracks.GLOBAL.required}\n- V0_4: ${allCounts.tracks.V0_4.PASS} PASS, ${allCounts.tracks.V0_4.FAIL} FAIL, ${allCounts.tracks.V0_4.NOT_RUN} NOT_RUN, ${allCounts.tracks.V0_4.BLOCKED} BLOCKED / ${allCounts.tracks.V0_4.required}\n- V0_5: ${allCounts.tracks.V0_5.PASS} PASS, ${allCounts.tracks.V0_5.FAIL} FAIL, ${allCounts.tracks.V0_5.NOT_RUN} NOT_RUN, ${allCounts.tracks.V0_5.BLOCKED} BLOCKED / ${allCounts.tracks.V0_5.required}\n\nNo aggregate PASS is calculated.\n\n## Phase accounting\n\n| phase | required | PASS | FAIL | NOT_RUN | BLOCKED | status |\n|---|---:|---:|---:|---:|---:|---|\n${phaseRows}\n\n## V4 decision\n\n**${v4.decision}**. Draft PR publication does not resolve the missing authoritative five-artifact WSGS geospatial handoff or the unrun real 18-case chain. Existing isolated PostgreSQL evidence remains supplementary and is never promoted to REAL_WSGS.\n\n## V5 decision\n\n**${v5.decision}**. Draft PR publication does not resolve the incomplete closure-package per-acceptance SCHEMA/UNIT mappings or the absent authoritative eight-artifact WSGS analysis handoff. Therefore \`DEVELOPMENT_READY_BLOCKED_LIVE\` is not claimed.\n\n## Candidate and audited evidence\n\n| evidence | scope | promotable | path |\n|---|---|---|---|\n${evidenceRows}\n\n## Canonical package conflicts\n\n${conflictRows}\n\nThe 24 rows requiring \`REPORT\` remain BLOCKED because the canonical template allowlists \`REPORT_ASSERTION\` instead. No silent alias is applied.\n\n## Audited runtime evidence\n\n- WSGS \`${audited.wsgs.endpoint}\` readiness returned HTTP ${audited.wsgs.readiness.httpStatus}.\n- One unauthenticated, read-only \`GROUND_REFERENCES\` request completed with one reference product, zero capability gaps, and no error code/stage.\n- Runtime OCI revision: \`${audited.wsgs.runtimeRevision}\`.\n- Isolated PostgreSQL: \`${audited.realPostgres.suite}\` passed 1 suite / 7 tests; the container was removed afterward.\n\nThe WSGS smoke is only base-operation evidence and does not promote any authoritative geospatial/analysis handoff or GOWM/GDPS/STAS row. PostgreSQL evidence is attached only to the lifecycle/proposal assertions actually exercised; rows still lack their remaining all-of evidence.\n\n## Real E2E and environment\n\nNo geospatial 18-case chain, analysis 22-case chain, shared-service failure injection, or SACS/container restart was performed by this reporting pass. Readiness and one ordinary grounding operation cannot replace either authoritative handoff bundle.\n\n## Security and protected actions\n\nNo bearer token, raw world reference ID, or response body is persisted. Push and Draft PR creation/update were performed under explicit authorization. No merge, tag, release, deployment, or shared-infrastructure mutation is claimed.\n`;
 }
 
-function captureGitSnapshot(sourceLock) {
-  const qualificationSourceSha = sourceLock?.qualificationSourceSha;
-  const qualificationSourceBranch = sourceLock?.qualificationSourceBranch;
+function captureGitSnapshot(sourceLock, publication) {
+  const baselineQualificationSourceSha = sourceLock?.qualificationSourceSha;
+  const qualificationSourceSha = publication?.v05?.qualificationSourceSha;
+  const qualificationSourceBranch = publication?.v05?.branch;
   if (!/^[0-9a-f]{40}$/u.test(qualificationSourceSha ?? "")) {
     throw new Error("qualificationSourceSha must be a full lowercase Git SHA");
   }
   const actualHeadSha = gitValue(["rev-parse", "HEAD"]);
   const branch = gitValue(["rev-parse", "--abbrev-ref", "HEAD"]);
-  if (branch !== qualificationSourceBranch) {
+  if (
+    branch !== qualificationSourceBranch ||
+    branch !== sourceLock?.qualificationSourceBranch
+  ) {
     throw new Error(
       `Qualification source branch mismatch: ${branch} != ${qualificationSourceBranch}`,
     );
   }
   try {
+    gitValue(["cat-file", "-e", `${baselineQualificationSourceSha}^{commit}`]);
     gitValue(["cat-file", "-e", `${qualificationSourceSha}^{commit}`]);
+    gitValue([
+      "merge-base",
+      "--is-ancestor",
+      baselineQualificationSourceSha,
+      qualificationSourceSha,
+    ]);
     gitValue([
       "merge-base",
       "--is-ancestor",
@@ -1341,7 +1512,7 @@ function captureGitSnapshot(sourceLock) {
     "--format=%cI",
     qualificationSourceSha,
   ]);
-  const dirty = gitLines(["status", "--porcelain"]);
+  const dirty = gitPorcelainLines();
   const dirtyOutsideClosure = dirty.filter(
     (line) => !isClosurePath(line.slice(3)),
   );
@@ -1364,28 +1535,107 @@ function captureGitSnapshot(sourceLock) {
     repository: "single-agent-chat-server",
     branch,
     headSha: qualificationSourceSha,
+    worktreeHeadSha: actualHeadSha,
+    baselineQualificationSourceSha,
     headCommittedAt,
     qualificationSourcePinned: true,
     closureArtifactCommitIsNotQualificationSource: true,
     dirtyOutsideClosure,
     committedChangesOutsideClosure,
     closurePathsExcludedFromDirtyAssessment: true,
-    v04: branchSnapshot("codex/sacs-v0.4-geospatial-explanation"),
+    v04: branchSnapshot(
+      "codex/sacs-v0.4-geospatial-explanation",
+      publication.v04.qualificationSourceSha,
+      publication.v04,
+    ),
     v05: branchSnapshot(
       "codex/sacs-v0.5-observer-first-interactive-analysis",
       qualificationSourceSha,
+      publication.v05,
     ),
   };
 }
 
-function branchSnapshot(name, localShaOverride) {
+function verifyPublicationEvidence(publication, snapshot) {
+  if (publication?.schemaVersion !== "sacs-v04-v05-publication-evidence/1.0") {
+    throw new Error("Unsupported publication-evidence schemaVersion");
+  }
+  if (Number.isNaN(Date.parse(publication.observedAt))) {
+    throw new Error("publication-evidence observedAt must be a date-time");
+  }
+  if (
+    publication?.closureReportCommit?.sha !== null ||
+    publication?.closureReportCommit?.qualificationSource !== false
+  ) {
+    throw new Error(
+      "Closure report commit must stay external and cannot be a qualification source",
+    );
+  }
+
+  verifyTrackPublication("v04", publication.v04, snapshot.v04, [
+    snapshot.v04.localSha,
+    snapshot.v04.trackingSha,
+    snapshot.v04.cachedRemoteSha,
+  ]);
+  verifyTrackPublication("v05", publication.v05, snapshot.v05, [
+    snapshot.worktreeHeadSha,
+    snapshot.v05.trackingSha,
+    snapshot.v05.cachedRemoteSha,
+  ]);
+}
+
+function verifyTrackPublication(label, publication, snapshot, currentShas) {
+  const sha = publication?.qualificationSourceSha;
+  if (!/^[0-9a-f]{40}$/u.test(sha ?? "")) {
+    throw new Error(`${label} publication source must be a full Git SHA`);
+  }
+  if (
+    publication.branch !== snapshot.branch ||
+    publication.trackingSha !== sha ||
+    publication.remoteSha !== sha ||
+    publication.push?.state !== "PERFORMED" ||
+    publication.push?.exactHead !== true ||
+    publication.pullRequest?.headBranch !== publication.branch ||
+    publication.pullRequest?.headSha !== sha ||
+    publication.pullRequest?.state !== "DRAFT" ||
+    publication.ci?.observedForSha !== sha
+  ) {
+    throw new Error(`${label} publication evidence is not internally exact`);
+  }
+  if (!["NOT_RUN", "PENDING", "PASS", "FAIL"].includes(publication.ci.state)) {
+    throw new Error(`${label} publication CI state is invalid`);
+  }
+  if (
+    publication.ci.terminal !== ["PASS", "FAIL"].includes(publication.ci.state)
+  ) {
+    throw new Error(`${label} publication CI terminal flag is inconsistent`);
+  }
+  gitValue(["cat-file", "-e", `${sha}^{commit}`]);
+  for (const currentSha of currentShas.filter(Boolean)) {
+    if (currentSha === sha) continue;
+    gitValue(["merge-base", "--is-ancestor", sha, currentSha]);
+    const nonClosureChanges = gitLines([
+      "diff",
+      "--name-only",
+      `${sha}..${currentSha}`,
+      "--",
+    ]).filter((path) => !isClosurePath(path));
+    if (nonClosureChanges.length > 0) {
+      throw new Error(
+        `${label} moved beyond the observed source with non-closure changes`,
+      );
+    }
+  }
+}
+
+function branchSnapshot(name, localShaOverride, publication) {
   return {
     branch: name,
     localSha:
       localShaOverride ?? gitOptional(["rev-parse", `refs/heads/${name}`]),
     trackingSha: gitOptional(["rev-parse", `${name}@{upstream}`]),
     cachedRemoteSha: gitOptional(["rev-parse", `refs/remotes/origin/${name}`]),
-    remoteRefRefresh: "NOT_RUN",
+    remoteRefRefresh: publication ? "PINNED_OBSERVATION" : "NOT_RUN",
   };
 }
 
@@ -1418,6 +1668,15 @@ function gitOptional(arguments_) {
 
 function gitLines(arguments_) {
   const value = gitValue(arguments_);
+  return value ? value.split(/\r?\n/u) : [];
+}
+
+function gitPorcelainLines() {
+  const value = execFileSync("git", ["status", "--porcelain"], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  }).trimEnd();
   return value ? value.split(/\r?\n/u) : [];
 }
 

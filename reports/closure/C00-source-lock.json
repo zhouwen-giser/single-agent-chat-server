@@ -1,8 +1,8 @@
 {
   "schemaVersion": "sacs-v04-v05-closure-source-lock/1.0",
-  "capturedAt": "2026-08-30T18:07:13+08:00",
-  "status": "NOT_RUN",
-  "reasonCode": "REMOTE_UPSTREAM_SOURCE_AND_CI_REFRESH_NOT_RUN",
+  "capturedAt": "2026-08-30T19:11:57.5372842+08:00",
+  "status": "PARTIAL",
+  "reasonCode": "SACS_PUBLICATION_OBSERVED_UPSTREAM_REFRESH_INCOMPLETE",
   "taskPackage": {
     "name": "SACS v0.4/v0.5 Closure and Qualification Codex Goal",
     "packageVersion": "R1",
@@ -20,8 +20,10 @@
   "sacs": {
     "repository": "single-agent-chat-server",
     "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
-    "headSha": "8d611e3195c786854f2d0efd18ac19000441ab4a",
-    "headCommittedAt": "2026-08-30T18:07:13+08:00",
+    "headSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "worktreeHeadSha": null,
+    "baselineQualificationSourceSha": "8d611e3195c786854f2d0efd18ac19000441ab4a",
+    "headCommittedAt": "2026-08-30T19:02:38+08:00",
     "qualificationSourcePinned": true,
     "closureArtifactCommitIsNotQualificationSource": true,
     "dirtyOutsideClosure": [],
@@ -29,17 +31,56 @@
     "closurePathsExcludedFromDirtyAssessment": true,
     "v04": {
       "branch": "codex/sacs-v0.4-geospatial-explanation",
-      "localSha": "8262685ea04c3adf908993860ce626fb6832a3c2",
-      "trackingSha": "0d67125ba1e8f2d69ad07480bacbe7ecf5bab774",
-      "cachedRemoteSha": "0d67125ba1e8f2d69ad07480bacbe7ecf5bab774",
-      "remoteRefRefresh": "NOT_RUN"
+      "localSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "cachedRemoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "remoteRefRefresh": "PINNED_OBSERVATION"
     },
     "v05": {
       "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
-      "localSha": "8d611e3195c786854f2d0efd18ac19000441ab4a",
-      "trackingSha": null,
-      "cachedRemoteSha": null,
-      "remoteRefRefresh": "NOT_RUN"
+      "localSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "trackingSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "cachedRemoteSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "remoteRefRefresh": "PINNED_OBSERVATION"
+    },
+    "worktreeHeadIdentity": "EXTERNAL_TO_REPORT_CONTENT"
+  },
+  "publication": {
+    "v04": {
+      "branch": "codex/sacs-v0.4-geospatial-explanation",
+      "qualificationSourceSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "remoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "push": "PERFORMED",
+      "pullRequestNumber": 17,
+      "pullRequestState": "DRAFT",
+      "pullRequestBaseBranch": "main",
+      "ciState": "PASS",
+      "ciObservedForSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "workflowRunIds": [
+        33307359129
+      ]
+    },
+    "v05": {
+      "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+      "qualificationSourceSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "trackingSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "remoteSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "push": "PERFORMED",
+      "pullRequestNumber": 18,
+      "pullRequestState": "DRAFT",
+      "pullRequestBaseBranch": "codex/sacs-v0.4-geospatial-explanation",
+      "ciState": "PASS",
+      "ciObservedForSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "workflowRunIds": [
+        33307975653
+      ]
+    },
+    "closureReportCommit": {
+      "sha": null,
+      "identity": "EXTERNAL_TO_REPORT_CONTENT",
+      "qualificationSource": false,
+      "reason": "Embedding the commit that contains this file would create a Git object-id self-reference."
     }
   },
   "packageGenerationBaselines": {
@@ -83,7 +124,7 @@
   },
   "nonClaims": [
     "Package-generation SHAs are context, not current source truth.",
-    "No remote fetch or authenticated capability request was performed by the report generator.",
+    "The report generator consumes the pinned publication observation and does not perform a network refresh.",
     "The recorded ordinary grounding POST does not establish either authoritative handoff or a downstream GOWM/GDPS/STAS chain."
   ]
 }

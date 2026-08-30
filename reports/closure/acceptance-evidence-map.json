@@ -9,7 +9,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-001: SACS main",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -42,7 +42,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-002: PR15 state",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -69,13 +69,13 @@
     },
     {
       "acceptanceId": "AC-C00-003",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-003: v0.4 geospatial branch",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -97,6 +97,48 @@
           "limitations": [
             "The source lock does not include the commit that created it and is not current C00 truth."
           ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-C00-003",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-C00-003",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-C00-003",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
+          ]
         }
       ]
     },
@@ -108,7 +150,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-004: v0.4 compare",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -135,13 +177,13 @@
     },
     {
       "acceptanceId": "AC-C00-005",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-005: v0.4 PR search",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -162,19 +204,61 @@
           "fixture": false,
           "limitations": [
             "The source lock does not include the commit that created it and is not current C00 truth."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-C00-005",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-C00-005",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-C00-005",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
     },
     {
       "acceptanceId": "AC-C00-006",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-006: v0.4 CI",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -195,19 +279,61 @@
           "fixture": false,
           "limitations": [
             "The source lock does not include the commit that created it and is not current C00 truth."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-C00-006",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-C00-006",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-C00-006",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
     },
     {
       "acceptanceId": "AC-C00-007",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-007: v0.5 branch search",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -228,6 +354,48 @@
           "fixture": false,
           "limitations": [
             "The source lock does not include the commit that created it and is not current C00 truth."
+          ]
+        },
+        {
+          "evidenceId": "V05_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v05 :: AC-C00-007",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v05 qualification source 718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V05_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v05 :: AC-C00-007",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #18.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V05_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v05 :: AC-C00-007",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
@@ -240,7 +408,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-008: WSGS PR6",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -273,7 +441,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-009: GDPS main",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -306,7 +474,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-010: GOWM main",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -339,7 +507,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-011: Migration chain",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -372,7 +540,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-012: Implementation matrix",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -405,7 +573,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-013: Stale report detection",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -438,7 +606,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-014: Running environment",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -465,7 +633,7 @@
           "evidenceId": "CURRENT_WSGS_18277_GROUNDING_SMOKE",
           "type": "REAL_WSGS",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "audited-run-evidence.json#/wsgs",
           "scope": "SUPPLEMENTARY",
           "promotable": false,
@@ -485,7 +653,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-C00-015: No protected action",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -518,7 +686,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-001: WorldExplanation contract",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -566,7 +734,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-002: Canonical explanation hash",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -614,7 +782,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-003: Strict finding normalizer",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -662,7 +830,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-004: Unknown schema fail-closed",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -710,7 +878,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-005: Deterministic Chinese renderer",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -758,7 +926,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-006: Deterministic English renderer",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -806,7 +974,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-007: OpenAI projection",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -854,7 +1022,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-008: AG-UI projection",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -902,7 +1070,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-009: Map projection",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -950,7 +1118,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-010: Source product projection",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -998,7 +1166,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-011: Migration 0013",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1046,7 +1214,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-012: World explanation repository",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1094,7 +1262,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-013: Exact replay key",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1142,7 +1310,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-014: Physical PostgreSQL restart replay",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1190,7 +1358,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-015: Gap policy",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1238,7 +1406,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-016: Currentness policy",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1286,7 +1454,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-017: Finding reference resolver",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1334,7 +1502,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-018: Map selection validator",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1382,7 +1550,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-019: Conversation world focus extension",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1430,7 +1598,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-020: Authority Fusion boundary",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1478,7 +1646,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-021: Architecture guard",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1526,7 +1694,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-PRESERVE-022: Secret guard",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1568,13 +1736,13 @@
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-001",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-001: Remote branch truth",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1610,19 +1778,61 @@
           "limitations": [
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-001",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-001",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-001",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-002",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-002: Exact local/tracking/remote SHA",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1658,19 +1868,61 @@
           "limitations": [
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-002",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-002",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-002",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-003",
-      "status": "BLOCKED",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-003: Stacked PR",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1707,18 +1959,60 @@
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
           ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-003",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-003",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-003",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
+          ]
         }
       ]
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-004",
-      "status": "BLOCKED",
+      "status": "NOT_RUN",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-004: PR description",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1760,13 +2054,13 @@
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-005",
-      "status": "BLOCKED",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-005: Hosted push CI",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1802,19 +2096,61 @@
           "limitations": [
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-005",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-005",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-005",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-006",
-      "status": "BLOCKED",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-006: Hosted PR CI",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1850,19 +2186,61 @@
           "limitations": [
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-006",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-006",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-006",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-007",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-007: Migration gate",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1898,19 +2276,61 @@
           "limitations": [
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-007",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-007",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-007",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-008",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-008: Architecture gate",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1946,19 +2366,61 @@
           "limitations": [
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-008",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-008",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-008",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-009",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-009: Secret gate",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -1994,19 +2456,61 @@
           "limitations": [
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-009",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-009",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-009",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-010",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-010: Container gate",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2042,6 +2546,48 @@
           "limitations": [
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-010",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-010",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-010",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
           ]
         }
       ]
@@ -2054,7 +2600,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-011: Compose gate",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2096,13 +2642,13 @@
     },
     {
       "acceptanceId": "AC-V4-DELIVERY-012",
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         {
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-DELIVERY-012: No merge",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2139,6 +2685,48 @@
             "The PostgreSQL instance is real and isolated.",
             "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
           ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_SOURCE",
+          "type": "SOURCE",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-012",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "Does not establish an authoritative upstream handoff or a live business chain."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_GIT",
+          "type": "GIT",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-012",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Limited to the exact pushed branch and Draft PR #17.",
+            "Draft publication does not imply merge readiness."
+          ]
+        },
+        {
+          "evidenceId": "V04_PUBLICATION_CI",
+          "type": "CI",
+          "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+          "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14",
+          "assertionLocator": "publication-evidence.json#/v04 :: AC-V4-DELIVERY-012",
+          "scope": "PRIMARY",
+          "promotable": true,
+          "fixture": false,
+          "limitations": [
+            "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+            "CI success does not satisfy live or upstream-handoff evidence."
+          ]
         }
       ]
     },
@@ -2150,7 +2738,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-001: Consumer bundle",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2170,7 +2758,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-002: Checksums",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2190,7 +2778,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-003: WSGS SHA",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2210,7 +2798,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-004: Result schema hash",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2230,7 +2818,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-005: WorldFinding hash",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2250,7 +2838,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-006: SourceProduct hash",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2270,7 +2858,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-007: TypedGap hash",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2290,7 +2878,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-008: Transport mode",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2310,7 +2898,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-009: Currentness mode",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2330,7 +2918,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-010: GOWM provenance",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2350,7 +2938,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-011: GDPS provenance",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2370,7 +2958,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-012: No provisional promotion",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2390,7 +2978,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-013: Generated consumer",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2410,7 +2998,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-HANDOFF-014: Adapter capability check",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2424,7 +3012,7 @@
           "evidenceId": "CURRENT_WSGS_18277_GROUNDING_SMOKE",
           "type": "REAL_WSGS",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "audited-run-evidence.json#/wsgs",
           "scope": "SUPPLEMENTARY",
           "promotable": false,
@@ -2444,7 +3032,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-001: Finding selection schema",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2478,7 +3066,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-002: Map selection schema",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2512,7 +3100,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-003: Reference-set selection",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2546,7 +3134,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-004: Principal ownership",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2580,7 +3168,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-005: Thread ownership",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2614,7 +3202,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-006: Grounding identity",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2648,7 +3236,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-007: Explanation identity",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2682,7 +3270,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-008: Finding/source hash",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2716,7 +3304,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-009: Selection revision",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2750,7 +3338,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-010: Selection expiry",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2784,7 +3372,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-011: ReferenceKey path",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2818,7 +3406,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-012: Upstream selection token",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2852,7 +3440,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-013: Bare ordinal",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2886,7 +3474,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-014: Cross-thread selection",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2920,7 +3508,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-015: Cross-principal selection",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2954,7 +3542,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-SELECT-016: Stale selection",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -2988,7 +3576,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-001: normal completed",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3022,7 +3610,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-002: completed empty",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3056,7 +3644,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-003: data gap",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3090,7 +3678,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-004: coverage gap",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3124,7 +3712,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-005: capability gap",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3158,7 +3746,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-006: reference ambiguity",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3192,7 +3780,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-007: product ambiguity",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3226,7 +3814,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-008: truncated",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3260,7 +3848,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-009: source changed during query",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3294,7 +3882,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-010: currentness CURRENT",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3328,7 +3916,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-011: currentness CHANGED",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3362,7 +3950,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-GAP-012: currentness NOT_AVAILABLE",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3396,7 +3984,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-001: 2号车当前位置的坡度是多少？",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3430,7 +4018,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-002: A区内坡度15到30度的区域有哪些？",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3464,7 +4052,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-003: A区内有哪些洪水高风险区域？",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3498,7 +4086,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-004: 2号车附近500米有哪些排水沟？",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3532,7 +4120,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-005: A区内有哪些高地？",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3566,7 +4154,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-006: A区内有哪些湿地？",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3600,7 +4188,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-007: 2号车当前位置是什么地表覆盖？",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3634,7 +4222,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-008: 2号车当前位置为什么属于该通行性等级？",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3668,7 +4256,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-009: 明确指定数据产品查询",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3702,7 +4290,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-010: 地图选择稳定引用后续",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3736,7 +4324,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-011: Descriptor/Data gap",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3770,7 +4358,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-012: Coverage gap",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3804,7 +4392,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-013: Reference ambiguity",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3838,7 +4426,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-014: Truncated result",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3872,7 +4460,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-015: Unknown finding schema",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3906,7 +4494,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-016: Source changed",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3940,7 +4528,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-017: Foreign scope",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -3974,7 +4562,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-E2E-018: Hybrid Task/world/fusion",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -4008,7 +4596,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-FINAL-001: SACS restart",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -4042,7 +4630,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-FINAL-002: WSGS outage",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -4076,7 +4664,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-FINAL-003: OpenAI/AGUI parity",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -4110,7 +4698,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-FINAL-004: Required ledger",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -4144,7 +4732,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-FINAL-005: Exact head CI",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -4178,7 +4766,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-FINAL-006: PR Ready",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -4212,7 +4800,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-FINAL-007: Final report",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -4246,7 +4834,7 @@
           "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
           "type": "REPORT_ASSERTION",
           "path": "reports/v0.4/geospatial/acceptance-ledger.json",
-          "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+          "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
           "assertionLocator": "AC-V4-FINAL-008: Decision",
           "scope": "HISTORICAL",
           "promotable": false,
@@ -5251,7 +5839,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -5298,7 +5886,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -5378,7 +5966,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -5425,7 +6013,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -5505,7 +6093,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -5552,7 +6140,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -5599,7 +6187,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -5646,7 +6234,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -5693,7 +6281,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -7225,7 +7813,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -7272,7 +7860,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -7319,7 +7907,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -7366,7 +7954,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -7413,7 +8001,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -7724,7 +8312,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,
@@ -7771,7 +8359,7 @@
           "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
           "type": "REAL_POSTGRES",
           "path": "reports/closure/audited-run-evidence.json",
-          "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91",
+          "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9",
           "assertionLocator": "tests/analysis-persistence.postgres.int.test.ts :: atomically appends an event and restores its exact projection snapshot",
           "scope": "PRIMARY",
           "promotable": true,

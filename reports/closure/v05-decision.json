@@ -2,7 +2,7 @@
   "schemaVersion": "sacs-closure-decision/1.0",
   "track": "V0_5",
   "decision": "BLOCKED_PREREQUISITE",
-  "sourceSha": "8d611e3195c786854f2d0efd18ac19000441ab4a",
+  "sourceSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
   "acceptance": {
     "required": 165,
     "pass": 0,
@@ -21,8 +21,16 @@
     "DEVELOPMENT_READY_BLOCKED_LIVE is not claimed while local required rows remain NOT_RUN."
   ],
   "pullRequest": {
-    "state": "NOT_RUN",
-    "exactHeadCi": "NOT_RUN",
-    "protectedActionsPerformed": []
+    "number": 18,
+    "state": "DRAFT",
+    "baseBranch": "codex/sacs-v0.4-geospatial-explanation",
+    "headBranch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "headSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "exactHeadCi": "PASS",
+    "protectedActionsPerformed": [
+      "PUSH",
+      "PULL_REQUEST_CREATE_OR_UPDATE"
+    ],
+    "closureReportCommitIsQualificationSource": false
   }
 }

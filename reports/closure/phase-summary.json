@@ -7,25 +7,25 @@
   "counts": {
     "overall": {
       "required": 298,
-      "PASS": 0,
+      "PASS": 14,
       "FAIL": 0,
-      "NOT_RUN": 129,
-      "BLOCKED": 169
+      "NOT_RUN": 119,
+      "BLOCKED": 165
     },
     "tracks": {
       "GLOBAL": {
         "required": 31,
-        "PASS": 0,
+        "PASS": 4,
         "FAIL": 0,
-        "NOT_RUN": 15,
+        "NOT_RUN": 11,
         "BLOCKED": 16
       },
       "V0_4": {
         "required": 102,
-        "PASS": 0,
+        "PASS": 10,
         "FAIL": 0,
-        "NOT_RUN": 29,
-        "BLOCKED": 73
+        "NOT_RUN": 23,
+        "BLOCKED": 69
       },
       "V0_5": {
         "required": 165,
@@ -38,17 +38,17 @@
     "phases": {
       "C00": {
         "required": 15,
-        "PASS": 0,
+        "PASS": 4,
         "FAIL": 0,
-        "NOT_RUN": 15,
+        "NOT_RUN": 11,
         "BLOCKED": 0
       },
       "C01": {
         "required": 34,
-        "PASS": 0,
+        "PASS": 10,
         "FAIL": 0,
-        "NOT_RUN": 29,
-        "BLOCKED": 5
+        "NOT_RUN": 23,
+        "BLOCKED": 1
       },
       "C02": {
         "required": 14,
@@ -148,9 +148,9 @@
       "status": "NOT_RUN",
       "acceptance": {
         "required": 15,
-        "PASS": 0,
+        "PASS": 4,
         "FAIL": 0,
-        "NOT_RUN": 15,
+        "NOT_RUN": 11,
         "BLOCKED": 0
       }
     },
@@ -158,10 +158,10 @@
       "status": "BLOCKED",
       "acceptance": {
         "required": 34,
-        "PASS": 0,
+        "PASS": 10,
         "FAIL": 0,
-        "NOT_RUN": 29,
-        "BLOCKED": 5
+        "NOT_RUN": 23,
+        "BLOCKED": 1
       }
     },
     "C02": {
@@ -295,5 +295,40 @@
       }
     }
   },
-  "protectedActionsPerformed": []
+  "publication": {
+    "v04": {
+      "branch": "codex/sacs-v0.4-geospatial-explanation",
+      "qualificationSourceSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "remoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "push": "PERFORMED",
+      "pullRequestNumber": 17,
+      "pullRequestState": "DRAFT",
+      "pullRequestBaseBranch": "main",
+      "ciState": "PASS",
+      "ciObservedForSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "workflowRunIds": [
+        33307359129
+      ]
+    },
+    "v05": {
+      "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+      "qualificationSourceSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "trackingSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "remoteSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "push": "PERFORMED",
+      "pullRequestNumber": 18,
+      "pullRequestState": "DRAFT",
+      "pullRequestBaseBranch": "codex/sacs-v0.4-geospatial-explanation",
+      "ciState": "PASS",
+      "ciObservedForSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "workflowRunIds": [
+        33307975653
+      ]
+    }
+  },
+  "protectedActionsPerformed": [
+    "PUSH",
+    "PULL_REQUEST_CREATE_OR_UPDATE"
+  ]
 }

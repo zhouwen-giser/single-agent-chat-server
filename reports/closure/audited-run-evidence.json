@@ -2,7 +2,7 @@
   "schemaVersion": "sacs-v04-v05-audited-run-evidence/1.0",
   "observedAt": "2026-08-30T10:03:37.8328244Z",
   "source": {
-    "worktreeHead": "8d611e3195c786854f2d0efd18ac19000441ab4a",
+    "worktreeHead": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
     "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
     "scopeFiles": [
       {
@@ -11,7 +11,7 @@
       },
       {
         "path": "packages/persistence/src/analysis-repository.ts",
-        "sha256": "sha256:9bedbed46cae759a491b31d0cc53d83a205be16eb22e2979f8c0cc0665ceec67"
+        "sha256": "sha256:56c33c30aa7900eafaa4c6abf18c7c62b8e3743882cc71d24f3a004fe9c313b4"
       },
       {
         "path": "packages/persistence/src/runtime.ts",
@@ -22,7 +22,7 @@
         "sha256": "sha256:ddeb49f042d1be8cbc8c0da71e7a7dd220ed6a49f38ac1da9f7e43e9f9847039"
       }
     ],
-    "scopeHash": "sha256:51e0e1292ba2754d97d7ac24fbd5d87da54e7dd5c30e7aea203d414ec47aade0"
+    "scopeHash": "sha256:d53d76aaf5c5506b4e2ee8c1cfcb480c31cde4fbf6e676eaea985dac9dafdff2"
   },
   "wsgs": {
     "status": "PASS",

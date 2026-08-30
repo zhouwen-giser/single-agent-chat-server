@@ -1,13 +1,21 @@
 {
-  "schemaVersion": "sacs-v04-v05-branch-pr-ci/1.0",
-  "capturedAt": "2026-08-30T19:11:57.5372842+08:00",
-  "status": "PUBLISHED_CI_PASS",
-  "remoteRefresh": "PINNED_OBSERVATION",
+  "schemaVersion": "sacs-v04-v05-publication-evidence/1.0",
+  "observedAt": "2026-08-30T19:11:57.5372842+08:00",
+  "policy": {
+    "observationIsPinnedToProductSha": true,
+    "cachedRemoteRefsWereRefreshed": true,
+    "closureReportCommitIsNotQualificationSource": true,
+    "reportCommitShaIsIntentionallyNotEmbedded": true
+  },
   "v04": {
     "branch": "codex/sacs-v0.4-geospatial-explanation",
-    "localSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "qualificationSourceSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
     "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
-    "cachedRemoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "remoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "push": {
+      "state": "PERFORMED",
+      "exactHead": true
+    },
     "pullRequest": {
       "number": 17,
       "state": "DRAFT",
@@ -27,9 +35,13 @@
   },
   "v05": {
     "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
-    "localSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "qualificationSourceSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
     "trackingSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
-    "cachedRemoteSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "remoteSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "push": {
+      "state": "PERFORMED",
+      "exactHead": true
+    },
     "pullRequest": {
       "number": 18,
       "state": "DRAFT",
@@ -47,12 +59,16 @@
       "terminal": true
     }
   },
-  "protectedActions": {
-    "push": "PERFORMED",
-    "pullRequestCreateOrUpdate": "PERFORMED",
-    "merge": "NOT_PERFORMED",
-    "tag": "NOT_PERFORMED",
-    "release": "NOT_PERFORMED",
-    "deploy": "NOT_PERFORMED"
-  }
+  "closureReportCommit": {
+    "sha": null,
+    "identity": "EXTERNAL_TO_REPORT_CONTENT",
+    "qualificationSource": false,
+    "reason": "Embedding the commit that contains this file would create a Git object-id self-reference."
+  },
+  "unperformedActions": [
+    "MERGE",
+    "TAG",
+    "RELEASE",
+    "DEPLOY"
+  ]
 }

@@ -1,14 +1,13 @@
 {
-  "schemaVersion": "sacs-remote-delivery-candidate/1.0",
-  "capturedAt": "2026-08-30T18:07:13+08:00",
-  "status": "BLOCKED",
-  "reasonCode": "CURRENT_REMOTE_PUBLICATION_NOT_AUTHORIZED_OR_REFRESHED",
+  "schemaVersion": "sacs-remote-delivery-report/1.0",
   "branch": "codex/sacs-v0.4-geospatial-explanation",
-  "localSha": "8262685ea04c3adf908993860ce626fb6832a3c2",
-  "trackingSha": "0d67125ba1e8f2d69ad07480bacbe7ecf5bab774",
-  "remoteSha": "0d67125ba1e8f2d69ad07480bacbe7ecf5bab774",
-  "prState": "NOT_RUN",
-  "ciState": "NOT_RUN",
-  "workflowRunIds": [],
-  "protectedActionsPerformed": []
+  "localSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+  "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+  "remoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+  "prState": "DRAFT",
+  "ciState": "PASS",
+  "pullRequestNumber": 17,
+  "workflowRunIds": [
+    33307359129
+  ]
 }

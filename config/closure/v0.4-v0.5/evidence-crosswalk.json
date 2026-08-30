@@ -71,19 +71,18 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "SOURCE",
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "HISTORICAL_SOURCE_LOCK_IS_CONTEXT_ONLY",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
-        "V05_SOURCE_LOCK_HISTORICAL"
+        "V05_SOURCE_LOCK_HISTORICAL",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -121,19 +120,18 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "SOURCE",
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "HISTORICAL_SOURCE_LOCK_IS_CONTEXT_ONLY",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
-        "V05_SOURCE_LOCK_HISTORICAL"
+        "V05_SOURCE_LOCK_HISTORICAL",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -146,19 +144,18 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "SOURCE",
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "HISTORICAL_SOURCE_LOCK_IS_CONTEXT_ONLY",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
-        "V05_SOURCE_LOCK_HISTORICAL"
+        "V05_SOURCE_LOCK_HISTORICAL",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -171,19 +168,18 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "SOURCE",
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "HISTORICAL_SOURCE_LOCK_IS_CONTEXT_ONLY",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
-        "V05_SOURCE_LOCK_HISTORICAL"
+        "V05_SOURCE_LOCK_HISTORICAL",
+        "V05_PUBLICATION_SOURCE",
+        "V05_PUBLICATION_GIT",
+        "V05_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -968,19 +964,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -992,19 +988,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -1016,23 +1012,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "BLOCKED",
-      "reasonCode": "REMOTE_PUBLICATION_NOT_AUTHORIZED_BY_CURRENT_REQUEST",
-      "dependencies": [
-        "REMOTE_PUBLICATION_AUTHORIZATION"
-      ],
-      "blockerMarkers": [
-        "REMOTE_PUBLICATION_WITHHELD"
-      ],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
+      "dependencies": [],
+      "blockerMarkers": [],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -1044,14 +1036,10 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "BLOCKED",
-      "reasonCode": "REMOTE_PUBLICATION_NOT_AUTHORIZED_BY_CURRENT_REQUEST",
-      "dependencies": [
-        "REMOTE_PUBLICATION_AUTHORIZATION"
-      ],
-      "blockerMarkers": [
-        "REMOTE_PUBLICATION_WITHHELD"
-      ],
+      "initialStatus": "NOT_RUN",
+      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "dependencies": [],
+      "blockerMarkers": [],
       "missingEvidenceTypes": [
         "GIT",
         "CI"
@@ -1072,23 +1060,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "BLOCKED",
-      "reasonCode": "REMOTE_PUBLICATION_NOT_AUTHORIZED_BY_CURRENT_REQUEST",
-      "dependencies": [
-        "REMOTE_PUBLICATION_AUTHORIZATION"
-      ],
-      "blockerMarkers": [
-        "REMOTE_PUBLICATION_WITHHELD"
-      ],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
+      "dependencies": [],
+      "blockerMarkers": [],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -1100,23 +1084,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "BLOCKED",
-      "reasonCode": "REMOTE_PUBLICATION_NOT_AUTHORIZED_BY_CURRENT_REQUEST",
-      "dependencies": [
-        "REMOTE_PUBLICATION_AUTHORIZATION"
-      ],
-      "blockerMarkers": [
-        "REMOTE_PUBLICATION_WITHHELD"
-      ],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
+      "dependencies": [],
+      "blockerMarkers": [],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -1128,19 +1108,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -1152,19 +1132,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -1176,19 +1156,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -1200,19 +1180,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },
@@ -1252,19 +1232,19 @@
         "GIT",
         "CI"
       ],
-      "initialStatus": "NOT_RUN",
-      "reasonCode": "CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN",
+      "initialStatus": "PASS",
+      "reasonCode": "EXACT_PUBLICATION_EVIDENCE_VERIFIED",
       "dependencies": [],
       "blockerMarkers": [],
-      "missingEvidenceTypes": [
-        "GIT",
-        "CI"
-      ],
+      "missingEvidenceTypes": [],
       "reusePolicy": "EXACT_SOURCE_SCOPE_AND_ASSERTION_LOCATOR_REQUIRED",
       "candidateEvidenceIds": [
         "V04_ACCEPTANCE_LEDGER_HISTORICAL",
         "V04_S19_POSTGRES_RESTART",
-        "V04_S23_REAL_POSTGRES"
+        "V04_S23_REAL_POSTGRES",
+        "V04_PUBLICATION_SOURCE",
+        "V04_PUBLICATION_GIT",
+        "V04_PUBLICATION_CI"
       ],
       "contractConflicts": []
     },

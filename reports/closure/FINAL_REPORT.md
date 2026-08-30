@@ -6,18 +6,18 @@
 - V5 decision: **BLOCKED_PREREQUISITE**
 - GLOBAL rows are reported independently and are not folded into either decision denominator.
 
-## Exact qualification sources
+## Exact qualification and publication sources
 
-- Pinned SACS qualification source: `codex/sacs-v0.5-observer-first-interactive-analysis@8d611e3195c786854f2d0efd18ac19000441ab4a`
-- V4 local source: `codex/sacs-v0.4-geospatial-explanation@8262685ea04c3adf908993860ce626fb6832a3c2`
-- V5 qualification source: `codex/sacs-v0.5-observer-first-interactive-analysis@8d611e3195c786854f2d0efd18ac19000441ab4a`
-- The closure artifact commit is intentionally not treated as product qualification source.
-- Remote/PR/CI refresh: `NOT_RUN`
+- V4 qualification source: `codex/sacs-v0.4-geospatial-explanation@951a1d81d640d24de60ce6eacc8bb6f95eb6ac35`
+- V4 publication: exact pushed remote SHA; Draft PR #17 targeting `main`; exact-head CI `PASS`.
+- V5 qualification source: `codex/sacs-v0.5-observer-first-interactive-analysis@718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c`
+- V5 publication: exact pushed remote SHA; Draft PR #18 targeting `codex/sacs-v0.4-geospatial-explanation`; exact-head CI `PASS`.
+- The closure artifact commit is resolved externally by Git/PR and intentionally is not embedded in its own content or treated as a product qualification source.
 
 ## Independent acceptance denominators
 
-- GLOBAL: 0 PASS, 0 FAIL, 15 NOT_RUN, 16 BLOCKED / 31
-- V0_4: 0 PASS, 0 FAIL, 29 NOT_RUN, 73 BLOCKED / 102
+- GLOBAL: 4 PASS, 0 FAIL, 11 NOT_RUN, 16 BLOCKED / 31
+- V0_4: 10 PASS, 0 FAIL, 23 NOT_RUN, 69 BLOCKED / 102
 - V0_5: 0 PASS, 0 FAIL, 85 NOT_RUN, 80 BLOCKED / 165
 
 No aggregate PASS is calculated.
@@ -26,8 +26,8 @@ No aggregate PASS is calculated.
 
 | phase | required | PASS | FAIL | NOT_RUN | BLOCKED | status |
 |---|---:|---:|---:|---:|---:|---|
-| C00 | 15 | 0 | 0 | 15 | 0 | NOT_RUN |
-| C01 | 34 | 0 | 0 | 29 | 5 | BLOCKED |
+| C00 | 15 | 4 | 0 | 11 | 0 | NOT_RUN |
+| C01 | 34 | 10 | 0 | 23 | 1 | BLOCKED |
 | C02 | 14 | 0 | 0 | 0 | 14 | BLOCKED |
 | C03 | 16 | 0 | 0 | 0 | 16 | BLOCKED |
 | C04 | 12 | 0 | 0 | 0 | 12 | BLOCKED |
@@ -44,11 +44,11 @@ No aggregate PASS is calculated.
 
 ## V4 decision
 
-**BLOCKED_UPSTREAM**. The checked-in historical reports do not contain an authoritative five-artifact WSGS geospatial handoff or a completed real 18-case chain. Existing isolated PostgreSQL evidence remains supplementary and is never promoted to REAL_WSGS.
+**BLOCKED_UPSTREAM**. Draft PR publication does not resolve the missing authoritative five-artifact WSGS geospatial handoff or the unrun real 18-case chain. Existing isolated PostgreSQL evidence remains supplementary and is never promoted to REAL_WSGS.
 
 ## V5 decision
 
-**BLOCKED_PREREQUISITE**. The current focused local run and isolated PostgreSQL suite pass, but closure-package per-acceptance SCHEMA/UNIT mappings remain incomplete, the prior 418-row ledger contains zero PASS, and the authoritative eight-artifact WSGS analysis handoff is absent. Therefore `DEVELOPMENT_READY_BLOCKED_LIVE` is not claimed.
+**BLOCKED_PREREQUISITE**. Draft PR publication does not resolve the incomplete closure-package per-acceptance SCHEMA/UNIT mappings or the absent authoritative eight-artifact WSGS analysis handoff. Therefore `DEVELOPMENT_READY_BLOCKED_LIVE` is not claimed.
 
 ## Candidate and audited evidence
 
@@ -63,6 +63,12 @@ No aggregate PASS is calculated.
 | V05_PHASE_SUMMARY_BLOCKED | HISTORICAL | no | reports/v0.5/observer-first-interactive-analysis/phase-summary.json |
 | V05_REAL_POSTGRES_7_TESTS | PRIMARY | yes | reports/closure/audited-run-evidence.json |
 | CURRENT_WSGS_18277_GROUNDING_SMOKE | SUPPLEMENTARY | no | reports/closure/audited-run-evidence.json |
+| V04_PUBLICATION_SOURCE | PRIMARY | yes | config/closure/v0.4-v0.5/publication-evidence.json |
+| V04_PUBLICATION_GIT | PRIMARY | yes | config/closure/v0.4-v0.5/publication-evidence.json |
+| V04_PUBLICATION_CI | PRIMARY | yes | config/closure/v0.4-v0.5/publication-evidence.json |
+| V05_PUBLICATION_SOURCE | PRIMARY | yes | config/closure/v0.4-v0.5/publication-evidence.json |
+| V05_PUBLICATION_GIT | PRIMARY | yes | config/closure/v0.4-v0.5/publication-evidence.json |
+| V05_PUBLICATION_CI | PRIMARY | yes | config/closure/v0.4-v0.5/publication-evidence.json |
 
 ## Canonical package conflicts
 
@@ -88,4 +94,4 @@ No geospatial 18-case chain, analysis 22-case chain, shared-service failure inje
 
 ## Security and protected actions
 
-No bearer token, raw world reference ID, or response body is persisted. No push, PR mutation, merge, tag, release, deployment, or shared-infrastructure mutation is claimed.
+No bearer token, raw world reference ID, or response body is persisted. Push and Draft PR creation/update were performed under explicit authorization. No merge, tag, release, deployment, or shared-infrastructure mutation is claimed.

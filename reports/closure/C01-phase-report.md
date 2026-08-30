@@ -2,13 +2,15 @@
 
 ## Status
 
-**BLOCKED** — 0 PASS, 0 FAIL, 29 NOT_RUN, 5 BLOCKED (34 required).
+**BLOCKED** — 10 PASS, 0 FAIL, 23 NOT_RUN, 1 BLOCKED (34 required).
 
-## Source
+## Source and publication
 
-- Qualification source branch: `codex/sacs-v0.5-observer-first-interactive-analysis`
-- Pinned qualification source: `8d611e3195c786854f2d0efd18ac19000441ab4a`
-- Remote/PR/CI refresh: `NOT_RUN`
+- V4 qualification source: `codex/sacs-v0.4-geospatial-explanation@951a1d81d640d24de60ce6eacc8bb6f95eb6ac35`
+- V4 remote/PR/CI: exact remote SHA, Draft PR #17, CI `PASS`
+- V5 qualification source: `codex/sacs-v0.5-observer-first-interactive-analysis@718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c`
+- V5 remote/PR/CI: exact remote SHA, Draft PR #18, CI `PASS`
+- Closure report commit: external to report content and not a qualification source
 - Audited WSGS base-operation smoke: `PARTIAL / SUPPLEMENTARY`
 
 ## Acceptance
@@ -37,23 +39,23 @@
 | AC-V4-PRESERVE-020 | NOT_RUN | Authority Fusion boundary | REAL_POSTGRES_NOT_RUN | SOURCE, UNIT, REAL_POSTGRES |
 | AC-V4-PRESERVE-021 | NOT_RUN | Architecture guard | REAL_POSTGRES_NOT_RUN | SOURCE, UNIT, REAL_POSTGRES |
 | AC-V4-PRESERVE-022 | NOT_RUN | Secret guard | REAL_POSTGRES_NOT_RUN | SOURCE, UNIT, REAL_POSTGRES |
-| AC-V4-DELIVERY-001 | NOT_RUN | Remote branch truth | CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN | GIT, CI |
-| AC-V4-DELIVERY-002 | NOT_RUN | Exact local/tracking/remote SHA | CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN | GIT, CI |
-| AC-V4-DELIVERY-003 | BLOCKED | Stacked PR | REMOTE_PUBLICATION_NOT_AUTHORIZED_BY_CURRENT_REQUEST | GIT, CI |
-| AC-V4-DELIVERY-004 | BLOCKED | PR description | REMOTE_PUBLICATION_NOT_AUTHORIZED_BY_CURRENT_REQUEST | GIT, CI |
-| AC-V4-DELIVERY-005 | BLOCKED | Hosted push CI | REMOTE_PUBLICATION_NOT_AUTHORIZED_BY_CURRENT_REQUEST | GIT, CI |
-| AC-V4-DELIVERY-006 | BLOCKED | Hosted PR CI | REMOTE_PUBLICATION_NOT_AUTHORIZED_BY_CURRENT_REQUEST | GIT, CI |
-| AC-V4-DELIVERY-007 | NOT_RUN | Migration gate | CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN | GIT, CI |
-| AC-V4-DELIVERY-008 | NOT_RUN | Architecture gate | CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN | GIT, CI |
-| AC-V4-DELIVERY-009 | NOT_RUN | Secret gate | CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN | GIT, CI |
-| AC-V4-DELIVERY-010 | NOT_RUN | Container gate | CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN | GIT, CI |
+| AC-V4-DELIVERY-001 | PASS | Remote branch truth | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
+| AC-V4-DELIVERY-002 | PASS | Exact local/tracking/remote SHA | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
+| AC-V4-DELIVERY-003 | PASS | Stacked PR | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
+| AC-V4-DELIVERY-004 | NOT_RUN | PR description | CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN | GIT, CI |
+| AC-V4-DELIVERY-005 | PASS | Hosted push CI | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
+| AC-V4-DELIVERY-006 | PASS | Hosted PR CI | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
+| AC-V4-DELIVERY-007 | PASS | Migration gate | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
+| AC-V4-DELIVERY-008 | PASS | Architecture gate | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
+| AC-V4-DELIVERY-009 | PASS | Secret gate | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
+| AC-V4-DELIVERY-010 | PASS | Container gate | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
 | AC-V4-DELIVERY-011 | BLOCKED | Compose gate | REAL_COMPOSE_GATE_BLOCKED_BY_WSGS_HANDOFF | GIT, CI |
-| AC-V4-DELIVERY-012 | NOT_RUN | No merge | CURRENT_SOURCE_REMOTE_CI_RECONCILIATION_NOT_RUN | GIT, CI |
+| AC-V4-DELIVERY-012 | PASS | No merge | EXACT_PUBLICATION_EVIDENCE_VERIFIED |  |
 
 ## Evidence policy
 
-Every acceptance row is explicit. Historical reports are supplementary unless exact source scope and assertion locators are proven. Fixture evidence cannot satisfy live rows, and `REPORT` is not aliased to `REPORT_ASSERTION`.
+Every acceptance row is explicit. Historical reports are supplementary unless exact source scope and assertion locators are proven. Fixture evidence cannot satisfy live rows, and `REPORT` is not aliased to `REPORT_ASSERTION`. A Draft PR or pending CI does not alter the qualification decision.
 
 ## Protected actions
 
-No push, PR mutation, merge, tag, release, deployment, shared-infrastructure restart, or credential persistence is claimed.
+Push and Draft PR creation/update were performed under explicit authorization. No merge, tag, release, deployment, shared-infrastructure restart, or credential persistence is claimed.

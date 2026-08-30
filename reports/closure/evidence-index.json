@@ -19,7 +19,7 @@
       ],
       "exists": true,
       "bytes": 540351,
-      "sha256": "sha256:86a4ef141a75997e725d160ca080dc287a1daf9bfb47b165758aca5df9f347f0",
+      "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
       "promotable": false
     },
     {
@@ -123,7 +123,7 @@
       ],
       "exists": true,
       "bytes": 2983,
-      "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91"
+      "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9"
     },
     {
       "evidenceId": "CURRENT_WSGS_18277_GROUNDING_SMOKE",
@@ -138,7 +138,97 @@
       ],
       "exists": true,
       "bytes": 2983,
-      "sha256": "sha256:b9a652bdc983a3815897b53436562896608fafad0fe6d3b2083712676e67dc91"
+      "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V04_PUBLICATION_SOURCE",
+      "type": "SOURCE",
+      "promotable": true,
+      "limitations": [
+        "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+        "Does not establish an authoritative upstream handoff or a live business chain."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V04_PUBLICATION_GIT",
+      "type": "GIT",
+      "promotable": true,
+      "limitations": [
+        "Limited to the exact pushed branch and Draft PR #17.",
+        "Draft publication does not imply merge readiness."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V04_PUBLICATION_CI",
+      "type": "CI",
+      "promotable": true,
+      "limitations": [
+        "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+        "CI success does not satisfy live or upstream-handoff evidence."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V05_PUBLICATION_SOURCE",
+      "type": "SOURCE",
+      "promotable": true,
+      "limitations": [
+        "Limited to the pinned v05 qualification source 718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c.",
+        "Does not establish an authoritative upstream handoff or a live business chain."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V05_PUBLICATION_GIT",
+      "type": "GIT",
+      "promotable": true,
+      "limitations": [
+        "Limited to the exact pushed branch and Draft PR #18.",
+        "Draft publication does not imply merge readiness."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V05_PUBLICATION_CI",
+      "type": "CI",
+      "promotable": true,
+      "limitations": [
+        "Hosted CI was observed PASS for 718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c.",
+        "CI success does not satisfy live or upstream-handoff evidence."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
     }
   ]
 }
