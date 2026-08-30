@@ -18,6 +18,8 @@ import type {
   TurnPlan,
 } from "../../world-grounding-contract/src/index.js";
 
+import { validateMapSelectionsForFocus } from "./map-selection-validation.js";
+
 const identifier = z
   .string()
   .min(1)
@@ -38,31 +40,76 @@ export const worldFocusReferenceStatuses = [
   "UNKNOWN",
 ] as const;
 
-export const worldFocusReferenceSchema = z.strictObject({
-  referenceIdentityHash: z.string().regex(/^[0-9a-f]{64}$/u),
-  referenceKey,
-  productId: identifier,
-  displayName: z.string().min(1).max(512),
-  referenceType: z.string().min(1).max(128),
-  sourceGroundingId: identifier,
-  sourceResultHash: sha256,
-  sourceWorldVersion: z.number().int().nonnegative(),
-  validUntil: z.iso.datetime().optional(),
-  revalidationRequired: z.boolean(),
-  status: z.enum(worldFocusReferenceStatuses),
-  lastUsedAt: z.iso.datetime(),
-});
+export const worldFocusReferenceSchema = z
+  .strictObject({
+    referenceIdentityHash: z.string().regex(/^[0-9a-f]{64}$/u),
+    referenceKey,
+    productId: identifier,
+    displayName: z.string().min(1).max(512),
+    referenceType: z.string().min(1).max(128),
+    sourceGroundingId: identifier,
+    sourceResultHash: sha256,
+    sourceWorldVersion: z.number().int().nonnegative(),
+    sourceExplanationId: identifier.optional(),
+    sourceExplanationHash: sha256.optional(),
+    sourceFindingId: identifier.optional(),
+    sourceFindingOrdinal: z.number().int().min(1).max(128).optional(),
+    validUntil: z.iso.datetime().optional(),
+    revalidationRequired: z.boolean(),
+    status: z.enum(worldFocusReferenceStatuses),
+    lastUsedAt: z.iso.datetime(),
+  })
+  .superRefine((value, context) => {
+    const projection = [
+      value.sourceExplanationId,
+      value.sourceExplanationHash,
+      value.sourceFindingId,
+      value.sourceFindingOrdinal,
+    ];
+    if (
+      projection.some((item) => item !== undefined) &&
+      projection.some((item) => item === undefined)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "World focus finding projection fields must be paired",
+      });
+    }
+  });
 
-export const conversationWorldFocusSchema = z.strictObject({
-  schemaVersion: z.literal("1.0"),
-  principalId: identifier,
-  threadId: identifier,
-  revision: z.number().int().nonnegative(),
-  lastGroundingId: identifier.optional(),
-  lastGroundingResultHash: sha256.optional(),
-  references: z.array(worldFocusReferenceSchema).max(64),
-  updatedAt: z.iso.datetime(),
-});
+export const conversationWorldFocusSchema = z
+  .strictObject({
+    schemaVersion: z.literal("1.0"),
+    principalId: identifier,
+    threadId: identifier,
+    revision: z.number().int().nonnegative(),
+    lastGroundingId: identifier.optional(),
+    lastGroundingResultHash: sha256.optional(),
+    lastExplanationId: identifier.optional(),
+    lastExplanationHash: sha256.optional(),
+    references: z.array(worldFocusReferenceSchema).max(64),
+    updatedAt: z.iso.datetime(),
+  })
+  .superRefine((value, context) => {
+    if (
+      (value.lastGroundingId === undefined) !==
+      (value.lastGroundingResultHash === undefined)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "World focus grounding identity fields must be paired",
+      });
+    }
+    if (
+      (value.lastExplanationId === undefined) !==
+      (value.lastExplanationHash === undefined)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "World focus explanation identity fields must be paired",
+      });
+    }
+  });
 
 export const pendingGroundingChoiceStatuses = [
   "OPEN",
@@ -141,7 +188,13 @@ export interface ContextReadyWorldReference {
 
 export interface UpsertWorldFocusReference extends Omit<
   WorldFocusReference,
-  "referenceIdentityHash" | "status" | "lastUsedAt"
+  | "referenceIdentityHash"
+  | "status"
+  | "lastUsedAt"
+  | "sourceExplanationId"
+  | "sourceExplanationHash"
+  | "sourceFindingId"
+  | "sourceFindingOrdinal"
 > {
   readonly sourceMessageId: string;
   readonly lastUsedAt?: string;
@@ -236,7 +289,13 @@ export class GroundingContextAssembler {
           ]
         : [];
     const mapSelections = input.turnPlan.worldFocusUsage.mapSelections
-      ? [...(input.mapSelections ?? [])]
+      ? (validateMapSelectionsForFocus({
+          principalId: input.principalId,
+          threadId: input.threadId,
+          focus,
+          selections: input.mapSelections ?? [],
+          ...(input.now === undefined ? {} : { now: input.now }),
+        }) ?? [])
       : [];
     const fusion = input.fusionRequirements;
     const externalCorrelationHints =
@@ -543,6 +602,9 @@ function deterministicOrdinal(value: string): number | undefined {
     第一个: 1,
     第二个: 2,
     第三个: 3,
+    第一处: 1,
+    第二处: 2,
+    第三处: 3,
   };
   return ordinals[value];
 }
@@ -550,3 +612,6 @@ function deterministicOrdinal(value: string): number | undefined {
 function asObject(value: object): Record<string, unknown> {
   return JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
 }
+
+export * from "./finding-reference-resolver.js";
+export * from "./map-selection-validation.js";

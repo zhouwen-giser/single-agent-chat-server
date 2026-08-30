@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "sacs-geospatial-explanation-limits/1.0",
+  "maxFindings": 128,
+  "maxFeaturesPerFinding": 256,
+  "maxSourceProducts": 64,
+  "maxInlineGeometryBytes": 1048576,
+  "maxExplanationJsonBytes": 4194304,
+  "maxRenderedCharacters": 16000,
+  "maxMapFeatures": 256,
+  "maxDisplayedFeatureSummaries": 5,
+  "hardCeilingsImmutableAtRuntime": true
+}

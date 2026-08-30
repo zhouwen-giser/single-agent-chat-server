@@ -46,6 +46,20 @@
       "type": "integer",
       "minimum": 0
     },
+    "sourceExplanationId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "sourceExplanationHash": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "sourceFindingId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "sourceFindingOrdinal": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 128
+    },
     "validUntil": {
       "$ref": "common.schema.json#/$defs/dateTime"
     },
@@ -58,5 +72,27 @@
     "lastUsedAt": {
       "$ref": "common.schema.json#/$defs/dateTime"
     }
+  },
+  "dependentRequired": {
+    "sourceExplanationId": [
+      "sourceExplanationHash",
+      "sourceFindingId",
+      "sourceFindingOrdinal"
+    ],
+    "sourceExplanationHash": [
+      "sourceExplanationId",
+      "sourceFindingId",
+      "sourceFindingOrdinal"
+    ],
+    "sourceFindingId": [
+      "sourceExplanationId",
+      "sourceExplanationHash",
+      "sourceFindingOrdinal"
+    ],
+    "sourceFindingOrdinal": [
+      "sourceExplanationId",
+      "sourceExplanationHash",
+      "sourceFindingId"
+    ]
   }
 }

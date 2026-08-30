@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "sacs-wsgs-geospatial-intake-report/1.0",
+  "phase": "S14",
+  "status": "BLOCKED",
+  "marker": "SACS_WSGS_GEOSPATIAL_CONTRACT_READY",
+  "markerAsserted": false,
+  "blocker": {
+    "code": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+    "safeDetail": "No authoritative WSGS-owned consumer lock, finding profile, result schema lock, provenance lock, and checksum bundle is available."
+  },
+  "provisionalArtifacts": {
+    "acceptedAsAuthority": false,
+    "consumerLock": "dependencies/wsgs-geospatial-consumer-lock.json",
+    "purpose": "FAIL_CLOSED_CONTRACT_DEVELOPMENT_ONLY"
+  },
+  "businessRequestsAllowed": false
+}

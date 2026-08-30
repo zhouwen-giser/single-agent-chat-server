@@ -1,0 +1,12 @@
+phase,acceptance,deliverable
+S13,AC-B001..AC-B022,source/status/branch
+S14,AC-U001..AC-U028,WSGS consumer intake
+S15,AC-C001..AC-C032,contracts
+S16,AC-N001..AC-N032,normalizer
+S17,AC-E001..AC-E034,assembler/renderer
+S18,AC-A001..AC-A026,OpenAI/AG-UI/map
+S19,AC-P001..AC-P025,persistence/replay
+S20,AC-M001..AC-M022,multi-turn
+S21-S22,AC-G001..AC-G028,gaps/currentness
+S23,AC-F001..AC-F018,Authority boundary
+S24,AC-R*; AC-Z*,real E2E and final

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "sacs-geospatial-authority-boundary/1.0",
+  "taskAuthority": "SDAR",
+  "worldAuthority": "WSGS_GOWM",
+  "currentProductAuthority": "GDPS",
+  "compositionAuthority": "SACS_COMPARE_ONLY",
+  "fusionPositiveSources": ["PREDICATE_EVALUATION", "CORRELATION_FINDING"],
+  "geospatialFindingCanDirectlyAffectFusion": false,
+  "forbiddenInferences": [
+    "TASK_FAILED",
+    "PLAN_VIOLATED",
+    "ROUTE_FEASIBLE",
+    "TARGET_VISIBLE",
+    "ACTION_SUCCEEDED"
+  ]
+}

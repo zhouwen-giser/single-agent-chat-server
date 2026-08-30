@@ -6,7 +6,9 @@ import {
 import type { ClientHistoryMessage } from "../../../../packages/conversation-context/src/index.js";
 import {
   A2aInteractionMapper,
+  isWorldExplanationChatResult,
   taskRequestId,
+  worldExplanationInteractionEvents,
   type DurableAgUiEventSource,
   type LegacyChatResult,
 } from "../../../../packages/interaction-runtime/src/index.js";
@@ -132,6 +134,25 @@ async function* coordinatorInteractionEvents(
   };
 
   const result = await operation(observer);
+  if (isWorldExplanationChatResult(result)) {
+    while (pendingEvents.length > 0) {
+      const event = pendingEvents.shift();
+      if (event !== undefined && !isLookupVisibleText(event)) yield event;
+    }
+    for (const event of worldExplanationInteractionEvents(
+      factory,
+      result.explanation,
+      result,
+    )) {
+      yield event;
+    }
+    const finished = factory.create("run.finished", {
+      reason: "world_explanation_complete",
+      taskTerminal: false,
+    });
+    if (finished !== undefined) yield finished;
+    return;
+  }
   for await (const fragment of fragments(result)) {
     while (pendingEvents.length > 0) {
       const event = pendingEvents.shift();
@@ -172,6 +193,10 @@ async function* coordinatorInteractionEvents(
     taskTerminal: false,
   });
   if (finished !== undefined) yield finished;
+}
+
+function isLookupVisibleText(event: SdarInteractionEvent): boolean {
+  return ["message.text", "artifact.text"].includes(event.eventType);
 }
 
 function adaptRepository(repository: InteractionPersistenceRepository) {
@@ -258,6 +283,7 @@ async function* fragments(result: LegacyChatResult): AsyncGenerator<string> {
     yield result;
     return;
   }
+  if (isWorldExplanationChatResult(result)) return;
   yield* result;
 }
 

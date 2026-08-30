@@ -2,6 +2,14 @@ import { describe, expect, it, jest } from "@jest/globals";
 
 import type { CompletedRequestResult } from "../packages/request-result/src/index.js";
 import { planGroundingRequest } from "../packages/grounding-request-planner/src/index.js";
+import {
+  calculateConsumerLockHash,
+  type WsgsGeospatialConsumerLock,
+} from "../packages/wsgs-geospatial-consumer/src/index.js";
+import {
+  hashCanonicalJson,
+  type WorldExplanationV1,
+} from "../packages/world-explanation-contract/src/index.js";
 import type {
   WsgsGroundingRequest,
   WsgsGroundingResult,
@@ -15,6 +23,7 @@ import {
   renderSafeWorldAnswer,
   WorldGroundingRuntime,
   WorldGroundingRuntimeError,
+  type HybridAuthoritySeparatedResult,
   type WorldGroundingRuntimeOptions,
 } from "../packages/world-grounding-runtime/src/index.js";
 import type { TurnPlan } from "../packages/world-grounding-contract/src/index.js";
@@ -510,6 +519,96 @@ describe("SACS v0.4 world grounding runtime", () => {
     );
   });
 
+  it("persists and exact-replays one authority-separated hybrid world explanation", async () => {
+    const lock = readyGeospatialConsumerLock();
+    let storedExplanation: StoredWorldExplanation | undefined;
+    const worldExplanations = {
+      findExact: jest.fn(async () => storedExplanation),
+      saveOrReplay: jest.fn(async (input: SaveWorldExplanation) => {
+        storedExplanation ??= storedWorldExplanation(input);
+        return {
+          created: storedExplanation.explanation === input.explanation,
+          explanation: storedExplanation,
+        };
+      }),
+    } as unknown as NonNullable<
+      WorldGroundingRuntimeOptions["worldExplanations"]
+    >;
+    const fixture = hybridRuntime(
+      (request) => geospatialHybridResult(request, lock),
+      { geospatialConsumerLock: lock, worldExplanations },
+    );
+    const turn = hybridV2Turn("COMPLETED");
+
+    const first = await fixture.runtime.compareHybrid(turn);
+    const replay = await fixture.runtime.compareHybrid(turn);
+
+    expect(typeof first).toBe("object");
+    const structured = first as HybridAuthoritySeparatedResult;
+    expect(structured.authorityPresentation.sections).toEqual([
+      expect.objectContaining({
+        section: "SDAR_TASK_PLAN",
+        authority: "SDAR",
+      }),
+      expect.objectContaining({
+        section: "WORLD_EXPLANATION",
+        authority: "WSGS_GOWM",
+        content: structured.explanation.renderedText,
+      }),
+      expect.objectContaining({
+        section: "SACS_FUSION_CHECKS",
+        authority: "SACS_COMPARE_ONLY",
+      }),
+    ]);
+    expect(structured.authorityPresentation.taskOutcomeInferenceAllowed).toBe(
+      false,
+    );
+    expect(structured.authorityFusion.overall).toBe("CONSISTENT");
+    expect(structured.authorityFusion.reality.resultHash).toBe(
+      structured.explanation.grounding.resultHash,
+    );
+    const findingEvidenceIds = new Set(
+      structured.explanation.findings.flatMap(
+        ({ evidenceItemIds }) => evidenceItemIds ?? [],
+      ),
+    );
+    expect(
+      structured.authorityFusion.checks.flatMap(
+        ({ evidenceItemIds }) => evidenceItemIds,
+      ),
+    ).toEqual(expect.not.arrayContaining([...findingEvidenceIds]));
+    expect(structured.renderedText).toContain("[SDAR_TASK_PLAN | SDAR]");
+    expect(structured.renderedText).toContain(
+      "[WORLD_EXPLANATION | WSGS_GOWM]",
+    );
+    expect(structured.renderedText).toContain(
+      "[SACS_FUSION_CHECKS | SACS_COMPARE_ONLY]",
+    );
+    expect(replay).toEqual(first);
+    expect(fixture.createGrounding).toHaveBeenCalledTimes(1);
+    expect(fixture.authorityFusion.saveOrReplay).toHaveBeenCalledTimes(1);
+    expect(worldExplanations.saveOrReplay).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not persist Fusion before a required geospatial explanation is available", async () => {
+    const lock = readyGeospatialConsumerLock();
+    const fixture = hybridRuntime(
+      (request) => geospatialHybridResult(request, lock),
+      { geospatialConsumerLock: lock },
+    );
+    const turn = hybridV2Turn("COMPLETED");
+
+    await expect(fixture.runtime.compareHybrid(turn)).resolves.toBe(
+      "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE",
+    );
+    await expect(fixture.runtime.compareHybrid(turn)).resolves.toBe(
+      "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE",
+    );
+
+    expect(fixture.authorityFusion.saveOrReplay).not.toHaveBeenCalled();
+    expect(fixture.createGrounding).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps a WORKING typed false observation UNKNOWN", async () => {
     const fixture = hybridRuntime((request) => ({
       ...validResult(request),
@@ -701,6 +800,10 @@ function hybridV2Turn(
 
 function hybridRuntime(
   resultForRequest: (request: WsgsGroundingRequest) => WsgsGroundingResult,
+  options: {
+    readonly geospatialConsumerLock?: WsgsGeospatialConsumerLock;
+    readonly worldExplanations?: WorldGroundingRuntimeOptions["worldExplanations"];
+  } = {},
 ) {
   let storedResult: CompletedRequestResult | undefined;
   const completeRequest = jest.fn(
@@ -731,6 +834,9 @@ function hybridRuntime(
   const wsgs = {
     contractVersion: "sacs-wsgs-grounding/1.0",
     endpoint: "http://wsgs.test/",
+    ...(options.geospatialConsumerLock === undefined
+      ? {}
+      : { geospatialConsumerLock: options.geospatialConsumerLock }),
     capabilities: jest.fn(async () => readyCapabilities()),
     createGrounding,
     getGrounding: jest.fn(),
@@ -797,6 +903,9 @@ function hybridRuntime(
       grounding,
       worldFocus,
       authorityFusion,
+      ...(options.worldExplanations === undefined
+        ? {}
+        : { worldExplanations: options.worldExplanations }),
       wsgs,
       sdarCompatibilityLock: unavailableLock,
       nextLeaseOwner: () => "hybrid-lease-owner",
@@ -995,4 +1104,146 @@ function validResult(
     validUntil: "2026-08-28T03:00:00.000Z",
     resultHash: `sha256:${"d".repeat(64)}`,
   };
+}
+
+function readyGeospatialConsumerLock(): WsgsGeospatialConsumerLock {
+  const candidate = {
+    schemaVersion: "sacs-wsgs-geospatial-consumer-lock/1.0" as const,
+    provenance: "AUTHORITATIVE_WSGS_HANDOFF" as const,
+    sources: {
+      wsgsSha: "1".repeat(40),
+      gowmSha: "2".repeat(40),
+      gdpsSha: "3".repeat(40),
+    },
+    groundingContract: {
+      contractVersion: "sacs-wsgs-grounding/1.0",
+      resultSchemaHash: sha("1"),
+      capabilitiesSchemaHash: sha("2"),
+    },
+    geospatialProfile: {
+      profile: "sacs-wsgs-geospatial-findings/1.0" as const,
+      transportMode: "RESULT_EXTENSION" as const,
+      profileSchemaHash: sha("3"),
+      findingSchemaHash: sha("4"),
+      sourceProductSchemaHash: sha("5"),
+      gapSchemaHash: sha("6"),
+      requestedProducts: [],
+    },
+    currentness: { mode: "UNSUPPORTED" as const },
+    status: "READY" as const,
+    consumerLockHash: sha("0"),
+  };
+  return {
+    ...candidate,
+    consumerLockHash: calculateConsumerLockHash(candidate),
+  };
+}
+
+function geospatialHybridResult(
+  request: WsgsGroundingRequest,
+  lock: WsgsGeospatialConsumerLock,
+): WsgsGroundingResult {
+  const findings = [
+    {
+      findingId: "finding-hybrid-slope-1",
+      findingKind: "POINT_MEASUREMENT" as const,
+      semanticConcept: "SLOPE",
+      querySemantics: "READ_VALUE",
+      status: "COMPLETED" as const,
+      subjectReferenceProductIds: ["product-1"],
+      evidenceItemIds: ["evidence-hybrid-slope-1"],
+      sourceProductIds: ["source-hybrid-slope-1"],
+      point: {
+        type: "Point" as const,
+        coordinates: [113.934, 22.544] as [number, number],
+      },
+      value: 12.6,
+      unit: "degree",
+    },
+  ];
+  const sourceProducts = [
+    {
+      sourceProductId: "source-hybrid-slope-1",
+      authority: "GDPS_CURRENT_PRODUCT" as const,
+      productId: "gdps-hybrid-slope-current",
+      productType: "SLOPE",
+      productProfile: "DEGREE",
+      contentHash: sha("7"),
+      descriptorId: "SLOPE/DEGREE",
+      descriptorHash: sha("8"),
+      evidenceItemIds: ["evidence-hybrid-slope-1"],
+    },
+  ];
+  return {
+    ...validResult(request),
+    evidenceItems: [
+      typedCorrelationEvidence("task-plan-1"),
+      typedPredicateEvidence("predicate-road-7", "SUPPORTED"),
+      {
+        evidenceProductId: "evidence-hybrid-slope-1",
+        productKind: "WORLD_FACT",
+        authority: "GOWM",
+        sourceOperation: "geo-raster.sample@1.0",
+        upstreamStatus: "COMPLETED",
+        payloadSchemaUri: "urn:test:hybrid-slope",
+        payloadSchemaHash: sha("a"),
+        safePayload: { untrusted: "must-not-be-rendered" },
+        receiptIds: ["receipt-hybrid-slope-1"],
+        evidenceIds: [],
+        unknowns: [],
+        warnings: [],
+      },
+    ],
+    geospatialFindings: {
+      profile: "sacs-wsgs-geospatial-findings/1.0",
+      profileSchemaHash: lock.geospatialProfile.profileSchemaHash,
+      findings,
+      sourceProducts,
+      gaps: [],
+      findingSetHash: hashCanonicalJson(findings),
+      sourceProductSetHash: hashCanonicalJson(sourceProducts),
+    },
+    resultHash: sha("9"),
+  };
+}
+
+interface SaveWorldExplanation {
+  readonly principalId: string;
+  readonly threadId: string;
+  readonly groundingResultHash: string;
+  readonly locale: string;
+  readonly contractHash: string;
+  readonly rendererPolicyHash: string;
+  readonly explanation: WorldExplanationV1;
+}
+
+interface StoredWorldExplanation extends Omit<
+  SaveWorldExplanation,
+  "explanation"
+> {
+  readonly explanationId: string;
+  readonly groundingId: string;
+  readonly contractVersion: string;
+  readonly explanationStatus: WorldExplanationV1["explanationStatus"];
+  readonly explanationHash: string;
+  readonly explanation: WorldExplanationV1;
+  readonly createdAt: Date;
+}
+
+function storedWorldExplanation(
+  input: SaveWorldExplanation,
+): StoredWorldExplanation {
+  return {
+    ...input,
+    explanationId: input.explanation.explanationId,
+    groundingId: input.explanation.grounding.groundingId,
+    contractVersion: input.explanation.schemaVersion,
+    explanationStatus: input.explanation.explanationStatus,
+    explanationHash: input.explanation.explanationHash,
+    createdAt: new Date(input.explanation.createdAt),
+  };
+}
+
+function sha(character: string): `sha256:${string}` {
+  return `sha256:${character.repeat(64)}`;
 }

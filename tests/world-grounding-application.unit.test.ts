@@ -7,6 +7,10 @@ import {
   type ConversationApplicationServiceOptions,
 } from "../apps/server/src/chat/conversation-application-service.js";
 import type { StructuredChatModel } from "../src/agent/model.js";
+import { assembleWorldExplanation } from "../packages/world-explanation-runtime/src/index.js";
+import type { HybridAuthoritySeparatedResult } from "../packages/world-grounding-runtime/src/index.js";
+import { hybridWorldExplanationFixture } from "./fixtures/hybrid-world-explanation.js";
+import { assemblyInput } from "./world-explanation-fixtures.js";
 
 describe("SACS v0.4 world grounding application routing", () => {
   it("handles a pending choice before model classification", async () => {
@@ -175,6 +179,51 @@ describe("SACS v0.4 world grounding application routing", () => {
     expect(submit).not.toHaveBeenCalled();
     expect(followUp).not.toHaveBeenCalled();
     expect(cancel).not.toHaveBeenCalled();
+  });
+
+  it("wraps a structured hybrid runtime result as one world explanation chat result", async () => {
+    const expected = hybridWorldExplanationFixture(
+      assembleWorldExplanation(assemblyInput()),
+    );
+    const { kind: ignoredKind, ...structuredFields } = expected;
+    void ignoredKind;
+    const structured = structuredFields as HybridAuthoritySeparatedResult;
+    const compareHybrid = jest.fn(async () => structured);
+    const statusForTask = jest.fn(async function* (
+      _input: unknown,
+      _signal: AbortSignal | undefined,
+      observed: (value: unknown) => void,
+    ) {
+      observed({
+        source: "task",
+        value: {
+          taskId: "task-plan-1",
+          contextId: "context-plan-1",
+          state: "COMPLETED",
+          internalPhase: "completed",
+          phaseMessage: "Published plan snapshot.",
+          artifacts: [],
+        },
+        fragments: ["Published plan snapshot."],
+      });
+      yield "Published plan snapshot.";
+    });
+    const application = new ConversationApplicationService({
+      repository: repository([binding("task-plan-1", "plan001")]),
+      coordinator: { statusForTask } as unknown as SdarTaskCoordinator,
+      model: {
+        decideTurn: async () => hybridPlan(),
+        answer: async () => "unused",
+      },
+      worldGrounding: {
+        answerWorld: jest.fn(async () => "unused"),
+        compareHybrid,
+        submitOperational: jest.fn(async () => "unused"),
+      },
+    });
+
+    await expect(application.execute(turn())).resolves.toEqual(expected);
+    expect(compareHybrid).toHaveBeenCalledTimes(1);
   });
 
   it("lists ambiguous active Tasks and never reads or compares authority state", async () => {

@@ -10,12 +10,21 @@ import {
   InteractionPersistenceRepository,
   PostgresWorldFocusRepository,
   runMigrations,
+  WorldExplanationRepository,
 } from "../packages/persistence/src/index.js";
+import {
+  calculateConsumerLockHash,
+  type WsgsGeospatialConsumerLock,
+} from "../packages/wsgs-geospatial-consumer/src/index.js";
+import { hashCanonicalJson } from "../packages/world-explanation-contract/src/index.js";
 import {
   createWsgsHttpClient,
   type WsgsGroundingRequest,
 } from "../packages/wsgs-http-adapter/src/index.js";
-import { WorldGroundingRuntime } from "../packages/world-grounding-runtime/src/index.js";
+import {
+  WorldGroundingRuntime,
+  type HybridAuthoritySeparatedResult,
+} from "../packages/world-grounding-runtime/src/index.js";
 
 const { Pool } = pg;
 const connectionString = process.env.TEST_DATABASE_URL;
@@ -356,6 +365,129 @@ describeWithPostgres("SACS v0.4 world runtime on PostgreSQL and HTTP", () => {
     expect(Number(rows.rows[0]?.count ?? 0)).toBe(3);
   });
 
+  it("persists and cross-protocol replays one exact geospatial hybrid object", async () => {
+    const requests = new InteractionPersistenceRepository(pool, 60_000);
+    const grounding = new GroundingPersistenceRepository(pool, 60_000);
+    const worldFocus = new PostgresWorldFocusRepository(pool);
+    const authorityFusion = new AuthorityFusionRepository(pool);
+    const worldExplanations = new WorldExplanationRepository(pool);
+    const principal = await requests.resolvePrincipal({
+      issuer: "s23-test",
+      subject: `principal-${randomUUID()}`,
+      role: "user",
+    });
+    const thread = await requests.getOrCreateThread({
+      clientType: "openwebui",
+      externalThreadId: `thread-${randomUUID()}`,
+      principalId: principal.principalId,
+    });
+    const lock = readyGeospatialConsumerLock();
+    const suffix = randomUUID().replaceAll("-", "");
+    const posts: WsgsGroundingRequest[] = [];
+    const runtime = new WorldGroundingRuntime({
+      requests,
+      grounding,
+      worldFocus,
+      authorityFusion,
+      worldExplanations,
+      wsgs: createWsgsHttpClient({
+        baseUrl: "http://wsgs.test",
+        geospatialConsumerLock: lock,
+        fetchImpl: async (request, init) => {
+          const url = new URL(
+            typeof request === "string"
+              ? request
+              : request instanceof URL
+                ? request.href
+                : request.url,
+          );
+          if (url.pathname === "/v1/capabilities") {
+            return jsonResponse(geospatialCapabilities(lock));
+          }
+          if (url.pathname === "/v1/groundings") {
+            const rawBody =
+              typeof init?.body === "string"
+                ? init.body
+                : request instanceof Request
+                  ? await request.text()
+                  : "{}";
+            const body = JSON.parse(rawBody) as WsgsGroundingRequest;
+            posts.push(body);
+            return jsonResponse(geospatialFusionResultFor(body, lock, suffix));
+          }
+          return jsonResponse({ error: "unexpected" }, 404);
+        },
+      }),
+      sdarCompatibilityLock: unavailableLock(),
+      nextLeaseOwner: () => randomUUID(),
+    });
+    const base = {
+      principalId: principal.principalId,
+      threadId: thread.threadId,
+      userText: "Compare the published Task with the current slope context.",
+      turnPlan: {
+        schemaVersion: "0.4" as const,
+        turnRoute: "HYBRID_PLAN_REALITY_COMPARE" as const,
+        groundingRequirement: "COMPARE_PLAN_REALITY" as const,
+        answerMode: "HYBRID_COMPARISON" as const,
+        taskDirective: {
+          action: "STATUS" as const,
+          selector: { taskId: "task-fusion-1" },
+        },
+        worldFocusUsage: emptyWorldFocus(),
+      },
+      sdarTask: fusionTask("WORKING", "predicate-1"),
+    };
+
+    const first = await runtime.compareHybrid({
+      ...base,
+      protocol: "openai",
+      externalRequestId: `message-geospatial-openai-${suffix}`,
+    });
+    const replay = await runtime.compareHybrid({
+      ...base,
+      protocol: "ag_ui",
+      externalRequestId: `message-geospatial-agui-${suffix}`,
+    });
+
+    expect(typeof first).toBe("object");
+    const structured = first as HybridAuthoritySeparatedResult;
+    expect(replay).toEqual(structured);
+    expect(structured.authorityPresentation.sections).toEqual([
+      expect.objectContaining({ section: "SDAR_TASK_PLAN", authority: "SDAR" }),
+      expect.objectContaining({
+        section: "WORLD_EXPLANATION",
+        authority: "WSGS_GOWM",
+        content: structured.explanation.renderedText,
+      }),
+      expect.objectContaining({
+        section: "SACS_FUSION_CHECKS",
+        authority: "SACS_COMPARE_ONLY",
+      }),
+    ]);
+    expect(structured.authorityFusion.reality.resultHash).toBe(
+      structured.explanation.grounding.resultHash,
+    );
+    expect(posts).toHaveLength(1);
+    const persisted = await pool.query<{
+      explanation_count: string;
+      fusion_count: string;
+    }>(
+      `
+        SELECT
+          (SELECT count(*) FROM chat_service.world_explanation
+           WHERE principal_id = $1 AND thread_id = $2)::text AS explanation_count,
+          (SELECT count(*) FROM chat_service.authority_fusion_evaluation
+           WHERE principal_id = $1 AND thread_id = $2)::text AS fusion_count
+      `,
+      [principal.principalId, thread.threadId],
+    );
+    expect(persisted.rows[0]).toEqual({
+      explanation_count: "1",
+      fusion_count: "1",
+    });
+  });
+
   it("validates an exact pending choice and resumes the original source", async () => {
     const requests = new InteractionPersistenceRepository(pool, 60_000);
     const grounding = new GroundingPersistenceRepository(pool, 60_000);
@@ -381,6 +513,7 @@ describeWithPostgres("SACS v0.4 world runtime on PostgreSQL and HTTP", () => {
       contentText: originText,
     });
     const posts: WsgsGroundingRequest[] = [];
+    const validUntil = new Date(Date.now() + 5 * 60_000).toISOString();
     const runtime = new WorldGroundingRuntime({
       requests,
       grounding,
@@ -411,7 +544,7 @@ describeWithPostgres("SACS v0.4 world runtime on PostgreSQL and HTTP", () => {
             return jsonResponse(
               posts.length === 1
                 ? ambiguousResultFor(body)
-                : selectedResultFor(body, posts.length),
+                : selectedResultFor(body, posts.length, validUntil),
             );
           }
           return jsonResponse({ error: "unexpected" }, 404);
@@ -551,6 +684,50 @@ function capabilities() {
     },
     requiredCapabilitiesReady: true,
     optionalCapabilities: [],
+  };
+}
+
+function readyGeospatialConsumerLock(): WsgsGeospatialConsumerLock {
+  const candidate = {
+    schemaVersion: "sacs-wsgs-geospatial-consumer-lock/1.0" as const,
+    provenance: "AUTHORITATIVE_WSGS_HANDOFF" as const,
+    sources: {
+      wsgsSha: "1".repeat(40),
+      gowmSha: "2".repeat(40),
+      gdpsSha: "3".repeat(40),
+    },
+    groundingContract: {
+      contractVersion: "sacs-wsgs-grounding/1.0",
+      resultSchemaHash: sha("1"),
+      capabilitiesSchemaHash: sha("2"),
+    },
+    geospatialProfile: {
+      profile: "sacs-wsgs-geospatial-findings/1.0" as const,
+      transportMode: "RESULT_EXTENSION" as const,
+      profileSchemaHash: sha("3"),
+      findingSchemaHash: sha("4"),
+      sourceProductSchemaHash: sha("5"),
+      gapSchemaHash: sha("6"),
+      requestedProducts: [],
+    },
+    currentness: { mode: "UNSUPPORTED" as const },
+    status: "READY" as const,
+    consumerLockHash: sha("0"),
+  };
+  return {
+    ...candidate,
+    consumerLockHash: calculateConsumerLockHash(candidate),
+  };
+}
+
+function geospatialCapabilities(lock: WsgsGeospatialConsumerLock) {
+  return {
+    ...capabilities(),
+    supportedProducts: [...lock.geospatialProfile.requestedProducts],
+    gowmContract: {
+      ...capabilities().gowmContract,
+      commit: lock.sources.gowmSha,
+    },
   };
 }
 
@@ -700,6 +877,76 @@ function fusionResultFor(request: WsgsGroundingRequest) {
   };
 }
 
+function geospatialFusionResultFor(
+  request: WsgsGroundingRequest,
+  lock: WsgsGeospatialConsumerLock,
+  suffix: string,
+) {
+  const base = fusionResultFor(request);
+  const findings = [
+    {
+      findingId: `finding-slope-${suffix}`,
+      findingKind: "POINT_MEASUREMENT" as const,
+      semanticConcept: "SLOPE",
+      querySemantics: "READ_VALUE",
+      status: "COMPLETED" as const,
+      subjectReferenceProductIds: ["product-1"],
+      evidenceItemIds: [`evidence-slope-${suffix}`],
+      sourceProductIds: [`source-slope-${suffix}`],
+      point: {
+        type: "Point" as const,
+        coordinates: [113.934, 22.544] as [number, number],
+      },
+      value: 12.6,
+      unit: "degree",
+    },
+  ];
+  const sourceProducts = [
+    {
+      sourceProductId: `source-slope-${suffix}`,
+      authority: "GDPS_CURRENT_PRODUCT" as const,
+      productId: `gdps-slope-${suffix}`,
+      productType: "SLOPE",
+      productProfile: "DEGREE",
+      contentHash: sha("7"),
+      descriptorId: "SLOPE/DEGREE",
+      descriptorHash: sha("8"),
+      evidenceItemIds: [`evidence-slope-${suffix}`],
+    },
+  ];
+  return {
+    ...base,
+    groundingId: `grounding-geospatial-${suffix}`,
+    evidenceItems: [
+      ...base.evidenceItems,
+      {
+        evidenceProductId: `evidence-slope-${suffix}`,
+        productKind: "WORLD_FACT",
+        authority: "GOWM",
+        sourceOperation: "geo-raster.sample@1.0",
+        upstreamStatus: "COMPLETED",
+        payloadSchemaUri: "urn:test:geospatial-slope",
+        payloadSchemaHash: sha("a"),
+        safePayload: { untrusted: "must-not-be-rendered" },
+        receiptIds: [`receipt-slope-${suffix}`],
+        evidenceIds: [],
+        unknowns: [],
+        warnings: [],
+      },
+    ],
+    geospatialFindings: {
+      profile: "sacs-wsgs-geospatial-findings/1.0" as const,
+      profileSchemaHash: lock.geospatialProfile.profileSchemaHash,
+      findings,
+      sourceProducts,
+      gaps: [],
+      findingSetHash: hashCanonicalJson(findings),
+      sourceProductSetHash: hashCanonicalJson(sourceProducts),
+    },
+    resultHash: sha("9"),
+  };
+}
+
 function readString(value: unknown, field: string): string | undefined {
   if (value === null || Array.isArray(value) || typeof value !== "object") {
     return undefined;
@@ -738,7 +985,11 @@ function ambiguousResultFor(request: WsgsGroundingRequest) {
   };
 }
 
-function selectedResultFor(request: WsgsGroundingRequest, ordinal: number) {
+function selectedResultFor(
+  request: WsgsGroundingRequest,
+  ordinal: number,
+  validUntil: string,
+) {
   const result = resultFor(request);
   const firstProduct = expectDefined(result.referenceProducts[0]);
   return {
@@ -756,7 +1007,7 @@ function selectedResultFor(request: WsgsGroundingRequest, ordinal: number) {
           version: String(42 + ordinal),
         },
         sourceWorldVersion: 42 + ordinal,
-        validUntil: "2026-08-30T00:00:00.000Z",
+        validUntil,
         revalidationRequired: false,
       },
     ],
@@ -808,4 +1059,8 @@ function withDatabase(connection: string, database: string): string {
   const url = new URL(connection);
   url.pathname = `/${database}`;
   return url.toString();
+}
+
+function sha(character: string): `sha256:${string}` {
+  return `sha256:${character.repeat(64)}`;
 }

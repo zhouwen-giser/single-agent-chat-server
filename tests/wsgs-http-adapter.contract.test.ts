@@ -5,11 +5,15 @@ import {
   WsgsHttpError,
   type WsgsGroundingRequest,
 } from "../packages/wsgs-http-adapter/src/index.js";
+import {
+  calculateConsumerLockHash,
+  parseWsgsGeospatialConsumerLock,
+} from "../packages/wsgs-geospatial-consumer/src/index.js";
 
 const sha = `sha256:${"a".repeat(64)}`;
 
 describe("isolated WSGS HTTP adapter", () => {
-  it("checks the exact frozen capabilities and fixed endpoint", async () => {
+  it("accepts bounded capability metadata while preserving the four stable operations", async () => {
     const fetchImpl = jest.fn<typeof fetch>(async (input) => {
       expect(String(input)).toBe("http://127.0.0.1:8080/v1/capabilities");
       return jsonResponse(capabilities());
@@ -19,8 +23,40 @@ describe("isolated WSGS HTTP adapter", () => {
       fetchImpl,
     });
     await expect(client.capabilities()).resolves.toMatchObject({
+      version: "2.7.9-local",
       contractVersion: "sacs-wsgs-grounding/1.0",
       requiredCapabilitiesReady: true,
+      gowmContract: {
+        softwareVersion: "0.6.4",
+        sourcePackageArtifacts: 812,
+      },
+    });
+    expect(client.geospatialConsumerLock).toMatchObject({
+      provenance: "TASK_PACKAGE_PROVISIONAL",
+      status: "BLOCKED",
+    });
+  });
+
+  it("fails closed when READY lock source binding does not match capabilities", async () => {
+    const client = createWsgsHttpClient({
+      baseUrl: "http://wsgs.test",
+      geospatialConsumerLock: readyLock("d".repeat(40)),
+      fetchImpl: async () => jsonResponse(capabilities()),
+    });
+    await expect(client.capabilities()).rejects.toMatchObject({
+      code: "WSGS_GEOSPATIAL_GOWM_COMMIT_MISMATCH",
+    });
+  });
+
+  it("does not authorize a typed geospatial result extension under the BLOCKED lock", async () => {
+    const client = createWsgsHttpClient({
+      baseUrl: "http://wsgs.test",
+      fetchImpl: async () => jsonResponse(groundingResult()),
+    });
+    await expect(
+      client.createGrounding(request(), "idem-1"),
+    ).rejects.toMatchObject({
+      code: "WSGS_GEOSPATIAL_CONSUMER_LOCK_BLOCKED",
     });
   });
 
@@ -207,7 +243,7 @@ function job(
 function capabilities() {
   return {
     service: "world-semantic-grounding-service",
-    version: "0.1.0",
+    version: "2.7.9-local",
     contractVersion: "sacs-wsgs-grounding/1.0",
     supportedOperations: [
       "GROUND_REFERENCES",
@@ -223,13 +259,81 @@ function capabilities() {
       "CAPABILITY_GAPS",
     ],
     gowmContract: {
-      softwareVersion: "0.4.0",
-      commit: "db575f79c874a69f65a2043a7e463338524b713d",
-      sourcePackageArtifacts: 33,
+      softwareVersion: "0.6.4",
+      commit: "c".repeat(40),
+      sourcePackageArtifacts: 812,
     },
     requiredCapabilitiesReady: true,
     optionalCapabilities: [],
   };
+}
+
+function groundingResult() {
+  return {
+    schemaVersion: "1.0",
+    requestId: "request-1",
+    groundingId: "grounding-1",
+    status: "COMPLETED",
+    source: {
+      messageId: "message-1",
+      originalTextSha256: sha,
+    },
+    mentions: [],
+    referenceProducts: [],
+    evidenceItems: [],
+    geospatialFindings: {
+      profile: "sacs-wsgs-geospatial-findings/1.0",
+      profileSchemaHash: sha,
+      findings: [],
+      sourceProducts: [],
+      gaps: [],
+      findingSetHash: sha,
+      sourceProductSetHash: sha,
+    },
+    ambiguities: [],
+    unresolvedMentions: [],
+    capabilityGaps: [],
+    warnings: [],
+    execution: {
+      parserVersion: "test",
+      semanticModelReceiptIds: [],
+      queryCompilerVersion: "test",
+      normalizerVersion: "test",
+      elapsedMs: 1,
+    },
+    resultHash: sha,
+  };
+}
+
+function readyLock(gowmSha = "c".repeat(40)) {
+  const value = {
+    schemaVersion: "sacs-wsgs-geospatial-consumer-lock/1.0",
+    provenance: "AUTHORITATIVE_WSGS_HANDOFF",
+    sources: {
+      wsgsSha: "b".repeat(40),
+      gowmSha,
+      gdpsSha: "d".repeat(40),
+    },
+    groundingContract: {
+      contractVersion: "sacs-wsgs-grounding/1.0",
+      resultSchemaHash: sha,
+      capabilitiesSchemaHash: sha,
+    },
+    geospatialProfile: {
+      profile: "sacs-wsgs-geospatial-findings/1.0",
+      transportMode: "REQUESTED_PRODUCTS",
+      profileSchemaHash: sha,
+      findingSchemaHash: sha,
+      sourceProductSchemaHash: sha,
+      gapSchemaHash: sha,
+      requestedProducts: ["WORLD_EVIDENCE"],
+    },
+    currentness: { mode: "UNSUPPORTED" },
+    status: "READY",
+    consumerLockHash: sha,
+  };
+  value.consumerLockHash = calculateConsumerLockHash(value);
+  return parseWsgsGeospatialConsumerLock(value);
 }
 
 function jsonResponse(value: unknown, status = 200): Response {

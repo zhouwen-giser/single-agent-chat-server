@@ -23,6 +23,19 @@ export {
 export { InteractionTaskCoordinatorRepository } from "./agui-task-coordinator-repository.js";
 export { InteractionPersistenceRepository } from "./interaction-repository.js";
 export { PostgresWorldFocusRepository } from "./world-focus-repository.js";
+export {
+  WORLD_EXPLANATION_MAX_JSON_BYTES,
+  WorldExplanationRepository,
+  type StoredWorldExplanation,
+  type WorldExplanationFindingLink,
+} from "./world-explanation-repository.js";
+export {
+  StructuredWorldSelectionRepository,
+  type StructuredWorldSelectionRepositoryOptions,
+  type StructuredWorldSelectionScope,
+  type UpstreamSelectionTokenValidation,
+  type VerifyUpstreamSelectionToken,
+} from "./structured-world-selection-repository.js";
 export type {
   AgentCardSnapshot,
   ClientThreadBinding,

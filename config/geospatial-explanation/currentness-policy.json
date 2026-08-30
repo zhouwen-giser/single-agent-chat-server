@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "sacs-geospatial-currentness-policy/1.0",
+  "southboundAuthority": "WSGS_ONLY",
+  "allowedModes": [
+    "DEDICATED_OPERATION",
+    "EXECUTE_WORLD_QUERY_PROFILE",
+    "UNSUPPORTED"
+  ],
+  "strictChanged": "BLOCK_CURRENT_REUSE",
+  "bestEffortChanged": "NEW_GROUNDING_WITH_SOURCE_ADVANCED",
+  "unsupported": "CURRENTNESS_UNAVAILABLE",
+  "directGdpsCheckCurrentAllowed": false
+}

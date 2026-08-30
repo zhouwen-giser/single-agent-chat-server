@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:wsgs-geospatial-consumer-lock:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "provenance",
+    "sources",
+    "groundingContract",
+    "geospatialProfile",
+    "currentness",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-wsgs-geospatial-consumer-lock/1.0"
+    },
+    "provenance": {
+      "enum": ["AUTHORITATIVE_WSGS_HANDOFF", "TASK_PACKAGE_PROVISIONAL"]
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "safeDetail"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "safeDetail": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wsgsSha", "gowmSha", "gdpsSha"],
+      "properties": {
+        "wsgsSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "gowmSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "gdpsSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    },
+    "groundingContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "resultSchemaHash",
+        "capabilitiesSchemaHash"
+      ],
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "resultSchemaHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "capabilitiesSchemaHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "geospatialProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "transportMode",
+        "profileSchemaHash",
+        "findingSchemaHash",
+        "sourceProductSchemaHash",
+        "gapSchemaHash",
+        "requestedProducts"
+      ],
+      "properties": {
+        "profile": { "const": "sacs-wsgs-geospatial-findings/1.0" },
+        "transportMode": {
+          "enum": ["REQUESTED_PRODUCTS", "RESULT_EXTENSION", "UNRESOLVED"]
+        },
+        "profileSchemaHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "findingSchemaHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "sourceProductSchemaHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "gapSchemaHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "requestedProducts": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          }
+        }
+      }
+    },
+    "currentness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": [
+            "DEDICATED_OPERATION",
+            "EXECUTE_WORLD_QUERY_PROFILE",
+            "UNSUPPORTED"
+          ]
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "status": { "enum": ["READY", "BLOCKED"] },
+    "consumerLockHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "READY" } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "provenance": { "const": "AUTHORITATIVE_WSGS_HANDOFF" }
+        },
+        "required": ["consumerLockHash"],
+        "not": { "required": ["blocker"] }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "BLOCKED" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["blocker"],
+        "properties": {
+          "geospatialProfile": {
+            "properties": {
+              "transportMode": { "const": "UNRESOLVED" },
+              "requestedProducts": { "maxItems": 0 }
+            }
+          },
+          "currentness": {
+            "properties": { "mode": { "const": "UNSUPPORTED" } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provenance": { "const": "TASK_PACKAGE_PROVISIONAL" }
+        },
+        "required": ["provenance"]
+      },
+      "then": { "properties": { "status": { "const": "BLOCKED" } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "geospatialProfile": {
+            "properties": {
+              "transportMode": { "const": "REQUESTED_PRODUCTS" }
+            },
+            "required": ["transportMode"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "geospatialProfile": {
+            "properties": { "requestedProducts": { "minItems": 1 } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "geospatialProfile": {
+            "properties": { "transportMode": { "const": "RESULT_EXTENSION" } },
+            "required": ["transportMode"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "geospatialProfile": {
+            "properties": { "requestedProducts": { "maxItems": 0 } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "currentness": {
+            "properties": { "mode": { "const": "DEDICATED_OPERATION" } },
+            "required": ["mode"]
+          }
+        }
+      },
+      "then": {
+        "properties": { "currentness": { "required": ["operation"] } }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "currentness": {
+            "properties": {
+              "mode": { "const": "EXECUTE_WORLD_QUERY_PROFILE" }
+            },
+            "required": ["mode"]
+          }
+        }
+      },
+      "then": {
+        "properties": { "currentness": { "required": ["profile"] } }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "currentness": {
+            "properties": { "mode": { "const": "UNSUPPORTED" } },
+            "required": ["mode"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "currentness": {
+            "not": {
+              "anyOf": [
+                { "required": ["operation"] },
+                { "required": ["profile"] }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

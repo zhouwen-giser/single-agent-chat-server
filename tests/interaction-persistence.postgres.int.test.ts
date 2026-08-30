@@ -718,6 +718,8 @@ describeWithPostgres("protocol-neutral interaction persistence", () => {
         "0010_grounding_lifecycle.sql",
         "0011_conversation_world_focus.sql",
         "0012_authority_fusion.sql",
+        "0013_world_explanation.sql",
+        "0014_structured_world_selection.sql",
       ]);
     } finally {
       await rm(directory, { recursive: true, force: true });

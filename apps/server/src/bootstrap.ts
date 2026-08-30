@@ -18,20 +18,27 @@ import {
   registerOpenAiRoutes,
   type OpenAiRoutesOptions,
 } from "./api/openai-routes.js";
+import {
+  registerWorldSelectionRoutes,
+  type WorldSelectionRoutesOptions,
+} from "./api/world-selection-routes.js";
 import type { ServerConfig } from "./config.js";
 import { SecureTelemetry } from "./observability/telemetry.js";
 import { FixedWindowRateLimiter } from "./operations/rate-limiter.js";
 import { registerCorsPolicy } from "./security/cors.js";
 
-export interface BuildServerOptions extends Pick<
-  OpenAiRoutesOptions,
-  | "now"
-  | "nextId"
-  | "runChat"
-  | "resolveChatThread"
-  | "checkpointer"
-  | "persistAssistantMessage"
-> {
+export interface BuildServerOptions
+  extends
+    Pick<
+      OpenAiRoutesOptions,
+      | "now"
+      | "nextId"
+      | "runChat"
+      | "resolveChatThread"
+      | "checkpointer"
+      | "persistAssistantMessage"
+    >,
+    Pick<WorldSelectionRoutesOptions, "saveSelection" | "findSelection"> {
   readonly config: ServerConfig;
   readonly logger?: FastifyServerOptions["logger"];
   readonly readinessCheck?: () => Promise<boolean>;
@@ -152,6 +159,20 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     ...(options.checkpointer === undefined
       ? {}
       : { checkpointer: options.checkpointer }),
+  });
+  void server.register(registerWorldSelectionRoutes, {
+    prefix: "/v1",
+    config: options.config,
+    telemetry,
+    rateLimiter,
+    resolveChatThread: options.resolveChatThread,
+    ...(options.now === undefined ? {} : { now: options.now }),
+    ...(options.saveSelection === undefined
+      ? {}
+      : { saveSelection: options.saveSelection }),
+    ...(options.findSelection === undefined
+      ? {}
+      : { findSelection: options.findSelection }),
   });
   return server;
 }

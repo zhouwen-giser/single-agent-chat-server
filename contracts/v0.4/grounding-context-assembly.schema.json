@@ -31,7 +31,59 @@
     },
     "mapSelections": {
       "type": "array",
-      "maxItems": 32
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["selectionId", "kind", "revision"],
+        "properties": {
+          "selectionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "label": { "type": "string", "maxLength": 512 },
+          "kind": {
+            "enum": ["POINT", "LINE", "AREA", "FEATURE", "ANNOTATION"]
+          },
+          "revision": { "type": "integer", "minimum": 1 },
+          "referenceKey": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["namespace", "kind", "id", "version"],
+            "properties": {
+              "namespace": { "const": "gowm" },
+              "kind": { "type": "string", "minLength": 1, "maxLength": 64 },
+              "id": {
+                "type": "string",
+                "pattern": "^wrf_[0-9a-f]{32}$"
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            }
+          },
+          "geometry": {
+            "type": "object",
+            "description": "Opaque geometry; SACS validates only canonical hash and the 1048576-byte runtime ceiling."
+          },
+          "geometryHash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "anyOf": [
+          { "required": ["referenceKey"] },
+          { "required": ["geometry", "geometryHash"] }
+        ],
+        "dependentRequired": {
+          "geometry": ["geometryHash"],
+          "geometryHash": ["geometry"]
+        }
+      }
     },
     "externalCorrelationHints": {
       "type": "array",

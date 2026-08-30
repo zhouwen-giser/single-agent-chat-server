@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "sacs-geospatial-source-lock/1.0",
+  "capturedAt": "2026-08-29T20:50:08.5206800+08:00",
+  "taskPackage": {
+    "name": "SACS v0.4 World Grounding and Geospatial Explanation Integration Codex Goal",
+    "revision": "R1",
+    "sha256": "sha256:738564a851f9144e797e63f7947288ef4a6760b1ac1e331a56e154c327d16647",
+    "validation": "TASK_PACKAGE_VALID schemas=13 findingKinds=6 e2eCases=18 acceptance=305"
+  },
+  "sacs": {
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "mainSha": "f60083c03c2c0aa602ab711090b6ff79c1b77d3e",
+    "baseBranch": "codex/sacs-v0.4-wsgs-world-grounding",
+    "baseSha": "2dcbbe1c6074a54e0c332337f03a4e5574c19e06",
+    "baseTree": "02ed3b9bf93a68de6247672be5cd268bf8ba4666",
+    "commitsAheadOfMain": 29,
+    "pullRequest": {
+      "number": 15,
+      "state": "OPEN",
+      "draft": false,
+      "mergeable": "MERGEABLE",
+      "quality": "SUCCESS",
+      "container": "SUCCESS"
+    },
+    "featureBranch": "codex/sacs-v0.4-geospatial-explanation",
+    "featurePublished": false,
+    "version": "0.4.0"
+  },
+  "wsgs": {
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "pullRequest": 6,
+    "branch": "codex/wsgs-v0.2-descriptor-driven-gdps-consumption",
+    "sha": "601772e935bd47b74d16679bf215654eb0a0cb27",
+    "tree": "421350bafd9caed092adb2cc3451d6e17066c705",
+    "state": "OPEN",
+    "draft": true,
+    "mergeable": "MERGEABLE",
+    "ci": "SUCCESS",
+    "authoritativeSacsGeospatialConsumerBundle": "ABSENT",
+    "upstreamGate": "GDPS_V021_HANDOFF_INCOMPLETE",
+    "declaredRuntimeSha": "46e872359536b84351ce2b417117fc5725c59145",
+    "runtimeReadiness": "TIMEOUT_20S",
+    "credentialsIncluded": false
+  },
+  "gdps": {
+    "repository": "zhouwen-giser/geospatial-data-product-service",
+    "mainSha": "574b6aa90364c67e2f59baf7714013cdd3d48526",
+    "mainTree": "97e81b79c00eef3cdc8672dd82177f066097c414",
+    "v02PullRequest": 4,
+    "v02PullRequestState": "MERGED",
+    "localV021CandidateSha": "dc88b7eddeebc65e106352718d268458da9f9270",
+    "localV021CandidateTree": "8bd9f4e7f4b3d657fe6fd6fbbe2e44e5a8b82d5b",
+    "localV021CommitsAheadOfMain": 27,
+    "localV021WorkingTree": "DIRTY_UNPUBLISHED",
+    "authoritativeWsgsHandoffPublished": false
+  },
+  "gowm": {
+    "repository": "zhouwen-giser/geospatial-operational-world-model",
+    "mainSha": "f2894d86eeca121f9cea76c70797ece3b091d51f",
+    "mainTree": "a680ca24a7423e8bff4b989382fb35e754d48cab",
+    "openPullRequest": 10,
+    "openPullRequestSha": "931366884853dd571de9e1c159e3d94a3dadcebe",
+    "openPullRequestTree": "e05ee29d01a272df5ab5d82a9654cd66400f4b16",
+    "runtimeReadiness": "HTTP_200_STATUS_OK",
+    "runtimeCapabilityCount": 122,
+    "runtimeRegistryVersion": "sha256:efd0395dbd05c884c781f964b22147efcb38c4cef91704597706ec4b8332075a"
+  },
+  "baselineRegression": {
+    "command": "pnpm.cmd test",
+    "suitesPassed": 43,
+    "suitesSkipped": 14,
+    "testsPassed": 311,
+    "testsSkipped": 100,
+    "testsTotal": 411,
+    "status": "PASS"
+  },
+  "protectedActions": {
+    "push": false,
+    "pullRequestCreateOrUpdate": false,
+    "merge": false,
+    "tag": false,
+    "release": false,
+    "deploy": false,
+    "sharedInfrastructureMutation": false
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "sacs-geospatial-e2e-corpus/1.0",
+  "cases": [
+    {
+      "caseId": "E2E-01",
+      "message": "2号车当前位置的坡度是多少？",
+      "questionKind": "POINT_VALUE",
+      "expectedExplanationStatus": "COMPLETE"
+    },
+    {
+      "caseId": "E2E-02",
+      "message": "A区内坡度15到30度的区域有哪些？",
+      "questionKind": "VALUE_RANGE_AREAS",
+      "expectedExplanationStatus": "COMPLETE"
+    },
+    {
+      "caseId": "E2E-03",
+      "message": "A区内有哪些洪水高风险区域？",
+      "questionKind": "FEATURES_IN_AREA",
+      "expectedExplanationStatus": "COMPLETE"
+    },
+    {
+      "caseId": "E2E-04",
+      "message": "2号车附近500米有哪些排水沟？",
+      "questionKind": "FEATURES_NEARBY",
+      "expectedExplanationStatus": "COMPLETE"
+    },
+    {
+      "caseId": "E2E-05",
+      "message": "A区内有哪些高地？",
+      "questionKind": "FEATURES_IN_AREA",
+      "expectedExplanationStatus": "COMPLETE"
+    },
+    {
+      "caseId": "E2E-06",
+      "message": "A区内有哪些湿地？",
+      "questionKind": "FEATURES_IN_AREA",
+      "expectedExplanationStatus": "COMPLETE"
+    },
+    {
+      "caseId": "E2E-07",
+      "message": "2号车当前位置是什么地表覆盖？",
+      "questionKind": "POINT_CLASSIFICATION",
+      "expectedExplanationStatus": "COMPLETE"
+    },
+    {
+      "caseId": "E2E-08",
+      "message": "2号车当前位置为什么属于该通行性等级？",
+      "questionKind": "QUALIFIED_EXPLANATION",
+      "expectedExplanationStatus": "COMPLETE"
+    },
+    {
+      "caseId": "E2E-09",
+      "message": "使用当前指定的坡度产品查询A区15到30度坡地。",
+      "questionKind": "VALUE_RANGE_AREAS",
+      "expectedExplanationStatus": "COMPLETE"
+    },
+    {
+      "caseId": "E2E-10",
+      "message": "把刚才找到的可引用高地显示出来。",
+      "questionKind": "MULTI_FINDING",
+      "expectedExplanationStatus": "COMPLETE_OR_CLARIFY"
+    },
+    {
+      "caseId": "NEG-01",
+      "message": "A区有哪些雪崩风险区域？",
+      "questionKind": "FEATURES_IN_AREA",
+      "expectedExplanationStatus": "DATA_UNAVAILABLE"
+    },
+    {
+      "caseId": "NEG-02",
+      "message": "查询范围超出当前数据覆盖。",
+      "questionKind": "FEATURES_IN_AREA",
+      "expectedExplanationStatus": "DATA_UNAVAILABLE"
+    },
+    {
+      "caseId": "NEG-03",
+      "message": "滨河路附近有哪些排水沟？",
+      "questionKind": "FEATURES_NEARBY",
+      "expectedExplanationStatus": "CLARIFICATION_REQUIRED"
+    },
+    {
+      "caseId": "NEG-04",
+      "message": "返回前100项但实际结果更多。",
+      "questionKind": "FEATURES_IN_AREA",
+      "expectedExplanationStatus": "PARTIAL"
+    },
+    {
+      "caseId": "NEG-05",
+      "message": "上游返回未知Finding Schema。",
+      "questionKind": "MULTI_FINDING",
+      "expectedExplanationStatus": "PARTIAL_OR_DATA_UNAVAILABLE"
+    },
+    {
+      "caseId": "NEG-06",
+      "message": "严格复用已经变化的数据源结果。",
+      "questionKind": "MULTI_FINDING",
+      "expectedExplanationStatus": "DATA_UNAVAILABLE"
+    },
+    {
+      "caseId": "NEG-07",
+      "message": "访问另一数据范围中的地理产品。",
+      "questionKind": "MULTI_FINDING",
+      "expectedExplanationStatus": "DATA_UNAVAILABLE"
+    },
+    {
+      "caseId": "HYBRID-01",
+      "message": "任务计划与当前地理条件是否一致？",
+      "questionKind": "MULTI_FINDING",
+      "expectedExplanationStatus": "COMPLETE_OR_PARTIAL"
+    }
+  ],
+  "requiredLivePath": [
+    "SACS_HTTP",
+    "WSGS_HTTP",
+    "GOWM_WORLD_CAPABILITY_GATEWAY",
+    "GDPS_CURRENT_PRODUCT",
+    "REAL_POSTGRES"
+  ],
+  "fixtureCannotSatisfyLive": true
+}

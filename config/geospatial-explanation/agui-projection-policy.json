@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "sacs-agui-geospatial-projection-policy/1.0",
+  "events": [
+    "sacs.world-explanation.v1",
+    "sacs.map-projection.v1",
+    "sacs.world-source-products.v1"
+  ],
+  "sharedIdentityFields": [
+    "explanationId",
+    "explanationHash",
+    "groundingId",
+    "groundingResultHash"
+  ],
+  "mapSources": ["UPSTREAM_GEOMETRY", "REFERENCE_KEY", "PAYLOAD_REF"],
+  "spatialComputationAllowed": false,
+  "rawAssetUriAllowed": false
+}

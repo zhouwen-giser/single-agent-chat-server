@@ -27,17 +27,19 @@ export class PostgresWorldFocusRepository implements WorldFocusRepository {
   constructor(private readonly pool: InstanceType<typeof Pool>) {}
 
   async getFocus(scope: WorldFocusScope): Promise<ConversationWorldFocus> {
-    await this.ensureFocus(scope);
-    const [focus, references] = await Promise.all([
-      this.pool.query<FocusRow>(
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ");
+      await ensureFocusWithClient(client, scope);
+      const focus = await client.query<FocusRow>(
         `
           SELECT *
           FROM chat_service.conversation_world_focus
           WHERE principal_id = $1 AND thread_id = $2
         `,
         [scope.principalId, scope.threadId],
-      ),
-      this.pool.query<ReferenceRow>(
+      );
+      const references = await client.query<ReferenceRow>(
         `
           SELECT *
           FROM chat_service.conversation_world_reference
@@ -46,9 +48,15 @@ export class PostgresWorldFocusRepository implements WorldFocusRepository {
           LIMIT 64
         `,
         [scope.principalId, scope.threadId],
-      ),
-    ]);
-    return mapFocus(requiredRow(focus.rows, "world focus"), references.rows);
+      );
+      await client.query("COMMIT");
+      return mapFocus(requiredRow(focus.rows, "world focus"), references.rows);
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async listUsableReferences(
@@ -344,6 +352,8 @@ interface FocusRow {
   revision: string | number;
   last_grounding_id: string | null;
   last_grounding_result_hash: string | null;
+  last_explanation_id: string | null;
+  last_explanation_hash: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -360,6 +370,10 @@ interface ReferenceRow {
   source_grounding_id: string;
   source_result_hash: string;
   source_world_version: string | number;
+  source_explanation_id: string | null;
+  source_explanation_hash: string | null;
+  source_finding_id: string | null;
+  source_finding_ordinal: number | null;
   valid_until: Date | null;
   revalidation_required: boolean;
   status: "VALID" | "STALE" | "EXPIRED" | "UNKNOWN";
@@ -462,6 +476,10 @@ async function upsertReference(
         source_grounding_id = EXCLUDED.source_grounding_id,
         source_result_hash = EXCLUDED.source_result_hash,
         source_world_version = EXCLUDED.source_world_version,
+        source_explanation_id = NULL,
+        source_explanation_hash = NULL,
+        source_finding_id = NULL,
+        source_finding_ordinal = NULL,
         valid_until = EXCLUDED.valid_until,
         revalidation_required = EXCLUDED.revalidation_required,
         status = EXCLUDED.status,
@@ -503,6 +521,12 @@ function mapFocus(
     ...(row.last_grounding_result_hash === null
       ? {}
       : { lastGroundingResultHash: row.last_grounding_result_hash }),
+    ...(row.last_explanation_id === null
+      ? {}
+      : { lastExplanationId: row.last_explanation_id }),
+    ...(row.last_explanation_hash === null
+      ? {}
+      : { lastExplanationHash: row.last_explanation_hash }),
     references: references.map((reference) => mapReference(reference)),
     updatedAt: row.updated_at.toISOString(),
   });
@@ -518,6 +542,18 @@ function mapReference(row: ReferenceRow, now?: string) {
     sourceGroundingId: row.source_grounding_id,
     sourceResultHash: row.source_result_hash,
     sourceWorldVersion: Number(row.source_world_version),
+    ...(row.source_explanation_id === null
+      ? {}
+      : { sourceExplanationId: row.source_explanation_id }),
+    ...(row.source_explanation_hash === null
+      ? {}
+      : { sourceExplanationHash: row.source_explanation_hash }),
+    ...(row.source_finding_id === null
+      ? {}
+      : { sourceFindingId: row.source_finding_id }),
+    ...(row.source_finding_ordinal === null
+      ? {}
+      : { sourceFindingOrdinal: row.source_finding_ordinal }),
     ...(row.valid_until === null
       ? {}
       : { validUntil: row.valid_until.toISOString() }),

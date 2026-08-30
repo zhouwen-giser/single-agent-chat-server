@@ -19,6 +19,9 @@ import { createSingleAgentChatGraph } from "../../../../src/agent/graph.js";
 import type { ClassificationError } from "../../../../src/agent/classification.js";
 import type { StructuredChatModel } from "../../../../src/agent/model.js";
 import type { TurnPlan } from "../../../../packages/world-grounding-contract/src/index.js";
+import type { MapSelection } from "../../../../packages/wsgs-http-adapter/src/index.js";
+import type { WorldExplanationV1 } from "../../../../packages/world-explanation-contract/src/index.js";
+import type { HybridAuthoritySeparatedResult } from "../../../../packages/world-grounding-runtime/src/index.js";
 
 export interface ConversationApplicationRepository {
   listActiveTasksForChat(input: {
@@ -48,6 +51,7 @@ export interface ConversationApplicationTurn {
   readonly userMessageId: string;
   readonly currentUserExternalMessageId?: string;
   readonly utilityRequest: boolean;
+  readonly mapSelections?: readonly MapSelection[];
   readonly coordinatorObserver?: TaskCoordinatorObserver;
   readonly signal?: AbortSignal;
 }
@@ -79,8 +83,13 @@ export interface WorldGroundingApplication {
   continuePendingChoice?(
     input: Omit<WorldGroundingTurn, "turnPlan">,
   ): Promise<string | undefined>;
+  answerWorldExplanation?(
+    input: WorldGroundingTurn,
+  ): Promise<WorldExplanationV1 | string>;
   answerWorld(input: WorldGroundingTurn): Promise<string>;
-  compareHybrid(input: HybridWorldGroundingTurn): Promise<string>;
+  compareHybrid(
+    input: HybridWorldGroundingTurn,
+  ): Promise<string | HybridAuthoritySeparatedResult>;
   submitOperational(input: WorldGroundingTurn): Promise<string>;
 }
 
@@ -91,6 +100,7 @@ export interface WorldGroundingTurn {
   readonly externalRequestId: string;
   readonly userText: string;
   readonly turnPlan: TurnPlan;
+  readonly mapSelections?: readonly MapSelection[];
   readonly signal?: AbortSignal;
 }
 
@@ -135,12 +145,23 @@ export class ConversationApplicationService {
       { configurable: { thread_id: turn.threadId } },
     );
     if (result.requestKind === "world_answer") {
-      return this.options.worldGrounding === undefined ||
+      if (
+        this.options.worldGrounding === undefined ||
         result.turnPlan === undefined
-        ? "WORLD_GROUNDING_RUNTIME_UNAVAILABLE"
-        : this.options.worldGrounding.answerWorld(
-            toWorldGroundingTurn(turn, result.turnPlan),
+      ) {
+        return "WORLD_GROUNDING_RUNTIME_UNAVAILABLE";
+      }
+      const groundingTurn = toWorldGroundingTurn(turn, result.turnPlan);
+      if (this.options.worldGrounding.answerWorldExplanation !== undefined) {
+        const explanation =
+          await this.options.worldGrounding.answerWorldExplanation(
+            groundingTurn,
           );
+        return typeof explanation === "string"
+          ? explanation
+          : { kind: "world_explanation", explanation };
+      }
+      return this.options.worldGrounding.answerWorld(groundingTurn);
     }
     if (result.requestKind === "grounded_task") {
       return this.options.worldGrounding === undefined ||
@@ -165,10 +186,19 @@ export class ConversationApplicationService {
       if (sdarTask === undefined) {
         return "AUTHORITY_FUSION_PLAN_UNAVAILABLE";
       }
-      return this.options.worldGrounding.compareHybrid({
+      const hybrid = await this.options.worldGrounding.compareHybrid({
         ...toWorldGroundingTurn(turn, result.turnPlan),
         sdarTask,
       });
+      return typeof hybrid === "string"
+        ? hybrid
+        : {
+            kind: "world_explanation",
+            explanation: hybrid.explanation,
+            renderedText: hybrid.renderedText,
+            authorityPresentation: hybrid.authorityPresentation,
+            authorityFusion: hybrid.authorityFusion,
+          };
     }
     if (result.requestKind === "new_task") {
       const input = {
@@ -346,6 +376,9 @@ function toWorldGroundingTurn(
     externalRequestId: turn.userMessageId,
     userText: turn.userText,
     turnPlan,
+    ...(turn.mapSelections === undefined
+      ? {}
+      : { mapSelections: turn.mapSelections }),
     ...(turn.signal === undefined ? {} : { signal: turn.signal }),
   };
 }

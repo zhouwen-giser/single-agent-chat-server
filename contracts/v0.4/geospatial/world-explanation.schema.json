@@ -1,0 +1,574 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:world-explanation:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "explanationId",
+    "explanationHash",
+    "locale",
+    "grounding",
+    "explanationStatus",
+    "questionKind",
+    "renderedText",
+    "findings",
+    "references",
+    "sourceProducts",
+    "gaps",
+    "provenance",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-world-explanation/1.0"
+    },
+    "explanationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "explanationHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 32
+    },
+    "grounding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["groundingId", "resultHash", "status"],
+      "properties": {
+        "groundingId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "resultHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "status": {
+          "enum": [
+            "COMPLETED",
+            "PARTIAL",
+            "AMBIGUOUS",
+            "UNRESOLVED",
+            "FAILED",
+            "CANCELLED"
+          ]
+        }
+      }
+    },
+    "explanationStatus": {
+      "enum": [
+        "COMPLETE",
+        "PARTIAL",
+        "CLARIFICATION_REQUIRED",
+        "DATA_UNAVAILABLE",
+        "FAILED",
+        "CANCELLED"
+      ]
+    },
+    "questionKind": {
+      "enum": [
+        "POINT_VALUE",
+        "POINT_CLASSIFICATION",
+        "FEATURES_IN_AREA",
+        "FEATURES_NEARBY",
+        "VALUE_RANGE_AREAS",
+        "PROFILE",
+        "QUALIFIED_EXPLANATION",
+        "REFERENCE_RESOLUTION",
+        "MULTI_FINDING"
+      ]
+    },
+    "renderedText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16000
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "findingId",
+          "findingKind",
+          "semanticConcept",
+          "headline",
+          "details",
+          "evidenceItemIds",
+          "sourceProductIds"
+        ],
+        "properties": {
+          "findingId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "findingKind": {
+            "enum": [
+              "POINT_MEASUREMENT",
+              "POINT_CLASSIFICATION",
+              "SPATIAL_FEATURE_COLLECTION",
+              "PROFILE",
+              "QUALIFIED_EXPLANATION",
+              "CATALOG"
+            ]
+          },
+          "semanticConcept": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "headline": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 1000
+            },
+            "maxItems": 32
+          },
+          "returnedCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "featureSummaries": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "type": "object"
+            }
+          },
+          "evidenceItemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "minItems": 1,
+            "maxItems": 256
+          },
+          "sourceProductIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "maxItems": 64
+          }
+        }
+      },
+      "maxItems": 128
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "productId",
+          "displayName",
+          "referenceKey",
+          "sourceWorldVersion"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "referenceKey": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["namespace", "kind", "id", "version"],
+            "properties": {
+              "namespace": {
+                "const": "gowm"
+              },
+              "kind": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^wrf_[0-9a-f]{32}$"
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            }
+          },
+          "sourceWorldVersion": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sourceOperation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revalidationRequired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "maxItems": 128
+    },
+    "sourceProducts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceProductId",
+          "authority",
+          "productId",
+          "productType",
+          "productProfile",
+          "contentHash",
+          "descriptorId",
+          "descriptorHash"
+        ],
+        "properties": {
+          "sourceProductId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "authority": {
+            "const": "GDPS_CURRENT_PRODUCT"
+          },
+          "productId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "productType": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "productProfile": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "contentHash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "descriptorId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "descriptorHash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "dataTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "qualitySummary": {
+            "type": "object"
+          }
+        }
+      },
+      "maxItems": 64
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["gapId", "gapKind", "severity", "messageCode"],
+        "properties": {
+          "gapId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "gapKind": {
+            "enum": [
+              "DATA_GAP",
+              "COVERAGE_GAP",
+              "CAPABILITY_GAP",
+              "REFERENCE_AMBIGUITY",
+              "PRODUCT_SELECTION_AMBIGUITY",
+              "SOURCE_CHANGED",
+              "TRUNCATED",
+              "UNSUPPORTED_FINDING_SCHEMA",
+              "EVIDENCE_INCOMPLETE",
+              "UPSTREAM_FAILURE",
+              "CURRENTNESS_UNAVAILABLE"
+            ]
+          },
+          "severity": {
+            "enum": ["INFO", "WARNING", "BLOCKING"]
+          },
+          "messageCode": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "semanticConcept": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "findingIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "maxItems": 64
+          },
+          "evidenceItemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "maxItems": 128
+          },
+          "safeDetail": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        }
+      },
+      "maxItems": 128
+    },
+    "mapProjection": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "urn:sacs:map-projection:1.0",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "features", "truncated"],
+      "properties": {
+        "schemaVersion": {
+          "const": "sacs-map-projection/1.0"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["projectionId", "findingId", "semanticRole"],
+            "properties": {
+              "projectionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "findingId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "featureId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "semanticRole": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "referenceKey": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["namespace", "kind", "id", "version"],
+                "properties": {
+                  "namespace": {
+                    "const": "gowm"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "id": {
+                    "type": "string",
+                    "pattern": "^wrf_[0-9a-f]{32}$"
+                  },
+                  "version": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                }
+              },
+              "geometry": {
+                "type": "object"
+              },
+              "payloadRef": {
+                "type": "string",
+                "maxLength": 1024
+              }
+            },
+            "oneOf": [
+              {
+                "required": ["referenceKey"],
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": ["geometry"]
+                    },
+                    {
+                      "required": ["payloadRef"]
+                    }
+                  ]
+                }
+              },
+              {
+                "required": ["geometry"],
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": ["referenceKey"]
+                    },
+                    {
+                      "required": ["payloadRef"]
+                    }
+                  ]
+                }
+              },
+              {
+                "required": ["payloadRef"],
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": ["referenceKey"]
+                    },
+                    {
+                      "required": ["geometry"]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "maxItems": 256
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "maxItems": 32
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceItemIds",
+        "receiptIds",
+        "operationKeys",
+        "consumerLockHash",
+        "findingProfileHash",
+        "rendererPolicyHash"
+      ],
+      "properties": {
+        "evidenceItemIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "maxItems": 1000
+        },
+        "receiptIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "maxItems": 1000
+        },
+        "operationKeys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "maxItems": 64
+        },
+        "consumerLockHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "findingProfileHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "rendererPolicyHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

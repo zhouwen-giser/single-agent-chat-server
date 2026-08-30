@@ -1,0 +1,306 @@
+id,required,phase,area,scenario,expected,evidence
+AC-B001,yes,S13,Baseline,SACS source fetch,Actual main/PR15 head recorded,SOURCE_LOCK/GIT/CI
+AC-B002,yes,S13,Baseline,PR15 state,Open/merged/draft/CI state recorded,SOURCE_LOCK/GIT/CI
+AC-B003,yes,S13,Baseline,Correct base,Stacked base selected without rewriting PR15,SOURCE_LOCK/GIT/CI
+AC-B004,yes,S13,Baseline,New branch,Dedicated geospatial explanation branch used,SOURCE_LOCK/GIT/CI
+AC-B005,yes,S13,Baseline,WSGS source fetch,Actual descriptor-driven branch/PR recorded,SOURCE_LOCK/GIT/CI
+AC-B006,yes,S13,Baseline,WSGS handoff state,Readiness and blockers recorded,SOURCE_LOCK/GIT/CI
+AC-B007,yes,S13,Baseline,GDPS source fetch,Actual v0.2/main/v0.2.1 state recorded,SOURCE_LOCK/GIT/CI
+AC-B008,yes,S13,Baseline,GOWM source fetch,Actual main and binding source recorded,SOURCE_LOCK/GIT/CI
+AC-B009,yes,S13,Baseline,Running environment discovery,Actual WSGS/GOWM/GDPS availability recorded,SOURCE_LOCK/GIT/CI
+AC-B010,yes,S13,Baseline,SACS software version,Remains 0.4.0 unless repository convention requires exact equivalent,SOURCE_LOCK/GIT/CI
+AC-B011,yes,S13,Baseline,Existing package inventory,Grounding/focus/fusion modules inventoried,SOURCE_LOCK/GIT/CI
+AC-B012,yes,S13,Baseline,Existing migrations,0010-0012 present and append-only,SOURCE_LOCK/GIT/CI
+AC-B013,yes,S13,Baseline,Existing CI,Latest base CI result recorded,SOURCE_LOCK/GIT/CI
+AC-B014,yes,S13,Baseline,Project status reconciliation,Stale S00-S05 statement corrected,SOURCE_LOCK/GIT/CI
+AC-B015,yes,S13,Baseline,Phase manifest reconciliation,Completed base markers retained,SOURCE_LOCK/GIT/CI
+AC-B016,yes,S13,Baseline,No duplicate grounding runtime,Existing runtime reused,SOURCE_LOCK/GIT/CI
+AC-B017,yes,S13,Baseline,No PR15 feature pollution,New implementation absent from PR15,SOURCE_LOCK/GIT/CI
+AC-B018,yes,S13,Baseline,No force push,Shared history preserved,SOURCE_LOCK/GIT/CI
+AC-B019,yes,S13,Baseline,No merge/tag/release/deploy,Protected actions absent,SOURCE_LOCK/GIT/CI
+AC-B020,yes,S13,Baseline,Source lock report,Four exact SHAs and PR states emitted,SOURCE_LOCK/GIT/CI
+AC-B021,yes,S13,Baseline,Baseline tests,Base regression runs before feature changes,SOURCE_LOCK/GIT/CI
+AC-B022,yes,S13,Baseline,S13 marker,Marker emitted only after evidence,SOURCE_LOCK/GIT/CI
+AC-U001,yes,S14,UpstreamIntake,Authoritative handoff discovered,WSGS-owned artifact bundle found or precise blocker,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U002,yes,S14,UpstreamIntake,Bundle checksums,All handoff bytes match CHECKSUMS,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U003,yes,S14,UpstreamIntake,WSGS SHA,Consumer lock SHA matches actual candidate,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U004,yes,S14,UpstreamIntake,GOWM SHA/fingerprint,Upstream provenance matches running authority,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U005,yes,S14,UpstreamIntake,GDPS SHA/fingerprint,Upstream provenance matches current product provider,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U006,yes,S14,UpstreamIntake,Grounding contract version,Exact declared contract accepted,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U007,yes,S14,UpstreamIntake,Capabilities schema hash,Exact hash validated,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U008,yes,S14,UpstreamIntake,Result schema hash,Exact hash validated,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U009,yes,S14,UpstreamIntake,Finding profile,Exact profile string and schema hash,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U010,yes,S14,UpstreamIntake,Finding schema hash,Exact hash validated,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U011,yes,S14,UpstreamIntake,SourceProduct schema hash,Exact hash validated,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U012,yes,S14,UpstreamIntake,Typed Gap schema hash,Exact hash validated,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U013,yes,S14,UpstreamIntake,Transport mode,Exactly one declared mode selected,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U014,yes,S14,UpstreamIntake,Requested products,Only published product names used,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U015,yes,S14,UpstreamIntake,Currentness mode,Declared mode parsed and enforced,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U016,yes,S14,UpstreamIntake,Generated TypeScript,Consumer types generated,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U017,yes,S14,UpstreamIntake,Generate check,Generated artifacts have no drift,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U018,yes,S14,UpstreamIntake,No source-code commit lock,Adapter does not hard-code old upstream SHA,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U019,yes,S14,UpstreamIntake,No fixed capability count,"Adapter validates lock, not magic count",SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U020,yes,S14,UpstreamIntake,No authority-field acceptance,WSGS cannot set SACS principal/scope/route,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U021,yes,S14,UpstreamIntake,Transport auth preserved,Bearer remains transport-only,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U022,yes,S14,UpstreamIntake,Unknown extension rejected,No permissive passthrough to facts,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U023,yes,S14,UpstreamIntake,Missing profile blocker,S14 marker withheld,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U024,yes,S14,UpstreamIntake,Provisional fixture labeled,Fixture never represented as authoritative,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U025,yes,S14,UpstreamIntake,No GDPS direct lock planning,SACS does not consume descriptor lock for capability choice,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U026,yes,S14,UpstreamIntake,Secret scan,No token/URL secret in generated locks,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U027,yes,S14,UpstreamIntake,Intake report,Machine-readable PASS/BLOCKED report,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-U028,yes,S14,UpstreamIntake,S14 marker,Only authoritative handoff can produce READY,SCHEMA/STATIC/UPSTREAM_LOCK
+AC-C001,yes,S15,Contracts,Finding discriminated union,Six finding kinds validate,SCHEMA/CONTRACT
+AC-C002,yes,S15,Contracts,Point measurement typed,Point/value/unit required,SCHEMA/CONTRACT
+AC-C003,yes,S15,Contracts,Point classification typed,Point/classCode required,SCHEMA/CONTRACT
+AC-C004,yes,S15,Contracts,Feature collection typed,count/truncated/features required,SCHEMA/CONTRACT
+AC-C005,yes,S15,Contracts,Profile typed,unit/samples/truncated required,SCHEMA/CONTRACT
+AC-C006,yes,S15,Contracts,Qualified explanation typed,code/summary/reasons required,SCHEMA/CONTRACT
+AC-C007,yes,S15,Contracts,Catalog typed,count/truncated/items required,SCHEMA/CONTRACT
+AC-C008,yes,S15,Contracts,Finding IDs bounded,Identifier contract enforced,SCHEMA/CONTRACT
+AC-C009,yes,S15,Contracts,Finding evidence IDs,At least one evidence item required,SCHEMA/CONTRACT
+AC-C010,yes,S15,Contracts,Source product identity,Current product fields required,SCHEMA/CONTRACT
+AC-C011,yes,S15,Contracts,Content hash,SHA-256 required,SCHEMA/CONTRACT
+AC-C012,yes,S15,Contracts,Descriptor hash,SHA-256 required,SCHEMA/CONTRACT
+AC-C013,yes,S15,Contracts,No productVersion,History semantics absent,SCHEMA/CONTRACT
+AC-C014,yes,S15,Contracts,Typed gaps,All gap kinds strict,SCHEMA/CONTRACT
+AC-C015,yes,S15,Contracts,Map projection union,Exactly reference/geometry/payloadRef,SCHEMA/CONTRACT
+AC-C016,yes,S15,Contracts,WorldExplanation identity,ID/hash required,SCHEMA/CONTRACT
+AC-C017,yes,S15,Contracts,Grounding identity,grounding ID/result hash/status required,SCHEMA/CONTRACT
+AC-C018,yes,S15,Contracts,Explanation statuses,Six statuses strict,SCHEMA/CONTRACT
+AC-C019,yes,S15,Contracts,Question kinds,Nine kinds strict,SCHEMA/CONTRACT
+AC-C020,yes,S15,Contracts,Rendered text bound,1..16000 chars,SCHEMA/CONTRACT
+AC-C021,yes,S15,Contracts,Explanation findings,Typed bounded summaries,SCHEMA/CONTRACT
+AC-C022,yes,S15,Contracts,Explanation references,GOWM ReferenceKey typed,SCHEMA/CONTRACT
+AC-C023,yes,S15,Contracts,Sanitized source products,No asset URI,SCHEMA/CONTRACT
+AC-C024,yes,S15,Contracts,Provenance closure fields,evidence/receipt/operation/lock hashes,SCHEMA/CONTRACT
+AC-C025,yes,S15,Contracts,Replay key,Exact six-part key,SCHEMA/CONTRACT
+AC-C026,yes,S15,Contracts,World focus projection,finding ordinal and optional ReferenceKey,SCHEMA/CONTRACT
+AC-C027,yes,S15,Contracts,Currentness result,CURRENT/CHANGED/NOT_AVAILABLE/UNKNOWN,SCHEMA/CONTRACT
+AC-C028,yes,S15,Contracts,Normalization report,PASS/PARTIAL/FAIL typed,SCHEMA/CONTRACT
+AC-C029,yes,S15,Contracts,Renderer policy,Hashable policy contract,SCHEMA/CONTRACT
+AC-C030,yes,S15,Contracts,Canonical hash tests,Stable ordering and self-hash exclusion,SCHEMA/CONTRACT
+AC-C031,yes,S15,Contracts,Schema examples,Complete/data-gap/map examples validate,SCHEMA/CONTRACT
+AC-C032,yes,S15,Contracts,S15 marker,Contract marker emitted,SCHEMA/CONTRACT
+AC-N001,yes,S16,Normalizer,Profile hash,Mismatch rejected,UNIT/CONTRACT/SECURITY
+AC-N002,yes,S16,Normalizer,Finding ID uniqueness,Duplicates rejected,UNIT/CONTRACT/SECURITY
+AC-N003,yes,S16,Normalizer,SourceProduct ID uniqueness,Duplicates rejected,UNIT/CONTRACT/SECURITY
+AC-N004,yes,S16,Normalizer,Finding evidence closure,Unknown evidence ID rejected,UNIT/CONTRACT/SECURITY
+AC-N005,yes,S16,Normalizer,Finding source closure,Unknown sourceProduct ID rejected,UNIT/CONTRACT/SECURITY
+AC-N006,yes,S16,Normalizer,Source evidence closure,Unknown evidence ID rejected,UNIT/CONTRACT/SECURITY
+AC-N007,yes,S16,Normalizer,Reference closure,Unknown reference product cannot be narrated,UNIT/CONTRACT/SECURITY
+AC-N008,yes,S16,Normalizer,Status compatibility,NO_DATA cannot carry completed factual value,UNIT/CONTRACT/SECURITY
+AC-N009,yes,S16,Normalizer,Point geometry,Invalid point rejected,UNIT/CONTRACT/SECURITY
+AC-N010,yes,S16,Normalizer,Measurement finite,NaN/infinity rejected,UNIT/CONTRACT/SECURITY
+AC-N011,yes,S16,Normalizer,Unit presence,Measurement/profile unit required,UNIT/CONTRACT/SECURITY
+AC-N012,yes,S16,Normalizer,Class code,Non-empty bounded class required,UNIT/CONTRACT/SECURITY
+AC-N013,yes,S16,Normalizer,Feature count parity,returnedCount and returned features interpreted safely,UNIT/CONTRACT/SECURITY
+AC-N014,yes,S16,Normalizer,Truncated,Partial semantics retained,UNIT/CONTRACT/SECURITY
+AC-N015,yes,S16,Normalizer,Feature identity,Feature ID required,UNIT/CONTRACT/SECURITY
+AC-N016,yes,S16,Normalizer,Feature locator,At least safe locator/attributes required,UNIT/CONTRACT/SECURITY
+AC-N017,yes,S16,Normalizer,Geometry budget,Oversized geometry becomes ref/warning or fails closed,UNIT/CONTRACT/SECURITY
+AC-N018,yes,S16,Normalizer,Feature budget,Over limit cannot silently truncate without gap,UNIT/CONTRACT/SECURITY
+AC-N019,yes,S16,Normalizer,Profile order,Distance samples nondecreasing,UNIT/CONTRACT/SECURITY
+AC-N020,yes,S16,Normalizer,Profile budget,Sample limit enforced,UNIT/CONTRACT/SECURITY
+AC-N021,yes,S16,Normalizer,Qualified explanation,Only published summary/reason codes retained,UNIT/CONTRACT/SECURITY
+AC-N022,yes,S16,Normalizer,Catalog result,Catalog items not treated as world objects,UNIT/CONTRACT/SECURITY
+AC-N023,yes,S16,Normalizer,Unknown finding kind,Unsupported schema gap; no claim,UNIT/CONTRACT/SECURITY
+AC-N024,yes,S16,Normalizer,Unknown profile,Entire extension not trusted,UNIT/CONTRACT/SECURITY
+AC-N025,yes,S16,Normalizer,Generic safePayload,Never creates finding,UNIT/CONTRACT/SECURITY
+AC-N026,yes,S16,Normalizer,Asset URI redaction,Internal URI removed/rejected,UNIT/CONTRACT/SECURITY
+AC-N027,yes,S16,Normalizer,Foreign scope leak,No product/reference detail exposed,UNIT/CONTRACT/SECURITY
+AC-N028,yes,S16,Normalizer,Unknown published attributes,Not narrated by default,UNIT/CONTRACT/SECURITY
+AC-N029,yes,S16,Normalizer,Normalization report,Every dropped/partial item has issue,UNIT/CONTRACT/SECURITY
+AC-N030,yes,S16,Normalizer,Determinism,Same input gives same normalized output,UNIT/CONTRACT/SECURITY
+AC-N031,yes,S16,Normalizer,Fuzz/hostile JSON,No prototype pollution/control-text leak,UNIT/CONTRACT/SECURITY
+AC-N032,yes,S16,Normalizer,S16 marker,Normalizer marker emitted,UNIT/CONTRACT/SECURITY
+AC-E001,yes,S17,Explanation,Point value question kind,POINT_VALUE,UNIT/CONTRACT
+AC-E002,yes,S17,Explanation,Point class question kind,POINT_CLASSIFICATION,UNIT/CONTRACT
+AC-E003,yes,S17,Explanation,Features in area kind,FEATURES_IN_AREA,UNIT/CONTRACT
+AC-E004,yes,S17,Explanation,Features nearby kind,FEATURES_NEARBY,UNIT/CONTRACT
+AC-E005,yes,S17,Explanation,Range areas kind,VALUE_RANGE_AREAS,UNIT/CONTRACT
+AC-E006,yes,S17,Explanation,Profile kind,PROFILE,UNIT/CONTRACT
+AC-E007,yes,S17,Explanation,Qualified explanation kind,QUALIFIED_EXPLANATION,UNIT/CONTRACT
+AC-E008,yes,S17,Explanation,Multi finding kind,MULTI_FINDING,UNIT/CONTRACT
+AC-E009,yes,S17,Explanation,Chinese locale,Deterministic Chinese rendering,UNIT/CONTRACT
+AC-E010,yes,S17,Explanation,English locale,Deterministic English rendering,UNIT/CONTRACT
+AC-E011,yes,S17,Explanation,Locale persistence,Replay retains locale,UNIT/CONTRACT
+AC-E012,yes,S17,Explanation,No model call,Renderer has no LLM dependency,UNIT/CONTRACT
+AC-E013,yes,S17,Explanation,Point measurement text,Exact upstream value/unit,UNIT/CONTRACT
+AC-E014,yes,S17,Explanation,Point class text,Exact class only,UNIT/CONTRACT
+AC-E015,yes,S17,Explanation,No cross-domain inference,Land cover does not imply traversability,UNIT/CONTRACT
+AC-E016,yes,S17,Explanation,Collection count,Count and top-N correct,UNIT/CONTRACT
+AC-E017,yes,S17,Explanation,Collection feature details,Only allowed published fields,UNIT/CONTRACT
+AC-E018,yes,S17,Explanation,Empty collection,No-match-in-current-data wording,UNIT/CONTRACT
+AC-E019,yes,S17,Explanation,Data gap text,No availability mistaken for absence,UNIT/CONTRACT
+AC-E020,yes,S17,Explanation,Coverage gap text,Coverage limitation explicit,UNIT/CONTRACT
+AC-E021,yes,S17,Explanation,Capability gap text,Capability limitation explicit,UNIT/CONTRACT
+AC-E022,yes,S17,Explanation,Reference ambiguity text,Clarification requested,UNIT/CONTRACT
+AC-E023,yes,S17,Explanation,Product ambiguity text,No automatic selection,UNIT/CONTRACT
+AC-E024,yes,S17,Explanation,Truncated text,Incomplete result explicit,UNIT/CONTRACT
+AC-E025,yes,S17,Explanation,Source changed text,Indeterminate/currentness language,UNIT/CONTRACT
+AC-E026,yes,S17,Explanation,Unknown schema text,No fact claim,UNIT/CONTRACT
+AC-E027,yes,S17,Explanation,Quality text,Only present quality metrics rendered,UNIT/CONTRACT
+AC-E028,yes,S17,Explanation,No fabricated confidence,Absent confidence remains absent,UNIT/CONTRACT
+AC-E029,yes,S17,Explanation,No ID dump,Normal answer avoids raw hash/ID clutter,UNIT/CONTRACT
+AC-E030,yes,S17,Explanation,Provenance preserved,Structured metadata retains IDs,UNIT/CONTRACT
+AC-E031,yes,S17,Explanation,Text bound,16000 chars max,UNIT/CONTRACT
+AC-E032,yes,S17,Explanation,Deterministic hash,Same input/policy gives same explanation hash,UNIT/CONTRACT
+AC-E033,yes,S17,Explanation,Safe escaping,Control/markdown injection neutralized,UNIT/CONTRACT
+AC-E034,yes,S17,Explanation,S17 marker,Narrative marker emitted,UNIT/CONTRACT
+AC-A001,yes,S18,ProtocolProjection,OpenAI uses persisted text,No re-render,UNIT/AGUI/OPENAI
+AC-A002,yes,S18,ProtocolProjection,OpenAI explanation identity,ID/hash retained internally,UNIT/AGUI/OPENAI
+AC-A003,yes,S18,ProtocolProjection,AGUI world explanation event,Typed event/state,UNIT/AGUI/OPENAI
+AC-A004,yes,S18,ProtocolProjection,AGUI map projection event,Typed event/state,UNIT/AGUI/OPENAI
+AC-A005,yes,S18,ProtocolProjection,AGUI sources event,Sanitized source metadata,UNIT/AGUI/OPENAI
+AC-A006,yes,S18,ProtocolProjection,Cross-protocol hash,Exact same explanation hash,UNIT/AGUI/OPENAI
+AC-A007,yes,S18,ProtocolProjection,Cross-protocol findings,Exact same finding IDs,UNIT/AGUI/OPENAI
+AC-A008,yes,S18,ProtocolProjection,Cross-protocol gaps,Exact same gap semantics,UNIT/AGUI/OPENAI
+AC-A009,yes,S18,ProtocolProjection,Map upstream geometry,Copied without calculation,UNIT/AGUI/OPENAI
+AC-A010,yes,S18,ProtocolProjection,Map ReferenceKey,Projected,UNIT/AGUI/OPENAI
+AC-A011,yes,S18,ProtocolProjection,Map payloadRef,Projected,UNIT/AGUI/OPENAI
+AC-A012,yes,S18,ProtocolProjection,Map exactly-one locator,No ambiguous locator,UNIT/AGUI/OPENAI
+AC-A013,yes,S18,ProtocolProjection,Map labels,Bounded safe labels,UNIT/AGUI/OPENAI
+AC-A014,yes,S18,ProtocolProjection,Map feature count,256 max,UNIT/AGUI/OPENAI
+AC-A015,yes,S18,ProtocolProjection,Large geometry fallback,Reference/payloadRef or warning,UNIT/AGUI/OPENAI
+AC-A016,yes,S18,ProtocolProjection,No buffer,No spatial computation,UNIT/AGUI/OPENAI
+AC-A017,yes,S18,ProtocolProjection,No distance calculation,Only upstream distance,UNIT/AGUI/OPENAI
+AC-A018,yes,S18,ProtocolProjection,No area calculation,Only upstream area,UNIT/AGUI/OPENAI
+AC-A019,yes,S18,ProtocolProjection,No asset URI,Never exposed,UNIT/AGUI/OPENAI
+AC-A020,yes,S18,ProtocolProjection,AGUI schema validation,All events accepted by SACS profile,UNIT/AGUI/OPENAI
+AC-A021,yes,S18,ProtocolProjection,OpenAI SSE/non-SSE parity,Same text,UNIT/AGUI/OPENAI
+AC-A022,yes,S18,ProtocolProjection,AGUI replay,Uses persisted explanation,UNIT/AGUI/OPENAI
+AC-A023,yes,S18,ProtocolProjection,Protocol error safety,No raw upstream error,UNIT/AGUI/OPENAI
+AC-A024,yes,S18,ProtocolProjection,Custom event order,Explanation before terminal run event,UNIT/AGUI/OPENAI
+AC-A025,yes,S18,ProtocolProjection,Activity/status projection,Grounding/explanation states coherent,UNIT/AGUI/OPENAI
+AC-A026,yes,S18,ProtocolProjection,S18 marker,Projection marker emitted,UNIT/AGUI/OPENAI
+AC-P001,yes,S19,Persistence,Migration 0013,Append-only contiguous migration,REAL_POSTGRES/UNIT
+AC-P002,yes,S19,Persistence,World explanation table,Required columns/constraints,REAL_POSTGRES/UNIT
+AC-P003,yes,S19,Persistence,Principal FK,Ownership constrained,REAL_POSTGRES/UNIT
+AC-P004,yes,S19,Persistence,Thread FK,Thread ownership constrained,REAL_POSTGRES/UNIT
+AC-P005,yes,S19,Persistence,Grounding identity,Grounding/result hash stored,REAL_POSTGRES/UNIT
+AC-P006,yes,S19,Persistence,Locale stored,Locale part of identity,REAL_POSTGRES/UNIT
+AC-P007,yes,S19,Persistence,Contract hash stored,Exact consumer contract,REAL_POSTGRES/UNIT
+AC-P008,yes,S19,Persistence,Renderer policy hash stored,Exact renderer,REAL_POSTGRES/UNIT
+AC-P009,yes,S19,Persistence,Explanation JSON,Object and size bounded,REAL_POSTGRES/UNIT
+AC-P010,yes,S19,Persistence,Explanation hash,SHA constraint,REAL_POSTGRES/UNIT
+AC-P011,yes,S19,Persistence,Unique replay key,Exact six-part uniqueness,REAL_POSTGRES/UNIT
+AC-P012,yes,S19,Persistence,Immutable identity,Cannot mutate keys,REAL_POSTGRES/UNIT
+AC-P013,yes,S19,Persistence,Exact replay,Same key returns same JSON/text,REAL_POSTGRES/UNIT
+AC-P014,yes,S19,Persistence,No second WSGS POST,Replay is local,REAL_POSTGRES/UNIT
+AC-P015,yes,S19,Persistence,New renderer policy,New explanation identity,REAL_POSTGRES/UNIT
+AC-P016,yes,S19,Persistence,New contract hash,New explanation identity,REAL_POSTGRES/UNIT
+AC-P017,yes,S19,Persistence,Cross-protocol replay,Same persisted record,REAL_POSTGRES/UNIT
+AC-P018,yes,S19,Persistence,World focus pointers,Paired ID/hash with revision,REAL_POSTGRES/UNIT
+AC-P019,yes,S19,Persistence,Optional finding identity columns,Only reference-linked findings,REAL_POSTGRES/UNIT
+AC-P020,yes,S19,Persistence,No large geometry duplication,Budget enforced,REAL_POSTGRES/UNIT
+AC-P021,yes,S19,Persistence,No product catalog table,SACS does not own GDPS data,REAL_POSTGRES/UNIT
+AC-P022,yes,S19,Persistence,Real PostgreSQL migration,0010→0013 passes,REAL_POSTGRES/UNIT
+AC-P023,yes,S19,Persistence,Concurrent create,Save-or-replay deterministic,REAL_POSTGRES/UNIT
+AC-P024,yes,S19,Persistence,Restart recovery,Explanation readable after restart,REAL_POSTGRES/UNIT
+AC-P025,yes,S19,Persistence,S19 marker,Replay marker emitted,REAL_POSTGRES/UNIT
+AC-M001,yes,S20,Multiturn,Existing known reference follow-up,No regression,REAL_POSTGRES/REAL_WSGS
+AC-M002,yes,S20,Multiturn,PendingChoice selection,No regression,REAL_POSTGRES/REAL_WSGS
+AC-M003,yes,S20,Multiturn,Reference revalidation,No regression,REAL_POSTGRES/REAL_WSGS
+AC-M004,yes,S20,Multiturn,Finding ReferenceKey stored,Eligible feature identity retained,REAL_POSTGRES/REAL_WSGS
+AC-M005,yes,S20,Multiturn,Finding ordinal stored,Deterministic within explanation,REAL_POSTGRES/REAL_WSGS
+AC-M006,yes,S20,Multiturn,Second feature with ReferenceKey,Follow-up resolves safely,REAL_POSTGRES/REAL_WSGS
+AC-M007,yes,S20,Multiturn,Second feature without ReferenceKey,Clarify/requery,REAL_POSTGRES/REAL_WSGS
+AC-M008,yes,S20,Multiturn,Pronoun with stable reference,Uses knownWorldReferences,REAL_POSTGRES/REAL_WSGS
+AC-M009,yes,S20,Multiturn,Bare array pronoun,Not accepted as stable identity,REAL_POSTGRES/REAL_WSGS
+AC-M010,yes,S20,Multiturn,Map selection reference,Accepted after validation,REAL_POSTGRES/REAL_WSGS
+AC-M011,yes,S20,Multiturn,Map selection geometry hash,Bounded and scoped,REAL_POSTGRES/REAL_WSGS
+AC-M012,yes,S20,Multiturn,Cross-thread isolation,No focus leak,REAL_POSTGRES/REAL_WSGS
+AC-M013,yes,S20,Multiturn,Cross-principal isolation,No focus leak,REAL_POSTGRES/REAL_WSGS
+AC-M014,yes,S20,Multiturn,Expired reference,Revalidate before current use,REAL_POSTGRES/REAL_WSGS
+AC-M015,yes,S20,Multiturn,Stale source,No current fact reuse,REAL_POSTGRES/REAL_WSGS
+AC-M016,yes,S20,Multiturn,Prior explanation lookup,Exact thread/principal only,REAL_POSTGRES/REAL_WSGS
+AC-M017,yes,S20,Multiturn,No prior grounding weakening,Pinned guard preserved,REAL_POSTGRES/REAL_WSGS
+AC-M018,yes,S20,Multiturn,Original query continuation,No pronoun rewrite,REAL_POSTGRES/REAL_WSGS
+AC-M019,yes,S20,Multiturn,Ambiguous follow-up,"Clarification, no auto-selection",REAL_POSTGRES/REAL_WSGS
+AC-M020,yes,S20,Multiturn,Map display historical label,Past result not claimed current,REAL_POSTGRES/REAL_WSGS
+AC-M021,yes,S20,Multiturn,World focus revision,Atomic increment,REAL_POSTGRES/REAL_WSGS
+AC-M022,yes,S20,Multiturn,S20 marker,Multi-turn marker emitted,REAL_POSTGRES/REAL_WSGS
+AC-G001,yes,S21,GapCurrentness,Completed normal,COMPLETE,UNIT/CONTRACT/REAL_WSGS
+AC-G002,yes,S21,GapCurrentness,Completed empty,COMPLETE + no-match wording,UNIT/CONTRACT/REAL_WSGS
+AC-G003,yes,S21,GapCurrentness,Partial upstream,PARTIAL,UNIT/CONTRACT/REAL_WSGS
+AC-G004,yes,S21,GapCurrentness,Truncated finding,PARTIAL + TRUNCATED,UNIT/CONTRACT/REAL_WSGS
+AC-G005,yes,S21,GapCurrentness,Data gap,DATA_UNAVAILABLE + DATA_GAP,UNIT/CONTRACT/REAL_WSGS
+AC-G006,yes,S21,GapCurrentness,Coverage gap,DATA_UNAVAILABLE + COVERAGE_GAP,UNIT/CONTRACT/REAL_WSGS
+AC-G007,yes,S21,GapCurrentness,Capability gap,DATA_UNAVAILABLE + CAPABILITY_GAP,UNIT/CONTRACT/REAL_WSGS
+AC-G008,yes,S21,GapCurrentness,Reference ambiguity,CLARIFICATION_REQUIRED,UNIT/CONTRACT/REAL_WSGS
+AC-G009,yes,S21,GapCurrentness,Product ambiguity,CLARIFICATION_REQUIRED,UNIT/CONTRACT/REAL_WSGS
+AC-G010,yes,S21,GapCurrentness,Source changed during query,PARTIAL + SOURCE_CHANGED,UNIT/CONTRACT/REAL_WSGS
+AC-G011,yes,S21,GapCurrentness,Unknown schema,No fact claim,UNIT/CONTRACT/REAL_WSGS
+AC-G012,yes,S21,GapCurrentness,Upstream failed,FAILED,UNIT/CONTRACT/REAL_WSGS
+AC-G013,yes,S21,GapCurrentness,Cancelled,CANCELLED,UNIT/CONTRACT/REAL_WSGS
+AC-G014,yes,S21,GapCurrentness,NO_DATA not false,No absence conclusion,UNIT/CONTRACT/REAL_WSGS
+AC-G015,yes,S21,GapCurrentness,Missing product not absence,No absence conclusion,UNIT/CONTRACT/REAL_WSGS
+AC-G016,yes,S22,GapCurrentness,Currentness via WSGS,No direct GDPS call,UNIT/CONTRACT/REAL_WSGS
+AC-G017,yes,S22,GapCurrentness,Currentness mode from lock,No guessed operation,UNIT/CONTRACT/REAL_WSGS
+AC-G018,yes,S22,GapCurrentness,CURRENT,Current reuse allowed,UNIT/CONTRACT/REAL_WSGS
+AC-G019,yes,S22,GapCurrentness,CHANGED strict,Current reuse blocked,UNIT/CONTRACT/REAL_WSGS
+AC-G020,yes,S22,GapCurrentness,CHANGED best effort,New grounding + SOURCE_ADVANCED,UNIT/CONTRACT/REAL_WSGS
+AC-G021,yes,S22,GapCurrentness,NOT_AVAILABLE,DATA_GAP,UNIT/CONTRACT/REAL_WSGS
+AC-G022,yes,S22,GapCurrentness,UNSUPPORTED currentness,CURRENTNESS_UNAVAILABLE,UNIT/CONTRACT/REAL_WSGS
+AC-G023,yes,S22,GapCurrentness,Previous and actual hashes,Recorded for advanced source,UNIT/CONTRACT/REAL_WSGS
+AC-G024,yes,S22,GapCurrentness,No historical query,No old product fetch,UNIT/CONTRACT/REAL_WSGS
+AC-G025,yes,S22,GapCurrentness,Historical transcript,Original text can display as past record,UNIT/CONTRACT/REAL_WSGS
+AC-G026,yes,S22,GapCurrentness,Current UI label,Stale record not labeled current,UNIT/CONTRACT/REAL_WSGS
+AC-G027,yes,S22,GapCurrentness,Safe retry bound,No infinite retry,UNIT/CONTRACT/REAL_WSGS
+AC-G028,yes,S22,GapCurrentness,S21/S22 markers,Both markers emitted,UNIT/CONTRACT/REAL_WSGS
+AC-F001,yes,S23,AuthorityFusion,Evaluator unchanged,Existing semantics preserved,UNIT/REAL_POSTGRES
+AC-F002,yes,S23,AuthorityFusion,Geospatial finding contextual,Not a predicate,UNIT/REAL_POSTGRES
+AC-F003,yes,S23,AuthorityFusion,No task failure inference,Forbidden,UNIT/REAL_POSTGRES
+AC-F004,yes,S23,AuthorityFusion,No plan violation inference,Forbidden,UNIT/REAL_POSTGRES
+AC-F005,yes,S23,AuthorityFusion,No route feasibility inference,Forbidden,UNIT/REAL_POSTGRES
+AC-F006,yes,S23,AuthorityFusion,No visibility inference,Forbidden,UNIT/REAL_POSTGRES
+AC-F007,yes,S23,AuthorityFusion,Typed predicate still supported,Existing PREDICATE_EVALUATION path,UNIT/REAL_POSTGRES
+AC-F008,yes,S23,AuthorityFusion,Typed correlation still supported,Existing CORRELATION_FINDING path,UNIT/REAL_POSTGRES
+AC-F009,yes,S23,AuthorityFusion,Hybrid three sections,Authorities separated,UNIT/REAL_POSTGRES
+AC-F010,yes,S23,AuthorityFusion,Task status from SDAR,Never overwritten,UNIT/REAL_POSTGRES
+AC-F011,yes,S23,AuthorityFusion,World explanation from WSGS/GOWM,Never rewritten as task truth,UNIT/REAL_POSTGRES
+AC-F012,yes,S23,AuthorityFusion,Composition compare-only,SACS role explicit,UNIT/REAL_POSTGRES
+AC-F013,yes,S23,AuthorityFusion,Partial world evidence,Fusion remains unknown where required,UNIT/REAL_POSTGRES
+AC-F014,yes,S23,AuthorityFusion,Data gap,Does not become violated,UNIT/REAL_POSTGRES
+AC-F015,yes,S23,AuthorityFusion,OpenAI/AGUI hybrid parity,Same fusion/explanation objects,UNIT/REAL_POSTGRES
+AC-F016,yes,S23,AuthorityFusion,Replay identity,Task/requirement/grounding hashes preserved,UNIT/REAL_POSTGRES
+AC-F017,yes,S23,AuthorityFusion,Regression 49 checks,Existing focused Fusion tests pass,UNIT/REAL_POSTGRES
+AC-F018,yes,S23,AuthorityFusion,S23 marker,Authority marker emitted,UNIT/REAL_POSTGRES
+AC-R001,yes,S24,RealE2E,E2E-01: 2号车当前位置的坡度是多少？,Real path; questionKind=POINT_VALUE; status=COMPLETE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R002,yes,S24,RealE2E,E2E-02: A区内坡度15到30度的区域有哪些？,Real path; questionKind=VALUE_RANGE_AREAS; status=COMPLETE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R003,yes,S24,RealE2E,E2E-03: A区内有哪些洪水高风险区域？,Real path; questionKind=FEATURES_IN_AREA; status=COMPLETE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R004,yes,S24,RealE2E,E2E-04: 2号车附近500米有哪些排水沟？,Real path; questionKind=FEATURES_NEARBY; status=COMPLETE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R005,yes,S24,RealE2E,E2E-05: A区内有哪些高地？,Real path; questionKind=FEATURES_IN_AREA; status=COMPLETE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R006,yes,S24,RealE2E,E2E-06: A区内有哪些湿地？,Real path; questionKind=FEATURES_IN_AREA; status=COMPLETE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R007,yes,S24,RealE2E,E2E-07: 2号车当前位置是什么地表覆盖？,Real path; questionKind=POINT_CLASSIFICATION; status=COMPLETE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R008,yes,S24,RealE2E,E2E-08: 2号车当前位置为什么属于该通行性等级？,Real path; questionKind=QUALIFIED_EXPLANATION; status=COMPLETE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R009,yes,S24,RealE2E,E2E-09: 使用当前指定的坡度产品查询A区15到30度坡地。,Real path; questionKind=VALUE_RANGE_AREAS; status=COMPLETE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R010,yes,S24,RealE2E,E2E-10: 把刚才找到的可引用高地显示出来。,Real path; questionKind=MULTI_FINDING; status=COMPLETE_OR_CLARIFY,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R011,yes,S24,RealE2E,NEG-01: A区有哪些雪崩风险区域？,Real path; questionKind=FEATURES_IN_AREA; status=DATA_UNAVAILABLE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R012,yes,S24,RealE2E,NEG-02: 查询范围超出当前数据覆盖。,Real path; questionKind=FEATURES_IN_AREA; status=DATA_UNAVAILABLE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R013,yes,S24,RealE2E,NEG-03: 滨河路附近有哪些排水沟？,Real path; questionKind=FEATURES_NEARBY; status=CLARIFICATION_REQUIRED,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R014,yes,S24,RealE2E,NEG-04: 返回前100项但实际结果更多。,Real path; questionKind=FEATURES_IN_AREA; status=PARTIAL,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R015,yes,S24,RealE2E,NEG-05: 上游返回未知Finding Schema。,Real path; questionKind=MULTI_FINDING; status=PARTIAL_OR_DATA_UNAVAILABLE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R016,yes,S24,RealE2E,NEG-06: 严格复用已经变化的数据源结果。,Real path; questionKind=MULTI_FINDING; status=DATA_UNAVAILABLE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R017,yes,S24,RealE2E,NEG-07: 访问另一数据范围中的地理产品。,Real path; questionKind=MULTI_FINDING; status=DATA_UNAVAILABLE,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-R018,yes,S24,RealE2E,HYBRID-01: 任务计划与当前地理条件是否一致？,Real path; questionKind=MULTI_FINDING; status=COMPLETE_OR_PARTIAL,OPENAI_HTTP/AGUI_HTTP_SSE/REAL_WSGS/RUNNING_GOWM_GATEWAY/REAL_GDPS_SOURCE
+AC-Z001,yes,S24,Final,Real WSGS post count,Every required query has real request evidence,CI/REPORT/GIT
+AC-Z002,yes,S24,Final,Real Gateway evidence,Operation/query IDs trace to running Gateway,CI/REPORT/GIT
+AC-Z003,yes,S24,Final,Real GDPS source,Product/profile/contentHash present,CI/REPORT/GIT
+AC-Z004,yes,S24,Final,Real PostgreSQL,Explanation persisted,CI/REPORT/GIT
+AC-Z005,yes,S24,Final,OpenAI HTTP path,At least required normal/negative cases,CI/REPORT/GIT
+AC-Z006,yes,S24,Final,AGUI HTTP/SSE path,At least required map/partial cases,CI/REPORT/GIT
+AC-Z007,yes,S24,Final,Configured model routing,At least two real user-facing routes,CI/REPORT/GIT
+AC-Z008,yes,S24,Final,No fixture substitution,Fixture evidence labeled supplementary,CI/REPORT/GIT
+AC-Z009,yes,S24,Final,Base 411 regression,Existing Jest/Postgres baseline not regressed,CI/REPORT/GIT
+AC-Z010,yes,S24,Final,Migration gate,0013 contiguous,CI/REPORT/GIT
+AC-Z011,yes,S24,Final,Architecture gate,No direct GDPS/GOWM and no spatial library,CI/REPORT/GIT
+AC-Z012,yes,S24,Final,Secret gate,No credential or raw identifiers leaked,CI/REPORT/GIT
+AC-Z013,yes,S24,Final,Container build,0.4.0 image passes,CI/REPORT/GIT
+AC-Z014,yes,S24,Final,Compose health,SACS healthy with real WSGS endpoint,CI/REPORT/GIT
+AC-Z015,yes,S24,Final,Restart,SACS restart preserves replay,CI/REPORT/GIT
+AC-Z016,yes,S24,Final,WSGS outage,Safe failure and recovery,CI/REPORT/GIT
+AC-Z017,yes,S24,Final,Evidence map,Every required row mapped,CI/REPORT/GIT
+AC-Z018,yes,S24,Final,No aggregate pass,Independent evaluation,CI/REPORT/GIT
+AC-Z019,yes,S24,Final,Draft PR,Correct stacked base and exact SHA,CI/REPORT/GIT
+AC-Z020,yes,S24,Final,No protected action,No merge/tag/release/deploy,CI/REPORT/GIT

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "sacs-geospatial-status-gap-mapping/1.0",
+  "mappings": [
+    {
+      "upstream": "NORMAL_FINDING",
+      "explanationStatus": "COMPLETE"
+    },
+    {
+      "upstream": "COMPLETED_EMPTY_COLLECTION",
+      "explanationStatus": "COMPLETE",
+      "gap": null,
+      "messageCode": "NO_MATCH_IN_CURRENT_DATA"
+    },
+    {
+      "upstream": "TRUNCATED",
+      "explanationStatus": "PARTIAL",
+      "gap": "TRUNCATED"
+    },
+    {
+      "upstream": "PRODUCT_NOT_AVAILABLE",
+      "explanationStatus": "DATA_UNAVAILABLE",
+      "gap": "DATA_GAP"
+    },
+    {
+      "upstream": "PRODUCT_COVERAGE_INSUFFICIENT",
+      "explanationStatus": "DATA_UNAVAILABLE",
+      "gap": "COVERAGE_GAP"
+    },
+    {
+      "upstream": "CAPABILITY_UNAVAILABLE",
+      "explanationStatus": "DATA_UNAVAILABLE",
+      "gap": "CAPABILITY_GAP"
+    },
+    {
+      "upstream": "REFERENCE_AMBIGUOUS",
+      "explanationStatus": "CLARIFICATION_REQUIRED",
+      "gap": "REFERENCE_AMBIGUITY"
+    },
+    {
+      "upstream": "AMBIGUOUS_PRODUCT_SELECTION",
+      "explanationStatus": "CLARIFICATION_REQUIRED",
+      "gap": "PRODUCT_SELECTION_AMBIGUITY"
+    },
+    {
+      "upstream": "SOURCE_CHANGED_DURING_QUERY",
+      "explanationStatus": "PARTIAL",
+      "gap": "SOURCE_CHANGED"
+    },
+    {
+      "upstream": "UNKNOWN_FINDING_SCHEMA",
+      "explanationStatus": "PARTIAL",
+      "gap": "UNSUPPORTED_FINDING_SCHEMA"
+    },
+    {
+      "upstream": "PROVIDER_OR_PROTOCOL_FAILURE",
+      "explanationStatus": "FAILED",
+      "gap": "UPSTREAM_FAILURE"
+    }
+  ],
+  "noDataIsFalse": false,
+  "missingProductIsAbsence": false
+}

@@ -6,10 +6,17 @@ import {
   AuthorityFusionEvaluator,
   AuthorityFusionRenderer,
   hashPlanRealityRequirements,
+  parseAuthorityFusionResultV2,
   PlanRealityRequirementCompiler,
   SdarTaskObservationAssembler,
   type AuthorityFusionResultV2,
+  type SdarTaskObservationV2,
 } from "../../authority-fusion/src/index.js";
+import {
+  composeAuthoritySeparatedPresentation,
+  type AuthoritySeparatedPresentation,
+} from "../../geospatial-explanation-policy/src/index.js";
+import { safePublicStatusText } from "../../interaction-contract/src/index.js";
 import { planGroundingRequest } from "../../grounding-request-planner/src/index.js";
 import {
   GroundingContextAssembler,
@@ -27,12 +34,15 @@ import type {
   GroundingPersistenceRepository,
   InteractionPersistenceRepository,
   JsonValue,
+  WorldExplanationFindingLink,
+  WorldExplanationRepository,
 } from "../../persistence/src/index.js";
 import type { NormalizedTask } from "../../sdar-a2a-adapter/src/index.js";
 import type { CompletedRequestResult } from "../../request-result/src/index.js";
 import {
   parseWsgsGroundingResult,
   WsgsHttpError,
+  type MapSelection,
   type WsgsGroundingJob,
   type WsgsGroundingContextCapsule,
   type WsgsGroundingRequest,
@@ -49,6 +59,27 @@ import {
   type OperationalGroundingBundle,
   type TurnPlan,
 } from "../../world-grounding-contract/src/index.js";
+import {
+  DEFAULT_WORLD_EXPLANATION_RENDERER_POLICY,
+  hashCanonicalJson,
+  hashRendererPolicy,
+  parseRendererPolicy,
+  sha256Schema,
+  type ExplanationReference,
+  type ExplanationReplayKey,
+  type RendererPolicy,
+  type Sha256,
+  type WorldExplanationV1,
+} from "../../world-explanation-contract/src/index.js";
+import {
+  assembleWorldExplanation,
+  normalizeWsgsGeospatialExtension,
+  resolveExplanationLocale,
+} from "../../world-explanation-runtime/src/index.js";
+import {
+  assertWsgsGeospatialFindingsAuthorized,
+  parseWsgsGeospatialConsumerLock,
+} from "../../wsgs-geospatial-consumer/src/index.js";
 
 const sdarPublishedPlanSnapshotSchema = z.strictObject({
   taskId: z
@@ -112,7 +143,9 @@ export interface WorldGroundingRuntimeTurn {
   readonly threadId: string;
   readonly externalRequestId: string;
   readonly userText: string;
+  readonly locale?: string;
   readonly turnPlan: TurnPlan;
+  readonly mapSelections?: readonly MapSelection[];
   readonly signal?: AbortSignal;
 }
 
@@ -130,6 +163,13 @@ export interface HybridGroundingRuntimeTurn extends WorldGroundingRuntimeTurn {
   readonly sdarPlan?: SdarPublishedPlanSnapshot;
 }
 
+export interface HybridAuthoritySeparatedResult {
+  readonly explanation: WorldExplanationV1;
+  readonly authorityFusion: AuthorityFusionResultV2;
+  readonly authorityPresentation: AuthoritySeparatedPresentation;
+  readonly renderedText: string;
+}
+
 export interface WorldGroundingRuntimeOptions {
   readonly requests: Pick<
     InteractionPersistenceRepository,
@@ -145,6 +185,10 @@ export interface WorldGroundingRuntimeOptions {
     AuthorityFusionRepository,
     "findExact" | "saveOrReplay"
   >;
+  readonly worldExplanations?: Pick<
+    WorldExplanationRepository,
+    "findExact" | "saveOrReplay"
+  >;
   readonly conversation?: Pick<
     ConversationPersistenceRepository,
     "loadMessageByExternalId"
@@ -153,6 +197,8 @@ export interface WorldGroundingRuntimeOptions {
   readonly sdarCompatibilityLock: unknown;
   readonly nextLeaseOwner?: () => string;
   readonly requestPlanner?: (turnPlan: TurnPlan) => GroundingRequestPlan;
+  readonly worldExplanationContractHash?: Sha256;
+  readonly rendererPolicy?: RendererPolicy;
 }
 
 interface ReadOnlyGroundingOverrides {
@@ -172,10 +218,21 @@ export class WorldGroundingRuntime {
   private readonly contextAssembler?: GroundingContextAssembler;
   private readonly focusUpdater?: WorldFocusUpdater;
   private readonly pendingChoiceResolver = new PendingChoiceResolver();
+  private readonly rendererPolicy: RendererPolicy;
+  private readonly rendererPolicyHash: Sha256;
+  private readonly worldExplanationContractHash: Sha256;
 
   constructor(private readonly options: WorldGroundingRuntimeOptions) {
     this.lock = compatibilityLockSchema.parse(options.sdarCompatibilityLock);
     this.nextLeaseOwner = options.nextLeaseOwner ?? randomUUID;
+    this.rendererPolicy = parseRendererPolicy(
+      options.rendererPolicy ?? DEFAULT_WORLD_EXPLANATION_RENDERER_POLICY,
+    );
+    this.rendererPolicyHash = hashRendererPolicy(this.rendererPolicy);
+    this.worldExplanationContractHash = sha256Schema.parse(
+      options.worldExplanationContractHash ??
+        DEFAULT_WORLD_EXPLANATION_CONTRACT_HASH,
+    );
     this.contextAssembler =
       options.worldFocus === undefined
         ? undefined
@@ -187,6 +244,13 @@ export class WorldGroundingRuntime {
   }
 
   async answerWorld(input: WorldGroundingRuntimeTurn): Promise<string> {
+    const answer = await this.answerWorldExplanation(input);
+    return typeof answer === "string" ? answer : answer.renderedText;
+  }
+
+  async answerWorldExplanation(
+    input: WorldGroundingRuntimeTurn,
+  ): Promise<WorldExplanationV1 | string> {
     const turnPlan = parseTurnPlan(input.turnPlan);
     if (turnPlan.turnRoute !== "WORLD_ANSWER") {
       throw new WorldGroundingRuntimeError(
@@ -198,17 +262,131 @@ export class WorldGroundingRuntime {
       turnPlan,
     );
     if (revalidationFailure !== undefined) return revalidationFailure;
-    return (
-      await this.executeReadOnlyGrounding(
-        input,
-        turnPlan,
-        undefined,
-        (result) => renderSafeWorldAnswer(result),
-      )
-    ).text;
+    let persistedExplanation: WorldExplanationV1 | undefined;
+    const outcome = await this.executeReadOnlyGrounding(
+      input,
+      turnPlan,
+      undefined,
+      async (result, observedAt) => {
+        if (result.geospatialFindings === undefined) {
+          return renderSafeWorldAnswer(result);
+        }
+        try {
+          persistedExplanation = await this.createOrReplayWorldExplanation({
+            input,
+            result,
+            observedAt,
+          });
+        } catch {
+          return "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE";
+        }
+        return (
+          persistedExplanation?.renderedText ??
+          "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE"
+        );
+      },
+    );
+    if (persistedExplanation !== undefined) return persistedExplanation;
+    if (
+      outcome.result?.geospatialFindings !== undefined &&
+      this.options.worldExplanations !== undefined
+    ) {
+      const replay = await this.options.worldExplanations.findExact(
+        this.explanationReplayKey(input, outcome.result.resultHash),
+      );
+      if (replay !== undefined) return replay.explanation;
+    }
+    return outcome.text;
   }
 
-  async compareHybrid(input: HybridGroundingRuntimeTurn): Promise<string> {
+  private async createOrReplayWorldExplanation(input: {
+    readonly input: WorldGroundingRuntimeTurn;
+    readonly result: WsgsGroundingResult;
+    readonly observedAt: string;
+  }): Promise<WorldExplanationV1 | undefined> {
+    if (
+      this.options.worldExplanations === undefined ||
+      input.result.geospatialFindings === undefined
+    ) {
+      return undefined;
+    }
+    const lock = parseWsgsGeospatialConsumerLock(
+      this.options.wsgs.geospatialConsumerLock,
+    );
+    assertWsgsGeospatialFindingsAuthorized(
+      input.result.geospatialFindings,
+      lock,
+    );
+    const replayKey = this.explanationReplayKey(
+      input.input,
+      input.result.resultHash,
+    );
+    const existing = await this.options.worldExplanations.findExact(replayKey);
+    if (existing !== undefined) return existing.explanation;
+    const normalized = normalizeWsgsGeospatialExtension({
+      extension: input.result.geospatialFindings,
+      expectedProfileSchemaHash: lock.geospatialProfile.profileSchemaHash,
+      resultStatus: input.result.status,
+      evidenceItemIds: input.result.evidenceItems.map(
+        ({ evidenceProductId }) => evidenceProductId,
+      ),
+      referenceProductIds: input.result.referenceProducts.map(
+        ({ productId }) => productId,
+      ),
+      limits: this.rendererPolicy.limits,
+    });
+    const references = projectExplanationReferences(input.result);
+    const explanation = assembleWorldExplanation({
+      grounding: {
+        groundingId: input.result.groundingId,
+        resultHash: input.result.resultHash,
+        status: input.result.status,
+      },
+      normalized,
+      references,
+      locale: replayKey.locale,
+      requestText: input.input.userText,
+      createdAt: input.observedAt,
+      evidenceItemIds: input.result.evidenceItems.map(
+        ({ evidenceProductId }) => evidenceProductId,
+      ),
+      receiptIds: uniqueStrings(
+        input.result.evidenceItems.flatMap(({ receiptIds }) => receiptIds),
+      ),
+      operationKeys: uniqueStrings(
+        input.result.evidenceItems.map(
+          ({ sourceOperation }) => sourceOperation,
+        ),
+      ),
+      consumerLockHash: lock.consumerLockHash,
+      findingProfileHash: input.result.geospatialFindings.profileSchemaHash,
+      rendererPolicy: this.rendererPolicy,
+    });
+    const stored = await this.options.worldExplanations.saveOrReplay({
+      ...replayKey,
+      explanation,
+      findingLinks: explanationFindingLinks(normalized.findings, references),
+    });
+    return stored.explanation.explanation;
+  }
+
+  private explanationReplayKey(
+    input: WorldGroundingRuntimeTurn,
+    groundingResultHash: Sha256,
+  ): ExplanationReplayKey {
+    return {
+      principalId: input.principalId,
+      threadId: input.threadId,
+      groundingResultHash,
+      locale: resolveExplanationLocale(input.locale, input.userText),
+      contractHash: this.worldExplanationContractHash,
+      rendererPolicyHash: this.rendererPolicyHash,
+    };
+  }
+
+  async compareHybrid(
+    input: HybridGroundingRuntimeTurn,
+  ): Promise<string | HybridAuthoritySeparatedResult> {
     const turnPlan = parseTurnPlan(input.turnPlan);
     if (turnPlan.turnRoute !== "HYBRID_PLAN_REALITY_COMPARE") {
       throw new WorldGroundingRuntimeError(
@@ -264,7 +442,13 @@ export class WorldGroundingRuntime {
         groundingResultHash: focus.lastGroundingResultHash,
       });
       if (replay !== undefined) {
-        return renderAuthorityFusionV2(replay.result);
+        const structuredReplay = await this.replayHybridWorldExplanation({
+          input,
+          task,
+          groundingResultHash: focus.lastGroundingResultHash,
+          fusion: replay.result,
+        });
+        return structuredReplay ?? renderAuthorityFusionV2(replay.result);
       }
     }
     const fusionTurnPlan = parseTurnPlan({
@@ -286,41 +470,108 @@ export class WorldGroundingRuntime {
       turnPlan: fusionTurnPlan,
       fusionRequirements: requirements,
     });
-    return (
-      await this.executeReadOnlyGrounding(
-        { ...input, turnPlan: fusionTurnPlan },
-        fusionTurnPlan,
-        asJsonValue({
-          taskSnapshotHash: requirements.taskSnapshotHash,
-          requirementHash,
-        }),
-        async (result, observedAt) => {
-          if (result.status === "AMBIGUOUS") {
-            return renderSafeWorldAnswer(result);
-          }
-          if (!["COMPLETED", "PARTIAL"].includes(result.status)) {
-            return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
-          }
-          const fusion = new AuthorityFusionEvaluator({
-            now: () => new Date(observedAt),
-          }).evaluate({ task, requirements, grounding: result });
-          if (this.options.authorityFusion !== undefined) {
-            await this.options.authorityFusion.saveOrReplay({
-              principalId: input.principalId,
-              threadId: input.threadId,
-              taskId: task.taskId,
-              taskSnapshotHash: requirements.taskSnapshotHash,
-              requirementHash,
-              groundingId: result.groundingId,
-              groundingResultHash: result.resultHash,
-              result: fusion,
+    let structuredResult: HybridAuthoritySeparatedResult | undefined;
+    const outcome = await this.executeReadOnlyGrounding(
+      { ...input, turnPlan: fusionTurnPlan },
+      fusionTurnPlan,
+      asJsonValue({
+        taskSnapshotHash: requirements.taskSnapshotHash,
+        requirementHash,
+      }),
+      async (result, observedAt) => {
+        if (result.status === "AMBIGUOUS") {
+          return renderSafeWorldAnswer(result);
+        }
+        if (!["COMPLETED", "PARTIAL"].includes(result.status)) {
+          return "AUTHORITY_FUSION_PREVIEW_UNAVAILABLE";
+        }
+        const fusion = new AuthorityFusionEvaluator({
+          now: () => new Date(observedAt),
+        }).evaluate({ task, requirements, grounding: result });
+        if (result.geospatialFindings !== undefined) {
+          let explanation: WorldExplanationV1 | undefined;
+          try {
+            explanation = await this.createOrReplayWorldExplanation({
+              input,
+              result,
+              observedAt,
             });
+          } catch {
+            return "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE";
           }
-          return renderAuthorityFusionV2(fusion);
-        },
-        { context },
-      )
-    ).text;
+          if (explanation === undefined) {
+            return "WORLD_GEOSPATIAL_EXPLANATION_UNAVAILABLE";
+          }
+          await this.saveAuthorityFusion({
+            input,
+            task,
+            requirements,
+            requirementHash,
+            result,
+            fusion,
+          });
+          structuredResult = buildHybridAuthoritySeparatedResult({
+            task,
+            explanation,
+            fusion,
+          });
+          return structuredResult.renderedText;
+        }
+        await this.saveAuthorityFusion({
+          input,
+          task,
+          requirements,
+          requirementHash,
+          result,
+          fusion,
+        });
+        return renderAuthorityFusionV2(fusion);
+      },
+      { context },
+    );
+    if (structuredResult !== undefined) return structuredResult;
+    return outcome.text;
+  }
+
+  private async saveAuthorityFusion(input: {
+    readonly input: HybridGroundingRuntimeTurn;
+    readonly task: SdarTaskObservationV2;
+    readonly requirements: ReturnType<
+      PlanRealityRequirementCompiler["compile"]
+    >;
+    readonly requirementHash: Sha256;
+    readonly result: WsgsGroundingResult;
+    readonly fusion: AuthorityFusionResultV2;
+  }): Promise<void> {
+    if (this.options.authorityFusion === undefined) return;
+    await this.options.authorityFusion.saveOrReplay({
+      principalId: input.input.principalId,
+      threadId: input.input.threadId,
+      taskId: input.task.taskId,
+      taskSnapshotHash: input.requirements.taskSnapshotHash,
+      requirementHash: input.requirementHash,
+      groundingId: input.result.groundingId,
+      groundingResultHash: input.result.resultHash,
+      result: input.fusion,
+    });
+  }
+
+  private async replayHybridWorldExplanation(input: {
+    readonly input: HybridGroundingRuntimeTurn;
+    readonly task: SdarTaskObservationV2;
+    readonly groundingResultHash: Sha256;
+    readonly fusion: AuthorityFusionResultV2;
+  }): Promise<HybridAuthoritySeparatedResult | undefined> {
+    if (this.options.worldExplanations === undefined) return undefined;
+    const replay = await this.options.worldExplanations.findExact(
+      this.explanationReplayKey(input.input, input.groundingResultHash),
+    );
+    if (replay === undefined) return undefined;
+    return buildHybridAuthoritySeparatedResult({
+      task: input.task,
+      explanation: replay.explanation,
+      fusion: input.fusion,
+    });
   }
 
   async continuePendingChoice(
@@ -731,6 +982,9 @@ export class WorldGroundingRuntime {
       principalId: input.principalId,
       threadId: input.threadId,
       turnPlan,
+      ...(input.mapSelections === undefined
+        ? {}
+        : { mapSelections: input.mapSelections }),
     });
     const usage = turnPlan.worldFocusUsage;
     const capsule = assembled.contextCapsule;
@@ -1108,6 +1362,51 @@ export function renderAuthorityFusionV2(
     .slice(0, 16_000);
 }
 
+export function buildHybridAuthoritySeparatedResult(input: {
+  readonly task: SdarTaskObservationV2;
+  readonly explanation: WorldExplanationV1;
+  readonly fusion: AuthorityFusionResultV2;
+}): HybridAuthoritySeparatedResult {
+  const authorityFusion = parseAuthorityFusionResultV2(input.fusion);
+  const authorityPresentation = composeAuthoritySeparatedPresentation({
+    taskPlanText: renderSdarTaskPlanAuthority(input.task),
+    worldExplanationText: input.explanation.renderedText,
+    fusionChecksText: renderAuthorityFusionV2(authorityFusion),
+  });
+  return {
+    explanation: input.explanation,
+    authorityFusion,
+    authorityPresentation,
+    renderedText: authorityPresentation.sections
+      .map(
+        ({ section, authority, content }) =>
+          "[" + section + " | " + authority + "]\n" + content,
+      )
+      .join("\n\n"),
+  };
+}
+
+function renderSdarTaskPlanAuthority(task: SdarTaskObservationV2): string {
+  const internalPhase =
+    task.internalPhase === undefined
+      ? undefined
+      : safeAuthorityStatusText(task.internalPhase);
+  const phaseMessage =
+    task.phaseMessage === undefined
+      ? undefined
+      : safeAuthorityStatusText(task.phaseMessage);
+  return [
+    "SDAR published Task/Plan snapshot.",
+    "Task: " + safeText(task.taskId) + " (" + safeText(task.taskState) + ")",
+    ...(internalPhase === undefined
+      ? []
+      : ["Internal phase: " + internalPhase]),
+    ...(phaseMessage === undefined
+      ? ["Published plan/status text: unavailable."]
+      : ["Published plan/status text: " + phaseMessage]),
+  ].join("\n");
+}
+
 export function renderSafeWorldAnswer(result: WsgsGroundingResult): string {
   const parsed = parseWsgsGroundingResult(result);
   if (parsed.status === "AMBIGUOUS") {
@@ -1148,17 +1447,12 @@ export function renderSafeWorldAnswer(result: WsgsGroundingResult): string {
       );
       continue;
     }
-    const payload =
-      evidence.safePayload === undefined
-        ? ""
-        : ` — ` + safeJson(evidence.safePayload);
     lines.push(
       `Evidence ` +
         safeText(evidence.evidenceProductId) +
         ` (` +
         evidence.upstreamStatus +
-        `)` +
-        payload,
+        `) was published. Its generic safePayload was not interpreted as a fact.`,
     );
   }
   if (
@@ -1239,7 +1533,10 @@ function createWsgsRequest(input: {
       messageId,
       originalText,
       originalTextSha256: `sha256:` + sha256Hex(originalText),
-      locale: "und",
+      locale: resolveExplanationLocale(
+        input.input.locale,
+        input.input.userText,
+      ),
       createdAt: input.createdAt,
     },
     requestedProducts: input.plan.requestedProducts,
@@ -1366,8 +1663,66 @@ function safeText(value: string): string {
     .slice(0, 2_000);
 }
 
+function safeAuthorityStatusText(value: string): string {
+  const sanitized = safePublicStatusText(value, 2_000);
+  return sanitized === undefined ? "unavailable" : safeText(sanitized);
+}
+
 function safeJson(value: JsonValue): string {
   return safeText(JSON.stringify(value)).slice(0, 4_000);
+}
+
+export const DEFAULT_WORLD_EXPLANATION_CONTRACT_HASH = hashCanonicalJson({
+  schemaVersion: "sacs-world-explanation/1.0",
+  contract: "WorldExplanationV1",
+});
+
+function projectExplanationReferences(
+  result: WsgsGroundingResult,
+): readonly ExplanationReference[] {
+  return result.referenceProducts.map((reference) => ({
+    productId: reference.productId,
+    displayName: reference.displayName,
+    referenceKey: reference.referenceKey,
+    sourceWorldVersion: reference.sourceWorldVersion,
+    sourceOperation: reference.sourceOperation,
+    ...(reference.validUntil === undefined
+      ? {}
+      : { validUntil: reference.validUntil }),
+    ...(reference.revalidationRequired === undefined
+      ? {}
+      : { revalidationRequired: reference.revalidationRequired }),
+  }));
+}
+
+function explanationFindingLinks(
+  findings: readonly {
+    readonly findingId: string;
+    readonly subjectReferenceProductIds?: readonly string[];
+  }[],
+  references: readonly ExplanationReference[],
+): readonly WorldExplanationFindingLink[] {
+  const referencesByProductId = new Map(
+    references.map((reference) => [reference.productId, reference] as const),
+  );
+  return findings.flatMap((finding, index) =>
+    (finding.subjectReferenceProductIds ?? []).flatMap((productId) => {
+      const reference = referencesByProductId.get(productId);
+      return reference === undefined
+        ? []
+        : [
+            {
+              findingId: finding.findingId,
+              ordinal: index + 1,
+              referenceKey: reference.referenceKey,
+            },
+          ];
+    }),
+  );
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values)];
 }
 
 function safeRuntimeCode(

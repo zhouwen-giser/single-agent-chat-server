@@ -3,6 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 import {
   InteractionEventFactory,
   isSdarInteractionEvent,
+  safePublicStatusText,
   safePublicText,
 } from "../packages/interaction-contract/src/index.js";
 import { legacyChatResultToInteractionEvents } from "../packages/interaction-runtime/src/index.js";
@@ -72,6 +73,27 @@ describe("unified interaction event spine", () => {
       "[REDACTED] value",
     );
     expect(safePublicText("abcdef", 3)).toBe("abc\n\n[truncated]");
+  });
+
+  it("redacts credentials and provider URLs from public status text", () => {
+    const providerUrl = "https://provider.internal/v1?token=query-secret";
+    const safe = safePublicStatusText(
+      `Bearer bearer-secret token=token-secret password=password-secret ${providerUrl}`,
+      4_000,
+    );
+
+    expect(safe).toContain("[REDACTED]");
+    expect(safe).toContain("[REDACTED_URL]");
+    for (const forbidden of [
+      "bearer-secret",
+      "token-secret",
+      "password-secret",
+      providerUrl,
+      "provider.internal",
+      "query-secret",
+    ]) {
+      expect(safe).not.toContain(forbidden);
+    }
   });
 
   it("bridges legacy coordinator text through the OpenAI renderer", async () => {
