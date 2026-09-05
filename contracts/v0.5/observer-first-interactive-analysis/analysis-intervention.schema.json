@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:analysis-intervention:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "interventionId",
+    "analysisId",
+    "revisionId",
+    "runId",
+    "interruptId",
+    "reason",
+    "status",
+    "requestPayload",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-analysis-intervention/1.0"
+    },
+    "interventionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "analysisId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "revisionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "interruptId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reason": {
+      "enum": [
+        "AMBIGUITY",
+        "PERMISSION",
+        "HIGH_RISK",
+        "BUDGET",
+        "USER_REQUESTED"
+      ]
+    },
+    "status": {
+      "enum": [
+        "OPEN",
+        "RESOLVED",
+        "EXPIRED",
+        "CANCELLED"
+      ]
+    },
+    "requestPayload": {
+      "type": "object"
+    },
+    "responsePayload": {
+      "type": "object"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolvedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "sacs-v04-v05-publication-evidence/1.0",
+  "observedAt": "2026-08-30T19:11:57.5372842+08:00",
+  "policy": {
+    "observationIsPinnedToProductSha": true,
+    "cachedRemoteRefsWereRefreshed": true,
+    "closureReportCommitIsNotQualificationSource": true,
+    "reportCommitShaIsIntentionallyNotEmbedded": true
+  },
+  "v04": {
+    "branch": "codex/sacs-v0.4-geospatial-explanation",
+    "qualificationSourceSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "remoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "push": {
+      "state": "PERFORMED",
+      "exactHead": true
+    },
+    "pullRequest": {
+      "number": 17,
+      "state": "DRAFT",
+      "baseBranch": "main",
+      "headBranch": "codex/sacs-v0.4-geospatial-explanation",
+      "headSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "createOrUpdate": "PERFORMED"
+    },
+    "ci": {
+      "state": "PASS",
+      "observedForSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "workflowRunIds": [
+        33307359129
+      ],
+      "terminal": true
+    }
+  },
+  "v05": {
+    "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "qualificationSourceSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "trackingSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "remoteSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "push": {
+      "state": "PERFORMED",
+      "exactHead": true
+    },
+    "pullRequest": {
+      "number": 18,
+      "state": "DRAFT",
+      "baseBranch": "codex/sacs-v0.4-geospatial-explanation",
+      "headBranch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+      "headSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "createOrUpdate": "PERFORMED"
+    },
+    "ci": {
+      "state": "PASS",
+      "observedForSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "workflowRunIds": [
+        33307975653
+      ],
+      "terminal": true
+    }
+  },
+  "closureReportCommit": {
+    "sha": null,
+    "identity": "EXTERNAL_TO_REPORT_CONTENT",
+    "qualificationSource": false,
+    "reason": "Embedding the commit that contains this file would create a Git object-id self-reference."
+  },
+  "unperformedActions": [
+    "MERGE",
+    "TAG",
+    "RELEASE",
+    "DEPLOY"
+  ]
+}

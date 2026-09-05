@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "sacs-v05-delivery-profile/1.0",
+  "defaultProfile": "DEVELOPMENT",
+  "profiles": [
+    {
+      "profile": "DEVELOPMENT",
+      "completionMarker": "SACS_V05_FEATURE_COMPLETE",
+      "externalDependencyPolicy": "NOT_APPLICABLE"
+    },
+    {
+      "profile": "INTEGRATION",
+      "completionMarker": "SACS_V05_INTEGRATION_READY",
+      "externalDependencyPolicy": "PENDING_NOT_BLOCKING"
+    },
+    {
+      "profile": "RELEASE",
+      "completionMarker": "SACS_V05_RELEASE_READY",
+      "externalDependencyPolicy": "REQUIRED"
+    }
+  ]
+}

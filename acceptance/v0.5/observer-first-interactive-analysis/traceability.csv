@@ -1,0 +1,16 @@
+phase,acceptance,deliverable
+A00,AC-A00-*,baseline and AG-UI compatibility
+A01,AC-A01-*; AC-A01-EVENT-*,WSGS analysis consumer
+A02,AC-A02-*; AC-SCHEMA-*,analysis contracts
+A03,AC-A03-*,event store and projection
+A04,AC-A04-*,observer-first policy
+A05,AC-A05-*,AG-UI v0.3 projection
+A06,AC-A06-*; AC-A06-STYLE-*,map and focus
+A07,AC-A07-*,tool interaction
+A08,AC-A08-*,proposal API
+A09,AC-A09-*,revision compilation
+A10,AC-A10-*,interrupt/cancel/resume
+A11,AC-A11-*,timeline
+A12,AC-A12-*,reference client
+A13,AC-A13-*; AC-NONGOAL-*,recovery/security/non-goals
+A14,AC-A14-*,real E2E and final delivery

@@ -26,3 +26,14 @@ contracts/v0.4/authority-fusion-record.schema.json
 
 # Generated supply-chain evidence.
 reports/security/sbom.cdx.json
+
+# Preserve imported SACS v0.5 task-package bytes and generated ledgers.
+acceptance/v0.5/observer-first-interactive-analysis/
+config/v0.5/observer-first-interactive-analysis/
+contracts/v0.5/observer-first-interactive-analysis/
+
+# Preserve imported closure-package bytes and deterministic generated reports.
+acceptance/closure/
+config/closure/
+contracts/closure/
+reports/closure/

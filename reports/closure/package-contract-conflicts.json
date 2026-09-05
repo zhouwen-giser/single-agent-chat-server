@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "sacs-v04-v05-package-contract-conflicts/1.0",
+  "status": "BLOCKED",
+  "canPromoteAffectedAcceptance": false,
+  "safePolicy": "Canonical conflicts are preserved. REPORT is not silently aliased to REPORT_ASSERTION, and weak schemas are supplemented by generator invariants.",
+  "conflicts": [
+    {
+      "code": "MATRIX_REPORT_EVIDENCE_TYPE_NOT_ALLOWLISTED",
+      "evidenceType": "REPORT",
+      "templateType": "REPORT_ASSERTION",
+      "acceptanceIds": [
+        "AC-V4-FINAL-001",
+        "AC-V4-FINAL-002",
+        "AC-V4-FINAL-003",
+        "AC-V4-FINAL-004",
+        "AC-V4-FINAL-005",
+        "AC-V4-FINAL-006",
+        "AC-V4-FINAL-007",
+        "AC-V4-FINAL-008",
+        "AC-FINAL-001",
+        "AC-FINAL-002",
+        "AC-FINAL-003",
+        "AC-FINAL-004",
+        "AC-FINAL-005",
+        "AC-FINAL-006",
+        "AC-FINAL-007",
+        "AC-FINAL-008",
+        "AC-FINAL-009",
+        "AC-FINAL-010",
+        "AC-FINAL-011",
+        "AC-FINAL-012",
+        "AC-FINAL-013",
+        "AC-FINAL-014",
+        "AC-FINAL-015",
+        "AC-FINAL-016"
+      ],
+      "safeResolution": "Keep affected rows BLOCKED until the canonical task package defines an explicit mapping or allowlists REPORT."
+    },
+    {
+      "code": "CLOSURE_DECISION_SCHEMA_NOT_TRACK_CONDITIONAL",
+      "acceptanceIds": [
+        "AC-FINAL-015",
+        "AC-FINAL-016"
+      ],
+      "safeResolution": "Enforce the narrower track-specific enums from final-decision-policy.json in the generator."
+    },
+    {
+      "code": "V05_DEFERRED_CONFIG_OMITS_LARGE_SCALE_TRAJECTORY",
+      "acceptanceIds": [
+        "AC-V5-NONGOAL-010"
+      ],
+      "safeResolution": "Treat Large-scale trajectory playback as deferred because the master prompt and acceptance matrix are stricter than the config list."
+    },
+    {
+      "code": "MACHINE_SCHEMAS_DO_NOT_ENFORCE_CARDINALITY",
+      "acceptanceIds": [],
+      "safeResolution": "Enforce 298 unique ledger entries, exact track/phase counts, non-empty missing evidence, and 18/22 E2E case sets in this generator."
+    }
+  ]
+}

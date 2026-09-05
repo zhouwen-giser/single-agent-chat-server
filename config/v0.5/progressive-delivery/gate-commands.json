@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "sacs-v05-gate-commands/1.0",
+  "commands": [
+    {
+      "command": "pnpm verify:v05",
+      "aliasFor": "pnpm verify:v05:development"
+    },
+    {
+      "command": "pnpm verify:v05:development",
+      "track": "DEVELOPMENT",
+      "pendingAllowed": false
+    },
+    {
+      "command": "pnpm test:v05:local-e2e",
+      "track": "DEVELOPMENT",
+      "pendingAllowed": false
+    },
+    {
+      "command": "pnpm check:v05:integration-readiness",
+      "track": "INTEGRATION",
+      "pendingAllowed": true,
+      "pendingExitCode": 0
+    },
+    {
+      "command": "pnpm verify:v05:integration",
+      "track": "INTEGRATION",
+      "pendingAllowed": false,
+      "runOnlyWhenReady": true
+    },
+    {
+      "command": "pnpm check:v05:release-readiness",
+      "track": "RELEASE",
+      "pendingAllowed": true,
+      "pendingExitCode": 0
+    },
+    {
+      "command": "pnpm verify:v05:release",
+      "track": "RELEASE",
+      "pendingAllowed": false,
+      "runOnlyWhenRequested": true
+    }
+  ]
+}

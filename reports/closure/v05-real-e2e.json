@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "sacs-real-e2e-report/1.0",
+  "track": "V0_5",
+  "sourceSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+  "environmentFingerprint": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "cases": [
+    {
+      "caseId": "AC-V5-E2E-001",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "unattended read-only zero interrupt",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-002",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "map browse zero command",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-003",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "pin without analysis",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-004",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "non-blocking radius proposal",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-005",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "range proposal partial rerun",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-006",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "node reuse display",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-007",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "old revision inspectable",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-008",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "reference ambiguity interrupt",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-009",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "intervention resume",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-010",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "explicit stop and apply",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-011",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "cancel unsupported",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-012",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "data gap zero interrupt",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-013",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "capability gap zero interrupt",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-014",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "stale proposal conflict",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-015",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "invalid edit path",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-016",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "state-delta resync",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-017",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "disconnect snapshot recovery",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-018",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "layer load failure",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-019",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "focus independence",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-020",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "historical window/current background",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-021",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "OpenAI/AGUI identity parity",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V5-E2E-022",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY",
+      "scenario": "foreign scope non-disclosure",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    }
+  ],
+  "decision": "BLOCKED"
+}

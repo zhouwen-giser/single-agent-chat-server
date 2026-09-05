@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:analysis-run:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "revisionId",
+    "attempt",
+    "status",
+    "startedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-analysis-run/1.0"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "revisionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "parentRunId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "upstreamRunId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "status": {
+      "enum": [
+        "STARTING",
+        "RUNNING",
+        "WAITING_INTERVENTION",
+        "SUCCEEDED",
+        "PARTIAL",
+        "FAILED",
+        "CANCEL_REQUESTED",
+        "CANCELLED"
+      ]
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finishedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "sacs-v04-v05-branch-plan/1.0",
+  "v04": {
+    "headBranch": "codex/sacs-v0.4-geospatial-explanation",
+    "basePolicy": "Use v0.4 world-grounding branch while PR15 is open; use main after PR15 merges.",
+    "title": "feat: add grounded geospatial explanation to SACS v0.4"
+  },
+  "v05": {
+    "headBranch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "basePolicy": "Stack on exact v0.4 geospatial branch until v0.4 merges.",
+    "title": "feat: add observer-first interactive analysis coordination to SACS v0.5"
+  },
+  "protectedActions": [
+    "MERGE",
+    "TAG",
+    "RELEASE",
+    "DEPLOY"
+  ]
+}

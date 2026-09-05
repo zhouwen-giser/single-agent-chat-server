@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "sacs-v05-soft-constraints/1.0",
+  "constraints": [
+    "EXACT_UPSTREAM_SHA",
+    "AUTHORITATIVE_WSGS_ANALYSIS_HANDOFF",
+    "REAL_SHARED_GOWM_GDPS_STAS",
+    "COMPLETE_RECOVERY_MATRIX",
+    "LOAD_PERFORMANCE",
+    "COMPLETE_RELEASE_SECURITY_SCAN",
+    "SBOM",
+    "RELEASE_DOCUMENTATION",
+    "EXACT_REMOTE_PR_HEAD",
+    "FULL_HISTORICAL_ACCEPTANCE"
+  ],
+  "developmentEffect": "NONE",
+  "integrationEffect": "PENDING",
+  "releaseEffect": "PENDING_OR_FAIL"
+}

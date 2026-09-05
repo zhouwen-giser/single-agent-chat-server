@@ -1,0 +1,218 @@
+{
+  "schemaVersion": "sacs-v04-v05-closure-implementation-matrix/1.0",
+  "generatedAt": "2026-08-30T19:11:57.5372842+08:00",
+  "status": "PARTIAL",
+  "sources": {
+    "sacs": {
+      "status": "PUBLISHED_CI_PASS",
+      "sha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c"
+    },
+    "wsgs": {
+      "status": "NOT_RUN",
+      "packageGenerationSha": "65c3716f956c688f48e08a43322548b75af849b8"
+    },
+    "gdps": {
+      "status": "NOT_RUN",
+      "packageGenerationSha": "574b6aa90364c67e2f59baf7714013cdd3d48526"
+    },
+    "gowm": {
+      "status": "NOT_RUN",
+      "packageGenerationSha": "f2894d86eeca121f9cea76c70797ece3b091d51f"
+    }
+  },
+  "v04": {
+    "branch": "codex/sacs-v0.4-geospatial-explanation",
+    "headSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "items": [
+      {
+        "id": "WorldExplanationV1",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "FindingNormalizer",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "DeterministicRenderer",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "OpenAIAgUiProjection",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "Migration0013",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "ExactReplay",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "GapPolicy",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "CurrentnessPolicy",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "AuthorityBoundary",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.4/geospatial/acceptance-ledger.json"
+        ]
+      },
+      {
+        "id": "AuthoritativeWsgsGeospatialHandoff",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": []
+      },
+      {
+        "id": "StructuredSelectionIngress",
+        "status": "MISSING",
+        "evidence": []
+      },
+      {
+        "id": "RealGapCurrentnessEvidence",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": []
+      },
+      {
+        "id": "Real18CaseE2E",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": []
+      },
+      {
+        "id": "ComposeRestartOutageRecovery",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": []
+      },
+      {
+        "id": "ExactHeadCI",
+        "status": "MISSING",
+        "evidence": []
+      },
+      {
+        "id": "StackedPullRequest",
+        "status": "MISSING",
+        "evidence": []
+      }
+    ]
+  },
+  "v05": {
+    "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "headSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "remoteBranchFound": true,
+    "items": [
+      {
+        "id": "AgUiV03Negotiation",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "AnalysisLifecycle",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "EventStoreProjection",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "ObserverFirstPolicy",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "MapFocusProjection",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "ToolInteractionDescriptor",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "ProposalApi",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "RevisionRecompile",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "InterruptCancelResume",
+        "status": "BLOCKED_UPSTREAM",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "SnapshotRecovery",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "ReferenceClient",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      },
+      {
+        "id": "TimeWindowSemantics",
+        "status": "IMPLEMENTED_AND_VERIFIED",
+        "evidence": [
+          "reports/v0.5/observer-first-interactive-analysis/local-verification.json"
+        ]
+      }
+    ]
+  }
+}

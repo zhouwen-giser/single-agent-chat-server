@@ -1,0 +1,506 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:map-shared-state:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sceneRevision",
+    "layersById",
+    "pinnedFocusById"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "io.sacs/map-scene/v1"
+    },
+    "sceneRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "layersById": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schemaVersion",
+          "layerId",
+          "title",
+          "role",
+          "representation",
+          "sourceAuthority",
+          "access",
+          "visibleByDefault",
+          "selectable",
+          "editable",
+          "analysisId",
+          "revisionId",
+          "findingIds",
+          "loadStatus",
+          "relevanceStatus",
+          "currentness",
+          "styleToken"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "const": "sacs-map-layer/1.0"
+          },
+          "layerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "role": {
+            "enum": [
+              "BASE_CONTEXT",
+              "TASK_CONTEXT",
+              "QUERY_INPUT",
+              "TOOL_SCOPE",
+              "INTERMEDIATE_RESULT",
+              "FINAL_FINDING",
+              "FOCUS",
+              "GAP"
+            ]
+          },
+          "representation": {
+            "enum": [
+              "INLINE_GEOJSON",
+              "REFERENCE_SET",
+              "PAYLOAD_REFERENCE"
+            ]
+          },
+          "sourceAuthority": {
+            "enum": [
+              "USER",
+              "SACS",
+              "WSGS",
+              "GOWM",
+              "GDPS",
+              "STAS",
+              "SDAR"
+            ]
+          },
+          "access": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "data"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "INLINE_GEOJSON"
+                  },
+                  "data": {
+                    "type": "object"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "referenceKeys"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "REFERENCE_SET"
+                  },
+                  "referenceKeys": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    },
+                    "maxItems": 256
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "payloadRef"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "PAYLOAD_REFERENCE"
+                  },
+                  "payloadRef": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  }
+                }
+              }
+            ]
+          },
+          "visibleByDefault": {
+            "type": "boolean"
+          },
+          "selectable": {
+            "type": "boolean"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "analysisId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "revisionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "nodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "findingIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "maxItems": 256
+          },
+          "loadStatus": {
+            "enum": [
+              "PENDING",
+              "LOADING",
+              "READY",
+              "ERROR"
+            ]
+          },
+          "relevanceStatus": {
+            "enum": [
+              "ACTIVE",
+              "SUPERSEDED"
+            ]
+          },
+          "currentness": {
+            "enum": [
+              "CURRENT",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "styleToken": {
+            "enum": [
+              "base.context",
+              "task.context",
+              "analysis.input",
+              "analysis.scope",
+              "analysis.intermediate",
+              "finding.primary",
+              "finding.candidate",
+              "focus.execution",
+              "focus.intervention",
+              "focus.pinned",
+              "gap.data",
+              "gap.coverage",
+              "gap.ambiguity",
+              "source.stale"
+            ]
+          }
+        }
+      }
+    },
+    "executionFocus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "focusId",
+        "targetKind",
+        "semanticRole",
+        "currentness"
+      ],
+      "properties": {
+        "focusId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "targetKind": {
+          "enum": [
+            "WORLD_REFERENCE",
+            "FINDING_FEATURE",
+            "TOOL_INPUT",
+            "TOOL_OUTPUT",
+            "TASK_OBJECT",
+            "USER_GEOMETRY"
+          ]
+        },
+        "referenceKey": {
+          "type": "object"
+        },
+        "findingId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "featureId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "analysisNodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "layerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "semanticRole": {
+          "enum": [
+            "SUBJECT",
+            "ANCHOR",
+            "TARGET",
+            "QUERY_SCOPE",
+            "CANDIDATE",
+            "SELECTED_RESULT",
+            "EXCLUDED",
+            "WARNING"
+          ]
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "currentness": {
+          "enum": [
+            "CURRENT",
+            "STALE",
+            "UNKNOWN"
+          ]
+        },
+        "validTime": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    },
+    "interventionFocus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "focusId",
+        "targetKind",
+        "semanticRole",
+        "currentness"
+      ],
+      "properties": {
+        "focusId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "targetKind": {
+          "enum": [
+            "WORLD_REFERENCE",
+            "FINDING_FEATURE",
+            "TOOL_INPUT",
+            "TOOL_OUTPUT",
+            "TASK_OBJECT",
+            "USER_GEOMETRY"
+          ]
+        },
+        "referenceKey": {
+          "type": "object"
+        },
+        "findingId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "featureId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "analysisNodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "layerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "semanticRole": {
+          "enum": [
+            "SUBJECT",
+            "ANCHOR",
+            "TARGET",
+            "QUERY_SCOPE",
+            "CANDIDATE",
+            "SELECTED_RESULT",
+            "EXCLUDED",
+            "WARNING"
+          ]
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "currentness": {
+          "enum": [
+            "CURRENT",
+            "STALE",
+            "UNKNOWN"
+          ]
+        },
+        "validTime": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    },
+    "pinnedFocusById": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "focusId",
+          "targetKind",
+          "semanticRole",
+          "currentness"
+        ],
+        "properties": {
+          "focusId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "targetKind": {
+            "enum": [
+              "WORLD_REFERENCE",
+              "FINDING_FEATURE",
+              "TOOL_INPUT",
+              "TOOL_OUTPUT",
+              "TASK_OBJECT",
+              "USER_GEOMETRY"
+            ]
+          },
+          "referenceKey": {
+            "type": "object"
+          },
+          "findingId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "featureId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "analysisNodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "layerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "semanticRole": {
+            "enum": [
+              "SUBJECT",
+              "ANCHOR",
+              "TARGET",
+              "QUERY_SCOPE",
+              "CANDIDATE",
+              "SELECTED_RESULT",
+              "EXCLUDED",
+              "WARNING"
+            ]
+          },
+          "displayName": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "currentness": {
+            "enum": [
+              "CURRENT",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "validTime": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

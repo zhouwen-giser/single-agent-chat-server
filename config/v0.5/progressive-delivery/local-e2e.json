@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "sacs-v05-local-e2e/1.0",
+  "cases": [
+    [
+      "DEV-E2E-01",
+      "unattended read-only analysis",
+      "success and zero interrupts"
+    ],
+    ["DEV-E2E-02", "map observation", "zero backend analysis commands"],
+    ["DEV-E2E-03", "pin focus", "focus changes; Revision unchanged"],
+    [
+      "DEV-E2E-04",
+      "SUGGEST_NEXT_REVISION",
+      "current Run continues; new Revision compiled"
+    ],
+    ["DEV-E2E-05", "reference ambiguity", "intervention and AG-UI interrupt"],
+    ["DEV-E2E-06", "DATA_GAP", "automatic explanation and zero interrupts"],
+    ["DEV-E2E-07", "stale Revision Proposal", "409 ANALYSIS_REVISION_CONFLICT"],
+    [
+      "DEV-E2E-08",
+      "disconnect/reconnect",
+      "snapshots restored; no tool re-execution"
+    ]
+  ]
+}

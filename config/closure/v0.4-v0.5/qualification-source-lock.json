@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "sacs-v04-v05-qualification-source-lock/1.0",
+  "qualificationSourceSha": "8d611e3195c786854f2d0efd18ac19000441ab4a",
+  "qualificationSourceBranch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+  "policy": {
+    "requireCommitExists": true,
+    "allowOnlyClosureChangesAfterSource": true,
+    "closureArtifactCommitIsNotQualificationSource": true
+  }
+}

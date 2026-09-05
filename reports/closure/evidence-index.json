@@ -1,0 +1,234 @@
+{
+  "schemaVersion": "sacs-v04-v05-closure-evidence-index/1.0",
+  "policy": {
+    "historicalStatusCannotBeCopied": true,
+    "candidateEvidenceIsNonPromotableByDefault": true,
+    "exactSourceAndAssertionLocatorRequired": true,
+    "secretsOrRawReferenceIdsPersisted": false
+  },
+  "entries": [
+    {
+      "evidenceId": "V04_ACCEPTANCE_LEDGER_HISTORICAL",
+      "type": "REPORT_ASSERTION",
+      "path": "reports/v0.4/geospatial/acceptance-ledger.json",
+      "scope": "HISTORICAL",
+      "fixture": false,
+      "limitations": [
+        "The 305-row ledger uses different acceptance IDs and cannot transfer PASS decisions.",
+        "Its source and remote observations predate this closure run."
+      ],
+      "exists": true,
+      "bytes": 540351,
+      "sha256": "sha256:8de9deff45b0a2f184c35576ca31f238c72f5fd0b38f0b17da0b52652e8bf32d",
+      "promotable": false
+    },
+    {
+      "evidenceId": "V04_S19_POSTGRES_RESTART",
+      "type": "REAL_POSTGRES",
+      "path": "reports/v0.4/geospatial/S19-restart-replay.json",
+      "scope": "SUPPLEMENTARY",
+      "fixture": true,
+      "limitations": [
+        "It proves an isolated PostgreSQL physical restart and exact replay, not a SACS process restart.",
+        "Its grounding result is fixture-scoped and is not REAL_WSGS evidence."
+      ],
+      "exists": true,
+      "bytes": 845,
+      "sha256": "sha256:392256df225187d91b8499d77d93f7f992081a4666d321c8345e548625825581",
+      "promotable": false
+    },
+    {
+      "evidenceId": "V04_S23_REAL_POSTGRES",
+      "type": "REAL_POSTGRES",
+      "path": "reports/v0.4/geospatial/S23-postgres-evidence.json",
+      "scope": "SUPPLEMENTARY",
+      "fixture": true,
+      "limitations": [
+        "The PostgreSQL instance is real and isolated.",
+        "The report explicitly identifies WSGS as INJECTED_PROTOCOL_FIXTURE."
+      ],
+      "exists": true,
+      "bytes": 893,
+      "sha256": "sha256:1a08ece1ecb30f79fc8cc6d0012d0fe30d4345b639b839e403fa66136bb6018f",
+      "promotable": false
+    },
+    {
+      "evidenceId": "V04_S24_BLOCKED_REAL_E2E",
+      "type": "REPORT_ASSERTION",
+      "path": "reports/v0.4/geospatial/S24-real-e2e.json",
+      "scope": "HISTORICAL",
+      "fixture": false,
+      "limitations": [
+        "All 18 cases are BLOCKED and no GET or business POST was issued.",
+        "It proves fail-closed behavior only and cannot satisfy a live row."
+      ],
+      "exists": true,
+      "bytes": 3948,
+      "sha256": "sha256:49652f18377f51b9505ee36091732a08517f0cf93f441ed3206a603f6930067e",
+      "promotable": false
+    },
+    {
+      "evidenceId": "V05_SOURCE_LOCK_HISTORICAL",
+      "type": "SOURCE",
+      "path": "reports/v0.5/observer-first-interactive-analysis/source-lock.json",
+      "scope": "HISTORICAL",
+      "fixture": false,
+      "limitations": [
+        "The source lock does not include the commit that created it and is not current C00 truth."
+      ],
+      "exists": true,
+      "bytes": 1381,
+      "sha256": "sha256:acc43e4e9aeb68656baec82b16739de1da18a81dd328ae653d704bcfb1dcc1ee",
+      "promotable": false
+    },
+    {
+      "evidenceId": "V05_LOCAL_VERIFICATION_SUPPLEMENTARY",
+      "type": "UNIT",
+      "path": "reports/v0.5/observer-first-interactive-analysis/local-verification.json",
+      "scope": "SUPPLEMENTARY",
+      "fixture": false,
+      "limitations": [
+        "The current report records implementation commit 9ce9b224, 16 focused suites and 116 tests PASS, but it has no closure-package per-acceptance result map.",
+        "Its PostgreSQL 7/7 and limited WSGS smoke are separately scoped; the authoritative WSGS analysis handoff and real analysis chain remain blocked."
+      ],
+      "exists": true,
+      "bytes": 2796,
+      "sha256": "sha256:f581c1ae4c73fc8618497b95df56d24572db3c27c962ff433c45293862e79cc3",
+      "promotable": false
+    },
+    {
+      "evidenceId": "V05_PHASE_SUMMARY_BLOCKED",
+      "type": "REPORT_ASSERTION",
+      "path": "reports/v0.5/observer-first-interactive-analysis/phase-summary.json",
+      "scope": "HISTORICAL",
+      "fixture": false,
+      "limitations": [
+        "The prior 418-row ledger contains zero PASS and does not satisfy this package's 165-row V0_5 denominator."
+      ],
+      "exists": true,
+      "bytes": 1645,
+      "sha256": "sha256:cbdbc753ac8430e653eaf2c2828c7a28c800dace814d62f083967393faaae79d",
+      "promotable": false
+    },
+    {
+      "evidenceId": "V05_REAL_POSTGRES_7_TESTS",
+      "type": "REAL_POSTGRES",
+      "path": "reports/closure/audited-run-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "promotable": true,
+      "limitations": [
+        "Promotion is limited to the lifecycle/proposal assertions exercised by tests/analysis-persistence.postgres.int.test.ts.",
+        "The test container was removed after the successful run."
+      ],
+      "exists": true,
+      "bytes": 2983,
+      "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9"
+    },
+    {
+      "evidenceId": "CURRENT_WSGS_18277_GROUNDING_SMOKE",
+      "type": "REAL_WSGS",
+      "path": "reports/closure/audited-run-evidence.json",
+      "scope": "SUPPLEMENTARY",
+      "fixture": false,
+      "promotable": false,
+      "limitations": [
+        "This proves only readiness and one ordinary read-only GROUND_REFERENCES execution.",
+        "It does not prove either authoritative handoff bundle, geospatial typed findings, analysis events, revision control, cancel, intervention, GOWM, or GDPS/STAS."
+      ],
+      "exists": true,
+      "bytes": 2983,
+      "sha256": "sha256:39af20f43a8edac0fedd9c3f05e4dbd27457e06f6ac7d954edfbe7c71df8c2a9"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V04_PUBLICATION_SOURCE",
+      "type": "SOURCE",
+      "promotable": true,
+      "limitations": [
+        "Limited to the pinned v04 qualification source 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+        "Does not establish an authoritative upstream handoff or a live business chain."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V04_PUBLICATION_GIT",
+      "type": "GIT",
+      "promotable": true,
+      "limitations": [
+        "Limited to the exact pushed branch and Draft PR #17.",
+        "Draft publication does not imply merge readiness."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V04_PUBLICATION_CI",
+      "type": "CI",
+      "promotable": true,
+      "limitations": [
+        "Hosted CI was observed PASS for 951a1d81d640d24de60ce6eacc8bb6f95eb6ac35.",
+        "CI success does not satisfy live or upstream-handoff evidence."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V05_PUBLICATION_SOURCE",
+      "type": "SOURCE",
+      "promotable": true,
+      "limitations": [
+        "Limited to the pinned v05 qualification source 718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c.",
+        "Does not establish an authoritative upstream handoff or a live business chain."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V05_PUBLICATION_GIT",
+      "type": "GIT",
+      "promotable": true,
+      "limitations": [
+        "Limited to the exact pushed branch and Draft PR #18.",
+        "Draft publication does not imply merge readiness."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    },
+    {
+      "path": "config/closure/v0.4-v0.5/publication-evidence.json",
+      "scope": "PRIMARY",
+      "fixture": false,
+      "evidenceId": "V05_PUBLICATION_CI",
+      "type": "CI",
+      "promotable": true,
+      "limitations": [
+        "Hosted CI was observed PASS for 718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c.",
+        "CI success does not satisfy live or upstream-handoff evidence."
+      ],
+      "exists": true,
+      "bytes": 2290,
+      "sha256": "sha256:f06d63f7701e0eb6d7de059698368ecc4ec0a8d248f1faccad968a6a36d55e14"
+    }
+  ]
+}

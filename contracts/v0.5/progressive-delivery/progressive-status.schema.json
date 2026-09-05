@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "source",
+    "development",
+    "integration",
+    "release",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "sacs-v05-progressive-status/1.0" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "branch", "headSha"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "branch": { "type": "string", "minLength": 1 },
+        "headSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    },
+    "development": {
+      "enum": [
+        "NOT_EVALUATED",
+        "CORE_IMPLEMENTATION_COMPLETE",
+        "LOCAL_E2E_COMPLETE",
+        "FEATURE_COMPLETE",
+        "CORE_BLOCKED"
+      ]
+    },
+    "integration": {
+      "enum": [
+        "NOT_EVALUATED",
+        "INTEGRATION_PENDING",
+        "INTEGRATION_READY",
+        "INTEGRATION_FAILED"
+      ]
+    },
+    "release": {
+      "enum": [
+        "NOT_EVALUATED",
+        "RELEASE_HARDENING_PENDING",
+        "RELEASE_READY",
+        "RELEASE_FAILED"
+      ]
+    },
+    "pendingReasons": { "type": "array", "items": { "type": "string" } },
+    "hardFailures": { "type": "array", "items": { "type": "string" } },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}

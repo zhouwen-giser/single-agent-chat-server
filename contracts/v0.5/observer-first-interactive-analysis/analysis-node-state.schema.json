@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:analysis-node-state:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "nodeId",
+    "executionStatus",
+    "relevanceStatus",
+    "currentness",
+    "inputLayerIds",
+    "outputLayerIds",
+    "findingIds"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-analysis-node-state/1.0"
+    },
+    "nodeId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "executionStatus": {
+      "enum": [
+        "PENDING",
+        "READY",
+        "RUNNING",
+        "SUCCEEDED",
+        "PARTIAL",
+        "FAILED",
+        "CANCELLED"
+      ]
+    },
+    "relevanceStatus": {
+      "enum": [
+        "ACTIVE",
+        "SUPERSEDED",
+        "INVALIDATED"
+      ]
+    },
+    "currentness": {
+      "enum": [
+        "CURRENT",
+        "STALE",
+        "UNKNOWN"
+      ]
+    },
+    "inputHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "outputHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "inputLayerIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+      },
+      "maxItems": 128
+    },
+    "outputLayerIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+      },
+      "maxItems": 128
+    },
+    "findingIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+      },
+      "maxItems": 256
+    },
+    "progress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "completed"
+      ],
+      "properties": {
+        "completed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "total": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "messageCode": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    }
+  }
+}

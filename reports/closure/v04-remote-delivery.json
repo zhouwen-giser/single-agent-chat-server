@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "sacs-remote-delivery-report/1.0",
+  "branch": "codex/sacs-v0.4-geospatial-explanation",
+  "localSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+  "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+  "remoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+  "prState": "DRAFT",
+  "ciState": "PASS",
+  "pullRequestNumber": 17,
+  "workflowRunIds": [
+    33307359129
+  ]
+}

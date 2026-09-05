@@ -1,5 +1,32 @@
 export { CHECKPOINT_SCHEMA, createPostgresCheckpointer } from "./checkpoint.js";
 export {
+  ANALYSIS_ACTIVITY_MAX_BYTES,
+  ANALYSIS_EVENT_PAYLOAD_MAX_BYTES,
+  ANALYSIS_STATE_MAX_BYTES,
+  AnalysisRepository,
+  type AnalysisChangeProposal,
+  type AnalysisEvent,
+  type AnalysisIntervention,
+  type AnalysisPersistenceSnapshot,
+  type AnalysisProjection,
+  type AnalysisRevision,
+  type AnalysisRun,
+  type AnalysisScope,
+  type AnalysisSession,
+  type AppendAnalysisEventResult,
+  type JsonPatchOperation,
+  type StoredAnalysisEvent,
+} from "./analysis-repository.js";
+export {
+  AnalysisDevelopmentRepository,
+  AnalysisMutationClaimPendingError,
+  DEVELOPMENT_TRUSTED_PUBLIC_EDIT_SCHEMAS,
+  type AnalysisDevelopmentEventCommit,
+  type AnalysisDevelopmentSeed,
+  type AnalysisDevelopmentSnapshot,
+  type TrustedPublicEditSchema,
+} from "./analysis-development-repository.js";
+export {
   AuthorityFusionRepository,
   type AuthorityFusionIdentity,
   type StoredAuthorityFusion,

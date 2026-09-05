@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "sacs-v05-evidence-groups/1.0",
+  "groups": {
+    "DEV-SOURCE": ["source reconciliation"],
+    "DEV-CONTRACT": ["focused contracts/typecheck"],
+    "DEV-POSTGRES": ["real PostgreSQL analysis persistence"],
+    "DEV-POLICY": ["observer policy tests"],
+    "DEV-AGUI": ["AG-UI v0.2/v0.3 tests"],
+    "DEV-MAP": ["map/focus reducer tests"],
+    "DEV-SECURITY": ["ownership/public-args checks"],
+    "DEV-CONTROL": ["control coordinator tests"],
+    "DEV-REVISION": ["revision tests"],
+    "DEV-ARCH": ["minimal architecture checks"],
+    "DEV-FIXTURE": ["development composition tests"],
+    "DEV-E2E": ["real SACS HTTP/PostgreSQL/fixture WSGS/reference-client E2E"],
+    "DEV-TRUTH": ["gap and authority tests"],
+    "DEV-STATUS": ["development verification report and feature marker"],
+    "INT-READINESS": ["real upstream readiness report"],
+    "INT-HANDOFF": ["real WSGS contract"],
+    "INT-ADAPTER": ["real adapter"],
+    "INT-E2E": ["real SACS→WSGS→GOWM→GDPS/STAS"],
+    "REL-LOCK": ["release locks"],
+    "REL-TEST": ["full regression"],
+    "REL-CONTAINER": ["container/compose"],
+    "REL-RECOVERY": ["recovery"],
+    "REL-SECURITY": ["security"],
+    "REL-SBOM": ["SBOM"],
+    "REL-DOCS": ["release docs"],
+    "REL-PUBLICATION": ["remote publication evidence"]
+  }
+}

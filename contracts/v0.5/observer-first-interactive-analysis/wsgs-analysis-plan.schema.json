@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:wsgs-analysis-plan:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "upstreamAnalysisId",
+    "planId",
+    "planHash",
+    "planRevision",
+    "nodes",
+    "edges",
+    "generatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-wsgs-analysis-plan/1.0"
+    },
+    "upstreamAnalysisId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "planId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "planHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "planRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nodeId",
+          "displayName",
+          "phase",
+          "dependencyNodeIds",
+          "riskLevel",
+          "executionPolicy",
+          "cancellable",
+          "inputMapArtifacts",
+          "expectedOutputRoles"
+        ],
+        "properties": {
+          "nodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "phase": {
+            "enum": [
+              "REFERENCE_GROUNDING",
+              "WORLD_STATE",
+              "WORLD_GEOMETRY",
+              "SPATIOTEMPORAL_QUERY",
+              "GEOSPATIAL_PRODUCT_QUERY",
+              "SPATIAL_COMPOSITION",
+              "RESULT_NORMALIZATION",
+              "EXPLANATION"
+            ]
+          },
+          "operationKey": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "dependencyNodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "maxItems": 128
+          },
+          "riskLevel": {
+            "enum": [
+              "READ_ONLY",
+              "REVERSIBLE",
+              "CONTROLLED",
+              "IRREVERSIBLE"
+            ]
+          },
+          "executionPolicy": {
+            "enum": [
+              "AUTO_EXECUTE",
+              "AUTO_EXECUTE_WITH_NOTIFICATION",
+              "INTERRUPT_ON_AMBIGUITY",
+              "REQUIRE_APPROVAL"
+            ]
+          },
+          "cancellable": {
+            "type": "boolean"
+          },
+          "toolInteraction": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schemaVersion",
+              "toolCallId",
+              "nodeId",
+              "operationKey",
+              "executionArgsHash",
+              "publicArgs",
+              "publicArgsHash",
+              "publicEditSchemaUri",
+              "publicEditSchemaHash",
+              "editablePaths",
+              "editorHints",
+              "editSemantics",
+              "editPolicy"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "sacs-wsgs-tool-interaction/1.0"
+              },
+              "toolCallId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "nodeId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "operationKey": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "executionArgsHash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "publicArgs": {
+                "type": "object"
+              },
+              "publicArgsHash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "publicEditSchemaUri": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "publicEditSchemaHash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "editablePaths": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^/"
+                },
+                "maxItems": 64
+              },
+              "editorHints": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "path",
+                    "editor"
+                  ],
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "pattern": "^/"
+                    },
+                    "editor": {
+                      "enum": [
+                        "MAP_POINT",
+                        "MAP_LINE",
+                        "MAP_POLYGON",
+                        "MAP_RADIUS",
+                        "NUMBER_RANGE",
+                        "TIME_RANGE",
+                        "ENUM_MULTISELECT",
+                        "AUTHORIZED_CANDIDATE_SELECT",
+                        "READ_ONLY"
+                      ]
+                    },
+                    "unit": {
+                      "type": "string",
+                      "maxLength": 64
+                    },
+                    "minimum": {
+                      "type": "number"
+                    },
+                    "maximum": {
+                      "type": "number"
+                    },
+                    "geometryTypes": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "Point",
+                          "LineString",
+                          "Polygon",
+                          "MultiPolygon"
+                        ]
+                      },
+                      "maxItems": 4
+                    },
+                    "candidateSource": {
+                      "type": "string",
+                      "maxLength": 256
+                    }
+                  }
+                },
+                "maxItems": 64
+              },
+              "editSemantics": {
+                "enum": [
+                  "CHANGE_CONSTRAINT",
+                  "CREATE_GEOMETRY_OVERRIDE",
+                  "SELECT_AUTHORIZED_CANDIDATE",
+                  "NOT_EDITABLE"
+                ]
+              },
+              "editPolicy": {
+                "enum": [
+                  "SUGGEST_NEXT_REVISION",
+                  "CANCEL_AND_RESTART_ALLOWED",
+                  "NOT_EDITABLE"
+                ]
+              },
+              "expiresAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "inputMapArtifacts": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "maxItems": 64
+          },
+          "expectedOutputRoles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "maxItems": 64
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 256
+    },
+    "edges": {
+      "type": "array",
+      "maxItems": 1024,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fromNodeId",
+          "toNodeId"
+        ],
+        "properties": {
+          "fromNodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "toNodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          }
+        }
+      }
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
