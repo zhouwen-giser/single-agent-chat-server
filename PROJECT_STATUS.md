@@ -1,29 +1,32 @@
 # Project status
 
-Status: `SACS_V0_5_OBSERVER_FIRST_INTERACTIVE_ANALYSIS_BLOCKED` — bounded
-v0.5 local contracts, components and fail-closed scaffolding are committed on
-`codex/sacs-v0.5-observer-first-interactive-analysis`, but qualification is
-blocked by the inherited v0.4 geospatial prerequisite, the absent authoritative
-eight-file WSGS analysis handoff, missing real PostgreSQL evidence, and the
-unavailable A14 official-client/real-service chain.
+Status: `SACS_V05_FEATURE_COMPLETE`.
 
-Crash-safe cancel/intervention reconciliation is also withheld: the
-authoritative WSGS idempotency/status/recovery semantics needed for a durable
-intent/outbox loop are not present, so the repository does not guess them.
+The active v0.5 decision is split into independent tracks on
+`codex/sacs-v0.5-observer-first-interactive-analysis`:
 
-The task package was imported byte-for-byte and its 418-row intake ledger
-remains truthful at 0 PASS, 0 FAIL, 347 NOT_RUN and 71 BLOCKED. Focused local
-verification passed 16 suites / 116 tests; one real PostgreSQL suite / 7 tests
-was skipped because `TEST_DATABASE_URL` was not supplied. No fixture or local
-unit result is counted as REAL_WSGS, real PostgreSQL, runtime, CI or publication
-evidence.
+- DEVELOPMENT: `SACS_V05_FEATURE_COMPLETE`; all 38 active development rows
+  pass through the source-bound development Gate, including focused contracts,
+  real PostgreSQL, and eight actual HTTP/AG-UI local E2E scenarios.
+- INTEGRATION: `SACS_V05_INTEGRATION_PENDING` because the authoritative WSGS
+  analysis-control handoff is not published; this does not block development.
+- RELEASE: `SACS_V05_RELEASE_HARDENING_PENDING` because release qualification
+  was not requested.
 
-See the v0.5 [final report](reports/v0.5/observer-first-interactive-analysis/FINAL_REPORT.md),
-[source lock](reports/v0.5/observer-first-interactive-analysis/source-lock.json),
-and [local verification](reports/v0.5/observer-first-interactive-analysis/local-verification.json).
-Production remains fail-closed: AG-UI v0.3 is not advertised and analysis
-control returns `SACS_WSGS_ANALYSIS_HANDOFF_NOT_READY` until a verified
-authoritative runtime is composed.
+The R2 progressive task package passed its official integrity preflight with
+seven schemas, ten phases, and 60 active acceptance rows (38 development, 12
+integration, 10 release). The prior 418-row global qualification and its
+reports are retained only as `SUPERSEDED_STRICT_QUALIFICATION`; they no longer
+drive the active product decision. Active evidence is limited to the four JSON
+reports under
+[`reports/v0.5/progressive`](reports/v0.5/progressive/PROGRESSIVE_STATUS.json).
+
+Production remains fail-closed: fixture analysis is restricted to explicit
+test/development composition, while the normal server continues to withhold
+AG-UI v0.3 and Analysis Control until a real compatible adapter is composed.
+The implementation matrix records the fetched `06c2864` D00 reconciliation
+baseline; the source-bound development report records the complete tested
+worktree independently.
 
 The detailed v0.4 S00–S05 history below is retained as historical evidence. The
 later S06–S12 development closure is recorded in

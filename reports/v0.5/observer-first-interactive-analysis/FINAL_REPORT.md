@@ -1,5 +1,8 @@
 # SACS v0.5 Observer-First Interactive Analysis — Final Report
 
+> Historical status: `SUPERSEDED_STRICT_QUALIFICATION`. This 418-row global
+> decision is retained for audit only and is not an active v0.5 product gate.
+
 ## Decision
 
 `SACS_V0_5_OBSERVER_FIRST_INTERACTIVE_ANALYSIS_BLOCKED`

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "supersedes", "counts", "rows"],
+  "properties": {
+    "schemaVersion": { "const": "sacs-v05-active-acceptance-matrix/1.0" },
+    "supersedes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packageSha256", "rowCount", "decision"],
+      "properties": {
+        "packageSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "rowCount": { "const": 418 },
+        "decision": { "const": "SUPERSEDED_STRICT_QUALIFICATION" }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "DEVELOPMENT", "INTEGRATION", "RELEASE"],
+      "properties": {
+        "total": { "const": 60 },
+        "DEVELOPMENT": { "const": 38 },
+        "INTEGRATION": { "const": 12 },
+        "RELEASE": { "const": 10 }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 60,
+      "maxItems": 60,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "track",
+          "blockingScope",
+          "scenario",
+          "expected",
+          "evidenceGroup"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^(DEV|INT|REL)-[0-9]{3}$" },
+          "track": { "enum": ["DEVELOPMENT", "INTEGRATION", "RELEASE"] },
+          "blockingScope": { "enum": ["CORE", "TRACK"] },
+          "scenario": { "type": "string", "minLength": 1 },
+          "expected": {
+            "enum": [
+              "PASS",
+              "READY_OR_PENDING",
+              "PASS_IF_READY",
+              "PASS_IF_REQUESTED"
+            ]
+          },
+          "evidenceGroup": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

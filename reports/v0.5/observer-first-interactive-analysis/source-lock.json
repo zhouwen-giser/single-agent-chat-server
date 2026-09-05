@@ -1,5 +1,6 @@
 {
   "schemaVersion": "sacs-v05-source-lock/1.0",
+  "qualificationStatus": "SUPERSEDED_STRICT_QUALIFICATION",
   "capturedAt": "2026-08-30T03:32:10.7783468Z",
   "repository": "single-agent-chat-server",
   "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",

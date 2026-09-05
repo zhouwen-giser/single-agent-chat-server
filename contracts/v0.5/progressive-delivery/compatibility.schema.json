@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "dependency",
+    "requiredContractFamily",
+    "level",
+    "effect"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "sacs-v05-compatibility/1.0" },
+    "dependency": { "type": "string", "minLength": 1 },
+    "observedRef": { "type": "string" },
+    "requiredContractFamily": { "type": "string", "minLength": 1 },
+    "level": {
+      "enum": [
+        "EXACT",
+        "BACKWARD_COMPATIBLE",
+        "PROVISIONAL_COMPATIBLE",
+        "INCOMPATIBLE",
+        "UNAVAILABLE"
+      ]
+    },
+    "effect": {
+      "enum": [
+        "NONE",
+        "INTEGRATION_PENDING",
+        "INTEGRATION_FAILED",
+        "CORE_BLOCKED"
+      ]
+    }
+  }
+}

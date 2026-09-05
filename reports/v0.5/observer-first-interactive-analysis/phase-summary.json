@@ -1,5 +1,6 @@
 {
   "schemaVersion": "sacs-v05-phase-summary/1.0",
+  "qualificationStatus": "SUPERSEDED_STRICT_QUALIFICATION",
   "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
   "startingCommit": "0d67125ba1e8f2d69ad07480bacbe7ecf5bab774",
   "decision": "BLOCKED",

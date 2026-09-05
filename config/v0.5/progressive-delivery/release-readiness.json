@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "sacs-v05-release-readiness/1.0",
+  "requestEnvironmentVariable": "SACS_V05_RELEASE_REQUESTED",
+  "evidenceEnvironmentVariable": "SACS_V05_RELEASE_EVIDENCE_FILE",
+  "unrequestedDecision": "RELEASE_HARDENING_PENDING",
+  "pendingExitCode": 0,
+  "qualificationRunner": {
+    "available": false,
+    "reason": "REAL_RELEASE_QUALIFICATION_RUNNER_UNAVAILABLE"
+  },
+  "acceptanceIds": [
+    "REL-001",
+    "REL-002",
+    "REL-003",
+    "REL-004",
+    "REL-005",
+    "REL-006",
+    "REL-007",
+    "REL-008",
+    "REL-009",
+    "REL-010"
+  ]
+}

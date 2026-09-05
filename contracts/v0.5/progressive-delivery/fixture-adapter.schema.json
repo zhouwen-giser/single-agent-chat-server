@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "adapterId",
+    "environmentEligibility",
+    "supports",
+    "productionEligible"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "sacs-v05-fixture-adapter/1.0" },
+    "adapterId": { "const": "FixtureWsgsAnalysisAdapter" },
+    "environmentEligibility": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": { "enum": ["test", "development", "local-compose"] }
+    },
+    "supports": {
+      "type": "array",
+      "minItems": 6,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "PLAN",
+          "EVENTS",
+          "COMPILE_REVISION",
+          "CANCEL",
+          "INTERVENTION",
+          "DATA_GAP"
+        ]
+      }
+    },
+    "productionEligible": { "const": false }
+  }
+}

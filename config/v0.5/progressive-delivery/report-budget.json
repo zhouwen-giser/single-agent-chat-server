@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "sacs-v05-report-budget/1.0",
+  "maxActiveReports": 4,
+  "reports": [
+    "CURRENT_IMPLEMENTATION_MATRIX.json",
+    "DEVELOPMENT_VERIFICATION.json",
+    "INTEGRATION_STATUS.json",
+    "PROGRESSIVE_STATUS.json"
+  ],
+  "reportOnlyCommitPerMicrophase": false,
+  "recommendedCommitRange": [3, 6]
+}

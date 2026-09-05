@@ -1,5 +1,6 @@
 {
   "schemaVersion": "sacs-v05-local-verification/1.0",
+  "qualificationStatus": "SUPERSEDED_STRICT_QUALIFICATION",
   "implementationCommit": "9ce9b224b3d8d94cf6844b9cdd61fca24849ca09",
   "scopePolicy": "V05_AND_DIRECTLY_AFFECTED_BOUNDARIES_ONLY",
   "status": "PASS_WITH_EXTERNAL_BLOCKERS",

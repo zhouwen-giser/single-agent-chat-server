@@ -92,6 +92,7 @@
       "blocker": "AUTHORITATIVE_WSGS_GEOSPATIAL_HANDOFF_MISSING"
     }
   ],
+  "v05HistoricalStrictQualification": "SUPERSEDED_STRICT_QUALIFICATION",
   "v05IntegrationPhases": [
     {
       "id": "A00",
@@ -124,8 +125,60 @@
       "blocker": "SACS_INTERACTIVE_LIVE_ENVIRONMENT_NOT_READY"
     }
   ],
-  "currentGoalCompletionMarker": "SACS_V0_5_OBSERVER_FIRST_INTERACTIVE_ANALYSIS_BLOCKED",
-  "taskPackageRevision": "SACS-v0.5-observer-first-interactive-analysis",
+  "v05ProgressiveDelivery": {
+    "activeAcceptance": {
+      "total": 60,
+      "development": 38,
+      "integration": 12,
+      "release": 10
+    },
+    "historicalQualification": "SUPERSEDED_STRICT_QUALIFICATION",
+    "phases": [
+      {
+        "id": "D00",
+        "status": "PASS",
+        "marker": "SACS_V05_PROGRESSIVE_DELIVERY_BASELINE_LOCKED"
+      },
+      {
+        "id": "D01",
+        "status": "PASS",
+        "marker": "SACS_V05_PROGRESSIVE_GATES_READY"
+      },
+      {
+        "id": "D02",
+        "status": "PASS",
+        "marker": "SACS_V05_DEVELOPMENT_RUNTIME_READY"
+      },
+      {
+        "id": "D03",
+        "status": "PASS",
+        "marker": "SACS_V05_LOCAL_E2E_COMPLETE"
+      },
+      {
+        "id": "D04",
+        "status": "PASS",
+        "marker": "SACS_V05_CORE_IMPLEMENTATION_COMPLETE"
+      },
+      {
+        "id": "D05",
+        "status": "PASS",
+        "marker": "SACS_V05_FEATURE_COMPLETE"
+      },
+      {
+        "id": "I00",
+        "status": "PASS",
+        "marker": "SACS_V05_INTEGRATION_PENDING"
+      },
+      {
+        "id": "R00",
+        "status": "PASS",
+        "marker": "SACS_V05_RELEASE_HARDENING_PENDING"
+      }
+    ]
+  },
+  "currentGoalCompletionMarker": "SACS_V05_FEATURE_COMPLETE",
+  "taskPackageRevision": "R2",
+  "taskPackageName": "SACS v0.5 Development Completion and Progressive Integration Codex Goal",
   "sdarA2aBaseline": {
     "specPatch": "1.0.1",
     "wireVersion": "1.0",

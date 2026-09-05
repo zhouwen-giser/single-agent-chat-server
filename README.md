@@ -34,7 +34,7 @@ Protocol drift fails closed. See [A2A compatibility](docs/a2a-compatibility.md).
 
 - Node `22.14.x`
 - pnpm `11.13.1`
-- PostgreSQL 16 for persistence and integration tests
+- PostgreSQL 16 or 17 for persistence and integration tests
 - one reachable OpenAI-compatible Chat Completions model gateway
 - one reachable SDAR Agent Card and A2A endpoint
 - Open WebUI 0.10.2 configured to forward a signed user JWT
@@ -92,13 +92,34 @@ public.
 
 ## Verification
 
+The active v0.5 tracks are `SACS_V05_FEATURE_COMPLETE`,
+`SACS_V05_INTEGRATION_PENDING`, and
+`SACS_V05_RELEASE_HARDENING_PENDING`. Their machine-readable evidence is the
+[progressive status](reports/v0.5/progressive/PROGRESSIVE_STATUS.json),
+[development verification](reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json),
+[integration status](reports/v0.5/progressive/INTEGRATION_STATUS.json), and
+[implementation matrix](reports/v0.5/progressive/CURRENT_IMPLEMENTATION_MATRIX.json).
+
 ```bash
+pnpm verify:v05           # v0.5 DEVELOPMENT only: focused, PostgreSQL, and local HTTP/AG-UI E2E
+pnpm test:v05:local-e2e   # eight fixture-backed cases on a real listener and isolated PostgreSQL
+pnpm check:v05:integration-readiness # READY/PENDING assessment; PENDING exits successfully
+pnpm check:v05:release-readiness     # normally PENDING until release qualification is requested
 pnpm verify:phase12       # hermetic quality and adversarial gate
 pnpm verify:ci            # CI-equivalent PostgreSQL and fixture gate
 pnpm test:e2e:fixture     # deterministic in-process fixture, not real E2E
 pnpm smoke                # built-server health/models/completion probe
 pnpm verify:v03           # complete exact-head gate; requires real services and Docker
 ```
+
+For the explicit v0.5 development composition, configure the normal server
+credentials and PostgreSQL connection, then run `pnpm dev:v05:analysis`. The
+launcher selects `NODE_ENV=development` and the non-production fixture adapter;
+the regular production entry point remains fail-closed until an authoritative
+WSGS analysis-control handoff and real HTTP adapter are available. Integration
+and release verification commands also fail closed until their real runners
+exist; the two readiness checks report those missing dependencies independently
+of DEVELOPMENT.
 
 `pnpm verify:v03` intentionally fails unless native PostgreSQL, Docker, a real
 OpenAI-compatible model, the fixed current SDAR, exact source/candidate SHAs,

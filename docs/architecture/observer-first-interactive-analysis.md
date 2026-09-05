@@ -30,6 +30,18 @@ Tool events come from the WSGS analysis presentation stream or snapshot. SACS
 must never reconstruct tool calls, progress, or completion events from final
 evidence or final result artifacts.
 
+## Development fixture boundary
+
+The deterministic `FixtureWsgsAnalysisAdapter` is a development qualification
+asset, not an alternate production authority. It is eligible only when
+`NODE_ENV` is `test` or `development` and
+`SACS_ANALYSIS_ADAPTER_MODE=fixture`; its manifest declares
+`productionEligible=false`. The fixture implements the same five SACS-side
+ports as the eventual HTTP adapter so local HTTP, AG-UI, policy, persistence,
+and reconnect behavior can be exercised without inventing an upstream WSGS
+contract. Production rejects fixture mode and fails closed until an
+authoritative WSGS analysis-control handoff is available.
+
 ## Disconnect and the background event pump
 
 The analysis event pump belongs to the durable Analysis Run, not to a browser

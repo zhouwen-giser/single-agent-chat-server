@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "sacs-v05-compatibility/1.0",
+  "dependency": "world-semantic-grounding-service",
+  "observedRef": "6332546c0f755dbd7f5ba6a138a5825c1619872e",
+  "requiredContractFamily": "WSGS_ANALYSIS_PRESENTATION_CONTROL_HANDOFF",
+  "level": "UNAVAILABLE",
+  "effect": "INTEGRATION_PENDING"
+}

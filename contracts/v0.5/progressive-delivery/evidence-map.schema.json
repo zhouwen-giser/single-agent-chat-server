@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "entries"],
+  "properties": {
+    "schemaVersion": { "const": "sacs-v05-progressive-evidence/1.0" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["acceptanceId", "status", "evidenceGroups"],
+        "properties": {
+          "acceptanceId": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["PASS", "FAIL", "PENDING", "NOT_RUN"] },
+          "evidenceGroups": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}
