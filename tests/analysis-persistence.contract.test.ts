@@ -8,6 +8,16 @@ const migration = readFileSync(
   new URL("../migrations/0015_interactive_analysis.sql", import.meta.url),
   "utf8",
 );
+const developmentMigration = readFileSync(
+  new URL(
+    "../migrations/0016_analysis_development_control.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const normalizedDevelopmentMigration = developmentMigration
+  .replaceAll(/\s+/gu, " ")
+  .trim();
 const repository = readFileSync(
   new URL(
     "../packages/persistence/src/analysis-repository.ts",
@@ -21,9 +31,25 @@ describe("SACS v0.5 interactive analysis persistence contract", () => {
     const files = readdirSync(new URL("../migrations", import.meta.url))
       .filter((file) => /^\d{4}_[a-z0-9_]+\.sql$/u.test(file))
       .sort();
-    expect(files.at(-3)).toBe("0013_world_explanation.sql");
-    expect(files.at(-2)).toBe("0014_structured_world_selection.sql");
-    expect(files.at(-1)).toBe("0015_interactive_analysis.sql");
+    expect(files.at(-4)).toBe("0013_world_explanation.sql");
+    expect(files.at(-3)).toBe("0014_structured_world_selection.sql");
+    expect(files.at(-2)).toBe("0015_interactive_analysis.sql");
+    expect(files.at(-1)).toBe("0016_analysis_development_control.sql");
+  });
+
+  it("extends legacy proposals without rewriting their status or requiring development claims", () => {
+    expect(developmentMigration).not.toMatch(
+      /\bUPDATE\s+chat_service\.analysis_change_proposal\b/iu,
+    );
+    expect(normalizedDevelopmentMigration).toContain(
+      "ADD CONSTRAINT analysis_change_proposal_claim_lineage_complete CHECK ( num_nonnulls( expected_run_id, expected_descriptor_hash, control_claim_token, control_claimed_at ) IN (0, 4) )",
+    );
+    expect(normalizedDevelopmentMigration).toContain(
+      "ADD CONSTRAINT analysis_change_proposal_safe_error_complete CHECK ( num_nonnulls(safe_error_code, safe_error_status) IN (0, 2) )",
+    );
+    expect(normalizedDevelopmentMigration).not.toContain(
+      "status NOT IN ('SUBMITTED', 'VALIDATING', 'ACCEPTED', 'COMPILING')",
+    );
   });
 
   it("creates exactly the seven required analysis tables", () => {

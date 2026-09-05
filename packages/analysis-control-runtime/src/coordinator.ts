@@ -1,6 +1,8 @@
 import {
+  ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
   analysisChangeProposalSchema,
   analysisRunSchema,
+  assertAnalysisPublicArgsNonDisclosure,
   type AnalysisChangeProposal,
   type AnalysisIntervention,
   type AnalysisRevision,
@@ -59,8 +61,13 @@ export interface AnalysisInterventionContext {
 }
 
 export type CommandClaim<T> =
-  | { readonly disposition: "CLAIMED" }
+  | { readonly disposition: "CLAIMED"; readonly claimToken: string }
   | { readonly disposition: "REPLAY"; readonly result: T }
+  | {
+      readonly disposition: "FAILED_REPLAY";
+      readonly safeCode: string;
+      readonly statusCode: AnalysisServiceError["statusCode"];
+    }
   | { readonly disposition: "IDEMPOTENCY_CONFLICT" }
   | { readonly disposition: "PENDING_CONFLICT" };
 
@@ -69,7 +76,8 @@ export interface AnalysisCoordinatorStore {
   getSnapshot(scope: AnalysisRequestScope): Promise<unknown | undefined>;
   loadProposalContext(
     scope: AnalysisRequestScope,
-    targetNodeId: string,
+    proposalId: string,
+    claimToken: string,
   ): Promise<AnalysisProposalContext | undefined>;
   claimProposal(input: {
     readonly scope: AnalysisRequestScope;
@@ -81,17 +89,23 @@ export interface AnalysisCoordinatorStore {
     readonly expectedRevisionId: string;
     readonly expectedRevisionNumber: number;
     readonly proposalId: string;
+    readonly claimToken: string;
     readonly revision: AnalysisRevision;
     readonly patchedPublicArgs: Readonly<Record<string, unknown>>;
     readonly cancellation?: CancelTransition;
+    readonly replacementRun?: AnalysisRun;
   }): Promise<unknown>;
   markProposalFailed(input: {
     readonly scope: AnalysisRequestScope;
     readonly proposalId: string;
+    readonly claimToken: string;
     readonly safeCode: string;
+    readonly statusCode: AnalysisServiceError["statusCode"];
   }): Promise<void>;
   loadCancelContext(
     scope: AnalysisRequestScope,
+    commandId: string,
+    claimToken: string,
   ): Promise<AnalysisCancelContext | undefined>;
   claimCancel(input: {
     readonly scope: AnalysisRequestScope;
@@ -101,10 +115,20 @@ export interface AnalysisCoordinatorStore {
   commitCancellation(input: {
     readonly scope: AnalysisRequestScope;
     readonly commandId: string;
+    readonly claimToken: string;
     readonly transition: CancelTransition;
   }): Promise<unknown>;
+  markCancelFailed(input: {
+    readonly scope: AnalysisRequestScope;
+    readonly commandId: string;
+    readonly claimToken: string;
+    readonly safeCode: string;
+    readonly statusCode: AnalysisServiceError["statusCode"];
+  }): Promise<void>;
   loadInterventionContext(
     scope: AnalysisRequestScope & { readonly interventionId: string },
+    commandId: string,
+    claimToken: string,
   ): Promise<AnalysisInterventionContext | undefined>;
   claimInterventionResolution(input: {
     readonly scope: AnalysisRequestScope & { readonly interventionId: string };
@@ -114,10 +138,18 @@ export interface AnalysisCoordinatorStore {
   commitInterventionResolution(input: {
     readonly scope: AnalysisRequestScope & { readonly interventionId: string };
     readonly commandId: string;
+    readonly claimToken: string;
     readonly response: Readonly<Record<string, unknown>>;
     readonly responseHash: string;
     readonly resumedRun: AnalysisRun;
   }): Promise<unknown>;
+  markInterventionResolutionFailed(input: {
+    readonly scope: AnalysisRequestScope & { readonly interventionId: string };
+    readonly commandId: string;
+    readonly claimToken: string;
+    readonly safeCode: string;
+    readonly statusCode: AnalysisServiceError["statusCode"];
+  }): Promise<void>;
 }
 
 export interface AnalysisCoordinatorWsgsPort {
@@ -164,11 +196,13 @@ export function createAnalysisControlCoordinator(
       });
       const replay = resolveClaim(claim);
       if (replay.replayed) return replay.result;
+      let dispatched = false;
 
       try {
         const context = await options.store.loadProposalContext(
           scope,
-          command.targetNodeId,
+          command.proposalId,
+          replay.claimToken,
         );
         if (context === undefined) throw notFound();
         assertMutableSession(context.session);
@@ -195,20 +229,34 @@ export function createAnalysisControlCoordinator(
         );
         let cancellation: CancelTransition | undefined;
         if (command.mode === "INTERRUPT_AND_APPLY") {
+          assertCancellationDispatchable(context.currentRun);
+          dispatched = true;
           cancellation = await requestAnalysisRunCancellation(
             options.wsgs,
             context.currentRun,
             {
               analysisId: scope.analysisId,
               revisionId: context.currentRevision.revisionId,
+              commandId: command.commandId,
+              idempotencyKey: command.idempotencyKey,
               reason: "REVISION_RESTART",
             },
             now(),
           );
         }
+        if (context.currentRevision.analysisId !== scope.analysisId) {
+          throw new AnalysisServiceError(
+            409,
+            "ANALYSIS_REVISION_CONFLICT",
+            "Analysis revision changed.",
+          );
+        }
+        dispatched = true;
         let revision = await compileImmutableRevision(options.wsgs, {
           analysisId: scope.analysisId,
           revisionId: nextId("revision"),
+          commandId: command.commandId,
+          idempotencyKey: command.idempotencyKey,
           currentRevision: context.currentRevision,
           parentRunId: context.currentRun.runId,
           cause: "USER_PROPOSAL",
@@ -220,24 +268,45 @@ export function createAnalysisControlCoordinator(
         if (cancellation?.queueRevision === true) {
           revision = { ...revision, status: "QUEUED" };
         }
+        const replacementRun =
+          command.mode === "INTERRUPT_AND_APPLY" &&
+          cancellation !== undefined &&
+          !cancellation.queueRevision
+            ? analysisRunSchema.parse({
+                schemaVersion: "sacs-analysis-run/1.0",
+                runId: nextId("run"),
+                revisionId: revision.revisionId,
+                attempt: 1,
+                parentRunId: context.currentRun.runId,
+                status: "STARTING",
+                startedAt: revision.createdAt,
+              })
+            : undefined;
         return await options.store.commitCompiledRevision({
           scope,
           expectedRevisionId: command.expectedRevisionId,
           expectedRevisionNumber: command.expectedRevisionNumber,
           proposalId: command.proposalId,
+          claimToken: replay.claimToken,
           revision,
           patchedPublicArgs: applied.publicArgs,
           ...(cancellation === undefined ? {} : { cancellation }),
+          ...(replacementRun === undefined ? {} : { replacementRun }),
         });
       } catch (error) {
-        await options.store
-          .markProposalFailed({
-            scope,
-            proposalId: command.proposalId,
-            safeCode: safeFailureCode(error),
-          })
-          .catch(() => undefined);
-        throw normalizeServiceError(error);
+        const normalized = normalizeServiceError(error);
+        if (!dispatched) {
+          await options.store
+            .markProposalFailed({
+              scope,
+              proposalId: command.proposalId,
+              claimToken: replay.claimToken,
+              safeCode: normalized.code,
+              statusCode: normalized.statusCode,
+            })
+            .catch(() => undefined);
+        }
+        throw normalized;
       }
     },
     requestCancel: async (scope, command) => {
@@ -248,96 +317,164 @@ export function createAnalysisControlCoordinator(
       });
       const replay = resolveClaim(claim);
       if (replay.replayed) return replay.result;
-      const context = await options.store.loadCancelContext(scope);
-      if (context === undefined) throw notFound();
-      assertMutableSession(context.session);
-      assertRevisionCas(context.currentRevision, command);
-      const transition = await requestAnalysisRunCancellation(
-        options.wsgs,
-        context.currentRun,
-        {
-          analysisId: scope.analysisId,
-          revisionId: context.currentRevision.revisionId,
-          reason: command.reason,
-        },
-        now(),
-      ).catch((error) => {
-        throw normalizeServiceError(error);
-      });
-      return options.store.commitCancellation({
-        scope,
-        commandId: command.commandId,
-        transition,
-      });
+      let dispatched = false;
+      try {
+        const context = await options.store.loadCancelContext(
+          scope,
+          command.commandId,
+          replay.claimToken,
+        );
+        if (context === undefined) throw notFound();
+        assertMutableSession(context.session);
+        assertRevisionCas(context.currentRevision, command);
+        assertCancellationDispatchable(context.currentRun);
+        dispatched = true;
+        const transition = await requestAnalysisRunCancellation(
+          options.wsgs,
+          context.currentRun,
+          {
+            analysisId: scope.analysisId,
+            revisionId: context.currentRevision.revisionId,
+            commandId: command.commandId,
+            idempotencyKey: command.idempotencyKey,
+            reason: command.reason,
+          },
+          now(),
+        ).catch((error) => {
+          throw normalizeServiceError(error);
+        });
+        return await options.store.commitCancellation({
+          scope,
+          commandId: command.commandId,
+          claimToken: replay.claimToken,
+          transition,
+        });
+      } catch (error) {
+        const normalized = normalizeServiceError(error);
+        if (!dispatched) {
+          await options.store
+            .markCancelFailed({
+              scope,
+              commandId: command.commandId,
+              claimToken: replay.claimToken,
+              safeCode: normalized.code,
+              statusCode: normalized.statusCode,
+            })
+            .catch(() => undefined);
+        }
+        throw normalized;
+      }
     },
     resolveIntervention: async (scope, command) => {
       const claim = await options.store.claimInterventionResolution({
         scope,
         command,
-        requestHash: hashCanonicalJson(command),
+        requestHash: hashCanonicalJson({
+          interventionId: scope.interventionId,
+          command,
+        }),
       });
       const replay = resolveClaim(claim);
       if (replay.replayed) return replay.result;
-      const context = await options.store.loadInterventionContext(scope);
-      if (context === undefined) throw interventionNotFound();
-      if (
-        context.expiresAt !== undefined &&
-        Date.parse(now()) >= Date.parse(context.expiresAt)
-      ) {
-        throw new AnalysisServiceError(
-          410,
-          "INTERACTION_EXPIRED",
-          "Analysis intervention has expired.",
+      let dispatched = false;
+      try {
+        const context = await options.store.loadInterventionContext(
+          scope,
+          command.commandId,
+          replay.claimToken,
         );
+        if (context === undefined) throw interventionNotFound();
+        if (
+          context.expiresAt !== undefined &&
+          Date.parse(now()) >= Date.parse(context.expiresAt)
+        ) {
+          throw new AnalysisServiceError(
+            410,
+            "INTERACTION_EXPIRED",
+            "Analysis intervention has expired.",
+          );
+        }
+        try {
+          assertAnalysisPublicArgsNonDisclosure(command.response);
+        } catch {
+          throw new AnalysisServiceError(
+            422,
+            ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+            ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+          );
+        }
+        if (!context.validateResponse(command.response)) {
+          throw new AnalysisServiceError(
+            422,
+            "INTERVENTION_RESPONSE_SCHEMA_INVALID",
+            "Intervention response is invalid.",
+          );
+        }
+        const responseHash = hashCanonicalJson(command.response);
+        if (context.currentRun.upstreamRunId === undefined) {
+          throw new AnalysisServiceError(
+            409,
+            "ANALYSIS_UPSTREAM_RUN_ID_REQUIRED",
+            "Analysis run cannot be resumed.",
+          );
+        }
+        dispatched = true;
+        const result = await options.wsgs.resolveIntervention({
+          analysisId: scope.analysisId,
+          interventionId: context.intervention.interventionId,
+          interruptId: context.intervention.interruptId,
+          commandId: command.commandId,
+          idempotencyKey: command.idempotencyKey,
+          response: command.response,
+        });
+        if (!result.accepted) {
+          dispatched = false;
+          throw new AnalysisServiceError(
+            409,
+            "WSGS_INTERVENTION_RESUME_CONFLICT",
+            "WSGS did not accept the intervention lineage.",
+          );
+        }
+        if (result.parentUpstreamRunId !== context.currentRun.upstreamRunId) {
+          throw new AnalysisServiceError(
+            409,
+            "WSGS_INTERVENTION_RESUME_CONFLICT",
+            "WSGS did not accept the intervention lineage.",
+          );
+        }
+        const resumedRun = analysisRunSchema.parse({
+          schemaVersion: "sacs-analysis-run/1.0",
+          runId: nextId("run"),
+          revisionId: context.currentRun.revisionId,
+          attempt: context.currentRun.attempt + 1,
+          parentRunId: context.currentRun.runId,
+          upstreamRunId: result.upstreamRunId,
+          status: "RUNNING",
+          startedAt: now(),
+        });
+        return await options.store.commitInterventionResolution({
+          scope,
+          commandId: command.commandId,
+          claimToken: replay.claimToken,
+          response: command.response,
+          responseHash,
+          resumedRun,
+        });
+      } catch (error) {
+        const normalized = normalizeServiceError(error);
+        if (!dispatched) {
+          await options.store
+            .markInterventionResolutionFailed({
+              scope,
+              commandId: command.commandId,
+              claimToken: replay.claimToken,
+              safeCode: normalized.code,
+              statusCode: normalized.statusCode,
+            })
+            .catch(() => undefined);
+        }
+        throw normalized;
       }
-      if (!context.validateResponse(command.response)) {
-        throw new AnalysisServiceError(
-          422,
-          "INTERVENTION_RESPONSE_SCHEMA_INVALID",
-          "Intervention response is invalid.",
-        );
-      }
-      const responseHash = hashCanonicalJson(command.response);
-      if (context.currentRun.upstreamRunId === undefined) {
-        throw new AnalysisServiceError(
-          409,
-          "ANALYSIS_UPSTREAM_RUN_ID_REQUIRED",
-          "Analysis run cannot be resumed.",
-        );
-      }
-      const result = await options.wsgs.resolveIntervention({
-        analysisId: scope.analysisId,
-        interventionId: context.intervention.interventionId,
-        interruptId: context.intervention.interruptId,
-        response: command.response,
-      });
-      if (
-        !result.accepted ||
-        result.parentUpstreamRunId !== context.currentRun.upstreamRunId
-      ) {
-        throw new AnalysisServiceError(
-          409,
-          "WSGS_INTERVENTION_RESUME_CONFLICT",
-          "WSGS did not accept the intervention lineage.",
-        );
-      }
-      const resumedRun = analysisRunSchema.parse({
-        schemaVersion: "sacs-analysis-run/1.0",
-        runId: nextId("run"),
-        revisionId: context.currentRun.revisionId,
-        attempt: context.currentRun.attempt + 1,
-        parentRunId: context.currentRun.runId,
-        upstreamRunId: result.upstreamRunId,
-        status: "RUNNING",
-        startedAt: now(),
-      });
-      return options.store.commitInterventionResolution({
-        scope,
-        commandId: command.commandId,
-        response: command.response,
-        responseHash,
-        resumedRun,
-      });
     },
   };
 }
@@ -374,10 +511,17 @@ function assertRevisionCas(
 function resolveClaim<T>(
   claim: CommandClaim<T>,
 ):
-  | { readonly replayed: false }
+  | { readonly replayed: false; readonly claimToken: string }
   | { readonly replayed: true; readonly result: T } {
   if (claim.disposition === "REPLAY") {
     return { replayed: true, result: claim.result };
+  }
+  if (claim.disposition === "FAILED_REPLAY") {
+    throw new AnalysisServiceError(
+      claim.statusCode,
+      claim.safeCode,
+      "The previous analysis command failed.",
+    );
   }
   if (claim.disposition === "IDEMPOTENCY_CONFLICT") {
     throw new AnalysisServiceError(
@@ -389,11 +533,34 @@ function resolveClaim<T>(
   if (claim.disposition === "PENDING_CONFLICT") {
     throw new AnalysisServiceError(
       409,
-      "PROPOSAL_ALREADY_PENDING",
-      "Another analysis proposal is pending.",
+      "ANALYSIS_MUTATION_PENDING",
+      "Another analysis mutation is pending.",
     );
   }
-  return { replayed: false };
+  return { replayed: false, claimToken: claim.claimToken };
+}
+
+function assertCancellationDispatchable(run: AnalysisRun): void {
+  if (run.upstreamRunId === undefined) {
+    throw new AnalysisServiceError(
+      409,
+      "ANALYSIS_UPSTREAM_RUN_ID_REQUIRED",
+      "Analysis run cannot be cancelled.",
+    );
+  }
+  if (
+    !new Set<AnalysisRun["status"]>([
+      "STARTING",
+      "RUNNING",
+      "WAITING_INTERVENTION",
+    ]).has(run.status)
+  ) {
+    throw new AnalysisServiceError(
+      409,
+      "ANALYSIS_RUN_NOT_CANCELLABLE",
+      "Analysis run cannot be cancelled.",
+    );
+  }
 }
 
 function translateControlError<T>(operation: () => T): T {

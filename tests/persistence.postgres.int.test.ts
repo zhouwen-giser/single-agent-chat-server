@@ -74,6 +74,7 @@ describeWithPostgres("PostgreSQL persistence", () => {
       "0013_world_explanation.sql",
       "0014_structured_world_selection.sql",
       "0015_interactive_analysis.sql",
+      "0016_analysis_development_control.sql",
     ]);
 
     const checkpointTables = await pool.query<{ table_name: string }>(`
@@ -104,7 +105,7 @@ describeWithPostgres("PostgreSQL persistence", () => {
       const versions = await pool.query<{ version: string; checksum: string }>(
         "SELECT version, checksum FROM chat_service.schema_migrations ORDER BY version",
       );
-      expect(versions.rows).toHaveLength(15);
+      expect(versions.rows).toHaveLength(16);
       expect(versions.rows[0]?.checksum).toBe(
         createHash("sha256").update(sql).digest("hex"),
       );

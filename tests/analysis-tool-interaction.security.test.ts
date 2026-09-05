@@ -1,8 +1,12 @@
 import { describe, expect, it } from "@jest/globals";
 
-import type { ToolInteractionDescriptor } from "../packages/analysis-contract/src/index.js";
+import {
+  ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+  type ToolInteractionDescriptor,
+} from "../packages/analysis-contract/src/index.js";
 import {
   AnalysisControlError,
+  compilePublicArgsSchemaValidator,
   validateAndApplyPublicArgsPatch,
 } from "../packages/analysis-tool-interaction/src/index.js";
 import { hashCanonicalJson } from "../packages/world-explanation-contract/src/index.js";
@@ -121,6 +125,70 @@ describe("v0.5 public tool edit boundary", () => {
       422,
       "PUBLIC_ARGS_SCHEMA_INVALID",
     );
+  });
+
+  it.each([
+    "Authorization: Bearer credential-material",
+    "password=credential-material",
+    "postgresql://db-user:db-password@database.internal/results",
+    "file:///srv/private/result.tif",
+    "https://storage.internal/private/result.tif",
+  ])("rejects disclosure-bearing values introduced by a patch", (value) => {
+    const publicArgs = { note: "public" };
+    const descriptor = toolDescriptor({
+      publicArgs,
+      publicArgsHash: hashCanonicalJson(publicArgs),
+      editablePaths: ["/note"],
+    });
+    expectControlError(
+      () =>
+        validateAndApplyPublicArgsPatch({
+          descriptor,
+          patch: [{ op: "replace", path: "/note", value }],
+          expectedPublicArgsHash: descriptor.publicArgsHash,
+          expectedEditSchemaHash: descriptor.publicEditSchemaHash,
+          now,
+          validatePublicArgs: () => true,
+        }),
+      422,
+      ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+    );
+  });
+
+  it("enforces bounded numeric, enum, required, and additionalProperties semantics", () => {
+    const validate = compilePublicArgsSchemaValidator({
+      type: "object",
+      additionalProperties: false,
+      required: ["radiusMeters", "relation"],
+      properties: {
+        radiusMeters: { type: "number", minimum: 1, maximum: 10_000 },
+        relation: { enum: ["near", "within"] },
+      },
+    });
+
+    expect(validate({ radiusMeters: 500, relation: "near" })).toBe(true);
+    expect(validate({ radiusMeters: -1, relation: "near" })).toBe(false);
+    expect(validate({ radiusMeters: 1e12, relation: "near" })).toBe(false);
+    expect(validate({ radiusMeters: 500, relation: "outside" })).toBe(false);
+    expect(validate({ radiusMeters: 500 })).toBe(false);
+    expect(
+      validate({ radiusMeters: 500, relation: "near", credential: "x" }),
+    ).toBe(false);
+  });
+
+  it("fails closed for unsupported or malformed public JSON Schemas", () => {
+    expect(() =>
+      compilePublicArgsSchemaValidator({
+        type: "object",
+        oneOf: [{ required: ["radiusMeters"] }],
+      }),
+    ).toThrow("PUBLIC_EDIT_SCHEMA_KEYWORD_UNSUPPORTED");
+    expect(() =>
+      compilePublicArgsSchemaValidator({
+        type: "object",
+        required: ["radiusMeters", "radiusMeters"],
+      }),
+    ).toThrow("PUBLIC_EDIT_SCHEMA_INVALID");
   });
 
   it("does not expose execution arguments as editable public arguments", () => {

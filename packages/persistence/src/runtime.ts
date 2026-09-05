@@ -3,6 +3,7 @@ import pg from "pg";
 
 import { createPostgresCheckpointer } from "./checkpoint.js";
 import { AnalysisRepository } from "./analysis-repository.js";
+import { AnalysisDevelopmentRepository } from "./analysis-development-repository.js";
 import { AuthorityFusionRepository } from "./authority-fusion-repository.js";
 import type { PersistenceConfig } from "./config.js";
 import { ConversationPersistenceRepository } from "./conversation-repository.js";
@@ -19,6 +20,7 @@ const { Pool } = pg;
 
 export interface PersistenceRuntime {
   readonly analysisRepository: AnalysisRepository;
+  readonly analysisDevelopmentRepository: AnalysisDevelopmentRepository;
   readonly repository: ChatPersistenceRepository;
   readonly interactionRepository: InteractionPersistenceRepository;
   readonly groundingRepository: GroundingPersistenceRepository;
@@ -51,8 +53,13 @@ export async function setupPersistence(
     await runMigrations(pool);
     checkpointer = await createPostgresCheckpointer(config.connectionString);
     const activeCheckpointer = checkpointer;
+    const analysisRepository = new AnalysisRepository(pool);
     return {
-      analysisRepository: new AnalysisRepository(pool),
+      analysisRepository,
+      analysisDevelopmentRepository: new AnalysisDevelopmentRepository(
+        pool,
+        analysisRepository,
+      ),
       repository: new ChatPersistenceRepository(
         pool,
         config.idempotencyLeaseMs,

@@ -5,6 +5,17 @@ import {
   hashCanonicalJson,
   sha256Schema,
 } from "../../world-explanation-contract/src/index.js";
+import {
+  ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+  isAnalysisPublicArgsNonDisclosing,
+} from "./public-args-non-disclosure.js";
+
+export {
+  ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+  assertAnalysisPublicPatchNonDisclosure,
+  assertAnalysisPublicArgsNonDisclosure,
+  isAnalysisPublicArgsNonDisclosing,
+} from "./public-args-non-disclosure.js";
 
 export const ANALYSIS_CONTRACT_VERSION = "1.0" as const;
 export const ANALYSIS_MAX_NODES = 256;
@@ -567,6 +578,14 @@ export const toolInteractionDescriptorSchema = z
   })
   .strict()
   .superRefine((descriptor, context) => {
+    if (!isAnalysisPublicArgsNonDisclosing(descriptor.publicArgs)) {
+      context.addIssue({
+        code: "custom",
+        path: ["publicArgs"],
+        message: ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+      });
+      return;
+    }
     if (
       hashCanonicalJson(descriptor.publicArgs) !== descriptor.publicArgsHash
     ) {

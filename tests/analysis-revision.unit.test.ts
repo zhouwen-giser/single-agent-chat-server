@@ -23,6 +23,8 @@ describe("v0.5 immutable analysis revision coordination", () => {
       {
         analysisId: "analysis-1",
         revisionId: "revision-2",
+        commandId: "command-proposal-1",
+        idempotencyKey: "proposal-key-1",
         currentRevision: currentRevision(),
         parentRunId: "run-1",
         cause: "USER_PROPOSAL",
@@ -36,6 +38,8 @@ describe("v0.5 immutable analysis revision coordination", () => {
       expect.objectContaining({
         parentPlanId: "plan-1",
         parentPlanHash: hash1,
+        commandId: "command-proposal-1",
+        idempotencyKey: "proposal-key-1",
         publicArgs: { radiusMeters: 600 },
       }),
     );
@@ -109,6 +113,8 @@ describe("v0.5 immutable analysis revision coordination", () => {
       {
         analysisId: "analysis-1",
         revisionId: "revision-1",
+        commandId: "command-cancel-1",
+        idempotencyKey: "cancel-key-1",
         reason: "USER_REQUESTED",
       },
       now,
@@ -118,7 +124,7 @@ describe("v0.5 immutable analysis revision coordination", () => {
     expect(transition.queueRevision).toBe(false);
   });
 
-  it("keeps the old run alive and queues a revision when cancel is unsupported", async () => {
+  it("keeps cancellation requested and queues a revision until acknowledged", async () => {
     const transition = await requestAnalysisRunCancellation(
       {
         cancelRun: async () => ({
@@ -131,11 +137,14 @@ describe("v0.5 immutable analysis revision coordination", () => {
       {
         analysisId: "analysis-1",
         revisionId: "revision-1",
+        commandId: "command-restart-1",
+        idempotencyKey: "restart-key-1",
         reason: "REVISION_RESTART",
       },
       now,
     );
-    expect(transition.settled.status).toBe("RUNNING");
+    expect(transition.settled.status).toBe("CANCEL_REQUESTED");
+    expect(transition.settled.finishedAt).toBeUndefined();
     expect(transition.queueRevision).toBe(true);
   });
 });

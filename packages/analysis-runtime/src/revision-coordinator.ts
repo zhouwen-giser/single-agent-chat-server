@@ -10,6 +10,8 @@ import type { WsgsAnalysisControlPort } from "../../wsgs-analysis-consumer/src/i
 export interface CompileRevisionRequest {
   readonly analysisId: string;
   readonly revisionId: string;
+  readonly commandId: string;
+  readonly idempotencyKey: string;
   readonly currentRevision: AnalysisRevision;
   readonly parentRunId: string;
   readonly cause: Extract<
@@ -24,6 +26,8 @@ export interface CompileRevisionRequest {
 
 export interface WsgsCompileRevisionRequest {
   readonly analysisId: string;
+  readonly commandId: string;
+  readonly idempotencyKey: string;
   readonly parentPlanId: string;
   readonly parentPlanHash: string;
   readonly parentRevisionNumber: number;
@@ -58,6 +62,8 @@ export async function compileImmutableRevision(
   }
   const result = await port.compileRevision({
     analysisId: input.analysisId,
+    commandId: input.commandId,
+    idempotencyKey: input.idempotencyKey,
     parentPlanId: input.currentRevision.wsgsPlanId,
     parentPlanHash: input.currentRevision.planHash,
     parentRevisionNumber: input.currentRevision.revisionNumber,
@@ -88,6 +94,8 @@ export interface WsgsCancelRequest {
   readonly analysisId: string;
   readonly revisionId: string;
   readonly upstreamRunId: string;
+  readonly commandId: string;
+  readonly idempotencyKey: string;
   readonly reason: "USER_REQUESTED" | "REVISION_RESTART";
 }
 
@@ -149,7 +157,7 @@ export async function requestAnalysisRunCancellation(
   }
   return {
     requested,
-    settled: analysisRunSchema.parse({ ...parsed, status: "RUNNING" }),
+    settled: requested,
     queueRevision: true,
   };
 }
@@ -158,6 +166,8 @@ export interface WsgsInterventionResolutionRequest {
   readonly analysisId: string;
   readonly interventionId: string;
   readonly interruptId: string;
+  readonly commandId: string;
+  readonly idempotencyKey: string;
   readonly response: Readonly<Record<string, unknown>>;
 }
 

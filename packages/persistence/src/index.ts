@@ -18,6 +18,15 @@ export {
   type StoredAnalysisEvent,
 } from "./analysis-repository.js";
 export {
+  AnalysisDevelopmentRepository,
+  AnalysisMutationClaimPendingError,
+  DEVELOPMENT_TRUSTED_PUBLIC_EDIT_SCHEMAS,
+  type AnalysisDevelopmentEventCommit,
+  type AnalysisDevelopmentSeed,
+  type AnalysisDevelopmentSnapshot,
+  type TrustedPublicEditSchema,
+} from "./analysis-development-repository.js";
+export {
   AuthorityFusionRepository,
   type AuthorityFusionIdentity,
   type StoredAuthorityFusion,

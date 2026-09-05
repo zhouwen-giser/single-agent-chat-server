@@ -7,15 +7,17 @@ import {
   type AnalysisCoordinatorWsgsPort,
   type AnalysisProposalContext,
 } from "../packages/analysis-control-runtime/src/index.js";
-import type {
-  AnalysisIntervention,
-  ToolInteractionDescriptor,
+import {
+  ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+  type AnalysisIntervention,
+  type ToolInteractionDescriptor,
 } from "../packages/analysis-contract/src/index.js";
 import { hashCanonicalJson } from "../packages/world-explanation-contract/src/index.js";
 
 const now = "2026-08-30T00:00:00.000Z";
 const hash1 = `sha256:${"1".repeat(64)}`;
 const hash2 = `sha256:${"2".repeat(64)}`;
+const claimToken = "00000000-0000-4000-8000-000000000001";
 
 describe("v0.5 analysis control coordinator", () => {
   it("queues a non-blocking revision and leaves the current run alone", async () => {
@@ -24,7 +26,12 @@ describe("v0.5 analysis control coordinator", () => {
     const coordinator = createCoordinator(store, wsgs);
     const result = await coordinator.submitProposal(scope(), proposalCommand());
     expect(wsgs.cancelRun).not.toHaveBeenCalled();
-    expect(wsgs.compileRevision).toHaveBeenCalledTimes(1);
+    expect(wsgs.compileRevision).toHaveBeenCalledWith(
+      expect.objectContaining({
+        commandId: "command-proposal",
+        idempotencyKey: "proposal-key",
+      }),
+    );
     expect(store.commitCompiledRevision).toHaveBeenCalledWith(
       expect.objectContaining({
         expectedRevisionId: "revision-1",
@@ -56,7 +63,7 @@ describe("v0.5 analysis control coordinator", () => {
 
     for (const [disposition, code] of [
       ["IDEMPOTENCY_CONFLICT", "IDEMPOTENCY_CONFLICT"],
-      ["PENDING_CONFLICT", "PROPOSAL_ALREADY_PENDING"],
+      ["PENDING_CONFLICT", "ANALYSIS_MUTATION_PENDING"],
     ] as const) {
       const store = coordinatorStore({
         claimProposal: jest.fn(async () => ({ disposition })),
@@ -173,6 +180,37 @@ describe("v0.5 analysis control coordinator", () => {
     );
   });
 
+  it("binds acknowledged interrupt-and-apply to a replacement Run", async () => {
+    const context = proposalContext({
+      descriptor: descriptor({ editPolicy: "CANCEL_AND_RESTART_ALLOWED" }),
+    });
+    const store = coordinatorStore({
+      loadProposalContext: jest.fn(async () => context),
+    });
+    const wsgs = wsgsPort();
+    await createCoordinator(store, wsgs).submitProposal(scope(), {
+      ...proposalCommand(),
+      mode: "INTERRUPT_AND_APPLY",
+    });
+    expect(wsgs.cancelRun).toHaveBeenCalledWith(
+      expect.objectContaining({
+        commandId: "command-proposal",
+        idempotencyKey: "proposal-key",
+      }),
+    );
+    expect(store.commitCompiledRevision).toHaveBeenCalledWith(
+      expect.objectContaining({
+        revision: expect.objectContaining({ status: "READY" }),
+        replacementRun: expect.objectContaining({
+          revisionId: "revision-2",
+          runId: "run-2",
+          parentRunId: "run-1",
+          status: "STARTING",
+        }),
+      }),
+    );
+  });
+
   it("resumes an intervention as a new Run with parent lineage", async () => {
     const store = coordinatorStore();
     const wsgs = wsgsPort();
@@ -218,7 +256,7 @@ describe("v0.5 analysis control coordinator", () => {
         {
           commandId: "command-resolve",
           idempotencyKey: "resolve-key",
-          response: { secretCandidate: "bad" },
+          response: { candidateId: 42 },
         },
       ),
     ).rejects.toMatchObject({
@@ -226,6 +264,82 @@ describe("v0.5 analysis control coordinator", () => {
       code: "INTERVENTION_RESPONSE_SCHEMA_INVALID",
     });
     expect(wsgs.resolveIntervention).not.toHaveBeenCalled();
+    expect(store.markInterventionResolutionFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        safeCode: "INTERVENTION_RESPONSE_SCHEMA_INVALID",
+        statusCode: 422,
+      }),
+    );
+  });
+
+  it("rejects disclosure-bearing intervention responses before WSGS", async () => {
+    const store = coordinatorStore({
+      loadInterventionContext: jest.fn(async () => ({
+        intervention: intervention(),
+        currentRun: proposalContext().currentRun,
+        validateResponse: () => true,
+      })),
+    });
+    const wsgs = wsgsPort();
+    await expect(
+      createCoordinator(store, wsgs).resolveIntervention(
+        { ...scope(), interventionId: "intervention-1" },
+        {
+          commandId: "command-resolve-sensitive",
+          idempotencyKey: "resolve-sensitive-key",
+          response: {
+            candidateId: "candidate-1",
+            auth: "credential-material",
+          },
+        },
+      ),
+    ).rejects.toMatchObject({
+      statusCode: 422,
+      code: ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+      message: ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+    });
+    expect(wsgs.resolveIntervention).not.toHaveBeenCalled();
+    expect(store.markInterventionResolutionFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        safeCode: ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+        statusCode: 422,
+      }),
+    );
+  });
+
+  it("retains a dispatched cancel claim when the upstream outcome is unknown", async () => {
+    const store = coordinatorStore();
+    const wsgs = wsgsPort({
+      cancelRun: jest.fn(async () => {
+        throw new Error("WSGS_CANCEL_UNAVAILABLE");
+      }),
+    });
+    await expect(
+      createCoordinator(store, wsgs).requestCancel(scope(), cancelCommand()),
+    ).rejects.toMatchObject({
+      statusCode: 503,
+      code: "WSGS_CANCEL_UNAVAILABLE",
+    });
+    expect(store.markCancelFailed).not.toHaveBeenCalled();
+
+    const replayStore = coordinatorStore({
+      claimCancel: jest.fn(async () => ({
+        disposition: "FAILED_REPLAY" as const,
+        safeCode: "WSGS_CANCEL_UNAVAILABLE",
+        statusCode: 503 as const,
+      })),
+    });
+    const replayWsgs = wsgsPort();
+    await expect(
+      createCoordinator(replayStore, replayWsgs).requestCancel(
+        scope(),
+        cancelCommand(),
+      ),
+    ).rejects.toMatchObject({
+      statusCode: 503,
+      code: "WSGS_CANCEL_UNAVAILABLE",
+    });
+    expect(replayWsgs.cancelRun).not.toHaveBeenCalled();
   });
 });
 
@@ -251,12 +365,19 @@ function coordinatorStore(
     getAnalysis: jest.fn(async () => ({ analysisId: "analysis-1" })),
     getSnapshot: jest.fn(async () => ({ stateRevision: 1 })),
     loadProposalContext: jest.fn(async () => proposalContext()),
-    claimProposal: jest.fn(async () => ({ disposition: "CLAIMED" })),
+    claimProposal: jest.fn(async () => ({
+      disposition: "CLAIMED",
+      claimToken,
+    })),
     commitCompiledRevision: jest.fn(async () => ({ status: "COMPILED" })),
     markProposalFailed: jest.fn(async () => undefined),
     loadCancelContext: jest.fn(async () => proposalContext()),
-    claimCancel: jest.fn(async () => ({ disposition: "CLAIMED" })),
+    claimCancel: jest.fn(async () => ({
+      disposition: "CLAIMED",
+      claimToken,
+    })),
     commitCancellation: jest.fn(async () => ({ status: "CANCELLED" })),
+    markCancelFailed: jest.fn(async () => undefined),
     loadInterventionContext: jest.fn(async () => ({
       intervention: intervention(),
       currentRun: proposalContext().currentRun,
@@ -265,10 +386,12 @@ function coordinatorStore(
     })),
     claimInterventionResolution: jest.fn(async () => ({
       disposition: "CLAIMED",
+      claimToken,
     })),
     commitInterventionResolution: jest.fn(async () => ({
       status: "RESOLVED",
     })),
+    markInterventionResolutionFailed: jest.fn(async () => undefined),
     ...override,
   } as AnalysisCoordinatorStore & Record<string, jest.Mock>;
 }
@@ -402,6 +525,16 @@ function proposalCommand() {
     patch: [{ op: "replace" as const, path: "/radiusMeters", value: 600 }],
     mode: "SUGGEST_NEXT_REVISION" as const,
     idempotencyKey: "proposal-key",
+  };
+}
+
+function cancelCommand() {
+  return {
+    commandId: "command-cancel",
+    expectedRevisionId: "revision-1",
+    expectedRevisionNumber: 1,
+    idempotencyKey: "cancel-key",
+    reason: "USER_REQUESTED" as const,
   };
 }
 
