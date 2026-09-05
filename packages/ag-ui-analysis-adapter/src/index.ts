@@ -10,6 +10,7 @@ import {
 import type { AgUiRunHandler } from "../../ag-ui-interaction-adapter/src/index.js";
 import type { AuthorizedWsgsAnalysisConsumer } from "../../wsgs-analysis-consumer/src/index.js";
 import {
+  assertAnalysisPublicArgsNonDisclosure,
   agUiSharedStateV03Schema,
   calculateAgUiStateSnapshotHash,
   parseAndVerifyAgUiSharedStateV03,
@@ -57,6 +58,32 @@ export interface AnalysisAgUiV03Readiness {
   readonly analysisControlReady: true;
 }
 
+export interface AnalysisFixtureAdapterManifest {
+  readonly schemaVersion: "sacs-v05-fixture-adapter/1.0";
+  readonly adapterId: "FixtureWsgsAnalysisAdapter";
+  readonly environmentEligibility: readonly (
+    "test" | "development" | "local-compose"
+  )[];
+  readonly supports: readonly (
+    | "PLAN"
+    | "EVENTS"
+    | "COMPILE_REVISION"
+    | "CANCEL"
+    | "INTERVENTION"
+    | "DATA_GAP"
+  )[];
+  readonly productionEligible: false;
+}
+
+export interface AnalysisAgUiV03DevelopmentReadiness {
+  readonly environment: {
+    readonly nodeEnv: "test" | "development";
+    readonly adapterMode: "fixture";
+  };
+  readonly fixture: AnalysisFixtureAdapterManifest;
+  readonly analysisControlReady: true;
+}
+
 /**
  * Explicitly registers a handler as the analysis v0.3 profile boundary.
  * The wrapper rejects profile confusion and revalidates every emitted event
@@ -76,6 +103,49 @@ export function createAnalysisAgUiV03RunHandler(
   ) {
     throw new Error("AG_UI_ANALYSIS_RUNTIME_NOT_READY");
   }
+  return wrapAndBrandAnalysisHandler(handler);
+}
+
+/**
+ * Opens the same v0.3 protocol boundary for the explicit fixture-backed
+ * development composition. This path requires the complete fixture manifest
+ * and cannot be constructed for a production process.
+ */
+export function createDevelopmentAnalysisAgUiV03RunHandler(
+  handler: AgUiRunHandler,
+  readiness: AnalysisAgUiV03DevelopmentReadiness,
+): AnalysisAgUiV03RunHandler {
+  const requiredCapabilities: readonly AnalysisFixtureAdapterManifest["supports"][number][] =
+    [
+      "PLAN",
+      "EVENTS",
+      "COMPILE_REVISION",
+      "CANCEL",
+      "INTERVENTION",
+      "DATA_GAP",
+    ];
+  if (
+    readiness.analysisControlReady !== true ||
+    readiness.environment.adapterMode !== "fixture" ||
+    !["test", "development"].includes(readiness.environment.nodeEnv) ||
+    readiness.fixture.schemaVersion !== "sacs-v05-fixture-adapter/1.0" ||
+    readiness.fixture.adapterId !== "FixtureWsgsAnalysisAdapter" ||
+    readiness.fixture.productionEligible !== false ||
+    !readiness.fixture.environmentEligibility.includes(
+      readiness.environment.nodeEnv,
+    ) ||
+    requiredCapabilities.some(
+      (capability) => !readiness.fixture.supports.includes(capability),
+    )
+  ) {
+    throw new Error("AG_UI_ANALYSIS_DEVELOPMENT_RUNTIME_NOT_READY");
+  }
+  return wrapAndBrandAnalysisHandler(handler);
+}
+
+function wrapAndBrandAnalysisHandler(
+  handler: AgUiRunHandler,
+): AnalysisAgUiV03RunHandler {
   const wrapped: AgUiRunHandler = async function* analysisV03(context) {
     if (context.profile !== SACS_AG_UI_V03_PROFILE_ID) {
       throw new Error("AG_UI_ANALYSIS_PROFILE_MISMATCH");
@@ -191,7 +261,7 @@ export function projectAnalysisToolCallLifecycle(input: {
   readonly descriptor: ToolInteractionDescriptor;
   readonly parentMessageId?: string;
 }): readonly AGUIEvent[] {
-  assertPublicToolArgs(input.descriptor.publicArgs);
+  assertAnalysisPublicArgsNonDisclosure(input.descriptor.publicArgs);
   const args = canonicalJson(input.descriptor.publicArgs);
   if (Buffer.byteLength(args, "utf8") > 262_144) {
     throw new Error("AG_UI_PUBLIC_TOOL_ARGS_TOO_LARGE");
@@ -419,28 +489,6 @@ function validatePatch(
     }
     return { ...operation };
   });
-}
-
-function assertPublicToolArgs(value: unknown, path = ""): void {
-  if (Array.isArray(value)) {
-    value.forEach((item, index) =>
-      assertPublicToolArgs(item, `${path}/${index}`),
-    );
-    return;
-  }
-  if (value === null || typeof value !== "object") return;
-  for (const [key, item] of Object.entries(value)) {
-    if (
-      /^(?:authorization|credential|dataScope|endpoint|executionArgs|executionArgsHash|principalId|provider|providerId|secret|sourceFingerprint|token|assetUri)$/iu.test(
-        key,
-      )
-    ) {
-      throw new Error(
-        `AG_UI_PUBLIC_ARGS_AUTHORITY_FIELD_FORBIDDEN:${path}/${key}`,
-      );
-    }
-    assertPublicToolArgs(item, `${path}/${key}`);
-  }
 }
 
 function assertRevision(value: number): void {

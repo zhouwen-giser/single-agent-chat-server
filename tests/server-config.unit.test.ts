@@ -1,6 +1,9 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { parseServerConfig } from "../apps/server/src/config.js";
+import {
+  parseAnalysisAdapterEnvironment,
+  parseServerConfig,
+} from "../apps/server/src/config.js";
 
 const validKey = "phase-1-test-service-key-32-bytes-minimum";
 const validJwtSecret = "phase-5-openwebui-jwt-secret-32-bytes-minimum";
@@ -91,5 +94,24 @@ describe("server configuration", () => {
         CHAT_SERVER_REQUEST_TIMEOUT_MS: "999999",
       }),
     ).toThrow();
+  });
+
+  it("keeps analysis disabled by default and gates fixture mode to local environments", () => {
+    expect(parseAnalysisAdapterEnvironment({})).toEqual({
+      nodeEnv: "production",
+      adapterMode: "disabled",
+    });
+    expect(
+      parseAnalysisAdapterEnvironment({
+        NODE_ENV: "development",
+        SACS_ANALYSIS_ADAPTER_MODE: "fixture",
+      }),
+    ).toEqual({ nodeEnv: "development", adapterMode: "fixture" });
+    expect(() =>
+      parseAnalysisAdapterEnvironment({
+        NODE_ENV: "production",
+        SACS_ANALYSIS_ADAPTER_MODE: "fixture",
+      }),
+    ).toThrow("SACS_ANALYSIS_FIXTURE_FORBIDDEN_IN_PRODUCTION");
   });
 });

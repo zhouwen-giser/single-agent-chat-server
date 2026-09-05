@@ -72,6 +72,17 @@ const serverConfigSchema = z.object({
     .default(1_000),
 });
 
+const analysisAdapterEnvironmentSchema = z
+  .object({
+    NODE_ENV: z
+      .enum(["test", "development", "production"])
+      .default("production"),
+    SACS_ANALYSIS_ADAPTER_MODE: z
+      .enum(["disabled", "fixture", "http"])
+      .default("disabled"),
+  })
+  .strict();
+
 export interface ServerConfig {
   readonly serviceKey: string;
   readonly agUiServiceKey: string;
@@ -91,6 +102,35 @@ export interface ServerConfig {
   readonly streamBudgetMs: number;
   readonly pollingBudgetMs: number;
   readonly pollingIntervalMs: number;
+}
+
+export interface AnalysisAdapterEnvironment {
+  readonly nodeEnv: "test" | "development" | "production";
+  readonly adapterMode: "disabled" | "fixture" | "http";
+}
+
+/**
+ * Parses the v0.5 analysis composition switch independently from the legacy
+ * server settings. Fixture mode is an explicit local-development capability;
+ * it can never make a production process analysis-ready.
+ */
+export function parseAnalysisAdapterEnvironment(
+  environment: NodeJS.ProcessEnv,
+): AnalysisAdapterEnvironment {
+  const parsed = analysisAdapterEnvironmentSchema.parse({
+    NODE_ENV: environment.NODE_ENV,
+    SACS_ANALYSIS_ADAPTER_MODE: environment.SACS_ANALYSIS_ADAPTER_MODE,
+  });
+  if (
+    parsed.SACS_ANALYSIS_ADAPTER_MODE === "fixture" &&
+    parsed.NODE_ENV === "production"
+  ) {
+    throw new Error("SACS_ANALYSIS_FIXTURE_FORBIDDEN_IN_PRODUCTION");
+  }
+  return {
+    nodeEnv: parsed.NODE_ENV,
+    adapterMode: parsed.SACS_ANALYSIS_ADAPTER_MODE,
+  };
 }
 
 export function parseServerConfig(

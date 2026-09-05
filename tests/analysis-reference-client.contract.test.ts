@@ -342,6 +342,52 @@ describe("headless v0.5 analysis reference client", () => {
       },
     ]);
 
+    await client.dispatchMapAction({
+      type: "PAN",
+      viewport: { longitude: 121.47, latitude: 31.23 },
+    });
+    await client.dispatchMapAction({ type: "ZOOM", zoom: 11 });
+    await client.dispatchMapAction({
+      type: "HOVER",
+      hover: { featureId: "feature-1" },
+    });
+    await client.dispatchMapAction({
+      type: "INSPECT",
+      focus: {
+        focusId: "inspection-1",
+        targetKind: "TOOL_OUTPUT",
+        analysisNodeId: "node-1",
+        semanticRole: "SELECTED_RESULT",
+        currentness: "CURRENT",
+      },
+    });
+    await client.dispatchMapAction({
+      type: "FOCUS_PIN",
+      focus: {
+        focusId: "pinned-1",
+        targetKind: "TOOL_OUTPUT",
+        analysisNodeId: "node-1",
+        semanticRole: "SELECTED_RESULT",
+        currentness: "CURRENT",
+      },
+    });
+    expect(client.mapPresentation).toMatchObject({
+      local: {
+        viewport: { longitude: 121.47, latitude: 31.23, zoom: 11 },
+        hover: { featureId: "feature-1" },
+        inspectionFocus: { focusId: "inspection-1" },
+      },
+      shared: { pinnedFocusById: { "pinned-1": { focusId: "pinned-1" } } },
+    });
+    expect(map.localMapActions.map(({ type }) => type)).toEqual([
+      "PAN",
+      "ZOOM",
+      "HOVER",
+      "INSPECT",
+      "FOCUS_PIN",
+    ]);
+    expect(send).not.toHaveBeenCalled();
+
     await client.disconnect();
     expect(client.state.connected).toBe(false);
     expect(map.disconnected).toBe(true);

@@ -16,6 +16,9 @@ import {
   projectAnalysisToolCallResult,
 } from "../packages/ag-ui-analysis-adapter/src/index.js";
 import {
+  ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+  assertAnalysisPublicArgsNonDisclosure,
+  assertAnalysisPublicPatchNonDisclosure,
   toolInteractionDescriptorSchema,
   type ToolInteractionDescriptor,
 } from "../packages/analysis-contract/src/index.js";
@@ -228,10 +231,99 @@ describe("AG-UI v0.3 analysis projection", () => {
       /geometry|provider|endpoint|executionArgs|dataScope/iu,
     );
 
-    const unsafe = descriptor({ provider: "private-provider" });
+    const unsafe = uncheckedDescriptor({ provider: "private-provider" });
     expect(() =>
       projectAnalysisToolCallLifecycle({ descriptor: unsafe }),
-    ).toThrow("AG_UI_PUBLIC_ARGS_AUTHORITY_FIELD_FORBIDDEN");
+    ).toThrow(ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION);
+  });
+
+  it.each([
+    { auth: "credential-material" },
+    { encryptionKey: "credential-material" },
+    { passphrase: "credential-material" },
+    { nested: { apiKey: "credential-material" } },
+    { nested: { sourceAuthority: "server-owned" } },
+    { note: "Authorization: Bearer credential-material" },
+    { note: "cookie=session-material" },
+    { note: "postgresql://db-user:db-password@database.internal/results" },
+    { source: "file:///srv/private/result.tif" },
+    { source: "http://example.com/private/result.tif" },
+    { source: "https://tiles.internal/private/result.tif" },
+    { source: "https://localhost./private/result.tif" },
+    { source: "https://service.namespace.svc/private/result.tif" },
+    { source: "https://127.0.0.1/private/result.tif" },
+    { source: "https://0x7f000001/private/result.tif" },
+    { source: "https://[::ffff:127.0.0.1]/private/result.tif" },
+  ])(
+    "rejects disclosure-bearing public arguments with a stable error",
+    (publicArgs) => {
+      const unsafe = uncheckedDescriptor(publicArgs);
+      try {
+        projectAnalysisToolCallLifecycle({ descriptor: unsafe });
+        throw new Error("expected non-disclosure rejection");
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toBe(
+          ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+        );
+        expect((error as Error).message).not.toContain("credential-material");
+        expect((error as Error).message).not.toContain("/srv/private");
+      }
+    },
+  );
+
+  it("enforces non-disclosure at the trusted descriptor boundary", () => {
+    const unsafe = uncheckedDescriptor({
+      nested: { accessToken: "credential-material" },
+    });
+    expect(() => toolInteractionDescriptorSchema.parse(unsafe)).toThrow(
+      ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+    );
+    expect(() =>
+      toolInteractionDescriptorSchema.parse(
+        uncheckedDescriptor({
+          source: "https://example.com/public/result.json",
+          keyboardLayout: "qwerty",
+          keyframeCount: 4,
+        }),
+      ),
+    ).not.toThrow();
+  });
+
+  it("rejects sensitive JSON Pointer tokens before a public patch is durable", () => {
+    for (const path of ["/auth", "/nested/encryptionKey", "/passphrase"]) {
+      expect(() =>
+        assertAnalysisPublicPatchNonDisclosure([
+          { op: "replace", path, value: "credential-material" },
+        ]),
+      ).toThrow(ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION);
+    }
+    expect(() =>
+      assertAnalysisPublicPatchNonDisclosure([
+        { op: "replace", path: "/keyboardLayout", value: "qwerty" },
+        { op: "replace", path: "/keyframeCount", value: 4 },
+      ]),
+    ).not.toThrow();
+  });
+
+  it("does not echo hostile input through non-disclosure errors", () => {
+    const hostile = new Proxy<Record<string, unknown>>(
+      {},
+      {
+        ownKeys: () => {
+          throw new Error("credential-material-from-hostile-input");
+        },
+      },
+    );
+    try {
+      assertAnalysisPublicArgsNonDisclosure(hostile);
+      throw new Error("expected non-disclosure rejection");
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toBe(
+        ANALYSIS_PUBLIC_ARGS_NON_DISCLOSURE_VIOLATION,
+      );
+    }
   });
 });
 
@@ -255,4 +347,14 @@ function descriptor(
     editSemantics: "CHANGE_CONSTRAINT",
     editPolicy: "SUGGEST_NEXT_REVISION",
   });
+}
+
+function uncheckedDescriptor(
+  publicArgs: Record<string, unknown>,
+): ToolInteractionDescriptor {
+  return {
+    ...descriptor(),
+    publicArgs,
+    publicArgsHash: hashCanonicalJson(publicArgs),
+  };
 }
