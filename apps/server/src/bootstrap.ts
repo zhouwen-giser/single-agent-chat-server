@@ -54,6 +54,7 @@ export interface BuildServerOptions
   readonly runAgUiV03?: AnalysisAgUiV03RunHandler;
   readonly persistAgUiAssistantMessages?: AgUiRoutesOptions["persistAssistantMessages"];
   readonly analysisControl?: AnalysisRoutesOptions["service"];
+  readonly analysisCapabilities?: AnalysisRoutesOptions["capabilities"];
   readonly rateLimiter?: FixedWindowRateLimiter;
 }
 
@@ -157,6 +158,9 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
   void server.register(registerAnalysisRoutes, {
     config: options.config,
     rateLimiter,
+    ...(options.analysisCapabilities
+      ? { capabilities: options.analysisCapabilities }
+      : {}),
     ...(options.analysisControl === undefined
       ? {}
       : { service: options.analysisControl }),

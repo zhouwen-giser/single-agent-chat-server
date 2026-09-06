@@ -421,6 +421,37 @@ export const mapSharedStateSchema = z
 export const timelineProjectionSchema = z
   .object({
     schemaVersion: z.literal("sacs-shared-timeline/1.0"),
+    items: z
+      .array(
+        z
+          .strictObject({
+            itemId: analysisIdSchema,
+            kind: z.enum([
+              "ROAD_VISIT",
+              "OFF_NETWORK",
+              "AMBIGUITY",
+              "QUALITY_BREAK",
+              "DATA_GAP",
+              "PAUSED_EXCLUDED",
+              "TRAJECTORY_DEFINED",
+              "TASK_INTERVAL",
+              "ACTIVE_PHASE",
+              "INSTANT_EVENT",
+              "INTERVAL_EVENT",
+              "METRIC_OBSERVATION",
+            ]),
+            sourceId: z.literal("wsgs"),
+            start: analysisDateTimeSchema,
+            end: analysisDateTimeSchema.optional(),
+            evidenceItemIds: z.array(analysisIdSchema).max(128),
+          })
+          .refine(
+            (item) =>
+              !item.end || Date.parse(item.start) <= Date.parse(item.end),
+          ),
+      )
+      .max(1000)
+      .optional(),
     analysisTimeWindow: z
       .object({
         start: analysisDateTimeSchema,
@@ -433,7 +464,7 @@ export const timelineProjectionSchema = z
       z.string(),
       z
         .object({
-          sourceKind: z.enum(["GOWM", "GDPS", "STAS", "SDAR"]),
+          sourceKind: z.enum(["GOWM", "GDPS", "STAS", "SDAR", "WSGS"]),
           timeSemantics: z.string().min(1).max(128),
           displayRole: z
             .enum(["LIVE", "HISTORICAL", "CURRENT_BACKGROUND", "PLANNED"])

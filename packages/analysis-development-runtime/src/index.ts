@@ -269,10 +269,7 @@ type PumpStopReason = NonNullable<AnalysisDevelopmentPumpStatus["stopReason"]>;
 type PumpNotification =
   | {
       readonly kind: "EVENT";
-      readonly observation: Extract<
-        AnalysisDevelopmentObservation,
-        { readonly kind: "EVENT" }
-      >;
+      readonly observation: AnalysisDevelopmentObservation;
     }
   | { readonly kind: "END" }
   | { readonly kind: "ERROR"; readonly errorCode: string };
@@ -288,11 +285,28 @@ interface AnalysisPumpEntry extends AnalysisScope {
   readonly listeners: Set<(notification: PumpNotification) => void>;
 }
 
-class AnalysisDevelopmentPumpSupervisor {
+export interface AnalysisSourcePumpOptions {
+  readonly source: {
+    load(
+      scope: AnalysisScope,
+    ): Promise<
+      { projection: AnalysisProjection; terminal: boolean } | undefined
+    >;
+    consume(
+      scope: AnalysisScope,
+    ): AsyncIterable<{ projection: AnalysisProjection; terminal: boolean }>;
+  };
+  readonly maxActivePumps?: number;
+  readonly onPumpError?: AnalysisDevelopmentRuntimeOptions["onPumpError"];
+}
+
+/** Shared supervisor for Native event streams and Grounding Job observations. */
+export class AnalysisDevelopmentPumpSupervisor {
   private readonly entries = new Map<string, AnalysisPumpEntry>();
 
   constructor(
-    private readonly options: AnalysisDevelopmentRuntimeOptions,
+    private readonly options:
+      AnalysisDevelopmentRuntimeOptions | AnalysisSourcePumpOptions,
     private readonly now: () => string,
   ) {}
 
@@ -323,6 +337,21 @@ class AnalysisDevelopmentPumpSupervisor {
       initialized: Promise.resolve(),
       listeners: new Set(),
     };
+    const max =
+      "source" in this.options ? (this.options.maxActivePumps ?? 128) : 128;
+    if (!Number.isInteger(max) || max < 1 || max > 256)
+      throw new Error("ANALYSIS_PUMP_LIMIT_INVALID");
+    if (
+      [...this.entries.values()].filter(
+        (e) => e.state === "STARTING" || e.state === "RUNNING",
+      ).length >= max
+    )
+      throw new Error("ANALYSIS_PUMP_LIMIT_EXCEEDED");
+    if (this.entries.size >= 512)
+      for (const [id, e] of this.entries) {
+        if (e.state === "STOPPED" || e.state === "FAILED")
+          this.entries.delete(id);
+      }
     this.entries.set(scope.analysisId, entry);
     entry.initialized = this.initialize(entry).catch((error: unknown) => {
       this.fail(entry, error);
@@ -339,6 +368,13 @@ class AnalysisDevelopmentPumpSupervisor {
     return pumpStatus(entry);
   }
 
+  /** Called after the source transport is aborted during application shutdown. */
+  async settle(): Promise<void> {
+    await Promise.all(
+      [...this.entries.values()].map((entry) => entry.background),
+    );
+  }
+
   observe(
     scopeValue: AnalysisScope,
   ): AsyncIterable<AnalysisDevelopmentObservation> {
@@ -346,6 +382,42 @@ class AnalysisDevelopmentPumpSupervisor {
   }
 
   private async initialize(entry: AnalysisPumpEntry): Promise<void> {
+    if ("source" in this.options) {
+      const source = this.options.source;
+      const stored = await source.load(entry);
+      if (!stored) throw new Error("ANALYSIS_NOT_FOUND");
+      entry.lastEventSequence = stored.projection.lastEventSequence;
+      if (stored.terminal) {
+        this.stop(entry, "DURABLE_TERMINAL");
+        return;
+      }
+      entry.state = "RUNNING";
+      entry.subscriptionCount++;
+      entry.background = (async () => {
+        for await (const observed of source.consume(entry)) {
+          if (observed.projection.lastEventSequence > entry.lastEventSequence) {
+            entry.lastEventSequence = observed.projection.lastEventSequence;
+            this.notify(entry, {
+              kind: "EVENT",
+              observation: {
+                kind: "SNAPSHOT",
+                snapshot: agUiSharedStateV03Schema.parse(
+                  observed.projection.state,
+                ),
+                activity: observed.projection.activity,
+                projection: observed.projection,
+              },
+            });
+          }
+          if (observed.terminal) {
+            this.stop(entry, "TERMINAL_EVENT");
+            return;
+          }
+        }
+        this.stop(entry, "UPSTREAM_STREAM_ENDED");
+      })().catch((error) => this.fail(entry, error));
+      return;
+    }
     const stored = await this.options.repository.getDevelopmentSnapshot(entry);
     if (stored === undefined) {
       throw new AnalysisDevelopmentPumpError("ANALYSIS_NOT_FOUND");
@@ -374,6 +446,9 @@ class AnalysisDevelopmentPumpSupervisor {
     entry: AnalysisPumpEntry,
     stored: AnalysisDevelopmentSnapshot,
   ): Promise<PumpStopReason> {
+    if ("source" in this.options)
+      throw new Error("ANALYSIS_SOURCE_MODE_INVALID");
+    const options = this.options;
     const plan = durablePlanIdentity(stored.projection);
     if (!stored.currentRevision.wsgsPlanId || !stored.currentRevision.planHash)
       throw new Error("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
@@ -384,13 +459,13 @@ class AnalysisDevelopmentPumpSupervisor {
       planRevision: stored.currentRevision.revisionNumber,
     });
     const cursor = stored.projection.lastEventSequence;
-    for await (const rawEvent of this.options.adapter.subscribeAnalysisEvents(
+    for await (const rawEvent of options.adapter.subscribeAnalysisEvents(
       stored.session.groundingId,
       cursor === 0 ? undefined : cursor,
     )) {
       const decision = guard.prepare(rawEvent);
       const committed = await retryWhileMutationClaimed(() =>
-        this.options.repository.commitUpstreamEvent({
+        options.repository.commitUpstreamEvent({
           scope: entry,
           decision,
         }),
@@ -440,9 +515,11 @@ class AnalysisDevelopmentPumpSupervisor {
 
     try {
       const stored =
-        await this.options.repository.getDevelopmentSnapshot(scope);
+        "source" in this.options
+          ? await this.options.source.load(scope)
+          : await this.options.repository.getDevelopmentSnapshot(scope);
       if (stored === undefined) return;
-      assertStoredScope(stored, scope);
+      if ("session" in stored) assertStoredScope(stored, scope);
       let lastEventSequence = stored.projection.lastEventSequence;
       yield {
         kind: "SNAPSHOT",

@@ -1913,6 +1913,10 @@ interface SessionRow {
 }
 
 interface RevisionRow {
+  source_kind?: string;
+  source_id?: string;
+  source_hash?: string;
+  source_upstream_run_id?: string | null;
   revision_id: string;
   analysis_id: string;
   revision_number: number | string;
@@ -3138,8 +3142,18 @@ function mapRevision(row: RevisionRow): AnalysisRevision {
       : { parentRevisionId: row.parent_revision_id }),
     ...(row.parent_run_id === null ? {} : { parentRunId: row.parent_run_id }),
     cause: row.cause,
-    wsgsPlanId: row.wsgs_plan_id,
-    planHash: row.plan_hash,
+    ...(row.source_kind === "WSGS_GROUNDING_JOB"
+      ? {
+          source: {
+            kind: "WSGS_GROUNDING_JOB",
+            sourceId: row.source_id,
+            sourceHash: row.source_hash,
+            ...(row.source_upstream_run_id
+              ? { upstreamRunId: row.source_upstream_run_id }
+              : {}),
+          },
+        }
+      : { wsgsPlanId: row.wsgs_plan_id, planHash: row.plan_hash }),
     changedPaths: stringArray(row.changed_paths_json, "changed paths"),
     reusedNodeIds: stringArray(row.reused_node_ids_json, "reused nodes"),
     invalidatedNodeIds: stringArray(

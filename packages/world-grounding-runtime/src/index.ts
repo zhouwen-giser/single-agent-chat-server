@@ -1,6 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 
 import { z } from "zod";
+import { WsgsAuthoritativeContract } from "../../wsgs-geospatial-consumer/src/authoritative.js";
+import { normalizeWorldAnalysis } from "../../world-explanation-runtime/src/analysis-view.js";
 import { GroundingJobAnalysisSourceAdapter } from "../../wsgs-analysis-adapter/src/grounding-job.js";
 import {
   AnalysisSourceError,
@@ -180,6 +182,21 @@ export interface HybridAuthoritySeparatedResult {
 }
 
 export interface WorldGroundingRuntimeOptions {
+  readonly sourcePolling?: {
+    pollIntervalMs: number;
+    maxDurationMs: number;
+    maxConsecutiveFailures: number;
+  };
+  readonly onSourceStarted?: (
+    execution: GroundingExecution,
+    leaseOwner: string,
+  ) => Promise<void>;
+  readonly awaitSourceCompletion?: (input: {
+    groundingExecutionId: string;
+    principalId: string;
+    threadId: string;
+    signal?: AbortSignal;
+  }) => Promise<WsgsGroundingResult>;
   readonly requests: Pick<
     InteractionPersistenceRepository,
     "claimRequest" | "completeRequest" | "authorizedRequestCreatedAt"
@@ -193,6 +210,7 @@ export interface WorldGroundingRuntimeOptions {
         GroundingPersistenceRepository,
         | "get"
         | "recordSourceSnapshot"
+        | "recordSourcePoll"
         | "requestSourceCancellation"
         | "releaseLease"
       >
@@ -277,7 +295,10 @@ export class WorldGroundingRuntime {
     const repository = this.options.grounding;
     if (!repository.get || !repository.recordSourceSnapshot)
       throw new AnalysisSourceError("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
-    const adapter = new GroundingJobAnalysisSourceAdapter(this.options.wsgs);
+    const adapter = new GroundingJobAnalysisSourceAdapter(
+      this.options.wsgs,
+      this.options.sourcePolling,
+    );
     const claim = await repository.claim({
       groundingId: input.groundingExecutionId,
       principalId: input.principalId,
@@ -301,11 +322,13 @@ export class WorldGroundingRuntime {
       claim.kind === "BUSY" ||
       claim.execution.wsgsGroundingId !== undefined ||
       claim.kind === "REPLAY"
-    )
+    ) {
+      await this.options.onSourceStarted?.(claim.execution, input.leaseOwner);
       return claim.execution;
+    }
     await this.options.wsgs.capabilities(input.signal);
     const snapshot = await adapter.start(input);
-    return (
+    const execution = (
       await repository.recordSourceSnapshot({
         groundingId: claim.execution.groundingId,
         principalId: input.principalId,
@@ -315,6 +338,8 @@ export class WorldGroundingRuntime {
         leaseMs: 180_000,
       })
     ).execution;
+    await this.options.onSourceStarted?.(execution, input.leaseOwner);
+    return execution;
   }
 
   async *observeWorldGrounding(input: {
@@ -359,7 +384,21 @@ export class WorldGroundingRuntime {
     if (snapshot.terminal) return;
     if (execution.leaseOwner !== input.leaseOwner)
       throw new AnalysisSourceError("WORLD_GROUNDING_IN_PROGRESS");
-    const adapter = new GroundingJobAnalysisSourceAdapter(this.options.wsgs);
+    const adapter = new GroundingJobAnalysisSourceAdapter(
+      this.options.wsgs,
+      this.options.sourcePolling,
+      async (succeeded) =>
+        repository.recordSourcePoll?.({
+          ...scope,
+          leaseOwner: input.leaseOwner,
+          succeeded,
+          leaseMs: 180_000,
+        }),
+    );
+    if (execution.cancelRequested)
+      await this.options.wsgs
+        .cancelGrounding(execution.wsgsGroundingId, input.signal)
+        .catch(() => undefined);
     let terminalObserved = false;
     try {
       for await (const observed of adapter.observe({
@@ -394,6 +433,8 @@ export class WorldGroundingRuntime {
     leaseOwner: string;
     signal?: AbortSignal;
   }): Promise<WsgsGroundingResult> {
+    if (this.options.awaitSourceCompletion)
+      return this.options.awaitSourceCompletion(input);
     for await (const snapshot of this.observeWorldGrounding(input)) {
       if (snapshot.terminal) {
         if (snapshot.result) return snapshot.result;
@@ -422,7 +463,25 @@ export class WorldGroundingRuntime {
       input,
       turnPlan,
       undefined,
-      async (result, observedAt) => {
+      async (result, observedAt, request) => {
+        if (this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.1")
+          return normalizeWorldAnalysis({
+            analysisId: "answer",
+            revisionId: "answer-revision",
+            runId: "answer-run",
+            snapshot: {
+              identity: {
+                kind: "WSGS_GROUNDING_JOB",
+                sourceId: result.groundingId,
+                sourceHash: hashCanonicalJson(request),
+              },
+              sourceStatus: result.status,
+              terminal: true,
+              observedAt,
+              resultHash: result.resultHash,
+              result,
+            },
+          }).summary.primaryText;
         if (result.geospatialFindings === undefined) {
           return renderSafeWorldAnswer(result);
         }
@@ -902,6 +961,7 @@ export class WorldGroundingRuntime {
     renderResult: (
       result: WsgsGroundingResult,
       observedAt: string,
+      request: WsgsGroundingRequest,
     ) => string | Promise<string>,
     overrides: ReadOnlyGroundingOverrides = {},
   ): Promise<{ readonly text: string; readonly result?: WsgsGroundingResult }> {
@@ -961,7 +1021,7 @@ export class WorldGroundingRuntime {
       const result =
         execution?.groundingResult === undefined
           ? undefined
-          : parseWsgsGroundingResult(execution.groundingResult);
+          : this.parseStoredResult(execution.groundingResult);
       return {
         text: outerClaim.result.renderedText,
         ...(result === undefined ? {} : { result }),
@@ -1020,7 +1080,7 @@ export class WorldGroundingRuntime {
             groundingClaim.execution.failureCode ?? "WORLD_GROUNDING_FAILED",
           );
         } else {
-          result = parseWsgsGroundingResult(
+          result = this.parseStoredResult(
             groundingClaim.execution.groundingResult,
           );
         }
@@ -1100,7 +1160,7 @@ export class WorldGroundingRuntime {
               overrides.originMessageId ?? input.externalRequestId,
           });
         }
-        response = await renderResult(result, requestCreatedAt);
+        response = await renderResult(result, requestCreatedAt, request);
         if (
           ["COMPLETED", "PARTIAL"].includes(result.status) &&
           groundingClaim.execution.state !== "COMPLETED"
@@ -1141,6 +1201,14 @@ export class WorldGroundingRuntime {
       text: response,
       ...(resultForOutcome === undefined ? {} : { result: resultForOutcome }),
     };
+  }
+
+  private parseStoredResult(value: unknown): WsgsGroundingResult {
+    if (this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.1") {
+      new WsgsAuthoritativeContract().validate("result", value);
+      return value as WsgsGroundingResult;
+    }
+    return parseWsgsGroundingResult(value);
   }
 
   private async assembleContext(

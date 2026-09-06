@@ -57,6 +57,7 @@ const interventionResolutionSchema = z
   .strict();
 
 export interface AnalysisRoutesOptions {
+  readonly capabilities?: () => Promise<unknown>;
   readonly config: ServerConfig;
   readonly rateLimiter: FixedWindowRateLimiter;
   readonly service?: AnalysisControlService;
@@ -99,6 +100,19 @@ export const registerAnalysisRoutes: FastifyPluginAsync<
         service.getAnalysis(requestScope(request.params.analysisId, request)),
       );
     },
+  );
+
+  server.get("/api/v1/analysis-capabilities", async (_request, reply) =>
+    sendResult(
+      reply,
+      () =>
+        options.capabilities?.() ??
+        Promise.resolve({
+          enabled: false,
+          nativeReady: false,
+          nativeReasonCode: "SACS_WSGS_NATIVE_ANALYSIS_CONTROL_DEFERRED",
+        }),
+    ),
   );
 
   server.get<{ Params: { analysisId: string } }>(

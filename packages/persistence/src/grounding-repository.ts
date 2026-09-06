@@ -269,7 +269,7 @@ export class GroundingPersistenceRepository {
       });
       const changed = current.last_observation_hash !== fingerprint;
       const updated = await client.query<GroundingRow>(
-        `UPDATE chat_service.grounding_execution SET wsgs_grounding_id=$4,source_job_id=$5,last_source_status=$6,last_observation_hash=$7,last_polled_at=now(),consecutive_poll_failures=0,grounding_result_hash=$8,grounding_result_json=$9::jsonb,lease_until=now()+($10::bigint*interval '1 millisecond'),version=version+1 WHERE grounding_id=$1 AND principal_id=$2 AND thread_id=$3 RETURNING *`,
+        `UPDATE chat_service.grounding_execution SET state=CASE WHEN $9::jsonb IS NOT NULL THEN 'GROUNDING_READY' ELSE state END,wsgs_grounding_id=$4,source_job_id=$5,last_source_status=$6,last_observation_hash=$7,last_polled_at=now(),consecutive_poll_failures=0,grounding_result_hash=$8,grounding_result_json=$9::jsonb,lease_until=now()+($10::bigint*interval '1 millisecond'),version=version+1 WHERE grounding_id=$1 AND principal_id=$2 AND thread_id=$3 RETURNING *`,
         [
           input.groundingId,
           input.principalId,
@@ -296,6 +296,34 @@ export class GroundingPersistenceRepository {
           },
         });
       return { execution: mapExecution(row), changed };
+    });
+  }
+
+  /** Poll health is durable telemetry, never a semantic Analysis event. */
+  async recordSourcePoll(
+    input: GroundingIdentity & {
+      leaseOwner: string;
+      succeeded: boolean;
+      leaseMs?: number;
+    },
+  ): Promise<void> {
+    const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
+    assertLeaseMs(leaseMs);
+    await this.transaction(async (client) => {
+      const current = await selectAuthorizedForUpdate(client, input);
+      assertActiveLease(current, input.leaseOwner);
+      if (!current.canonical_request_json)
+        throw new PersistenceConflictError("ANALYSIS_SOURCE_IDENTITY_INVALID");
+      await client.query(
+        `UPDATE chat_service.grounding_execution SET last_polled_at=now(),consecutive_poll_failures=CASE WHEN $4 THEN 0 ELSE LEAST(consecutive_poll_failures+1,1000000) END,lease_until=now()+($5::bigint*interval '1 millisecond'),version=version+1 WHERE grounding_id=$1 AND principal_id=$2 AND thread_id=$3`,
+        [
+          input.groundingId,
+          input.principalId,
+          input.threadId,
+          input.succeeded,
+          leaseMs,
+        ],
+      );
     });
   }
 
@@ -521,6 +549,7 @@ export class GroundingPersistenceRepository {
     readonly leaseOwner: string;
     readonly leaseMs?: number;
     readonly limit?: number;
+    readonly sourceOnly?: boolean;
   }): Promise<readonly GroundingExecution[]> {
     const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
     const limit = input.limit ?? 32;
@@ -533,13 +562,14 @@ export class GroundingPersistenceRepository {
         `
           SELECT *
           FROM chat_service.grounding_execution
-          WHERE state IN ('GROUNDING_PENDING', 'SDAR_SUBMISSION_RESERVED')
+          WHERE (state IN ('GROUNDING_PENDING', 'SDAR_SUBMISSION_RESERVED') OR ($2::boolean AND state='GROUNDING_READY'))
+            AND (NOT $2::boolean OR (canonical_request_json IS NOT NULL AND (last_source_status IS NULL OR last_source_status IN ('ACCEPTED','RUNNING') OR analysis_revision_id IS NULL OR NOT EXISTS(SELECT 1 FROM chat_service.analysis_projection p WHERE p.analysis_id=grounding_execution.analysis_id))))
             AND (lease_until IS NULL OR lease_until <= now())
           ORDER BY created_at, grounding_id
           FOR UPDATE SKIP LOCKED
           LIMIT $1
         `,
-        [limit],
+        [limit, input.sourceOnly ?? false],
       );
       const recovered: GroundingExecution[] = [];
       for (const candidate of candidates.rows) {

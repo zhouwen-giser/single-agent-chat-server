@@ -1,5 +1,9 @@
 import type { Pool, PoolClient } from "pg";
 import {
+  analysisRevisionSchema,
+  analysisRunSchema,
+} from "../../analysis-contract/src/index.js";
+import {
   sourceStatusMapping,
   type AnalysisSourceStatus,
 } from "../../analysis-contract/src/source.js";
@@ -195,6 +199,59 @@ export interface AppendAnalysisEventResult {
 export class AnalysisRepository {
   constructor(private readonly pool: Pool) {}
 
+  async getGroundingAnalysis(scope: AnalysisScope) {
+    const session = await this.findSession(scope);
+    if (!session) return undefined;
+    const result = await this.pool.query<{
+      revision: Record<string, unknown>;
+      run: Record<string, unknown>;
+      grounding_id: string;
+    }>(
+      `SELECT row_to_json(v) AS revision,row_to_json(r) AS run,g.grounding_id FROM chat_service.analysis_session s JOIN chat_service.analysis_revision v ON v.revision_id=s.active_revision_id JOIN chat_service.grounding_execution g ON g.analysis_revision_id=v.revision_id JOIN chat_service.analysis_run r ON r.run_id=g.analysis_run_id WHERE s.analysis_id=$1 AND s.principal_id=$2 AND s.thread_id=$3 AND g.principal_id=s.principal_id AND g.thread_id=s.thread_id`,
+      [scope.analysisId, scope.principalId, scope.threadId],
+    );
+    const row = result.rows[0];
+    if (!row) return undefined;
+    const v = row.revision;
+    const r = row.run;
+    const source = await this.getRevisionSource(
+      scope,
+      String(v["revision_id"]),
+    );
+    if (!source || source.kind !== "WSGS_GROUNDING_JOB") return undefined;
+    const revision = analysisRevisionSchema.parse({
+      schemaVersion: "sacs-analysis-revision/1.0",
+      revisionId: v["revision_id"],
+      analysisId: v["analysis_id"],
+      revisionNumber: v["revision_number"],
+      cause: v["cause"],
+      source,
+      changedPaths: v["changed_paths_json"],
+      reusedNodeIds: v["reused_node_ids_json"],
+      invalidatedNodeIds: v["invalidated_node_ids_json"],
+      rerunNodeIds: v["rerun_node_ids_json"],
+      status: v["status"],
+      createdAt: new Date(String(v["created_at"])).toISOString(),
+      ...(v["parent_revision_id"]
+        ? { parentRevisionId: v["parent_revision_id"] }
+        : {}),
+      ...(v["parent_run_id"] ? { parentRunId: v["parent_run_id"] } : {}),
+    });
+    const run = analysisRunSchema.parse({
+      schemaVersion: "sacs-analysis-run/1.0",
+      runId: r["run_id"],
+      revisionId: r["revision_id"],
+      attempt: r["attempt"],
+      status: r["status"],
+      startedAt: new Date(String(r["started_at"])).toISOString(),
+      ...(r["upstream_run_id"] ? { upstreamRunId: r["upstream_run_id"] } : {}),
+      ...(r["finished_at"]
+        ? { finishedAt: new Date(String(r["finished_at"])).toISOString() }
+        : {}),
+    });
+    return { session, revision, run, groundingExecutionId: row.grounding_id };
+  }
+
   /** Atomic source binding; only an already-authorized durable intent can bind. */
   async bindGroundingSource(input: {
     scope: AnalysisScope;
@@ -325,8 +382,9 @@ export class AnalysisRepository {
         last_source_status: AnalysisSourceStatus;
         last_observation_hash: string;
         grounding_result_hash: string | null;
+        cancel_requested: boolean;
       }>(
-        `SELECT g.last_source_status,g.last_observation_hash,g.grounding_result_hash FROM chat_service.grounding_execution g JOIN chat_service.analysis_run r ON r.run_id=g.analysis_run_id WHERE g.grounding_id=$1 AND g.principal_id=$2 AND g.thread_id=$3 AND g.analysis_id=$4 AND g.analysis_revision_id=$5 AND g.analysis_run_id=$6 AND NOT EXISTS(SELECT 1 FROM chat_service.analysis_run newer WHERE newer.revision_id=r.revision_id AND newer.attempt>r.attempt) FOR UPDATE OF g,r`,
+        `SELECT g.last_source_status,g.last_observation_hash,g.grounding_result_hash,g.cancel_requested FROM chat_service.grounding_execution g JOIN chat_service.analysis_run r ON r.run_id=g.analysis_run_id WHERE g.grounding_id=$1 AND g.principal_id=$2 AND g.thread_id=$3 AND g.analysis_id=$4 AND g.analysis_revision_id=$5 AND g.analysis_run_id=$6 AND NOT EXISTS(SELECT 1 FROM chat_service.analysis_run newer WHERE newer.revision_id=r.revision_id AND newer.attempt>r.attempt) FOR UPDATE OF g,r`,
         [
           input.groundingExecutionId,
           input.scope.principalId,
@@ -408,11 +466,31 @@ export class AnalysisRepository {
         );
       await client.query(
         `UPDATE chat_service.analysis_run SET status=$2,finished_at=CASE WHEN $2 IN ('SUCCEEDED','PARTIAL','FAILED','CANCELLED') THEN $3::timestamptz ELSE finished_at END WHERE run_id=$1`,
-        [input.runId, mapping.run, now],
+        [
+          input.runId,
+          g.cancel_requested &&
+          ["ACCEPTED", "RUNNING"].includes(g.last_source_status)
+            ? "CANCEL_REQUESTED"
+            : mapping.run,
+          now,
+        ],
       );
       await client.query(
         `UPDATE chat_service.analysis_session SET status=$2,updated_at=$3::timestamptz WHERE analysis_id=$1`,
         [input.scope.analysisId, mapping.session, now],
+      );
+      await client.query(
+        `UPDATE chat_service.analysis_revision SET status=$2 WHERE revision_id=$1`,
+        [
+          input.revisionId,
+          g.last_source_status === "COMPLETED"
+            ? "COMPLETED"
+            : ["PARTIAL", "UNRESOLVED"].includes(g.last_source_status)
+              ? "PARTIAL"
+              : ["FAILED", "CANCELLED"].includes(g.last_source_status)
+                ? "FAILED"
+                : "RUNNING",
+        ],
       );
       return committed.projection;
     });

@@ -32,6 +32,7 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
   constructor(
     readonly client: WsgsHttpClient,
     options: z.input<typeof bounds> = {},
+    private readonly onPoll?: (succeeded: boolean) => Promise<void>,
   ) {
     if (client.contractVersion !== "sacs-wsgs-grounding/1.1")
       throw new AnalysisSourceError("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
@@ -102,10 +103,10 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
       let snapshot: AnalysisSourceSnapshot;
       try {
         snapshot = await this.get(identity, signal);
-        failures = 0;
       } catch (error) {
         input.signal?.throwIfAborted();
         if (!(error instanceof WsgsHttpError) || !error.retryable) throw error;
+        await this.onPoll?.(false);
         if (++failures >= this.limits.maxConsecutiveFailures)
           throw new AnalysisSourceError(
             "ANALYSIS_SOURCE_OBSERVATION_LIMIT_EXCEEDED",
@@ -119,6 +120,9 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
         }
         continue;
       }
+      // Persistence errors are not transport failures and must stop this owner.
+      await this.onPoll?.(true);
+      failures = 0;
       const eventId = hashCanonicalJson({
         identity: snapshot.identity,
         status: snapshot.sourceStatus,

@@ -780,7 +780,7 @@ async function readBoundedJson(
   let size = 0;
   if (reader)
     try {
-      while (true) {
+      for (;;) {
         const part = await reader.read();
         if (part.done) break;
         size += part.value.byteLength;
@@ -798,9 +798,27 @@ async function readBoundedJson(
     throw new WsgsHttpError("WSGS_RESPONSE_TOO_LARGE", response.status);
   }
   try {
-    return JSON.parse(text) as unknown;
+    const value: unknown = JSON.parse(text);
+    assertJsonTraversalBound(value);
+    return value;
   } catch {
     throw new WsgsHttpError("WSGS_INVALID_JSON_RESPONSE", response.status);
+  }
+}
+
+function assertJsonTraversalBound(value: unknown): void {
+  const stack: { value: unknown; depth: number }[] = [{ value, depth: 0 }];
+  let nodes = 0;
+  while (stack.length) {
+    const item = stack.pop()!;
+    if (++nodes > 100_000 || item.depth > 32)
+      throw new WsgsHttpError("WSGS_RESPONSE_TOO_LARGE");
+    if (item.value !== null && typeof item.value === "object")
+      for (const [key, child] of Object.entries(item.value)) {
+        if (["__proto__", "constructor", "prototype"].includes(key))
+          throw new WsgsHttpError("WSGS_INVALID_JSON_RESPONSE");
+        stack.push({ value: child, depth: item.depth + 1 });
+      }
   }
 }
 
@@ -837,15 +855,15 @@ function assertNoForbiddenFields(
   value: unknown,
   forbidden: ReadonlySet<string>,
 ): void {
-  if (Array.isArray(value)) {
-    for (const item of value) assertNoForbiddenFields(item, forbidden);
-    return;
-  }
-  if (value === null || typeof value !== "object") return;
-  for (const [key, child] of Object.entries(value)) {
-    if (forbidden.has(key)) {
-      throw new WsgsHttpError("WSGS_FORBIDDEN_AUTHORITY_FIELD");
+  assertJsonTraversalBound(value);
+  const stack = [value];
+  while (stack.length) {
+    const item = stack.pop();
+    if (item === null || typeof item !== "object") continue;
+    for (const [key, child] of Object.entries(item)) {
+      if (forbidden.has(key))
+        throw new WsgsHttpError("WSGS_FORBIDDEN_AUTHORITY_FIELD");
+      stack.push(child);
     }
-    assertNoForbiddenFields(child, forbidden);
   }
 }

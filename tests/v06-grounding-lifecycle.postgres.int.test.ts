@@ -16,6 +16,10 @@ import {
 import { WSGS_V11_HEADERS } from "../packages/wsgs-geospatial-consumer/src/authoritative.js";
 import { hashCanonicalJson } from "../packages/world-explanation-contract/src/index.js";
 import type { AnalysisSourceSnapshot } from "../packages/analysis-contract/src/source.js";
+import { GroundingSourceAnalysisRuntime } from "../packages/analysis-runtime/src/grounding-source-runtime.js";
+import { AnalysisDevelopmentRepository } from "../packages/persistence/src/index.js";
+import { createGroundingSourceAnalysisControl } from "../packages/analysis-control-runtime/src/grounding-source-control.js";
+import { parseAndVerifyAgUiSharedStateV03 } from "../packages/analysis-contract/src/index.js";
 const connectionString = process.env.TEST_DATABASE_URL;
 const suite = connectionString ? describe : describe.skip;
 const read = (path: string) => JSON.parse(readFileSync(path, "utf8"));
@@ -104,6 +108,193 @@ suite("v06 durable Grounding lifecycle", () => {
     groundingId: input.groundingExecutionId,
     principalId: input.principalId,
     threadId: input.threadId,
+  });
+  function composed(fetchImpl: typeof fetch) {
+    const world: WorldGroundingRuntime = new WorldGroundingRuntime({
+      grounding,
+      requests,
+      wsgs: createWsgsHttpClient({
+        baseUrl: "http://wsgs.test",
+        contractVersion: "sacs-wsgs-grounding/1.1",
+        fetchImpl,
+      }),
+      sdarCompatibilityLock: read(
+        "dependencies/sdar-grounding-extension-compatibility-lock.json",
+      ),
+      onSourceStarted: (execution, owner) => source.accept(execution, owner),
+      awaitSourceCompletion: (input) => source.complete(input),
+    });
+    const source: GroundingSourceAnalysisRuntime =
+      new GroundingSourceAnalysisRuntime({
+        analysis: new AnalysisRepository(pool),
+        grounding,
+        world,
+      });
+    return { source, world };
+  }
+  it("uses one shared pump for concurrent waits and durable full snapshots", async () => {
+    const input = await seed();
+    let polls = 0;
+    const final = {
+      ...read(
+        "dependencies/wsgs-v06/examples/grounding-result-with-geospatial-findings.json",
+      ),
+      requestId: input.requestId,
+      groundingId: job(input).groundingId,
+    };
+    const { source, world } = composed(async (url, init) =>
+      String(url).endsWith("capabilities")
+        ? json(
+            read(
+              "dependencies/wsgs-v06/examples/capabilities-response-v1.1.json",
+            ),
+          )
+        : init?.method === "POST"
+          ? json(job(input), 202)
+          : json(
+              ++polls < 2
+                ? job(input, "RUNNING")
+                : { ...job(input, "COMPLETED"), result: final },
+            ),
+    );
+    await world.beginWorldGrounding(input);
+    const analysisScope = {
+      analysisId: input.analysisId,
+      principalId: input.principalId,
+      threadId: input.threadId,
+    };
+    await Promise.all(
+      Array.from({ length: 10 }, () => source.pump.ensure(analysisScope)),
+    );
+    const answers = await Promise.all([
+      world.completeWorldGrounding(input),
+      world.completeWorldGrounding(input),
+    ]);
+    expect(answers[0].resultHash).toBe(final.resultHash);
+    expect(answers[1]).toEqual(answers[0]);
+    expect(polls).toBe(2);
+    const projection = await source.getProjection(analysisScope);
+    expect(projection?.state["worldExplanation"]).toMatchObject({
+      status: "COMPLETED",
+    });
+    expect(source.pump.status(analysisScope)?.subscriptionCount).toBe(1);
+    expect(
+      (projection?.state["analysis"] as { nodesById: unknown }).nodesById,
+    ).toEqual({});
+    expect(() =>
+      parseAndVerifyAgUiSharedStateV03(projection?.state),
+    ).not.toThrow();
+  });
+  it("recovers a bound-missing cancelled intent with no second Grounding create", async () => {
+    const input = await seed();
+    await runtime(async (url) =>
+      String(url).endsWith("capabilities")
+        ? json(
+            read(
+              "dependencies/wsgs-v06/examples/capabilities-response-v1.1.json",
+            ),
+          )
+        : json(job(input), 202),
+    ).beginWorldGrounding(input);
+    await grounding.requestSourceCancellation(scope(input));
+    await pool.query(
+      "UPDATE chat_service.grounding_execution SET lease_until=now()-interval '1 second',version=version+1 WHERE grounding_id=$1",
+      [input.groundingExecutionId],
+    );
+    const calls: string[] = [];
+    const { source, world } = composed(async (url, init) => {
+      calls.push((init?.method ?? "GET") + " " + String(url));
+      return json(
+        job(input, String(url).endsWith(":cancel") ? "ACCEPTED" : "CANCELLED"),
+      );
+    });
+    expect(await source.recover()).toBeGreaterThanOrEqual(1);
+    await expect(world.completeWorldGrounding(input)).rejects.toThrow(
+      "WSGS_CANCELLED",
+    );
+    expect(calls.every((call) => !call.endsWith("/v1/groundings"))).toBe(true);
+    expect(calls.some((call) => call.endsWith(":cancel"))).toBe(true);
+    expect(
+      (
+        await source.getProjection({
+          analysisId: input.analysisId,
+          principalId: input.principalId,
+          threadId: input.threadId,
+        })
+      )?.state["worldExplanation"],
+    ).toMatchObject({ status: "CANCELLED" });
+  });
+  it("fences cancellation before dispatch and keeps uncertainty CANCEL_REQUESTED", async () => {
+    const input = await seed();
+    await pool.query(
+      "UPDATE chat_service.principal SET issuer='openwebui-jwt' WHERE principal_id=$1",
+      [input.principalId],
+    );
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let cancels = 0;
+    const fetchImpl: typeof fetch = async (url, init) => {
+      if (String(url).endsWith("capabilities"))
+        return json(
+          read(
+            "dependencies/wsgs-v06/examples/capabilities-response-v1.1.json",
+          ),
+        );
+      if (String(url).endsWith(":cancel")) {
+        cancels++;
+        expect((await grounding.get(scope(input)))?.cancelRequested).toBe(true);
+        throw Error("synthetic lost response");
+      }
+      if (init?.method === "POST") return json(job(input), 202);
+      await gate;
+      return json(job(input, "CANCELLED"));
+    };
+    const { source, world } = composed(fetchImpl);
+    await world.beginWorldGrounding(input);
+    const analysis = new AnalysisRepository(pool);
+    const control = createGroundingSourceAnalysisControl({
+      runtime: source,
+      analysis,
+      grounding,
+      store: new AnalysisDevelopmentRepository(pool, analysis),
+      wsgs: createWsgsHttpClient({
+        baseUrl: "http://wsgs.test",
+        contractVersion: "sacs-wsgs-grounding/1.1",
+        fetchImpl,
+      }),
+    });
+    const requestScope = {
+      analysisId: input.analysisId,
+      userId: input.principalId,
+      userRole: "user",
+    };
+    const command = {
+      commandId: "cancel-1",
+      expectedRevisionId: input.revisionId,
+      expectedRevisionNumber: 0,
+      idempotencyKey: "cancel-key-1",
+      reason: "USER_REQUESTED" as const,
+    };
+    try {
+      expect(await control.requestCancel(requestScope, command)).toMatchObject({
+        status: "CANCEL_REQUESTED",
+        acknowledged: false,
+      });
+      expect(await control.requestCancel(requestScope, command)).toMatchObject({
+        status: "CANCEL_REQUESTED",
+      });
+      expect(cancels).toBe(1);
+      await expect(
+        control.getSnapshot({ ...requestScope, userId: "foreign" }),
+      ).rejects.toMatchObject({ statusCode: 404 });
+    } finally {
+      release();
+    }
+    await expect(world.completeWorldGrounding(input)).rejects.toThrow(
+      "WSGS_CANCELLED",
+    );
   });
   it("persists exact intent before network, returns ACCEPTED and replays without resubmission", async () => {
     const input = await seed();
@@ -216,6 +407,48 @@ suite("v06 durable Grounding lifecycle", () => {
       ).changed,
     ).toBe(true);
     const count = (await grounding.events(scope(input))).length;
+    await grounding.recordSourcePoll({
+      ...scope(input),
+      leaseOwner: input.leaseOwner,
+      succeeded: false,
+    });
+    await grounding.recordSourcePoll({
+      ...scope(input),
+      leaseOwner: input.leaseOwner,
+      succeeded: false,
+    });
+    expect(
+      (
+        await pool.query(
+          "SELECT consecutive_poll_failures FROM chat_service.grounding_execution WHERE grounding_id=$1",
+          [input.groundingExecutionId],
+        )
+      ).rows[0].consecutive_poll_failures,
+    ).toBe(2);
+    await expect(
+      grounding.recordSourcePoll({
+        ...scope(input),
+        leaseOwner: "foreign",
+        succeeded: true,
+      }),
+    ).rejects.toThrow();
+    await grounding.recordSourcePoll({
+      ...scope(input),
+      leaseOwner: input.leaseOwner,
+      succeeded: true,
+    });
+    expect(
+      (
+        await pool.query(
+          "SELECT consecutive_poll_failures,last_polled_at FROM chat_service.grounding_execution WHERE grounding_id=$1",
+          [input.groundingExecutionId],
+        )
+      ).rows[0],
+    ).toMatchObject({
+      consecutive_poll_failures: 0,
+      last_polled_at: expect.any(Date),
+    });
+    expect(await grounding.events(scope(input))).toHaveLength(count);
     expect(
       (
         await grounding.recordSourceSnapshot({
