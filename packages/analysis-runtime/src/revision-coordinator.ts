@@ -60,6 +60,13 @@ export async function compileImmutableRevision(
   if (input.currentRevision.analysisId !== input.analysisId) {
     throw new Error("ANALYSIS_REVISION_SCOPE_MISMATCH");
   }
+  if (
+    !input.currentRevision.wsgsPlanId ||
+    !input.currentRevision.planHash ||
+    input.currentRevision.source?.kind === "WSGS_GROUNDING_JOB"
+  ) {
+    throw new Error("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
+  }
   const result = await port.compileRevision({
     analysisId: input.analysisId,
     commandId: input.commandId,

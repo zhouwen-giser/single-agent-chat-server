@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export * from "./source.js";
+import { analysisSourceIdentitySchema } from "./source.js";
+
 import {
   canonicalJson,
   hashCanonicalJson,
@@ -70,8 +73,9 @@ export const analysisRevisionSchema = z
       "SOURCE_ADVANCED",
       "AUTOMATIC_RETRY",
     ]),
-    wsgsPlanId: analysisIdSchema,
-    planHash: sha256Schema,
+    wsgsPlanId: analysisIdSchema.optional(),
+    planHash: sha256Schema.optional(),
+    source: analysisSourceIdentitySchema.optional(),
     changedPaths: z.array(z.string().regex(/^\//u)).max(128),
     reusedNodeIds: z.array(analysisIdSchema).max(ANALYSIS_MAX_NODES),
     invalidatedNodeIds: z.array(analysisIdSchema).max(ANALYSIS_MAX_NODES),
@@ -88,7 +92,20 @@ export const analysisRevisionSchema = z
     ]),
     createdAt: analysisDateTimeSchema,
   })
-  .strict();
+  .strict()
+  .superRefine((revision, context) => {
+    const job = revision.source?.kind === "WSGS_GROUNDING_JOB";
+    if (
+      job
+        ? revision.wsgsPlanId !== undefined || revision.planHash !== undefined
+        : !revision.wsgsPlanId || !revision.planHash
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "ANALYSIS_SOURCE_IDENTITY_INVALID",
+      });
+    }
+  });
 
 export const analysisRunSchema = z
   .object({

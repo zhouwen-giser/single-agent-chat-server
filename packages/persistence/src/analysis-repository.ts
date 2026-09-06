@@ -1,4 +1,9 @@
 import type { Pool, PoolClient } from "pg";
+import {
+  analysisSourceIdentitySchema,
+  parseWritableAnalysisSource,
+  type AnalysisSourceIdentity,
+} from "../../analysis-contract/src/source.js";
 
 import { hashJson } from "./hash.js";
 import {
@@ -44,8 +49,9 @@ export interface AnalysisRevision {
     | "AMBIGUITY_RESOLUTION"
     | "SOURCE_ADVANCED"
     | "AUTOMATIC_RETRY";
-  readonly wsgsPlanId: string;
-  readonly planHash: string;
+  readonly wsgsPlanId?: string;
+  readonly planHash?: string;
+  readonly source?: AnalysisSourceIdentity;
   readonly changedPaths: readonly string[];
   readonly reusedNodeIds: readonly string[];
   readonly invalidatedNodeIds: readonly string[];
@@ -184,6 +190,39 @@ export interface AppendAnalysisEventResult {
 
 export class AnalysisRepository {
   constructor(private readonly pool: Pool) {}
+
+  async getRevisionSource(
+    scope: AnalysisScope,
+    revisionId: string,
+  ): Promise<AnalysisSourceIdentity | undefined> {
+    const result = await this.pool.query<{
+      source_kind: string;
+      source_id: string;
+      source_hash: string;
+      source_revision: number | null;
+      source_upstream_run_id: string | null;
+    }>(
+      `SELECT r.source_kind,r.source_id,r.source_hash,r.source_revision,r.source_upstream_run_id
+       FROM chat_service.analysis_revision r JOIN chat_service.analysis_session s USING(analysis_id)
+       WHERE s.analysis_id=$1 AND s.principal_id=$2 AND s.thread_id=$3 AND r.revision_id=$4`,
+      [scope.analysisId, scope.principalId, scope.threadId, revisionId],
+    );
+    const row = result.rows[0];
+    if (!row) return undefined;
+    return analysisSourceIdentitySchema.parse({
+      kind: row.source_kind,
+      sourceId: row.source_id,
+      sourceHash: row.source_hash,
+      ...(row.source_revision === null
+        ? {}
+        : { sourceRevision: row.source_revision }),
+      ...(row.source_kind === "LEGACY_PLAN"
+        ? { readOnly: true }
+        : row.source_upstream_run_id === null
+          ? {}
+          : { upstreamRunId: row.source_upstream_run_id }),
+    });
+  }
 
   async createSessionWithInitialRevision(input: {
     readonly session: AnalysisSession;
@@ -942,10 +981,10 @@ async function insertRevision(
         revision_id, analysis_id, revision_number, parent_revision_id,
         parent_run_id, cause, wsgs_plan_id, plan_hash, changed_paths_json,
         reused_node_ids_json, invalidated_node_ids_json, rerun_node_ids_json,
-        status, created_at
+        status, created_at, source_kind, source_id, source_hash, source_revision, source_upstream_run_id
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb,
-        $11::jsonb, $12::jsonb, $13, $14::timestamptz
+        $11::jsonb, $12::jsonb, $13, $14::timestamptz, $15, $16, $17, $18, $19
       )
     `,
     [
@@ -963,6 +1002,15 @@ async function insertRevision(
       JSON.stringify(revision.rerunNodeIds),
       revision.status,
       revision.createdAt,
+      revision.source?.kind ?? null,
+      revision.source?.sourceId ?? null,
+      revision.source?.sourceHash ?? null,
+      revision.source && "sourceRevision" in revision.source
+        ? (revision.source.sourceRevision ?? null)
+        : null,
+      revision.source && "upstreamRunId" in revision.source
+        ? (revision.source.upstreamRunId ?? null)
+        : null,
     ],
   );
 }
@@ -1411,8 +1459,21 @@ function assertInitialSession(
 function assertRevision(revision: AnalysisRevision): void {
   assertIdentifier(revision.revisionId, "revisionId");
   assertIdentifier(revision.analysisId, "analysisId");
-  assertIdentifier(revision.wsgsPlanId, "wsgsPlanId");
-  assertSha256(revision.planHash, "planHash");
+  if (revision.source !== undefined)
+    parseWritableAnalysisSource(revision.source);
+  if (revision.source?.kind !== "WSGS_GROUNDING_JOB") {
+    if (!revision.wsgsPlanId || !revision.planHash)
+      throw new PersistenceConflictError("Native plan identity required");
+    assertIdentifier(revision.wsgsPlanId, "wsgsPlanId");
+    assertSha256(revision.planHash, "planHash");
+  } else if (
+    revision.wsgsPlanId !== undefined ||
+    revision.planHash !== undefined
+  ) {
+    throw new PersistenceConflictError(
+      "Grounding jobs cannot carry Native plan identity",
+    );
+  }
   timestamp(revision.createdAt, "createdAt");
   if (
     !Number.isInteger(revision.revisionNumber) ||

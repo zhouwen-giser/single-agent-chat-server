@@ -2086,10 +2086,10 @@ async function insertRevision(
         revision_id, analysis_id, revision_number, parent_revision_id,
         parent_run_id, cause, wsgs_plan_id, plan_hash, changed_paths_json,
         reused_node_ids_json, invalidated_node_ids_json, rerun_node_ids_json,
-        status, created_at
+        status, created_at, source_kind, source_id, source_hash, source_revision
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb,
-        $11::jsonb, $12::jsonb, $13, $14::timestamptz
+        $11::jsonb, $12::jsonb, $13, $14::timestamptz, 'FIXTURE', $7, $8, $3
       )
     `,
     [

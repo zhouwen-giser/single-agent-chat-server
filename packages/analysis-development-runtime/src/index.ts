@@ -375,6 +375,8 @@ class AnalysisDevelopmentPumpSupervisor {
     stored: AnalysisDevelopmentSnapshot,
   ): Promise<PumpStopReason> {
     const plan = durablePlanIdentity(stored.projection);
+    if (!stored.currentRevision.wsgsPlanId || !stored.currentRevision.planHash)
+      throw new Error("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
     const guard = new WsgsAnalysisEventIntegrityGuard({
       upstreamAnalysisId: plan.upstreamAnalysisId,
       planId: stored.currentRevision.wsgsPlanId,

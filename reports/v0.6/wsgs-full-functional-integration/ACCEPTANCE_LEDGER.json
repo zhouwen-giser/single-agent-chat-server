@@ -6,112 +6,178 @@
     {
       "id": "V06-S00-001",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S00-002",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S00-003",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S00-004",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S00-005",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S00-006",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S00-007",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S00-008",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S00-009",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S00-010",
       "status": "PASS",
-      "evidenceRefs": ["SOURCE_LOCK.json", "S00.json"]
+      "evidenceRefs": [
+        "SOURCE_LOCK.json",
+        "S00.json"
+      ]
     },
     {
       "id": "V06-S01-001",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/v06-analysis-source.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S01-002",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/v06-analysis-source.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S01-003",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "packages/analysis-contract/src/source.ts"
+      ]
     },
     {
       "id": "V06-S01-004",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/v06-source-bridge.unit.test.ts"
+      ]
     },
     {
       "id": "V06-S01-005",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/v06-source-bridge.unit.test.ts"
+      ]
     },
     {
       "id": "V06-S01-006",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/v06-source-persistence.postgres.int.test.ts"
+      ]
     },
     {
       "id": "V06-S01-007",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/v06-source-persistence.postgres.int.test.ts"
+      ]
     },
     {
       "id": "V06-S01-008",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "migrations/0017_analysis_source_identity.sql"
+      ]
     },
     {
       "id": "V06-S01-009",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/v06-source-persistence.postgres.int.test.ts"
+      ]
     },
     {
       "id": "V06-S01-010",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/analysis-persistence.postgres.int.test.ts"
+      ]
     },
     {
       "id": "V06-S01-011",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/v06-source-persistence.postgres.int.test.ts"
+      ]
     },
     {
       "id": "V06-S01-012",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S01.json",
+        "tests/v06-analysis-source.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-001",
