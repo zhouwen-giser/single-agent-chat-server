@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 const upstream = resolve(
@@ -10,6 +10,10 @@ const commit = "565e52705bb7656d4623a04655001325ca61acd0";
 const directory = "contracts/wsgs-v0.2.1-sacs-geospatial";
 const destination = "dependencies/wsgs-v06";
 const reports = "reports/v0.6/wsgs-full-functional-integration";
+if (existsSync(`${reports}/ACCEPTANCE_LEDGER.json`))
+  throw Error(
+    "V06_INTAKE_ALREADY_INITIALIZED: preserve the existing ledger; use phase verification instead of resetting intake.",
+  );
 const hash = (value) =>
   "sha256:" + createHash("sha256").update(value).digest("hex");
 const git = (...args) => execFileSync("git", args, { encoding: "utf8" }).trim();

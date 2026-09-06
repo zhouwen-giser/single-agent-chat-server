@@ -1,7 +1,7 @@
 {
   "schemaVersion": "sacs-v06-progressive-status/1.0",
-  "sourceSha": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
-  "updatedAt": "2026-09-06T07:47:56.267Z",
+  "sourceSha": "70c0a5ec30a165144bc706f0a9c21cd3c1cf8f26",
+  "updatedAt": "2026-09-06T07:51:11Z",
   "development": "IN_PROGRESS",
   "realWsgsIntegration": "NOT_STARTED",
   "release": "NOT_REQUESTED",
@@ -9,6 +9,9 @@
     "SACS_WSGS_NATIVE_ANALYSIS_CONTROL_DEFERRED",
     "SACS_V06_OBSERVED_GROUNDING_RUNTIME_READY"
   ],
-  "pendingReasons": [],
+  "pendingReasons": [
+    "WSGS_REAL_ENVIRONMENT_MISSING",
+    "V06_DEVELOPMENT_NOT_COMPLETE"
+  ],
   "hardFailures": []
 }
