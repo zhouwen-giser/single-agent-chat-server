@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "sacs-v06-source-lock/1.0",
+  "capturedAt": "2026-01-01T00:00:00Z",
+  "taskPackage": {
+    "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "verified": true
+  },
+  "sacs": {
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "branch": "REPLACE_AT_S00",
+    "commit": "0000000000000000000000000000000000000000",
+    "treeStatus": "CLEAN",
+    "remote": "origin",
+    "observedAt": "2026-01-01T00:00:00Z"
+  },
+  "wsgs": {
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "branch": "main",
+    "commit": "0000000000000000000000000000000000000000",
+    "treeStatus": "CLEAN",
+    "remote": "origin",
+    "observedAt": "2026-01-01T00:00:00Z",
+    "contractArtifacts": [
+      {
+        "path": "contracts/wsgs-v0.2.1-sacs-geospatial/contract-release-lock.json",
+        "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
+  },
+  "toolchain": {
+    "node": "REPLACE",
+    "pnpm": "REPLACE",
+    "postgresql": "REPLACE",
+    "python": "REPLACE",
+    "git": "REPLACE"
+  },
+  "worktree": {
+    "clean": true,
+    "statusDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "preservedChanges": []
+  },
+  "notes": [
+    "Replace all zero/REPLACE values during S00; do not commit this template as evidence."
+  ]
+}

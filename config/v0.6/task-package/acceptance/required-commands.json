@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "sacs-v06-required-commands/1.0",
+  "packageId": "sacs-v0.6-wsgs-full-functional-integration-codex-goal",
+  "notes": [
+    "Codex may refine implementation filenames, but these semantic command entrypoints must exist by S07.",
+    "Commands must return non-zero on failure and produce source-bound machine-readable evidence where noted.",
+    "Do not make verify:v06:development invoke real WSGS or release-only work."
+  ],
+  "commands": [
+    {
+      "name": "pnpm test:v06:contracts",
+      "track": "DEVELOPMENT",
+      "requiredBy": "S04",
+      "purpose": "Run v0.6 source, negotiation, result, view-model and AG-UI contract tests."
+    },
+    {
+      "name": "pnpm test:v06:unit",
+      "track": "DEVELOPMENT",
+      "requiredBy": "S06",
+      "purpose": "Run focused v0.6 unit/state-machine/projection tests."
+    },
+    {
+      "name": "pnpm test:v06:postgres",
+      "track": "DEVELOPMENT",
+      "requiredBy": "S03",
+      "purpose": "Run real PostgreSQL migration, source identity, lease, recovery and scope tests."
+    },
+    {
+      "name": "pnpm test:v06:local-e2e",
+      "track": "DEVELOPMENT",
+      "requiredBy": "S07",
+      "purpose": "Run actual-listener SACS HTTP/AG-UI E2E with real PostgreSQL and controlled upstream adapter."
+    },
+    {
+      "name": "pnpm check:v06:integration-readiness",
+      "track": "REAL_WSGS_INTEGRATION",
+      "requiredBy": "S08",
+      "purpose": "Inspect locked WSGS source, contract and configured environment without claiming execution."
+    },
+    {
+      "name": "pnpm test:v06:real-wsgs",
+      "track": "REAL_WSGS_INTEGRATION",
+      "requiredBy": "S08",
+      "purpose": "Run source-built/approved real SACS→WSGS Grounding Job E2E and write bounded evidence."
+    },
+    {
+      "name": "pnpm verify:v06:development",
+      "track": "DEVELOPMENT",
+      "requiredBy": "S07",
+      "purpose": "Run all development-track commands, migrations, architecture, secrets, lint, typecheck and build; write DEVELOPMENT_VERIFICATION.json."
+    },
+    {
+      "name": "pnpm verify:v06:integration",
+      "track": "REAL_WSGS_INTEGRATION",
+      "requiredBy": "S08",
+      "purpose": "Require readiness, execute real WSGS tests and validate INTEGRATION_EVIDENCE.json."
+    },
+    {
+      "name": "pnpm verify:v06:release",
+      "track": "RELEASE",
+      "requiredBy": "S09",
+      "purpose": "Run release-only container/SBOM/compose checks only with explicit release authorization."
+    },
+    {
+      "name": "pnpm verify:v06",
+      "track": "DEVELOPMENT",
+      "requiredBy": "S09",
+      "purpose": "Run development verification and evidence consistency; must not silently execute release work."
+    },
+    {
+      "name": "pnpm verify:v06:evidence",
+      "track": "DEVELOPMENT",
+      "requiredBy": "S09",
+      "purpose": "Validate source locks, per-row evidence, digests and completion markers."
+    }
+  ]
+}

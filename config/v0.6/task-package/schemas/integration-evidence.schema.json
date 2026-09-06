@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.6:integration-evidence",
+  "title": "SACS v0.6 Real WSGS Integration Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "capturedAt",
+    "sacs",
+    "wsgs",
+    "services",
+    "cases",
+    "networkBoundary",
+    "cleanup",
+    "decision",
+    "evidenceDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-v06-integration-evidence/1.0"
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sacs": {
+      "$ref": "#/$defs/source"
+    },
+    "wsgs": {
+      "$ref": "#/$defs/source"
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "implementation",
+          "endpointDigest",
+          "real"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "SACS",
+              "WSGS_API",
+              "WSGS_WORKER",
+              "POSTGRESQL",
+              "SDAR",
+              "OTHER"
+            ]
+          },
+          "implementation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "endpointDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "real": {
+            "type": "boolean"
+          },
+          "processEvidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "caseId",
+          "status",
+          "acceptanceIds",
+          "evidenceRefs"
+        ],
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "pattern": "^E2E-V06-[0-9]{3}$"
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "BLOCKED_EXTERNAL",
+              "NOT_RUN"
+            ]
+          },
+          "acceptanceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^V06-S[0-9]{2}-[0-9]{3}$"
+            }
+          },
+          "evidenceRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "safeDetail": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        }
+      }
+    },
+    "networkBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "observedDestinationDigests",
+        "forbiddenConnectionsObserved"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "NOT_RUN"
+          ]
+        },
+        "observedDestinationDigests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "forbiddenConnectionsObserved": {
+          "type": "boolean"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "safeDetail"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "NOT_RUN"
+          ]
+        },
+        "safeDetail": {
+          "type": "string",
+          "maxLength": 2000
+        }
+      }
+    },
+    "decision": {
+      "enum": [
+        "READY",
+        "PARTIAL_EXTERNAL_BLOCKERS",
+        "FAILED"
+      ]
+    },
+    "evidenceDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "branch",
+        "commit",
+        "worktreeDigest"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "worktreeDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "contractDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

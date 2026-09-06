@@ -6,6 +6,10 @@ This repository owns a single-SDAR conversational entrance service.
 
 It owns:
 
+- WSGS northbound Grounding Job consumption, world focus and safe world explanations;
+- durable Analysis Session/Revision/Run projections and AG-UI v0.2/v0.3 protocol adapters;
+- text, map, timeline and non-executing historical candidate presentation;
+
 - an OpenAI-compatible chat API for Open WebUI;
 - a small LangGraph chat state machine;
 - one isolated SDAR A2A 1.0 HTTP+JSON client adapter;
@@ -19,7 +23,7 @@ It does not own:
 - SDAR Goal, Skill, Plan, Workflow, MCP Task, Provider or Evidence state;
 - Agent Mesh, Registry, multi-agent routing or capability discovery;
 - MCP Client/Provider or resource execution;
-- ClickHouse, evaluation or AG-UI implementation.
+- upstream databases, Provider algorithms, evaluation or the AG-UI framework itself.
 
 ## Frozen A2A baseline
 
@@ -52,7 +56,7 @@ Use `sendMessageStream`, `sendMessage`, `getTask`, and `cancelTask`. Do not impl
 ## Git rules
 
 - Protected `main`, PR-only changes.
-- Feature branch: `feature/single-sdar-chat-entry-v0.1`.
+- Active v0.6 branch: `codex/sacs-v0.6-wsgs-full-functional-integration`, based on the complete v0.5 branch (or main after equivalent merge).
 - No rebase or force-push after remote publication.
 - Prefer small semantic commits.
 - Open a Draft PR after Phase 0 and update it every phase.

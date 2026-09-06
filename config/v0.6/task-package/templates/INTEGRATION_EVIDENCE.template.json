@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "sacs-v06-integration-evidence/1.0",
+  "capturedAt": "2026-01-01T00:00:00Z",
+  "sacs": {
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "branch": "REPLACE",
+    "commit": "0000000000000000000000000000000000000000",
+    "worktreeDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "wsgs": {
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "branch": "main",
+    "commit": "0000000000000000000000000000000000000000",
+    "worktreeDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "contractDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "services": [],
+  "cases": [],
+  "networkBoundary": {
+    "status": "NOT_RUN",
+    "observedDestinationDigests": [],
+    "forbiddenConnectionsObserved": false,
+    "evidenceRefs": []
+  },
+  "cleanup": {
+    "status": "NOT_RUN",
+    "safeDetail": "Replace during S08."
+  },
+  "decision": "FAILED",
+  "evidenceDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+}

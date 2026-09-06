@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "sacs-v06-phase-plan/1.0",
+  "packageId": "sacs-v0.6-wsgs-full-functional-integration-codex-goal",
+  "phases": [
+    {
+      "id": "S00",
+      "title": "Source Lock and Baseline Reconciliation",
+      "file": "phases/S00_SOURCE_LOCK_AND_RECONCILIATION.md",
+      "dependsOn": [],
+      "completionMarker": "SACS_V06_S00_BASELINE_READY",
+      "recommendedCommit": "chore(v0.6): lock SACS and WSGS integration baselines",
+      "track": "DEVELOPMENT"
+    },
+    {
+      "id": "S01",
+      "title": "Analysis Source Abstraction and Truthful Persistence",
+      "file": "phases/S01_ANALYSIS_SOURCE_AND_MIGRATION.md",
+      "dependsOn": [
+        "S00"
+      ],
+      "completionMarker": "SACS_V06_ANALYSIS_SOURCE_READY",
+      "recommendedCommit": "feat(v0.6): add truthful analysis source abstraction",
+      "track": "DEVELOPMENT"
+    },
+    {
+      "id": "S02",
+      "title": "Authoritative WSGS Negotiation and Grounding Job Adapter",
+      "file": "phases/S02_WSGS_NEGOTIATION_AND_GROUNDING_JOB_ADAPTER.md",
+      "dependsOn": [
+        "S01"
+      ],
+      "completionMarker": "SACS_V06_WSGS_GROUNDING_JOB_ADAPTER_READY",
+      "recommendedCommit": "feat(v0.6): integrate authoritative WSGS grounding job transport",
+      "track": "DEVELOPMENT"
+    },
+    {
+      "id": "S03",
+      "title": "Observed Grounding Lifecycle, Pump and Recovery",
+      "file": "phases/S03_OBSERVED_LIFECYCLE_PUMP_AND_RECOVERY.md",
+      "dependsOn": [
+        "S02"
+      ],
+      "completionMarker": "SACS_V06_OBSERVED_GROUNDING_RUNTIME_READY",
+      "recommendedCommit": "feat(v0.6): add durable observed grounding lifecycle",
+      "track": "DEVELOPMENT"
+    },
+    {
+      "id": "S04",
+      "title": "WSGS Result Consumer and Unified View Model",
+      "file": "phases/S04_RESULT_CONSUMER_AND_VIEW_MODEL.md",
+      "dependsOn": [
+        "S03"
+      ],
+      "completionMarker": "SACS_V06_WORLD_ANALYSIS_VIEW_READY",
+      "recommendedCommit": "feat(v0.6): normalize WSGS findings into world analysis view",
+      "track": "DEVELOPMENT"
+    },
+    {
+      "id": "S05",
+      "title": "Text, Map, Timeline and AG-UI Projection",
+      "file": "phases/S05_TEXT_MAP_TIMELINE_AND_AGUI.md",
+      "dependsOn": [
+        "S04"
+      ],
+      "completionMarker": "SACS_V06_WORLD_ANALYSIS_PRESENTATION_READY",
+      "recommendedCommit": "feat(v0.6): project world analysis to text map timeline and AG-UI",
+      "track": "DEVELOPMENT"
+    },
+    {
+      "id": "S06",
+      "title": "Multi-turn, Intervention, Revision and Cancel",
+      "file": "phases/S06_MULTITURN_INTERVENTION_REVISION_CANCEL.md",
+      "dependsOn": [
+        "S05"
+      ],
+      "completionMarker": "SACS_V06_WORLD_ANALYSIS_MULTITURN_READY",
+      "recommendedCommit": "feat(v0.6): add multiturm world analysis controls",
+      "track": "DEVELOPMENT"
+    },
+    {
+      "id": "S07",
+      "title": "Production Composition, Configuration and Operations",
+      "file": "phases/S07_PRODUCTION_COMPOSITION_AND_OPERATIONS.md",
+      "dependsOn": [
+        "S06"
+      ],
+      "completionMarker": "SACS_V06_RUNTIME_WIRED",
+      "recommendedCommit": "feat(v0.6): wire WSGS analysis into production server",
+      "track": "DEVELOPMENT"
+    },
+    {
+      "id": "S08",
+      "title": "Real WSGS Integration",
+      "file": "phases/S08_REAL_WSGS_INTEGRATION.md",
+      "dependsOn": [
+        "S07"
+      ],
+      "completionMarker": "SACS_WSGS_GROUNDING_JOB_REAL_INTEGRATION_READY",
+      "recommendedCommit": "test(v0.6): qualify real SACS WSGS grounding integration",
+      "track": "REAL_WSGS_INTEGRATION"
+    },
+    {
+      "id": "S09",
+      "title": "Final Qualification and Draft PR",
+      "file": "phases/S09_FINAL_QUALIFICATION_AND_PR.md",
+      "dependsOn": [
+        "S08"
+      ],
+      "completionMarker": "SACS_V06_FINAL_EVIDENCE_READY",
+      "recommendedCommit": "docs(v0.6): publish source-bound integration evidence",
+      "track": "RELEASE"
+    }
+  ]
+}

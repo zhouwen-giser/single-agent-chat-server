@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "sacs-v06-task-source-baseline/1.0",
+  "generatedAt": "2026-09-06T05:32:35Z",
+  "purpose": "OBSERVED_ONLY_RELOCK_AT_EXECUTION",
+  "sacs": {
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "preferredBaseBranch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "observedHead": "0cce422873f69df1ea7b78f72067dcd48e3c6b51",
+    "observedPullRequest": 18,
+    "fallbackBranch": "main",
+    "observedMainHead": "a957cdaa60dec5a2b3d291f2a97a2ff96a72a182",
+    "requiredExistingComponents": [
+      "analysis-contract",
+      "analysis-control-runtime",
+      "analysis-development-runtime",
+      "analysis-runtime",
+      "wsgs-analysis-adapter",
+      "wsgs-analysis-consumer",
+      "ag-ui-analysis-adapter",
+      "analysis-client",
+      "migration 0015 interactive analysis",
+      "v0.5 progressive reports and verification"
+    ]
+  },
+  "wsgs": {
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "authoritativeBranch": "main",
+    "observedHead": "565e52705bb7656d4623a04655001325ca61acd0",
+    "observedGeospatialBranch": "codex/wsgs-v0.2.1-sacs-geospatial-handoff",
+    "observedGeospatialBranchHead": "8c78600a8886f13cd9f4f418f9297cf9ecf39c32",
+    "authoritativeContractDirectory": "contracts/wsgs-v0.2.1-sacs-geospatial",
+    "authoritativeReleaseLock": "contracts/wsgs-v0.2.1-sacs-geospatial/contract-release-lock.json",
+    "observedContractVersion": "sacs-wsgs-grounding/1.1",
+    "observedResultProfile": "sacs-wsgs-geospatial-findings/1.0",
+    "observedTransport": "RESULT_EXTENSION",
+    "observedEndpoints": [
+      "GET /v1/capabilities",
+      "POST /v1/groundings",
+      "GET /v1/groundings/:groundingId",
+      "POST /v1/groundings/:groundingId:cancel"
+    ],
+    "observedOptionalCapabilities": {
+      "RESOLVE_WORLD_SELECTION": {
+        "available": false,
+        "reason": "IMPLEMENTATION_PENDING_N05"
+      },
+      "VALIDATE_SOURCE_CURRENTNESS": {
+        "available": false,
+        "reason": "IMPLEMENTATION_PENDING_N06"
+      }
+    },
+    "nativeAnalysisControlObserved": false
+  },
+  "executionRules": {
+    "mustFetchBeforeImplementing": true,
+    "mustRecordExactShas": true,
+    "mustVerifyContractArtifactsByBytesAndHash": true,
+    "mustNotAssumeObservedHeadsRemainCurrent": true,
+    "mustNotWriteUpstreamRepositories": true
+  }
+}

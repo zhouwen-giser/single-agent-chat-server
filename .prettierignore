@@ -37,3 +37,7 @@ acceptance/closure/
 config/closure/
 contracts/closure/
 reports/closure/
+
+# Immutable v0.6 task and WSGS contract source bytes.
+config/v0.6/task-package/
+dependencies/wsgs-v06/
