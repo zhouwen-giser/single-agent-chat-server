@@ -48,7 +48,7 @@ try {
         "--env",
         `POSTGRES_PASSWORD=${password}`,
         "--env",
-        "POSTGRES_DB=postgres",
+        "POSTGRES_DB=single_agent_chat_phase4",
         "--publish",
         "127.0.0.1::5432",
         image,
@@ -61,7 +61,7 @@ try {
       { timeout: 10_000 },
     );
     const port = parsePublishedPort(stdout);
-    databaseUrl = `postgresql://${user}:${encodeURIComponent(password)}@127.0.0.1:${port}/postgres`;
+    databaseUrl = `postgresql://${user}:${encodeURIComponent(password)}@127.0.0.1:${port}/single_agent_chat_phase4`;
     await waitForPostgres(containerName, user);
     process.stdout.write(
       `${JSON.stringify({ event: "v05.postgres.ready", source: "ephemeral-container", image })}\n`,

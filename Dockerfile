@@ -32,6 +32,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
+COPY --chown=node:node dependencies/wsgs-v06 ./dependencies/wsgs-v06
 COPY --chown=node:node package.json LICENSE ./
 COPY --chown=node:node migrations ./migrations
 USER node

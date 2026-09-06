@@ -181,73 +181,129 @@
     },
     {
       "id": "V06-S02-001",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-002",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-003",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-004",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-005",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-006",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-007",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-008",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-009",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-010",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-011",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-012",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S02-013",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/v06-grounding-lifecycle.postgres.int.test.ts"
+      ]
     },
     {
       "id": "V06-S02-014",
-      "status": "NOT_RUN",
-      "evidenceRefs": []
+      "status": "PASS",
+      "evidenceRefs": [
+        "S02.json",
+        "tests/v06-grounding-job.contract.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts"
+      ]
     },
     {
       "id": "V06-S03-001",

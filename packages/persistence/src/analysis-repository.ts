@@ -1,5 +1,9 @@
 import type { Pool, PoolClient } from "pg";
 import {
+  sourceStatusMapping,
+  type AnalysisSourceStatus,
+} from "../../analysis-contract/src/source.js";
+import {
   analysisSourceIdentitySchema,
   parseWritableAnalysisSource,
   type AnalysisSourceIdentity,
@@ -190,6 +194,229 @@ export interface AppendAnalysisEventResult {
 
 export class AnalysisRepository {
   constructor(private readonly pool: Pool) {}
+
+  /** Atomic source binding; only an already-authorized durable intent can bind. */
+  async bindGroundingSource(input: {
+    scope: AnalysisScope;
+    groundingExecutionId: string;
+    revisionId: string;
+    runId: string;
+    leaseOwner: string;
+    title: string;
+  }): Promise<void> {
+    await this.transaction(async (client) => {
+      const selected = await client.query<{
+        wsgs_grounding_id: string | null;
+        request_hash: string;
+        source_job_id: string | null;
+        analysis_revision_id: string | null;
+        analysis_run_id: string | null;
+        analysis_intent_json: Record<string, JsonValue> | null;
+        lease_owner: string | null;
+        lease_until: Date | null;
+      }>(
+        `SELECT * FROM chat_service.grounding_execution WHERE grounding_id=$1 AND principal_id=$2 AND thread_id=$3 FOR UPDATE`,
+        [
+          input.groundingExecutionId,
+          input.scope.principalId,
+          input.scope.threadId,
+        ],
+      );
+      const g = selected.rows[0];
+      if (
+        !g ||
+        !g.wsgs_grounding_id ||
+        g.analysis_intent_json?.["analysisId"] !== input.scope.analysisId ||
+        g.analysis_intent_json?.["revisionId"] !== input.revisionId
+      )
+        throw new PersistenceAuthorizationError("ANALYSIS_NOT_FOUND");
+      if (g.analysis_revision_id !== null) {
+        if (
+          g.analysis_revision_id !== input.revisionId ||
+          g.analysis_run_id !== input.runId
+        )
+          throw new PersistenceConflictError(
+            "ANALYSIS_SOURCE_IDENTITY_INVALID",
+          );
+        return;
+      }
+      if (
+        g.lease_owner !== input.leaseOwner ||
+        !g.lease_until ||
+        g.lease_until.getTime() <= Date.now()
+      )
+        throw new PersistenceConflictError("Grounding lease is not active");
+      const now = new Date().toISOString();
+      const source = {
+        kind: "WSGS_GROUNDING_JOB" as const,
+        sourceId: g.wsgs_grounding_id,
+        sourceHash: "sha256:" + g.request_hash,
+        ...(g.source_job_id ? { upstreamRunId: g.source_job_id } : {}),
+      };
+      const session: AnalysisSession = {
+        schemaVersion: "sacs-analysis-session/1.0",
+        ...input.scope,
+        groundingId: g.wsgs_grounding_id,
+        title: input.title,
+        autonomyMode: "OBSERVER",
+        status: "ACTIVE",
+        activeRevisionId: input.revisionId,
+        latestRevisionNumber: 0,
+        observerPolicyHash: canonicalHash({
+          mode: "OBSERVER",
+          source: "GROUNDING_JOB",
+        }),
+        createdAt: now,
+        updatedAt: now,
+      };
+      const revision: AnalysisRevision = {
+        schemaVersion: "sacs-analysis-revision/1.0",
+        analysisId: input.scope.analysisId,
+        revisionId: input.revisionId,
+        revisionNumber: 0,
+        cause: "INITIAL_QUERY",
+        source,
+        changedPaths: [],
+        reusedNodeIds: [],
+        invalidatedNodeIds: [],
+        rerunNodeIds: [],
+        status: "READY",
+        createdAt: now,
+      };
+      assertInitialSession(session, revision);
+      await assertThreadScope(client, input.scope);
+      await insertSession(client, session);
+      await insertRevision(client, revision);
+      await insertRun(client, {
+        schemaVersion: "sacs-analysis-run/1.0",
+        analysisId: input.scope.analysisId,
+        revisionId: input.revisionId,
+        runId: input.runId,
+        attempt: 1,
+        status: "STARTING",
+        startedAt: now,
+        ...(g.source_job_id ? { upstreamRunId: g.source_job_id } : {}),
+      });
+      await client.query(
+        `UPDATE chat_service.grounding_execution SET analysis_id=$2,analysis_revision_id=$3,analysis_run_id=$4,version=version+1 WHERE grounding_id=$1`,
+        [
+          input.groundingExecutionId,
+          input.scope.analysisId,
+          input.revisionId,
+          input.runId,
+        ],
+      );
+    });
+  }
+
+  /** Reuses the append-only event/projection transaction and local sequences. */
+  async projectGroundingSource(input: {
+    scope: AnalysisScope;
+    groundingExecutionId: string;
+    revisionId: string;
+    runId: string;
+    observationHash: string;
+    state: Readonly<Record<string, JsonValue>>;
+  }): Promise<AnalysisProjection | undefined> {
+    return this.transaction(async (client) => {
+      const session = await lockAuthorizedSession(client, input.scope);
+      if (session.active_revision_id !== input.revisionId) return undefined;
+      const selected = await client.query<{
+        last_source_status: AnalysisSourceStatus;
+        last_observation_hash: string;
+        grounding_result_hash: string | null;
+      }>(
+        `SELECT g.last_source_status,g.last_observation_hash,g.grounding_result_hash FROM chat_service.grounding_execution g JOIN chat_service.analysis_run r ON r.run_id=g.analysis_run_id WHERE g.grounding_id=$1 AND g.principal_id=$2 AND g.thread_id=$3 AND g.analysis_id=$4 AND g.analysis_revision_id=$5 AND g.analysis_run_id=$6 AND NOT EXISTS(SELECT 1 FROM chat_service.analysis_run newer WHERE newer.revision_id=r.revision_id AND newer.attempt>r.attempt) FOR UPDATE OF g,r`,
+        [
+          input.groundingExecutionId,
+          input.scope.principalId,
+          input.scope.threadId,
+          input.scope.analysisId,
+          input.revisionId,
+          input.runId,
+        ],
+      );
+      const g = selected.rows[0];
+      if (!g || g.last_observation_hash !== input.observationHash)
+        return undefined;
+      const eventId =
+        "event-" +
+        hashJson({
+          runId: input.runId,
+          sourceObservation: input.observationHash,
+        });
+      const prior = await client.query(
+        "SELECT 1 FROM chat_service.analysis_event WHERE event_id=$1",
+        [eventId],
+      );
+      if (prior.rowCount)
+        return requiredProjection(client, input.scope.analysisId);
+      const current = await findProjectionForUpdate(
+        client,
+        input.scope.analysisId,
+      );
+      const counters = await client.query<{ a: string; r: string }>(
+        `SELECT COALESCE(MAX(analysis_sequence),0)::text a,COALESCE(MAX(run_sequence) FILTER(WHERE run_id=$2),0)::text r FROM chat_service.analysis_event WHERE analysis_id=$1`,
+        [input.scope.analysisId, input.runId],
+      );
+      const sequence = Number(counters.rows[0]?.a ?? 0) + 1;
+      const now = new Date().toISOString();
+      const payload = {
+        sourceStatus: g.last_source_status,
+        resultHash: g.grounding_result_hash,
+      };
+      const activity = {
+        sourceStatus: g.last_source_status,
+        transport: "GROUNDING_JOB",
+      };
+      const event: AnalysisEvent = {
+        schemaVersion: "sacs-analysis-event/1.0",
+        eventId,
+        analysisId: input.scope.analysisId,
+        revisionId: input.revisionId,
+        runId: input.runId,
+        analysisSequence: sequence,
+        runSequence: Number(counters.rows[0]?.r ?? 0) + 1,
+        eventType: "GROUNDING_SOURCE_OBSERVED",
+        correlationId: input.runId,
+        occurredAt: now,
+        payload,
+        payloadHash: canonicalHash(payload),
+      };
+      const projection: AnalysisProjection = {
+        schemaVersion: "sacs-analysis-projection/1.0",
+        analysisId: input.scope.analysisId,
+        stateRevision: Number(current?.stateRevision ?? 0) + 1,
+        activityRevision: Number(current?.activityRevision ?? 0) + 1,
+        state: input.state,
+        stateHash: canonicalHash(input.state),
+        activity,
+        activityHash: canonicalHash(activity),
+        lastEventSequence: sequence,
+        updatedAt: now,
+      };
+      assertEvent(event);
+      const committed = await this.appendEventInTransaction(client, {
+        scope: input.scope,
+        event,
+        projection,
+      });
+      const mapping = sourceStatusMapping[g.last_source_status];
+      if (!mapping)
+        throw new PersistenceConflictError(
+          "ANALYSIS_SOURCE_RESPONSE_CONTRACT_VIOLATION",
+        );
+      await client.query(
+        `UPDATE chat_service.analysis_run SET status=$2,finished_at=CASE WHEN $2 IN ('SUCCEEDED','PARTIAL','FAILED','CANCELLED') THEN $3::timestamptz ELSE finished_at END WHERE run_id=$1`,
+        [input.runId, mapping.run, now],
+      );
+      await client.query(
+        `UPDATE chat_service.analysis_session SET status=$2,updated_at=$3::timestamptz WHERE analysis_id=$1`,
+        [input.scope.analysisId, mapping.session, now],
+      );
+      return committed.projection;
+    });
+  }
 
   async getRevisionSource(
     scope: AnalysisScope,
@@ -708,49 +935,55 @@ export class AnalysisRepository {
     if (input.event.analysisId !== input.scope.analysisId) {
       throw new PersistenceConflictError("Analysis event scope mismatch");
     }
-    return this.transaction(async (client) => {
-      const session = await lockAuthorizedSession(client, input.scope);
-      const collision = await findEventCollision(client, input.event);
-      if (collision !== undefined) {
-        if (!sameEvent(collision, input.event)) {
-          throw new PersistenceConflictError(
-            "Analysis event sequence conflict",
-          );
-        }
-        const projection = await requiredProjection(
-          client,
-          input.scope.analysisId,
-        );
-        return {
-          created: false,
-          projected: false,
-          event: collision,
-          projection,
-        };
+    return this.transaction((client) =>
+      this.appendEventInTransaction(client, input),
+    );
+  }
+
+  private async appendEventInTransaction(
+    client: PoolClient,
+    input: Parameters<AnalysisRepository["appendEventAndProject"]>[0],
+  ): Promise<AppendAnalysisEventResult> {
+    const session = await lockAuthorizedSession(client, input.scope);
+    const collision = await findEventCollision(client, input.event);
+    if (collision !== undefined) {
+      if (!sameEvent(collision, input.event)) {
+        throw new PersistenceConflictError("Analysis event sequence conflict");
       }
-      await assertEventLineage(client, input.event);
-      await assertNextSequences(client, input.event);
-      const currentProjection = await findProjectionForUpdate(
+      const projection = await requiredProjection(
         client,
         input.scope.analysisId,
       );
-      const isActiveRevision =
-        session.active_revision_id === input.event.revisionId;
-      const nextProjection = isActiveRevision
-        ? requireNextProjection(
-            input.scope.analysisId,
-            input.event.analysisSequence,
-            currentProjection,
-            input.projection,
-          )
-        : auditOnlyProjection(
-            input.event.analysisSequence,
-            currentProjection,
-            input.event.occurredAt,
-          );
-      try {
-        const inserted = await client.query<AnalysisEventRow>(
-          `
+      return {
+        created: false,
+        projected: false,
+        event: collision,
+        projection,
+      };
+    }
+    await assertEventLineage(client, input.event);
+    await assertNextSequences(client, input.event);
+    const currentProjection = await findProjectionForUpdate(
+      client,
+      input.scope.analysisId,
+    );
+    const isActiveRevision =
+      session.active_revision_id === input.event.revisionId;
+    const nextProjection = isActiveRevision
+      ? requireNextProjection(
+          input.scope.analysisId,
+          input.event.analysisSequence,
+          currentProjection,
+          input.projection,
+        )
+      : auditOnlyProjection(
+          input.event.analysisSequence,
+          currentProjection,
+          input.event.occurredAt,
+        );
+    try {
+      const inserted = await client.query<AnalysisEventRow>(
+        `
           INSERT INTO chat_service.analysis_event(
             event_id, analysis_id, revision_id, run_id, analysis_sequence,
             run_sequence, upstream_sequence, event_type, node_id,
@@ -762,34 +995,33 @@ export class AnalysisRepository {
           )
           RETURNING *
         `,
-          [
-            input.event.eventId,
-            input.event.analysisId,
-            input.event.revisionId,
-            input.event.runId,
-            input.event.analysisSequence,
-            input.event.runSequence,
-            input.event.upstreamSequence ?? null,
-            input.event.eventType,
-            input.event.nodeId ?? null,
-            input.event.correlationId,
-            input.event.causationId ?? null,
-            input.event.occurredAt,
-            JSON.stringify(input.event.payload),
-            input.event.payloadHash,
-          ],
-        );
-        const storedProjection = await upsertProjection(client, nextProjection);
-        return {
-          created: true,
-          projected: isActiveRevision,
-          event: mapEvent(requiredRow(inserted.rows, "analysis event insert")),
-          projection: storedProjection,
-        };
-      } catch (error) {
-        throw persistenceWriteError(error, "Analysis event commit conflict");
-      }
-    });
+        [
+          input.event.eventId,
+          input.event.analysisId,
+          input.event.revisionId,
+          input.event.runId,
+          input.event.analysisSequence,
+          input.event.runSequence,
+          input.event.upstreamSequence ?? null,
+          input.event.eventType,
+          input.event.nodeId ?? null,
+          input.event.correlationId,
+          input.event.causationId ?? null,
+          input.event.occurredAt,
+          JSON.stringify(input.event.payload),
+          input.event.payloadHash,
+        ],
+      );
+      const storedProjection = await upsertProjection(client, nextProjection);
+      return {
+        created: true,
+        projected: isActiveRevision,
+        event: mapEvent(requiredRow(inserted.rows, "analysis event insert")),
+        projection: storedProjection,
+      };
+    } catch (error) {
+      throw persistenceWriteError(error, "Analysis event commit conflict");
+    }
   }
 
   async getProjection(

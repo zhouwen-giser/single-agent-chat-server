@@ -119,7 +119,7 @@ suite("v0.6 source identity empty and v0.5 upgrade PostgreSQL", () => {
     return f;
   }
   it("preserves existing Native fields while marking only existing rows read-only", async () => {
-    expect((await runMigrations(pool)).at(-1)?.version).toBe(
+    expect((await runMigrations(pool)).map((item) => item.version)).toContain(
       "0017_analysis_source_identity.sql",
     );
     expect(

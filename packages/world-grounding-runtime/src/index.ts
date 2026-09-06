@@ -1,6 +1,15 @@
 import { createHash, randomUUID } from "node:crypto";
 
 import { z } from "zod";
+import { GroundingJobAnalysisSourceAdapter } from "../../wsgs-analysis-adapter/src/grounding-job.js";
+import {
+  AnalysisSourceError,
+  sourceIsTerminal,
+  verifySourceRequest,
+  type AnalysisSourceSnapshot,
+  type StartWorldAnalysisRequest,
+} from "../../analysis-contract/src/source.js";
+import type { GroundingExecution } from "../../persistence/src/grounding-repository.js";
 
 import {
   AuthorityFusionEvaluator,
@@ -179,7 +188,15 @@ export interface WorldGroundingRuntimeOptions {
     GroundingPersistenceRepository,
     "claim" | "recordGroundingReady" | "complete" | "fail" | "cancel"
   > &
-    Partial<Pick<GroundingPersistenceRepository, "get">>;
+    Partial<
+      Pick<
+        GroundingPersistenceRepository,
+        | "get"
+        | "recordSourceSnapshot"
+        | "requestSourceCancellation"
+        | "releaseLease"
+      >
+    >;
   readonly worldFocus?: WorldFocusRepository;
   readonly authorityFusion?: Pick<
     AuthorityFusionRepository,
@@ -246,6 +263,144 @@ export class WorldGroundingRuntime {
   async answerWorld(input: WorldGroundingRuntimeTurn): Promise<string> {
     const answer = await this.answerWorldExplanation(input);
     return typeof answer === "string" ? answer : answer.renderedText;
+  }
+
+  /** Internal, authenticated application boundary. Persist intent before any HTTP. */
+  async beginWorldGrounding(
+    input: StartWorldAnalysisRequest & {
+      groundingExecutionId: string;
+      interactionRequestId: string;
+      leaseOwner: string;
+    },
+  ): Promise<GroundingExecution> {
+    verifySourceRequest(input);
+    const repository = this.options.grounding;
+    if (!repository.get || !repository.recordSourceSnapshot)
+      throw new AnalysisSourceError("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
+    const adapter = new GroundingJobAnalysisSourceAdapter(this.options.wsgs);
+    const claim = await repository.claim({
+      groundingId: input.groundingExecutionId,
+      principalId: input.principalId,
+      threadId: input.threadId,
+      interactionRequestId: input.interactionRequestId,
+      wsgsRequestId: input.requestId,
+      idempotencyKey: input.idempotencyKey,
+      requestHash: input.requestHash.replace(/^sha256:/u, ""),
+      wsgsOperation: input.canonicalGroundingRequest.operation,
+      requestedProducts: input.canonicalGroundingRequest.requestedProducts,
+      contextUsage: {},
+      leaseOwner: input.leaseOwner,
+      leaseMs: 180_000,
+      canonicalRequest: asJsonValue(input.canonicalGroundingRequest),
+      analysisIntent: {
+        analysisId: input.analysisId,
+        revisionId: input.revisionId,
+      },
+    });
+    if (
+      claim.kind === "BUSY" ||
+      claim.execution.wsgsGroundingId !== undefined ||
+      claim.kind === "REPLAY"
+    )
+      return claim.execution;
+    await this.options.wsgs.capabilities(input.signal);
+    const snapshot = await adapter.start(input);
+    return (
+      await repository.recordSourceSnapshot({
+        groundingId: claim.execution.groundingId,
+        principalId: input.principalId,
+        threadId: input.threadId,
+        leaseOwner: input.leaseOwner,
+        snapshot,
+        leaseMs: 180_000,
+      })
+    ).execution;
+  }
+
+  async *observeWorldGrounding(input: {
+    groundingExecutionId: string;
+    principalId: string;
+    threadId: string;
+    leaseOwner: string;
+    signal?: AbortSignal;
+  }): AsyncIterable<AnalysisSourceSnapshot> {
+    const repository = this.options.grounding;
+    if (!repository.get || !repository.recordSourceSnapshot)
+      throw new AnalysisSourceError("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
+    const scope = {
+      groundingId: input.groundingExecutionId,
+      principalId: input.principalId,
+      threadId: input.threadId,
+    };
+    const execution = await repository.get(scope);
+    if (!execution) throw new AnalysisSourceError("ANALYSIS_NOT_FOUND");
+    if (!execution.wsgsGroundingId || !execution.lastSourceStatus)
+      throw new AnalysisSourceError("WORLD_GROUNDING_IN_PROGRESS");
+    const snapshot: AnalysisSourceSnapshot = {
+      identity: {
+        kind: "WSGS_GROUNDING_JOB",
+        sourceId: execution.wsgsGroundingId,
+        sourceHash: "sha256:" + execution.requestHash,
+        ...(execution.sourceJobId
+          ? { upstreamRunId: execution.sourceJobId }
+          : {}),
+      },
+      sourceStatus: execution.lastSourceStatus,
+      terminal: sourceIsTerminal(execution.lastSourceStatus),
+      observedAt: execution.updatedAt.toISOString(),
+      ...(execution.groundingResult
+        ? {
+            result: execution.groundingResult as WsgsGroundingResult,
+            resultHash: execution.groundingResultHash!,
+          }
+        : {}),
+    };
+    yield snapshot;
+    if (snapshot.terminal) return;
+    if (execution.leaseOwner !== input.leaseOwner)
+      throw new AnalysisSourceError("WORLD_GROUNDING_IN_PROGRESS");
+    const adapter = new GroundingJobAnalysisSourceAdapter(this.options.wsgs);
+    let terminalObserved = false;
+    try {
+      for await (const observed of adapter.observe({
+        analysisId: String(execution.analysisIntent?.["analysisId"]),
+        revisionId: String(execution.analysisIntent?.["revisionId"]),
+        runId: execution.groundingId,
+        identity: snapshot.identity,
+        signal: input.signal,
+      })) {
+        const committed = await repository.recordSourceSnapshot({
+          ...scope,
+          leaseOwner: input.leaseOwner,
+          snapshot: observed,
+          leaseMs: 180_000,
+        });
+        terminalObserved = observed.terminal;
+        if (committed.changed) yield observed;
+      }
+    } finally {
+      if (!terminalObserved)
+        await repository.releaseLease?.({
+          ...scope,
+          leaseOwner: input.leaseOwner,
+        });
+    }
+  }
+
+  async completeWorldGrounding(input: {
+    groundingExecutionId: string;
+    principalId: string;
+    threadId: string;
+    leaseOwner: string;
+    signal?: AbortSignal;
+  }): Promise<WsgsGroundingResult> {
+    for await (const snapshot of this.observeWorldGrounding(input)) {
+      if (snapshot.terminal) {
+        if (snapshot.result) return snapshot.result;
+        throw new AnalysisSourceError("WSGS_" + snapshot.sourceStatus);
+      }
+    }
+    throw new AnalysisSourceError("WORLD_GROUNDING_IN_PROGRESS");
   }
 
   async answerWorldExplanation(
@@ -841,6 +996,15 @@ export class WorldGroundingRuntime {
       contextUsage: turnPlan.worldFocusUsage,
       leaseOwner,
       leaseMs: 180_000,
+      ...(this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.1"
+        ? {
+            canonicalRequest: asJsonValue(request),
+            analysisIntent: {
+              analysisId: "analysis-" + stableHash,
+              revisionId: "revision-" + stableHash,
+            },
+          }
+        : {}),
     });
     if (groundingClaim.kind === "BUSY") {
       return { text: "WORLD_GROUNDING_IN_PROGRESS" };
@@ -867,12 +1031,36 @@ export class WorldGroundingRuntime {
             "WORLD_GROUNDING_CAPABILITY_UNAVAILABLE",
           );
         }
-        result = await resolveGroundingResult(
-          this.options.wsgs,
-          request,
-          `wsgs-grounding-` + stableHash,
-          input.signal,
-        );
+        if (this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.1") {
+          await this.beginWorldGrounding({
+            analysisId: "analysis-" + stableHash,
+            revisionId: "revision-" + stableHash,
+            groundingExecutionId: groundingId,
+            interactionRequestId: outerClaim.requestId,
+            leaseOwner,
+            principalId: input.principalId,
+            threadId: input.threadId,
+            requestId: request.requestId,
+            canonicalGroundingRequest: request,
+            requestHash: hashCanonicalJson(request),
+            idempotencyKey: "wsgs-grounding-" + stableHash,
+            signal: input.signal,
+          });
+          result = await this.completeWorldGrounding({
+            groundingExecutionId: groundingId,
+            principalId: input.principalId,
+            threadId: input.threadId,
+            leaseOwner,
+            signal: input.signal,
+          });
+        } else {
+          result = await resolveGroundingResult(
+            this.options.wsgs,
+            request,
+            `wsgs-grounding-` + stableHash,
+            input.signal,
+          );
+        }
         assertResultIdentity(result, request);
         await this.options.grounding.recordGroundingReady({
           groundingId,

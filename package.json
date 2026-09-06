@@ -161,6 +161,7 @@
     "@langchain/langgraph": "1.4.8",
     "@langchain/langgraph-checkpoint-postgres": "1.0.4",
     "@opentelemetry/api": "1.9.1",
+    "ajv": "8.20.0",
     "fastify": "5.10.0",
     "pg": "8.22.0",
     "zod": "4.4.3"
@@ -175,7 +176,6 @@
     "@types/pg": "8.20.0",
     "@typescript-eslint/eslint-plugin": "5.59.8",
     "@typescript-eslint/parser": "5.59.8",
-    "ajv": "8.20.0",
     "dotenv": "17.4.2",
     "eslint": "8.57.1",
     "eslint-config-prettier": "10.1.8",
