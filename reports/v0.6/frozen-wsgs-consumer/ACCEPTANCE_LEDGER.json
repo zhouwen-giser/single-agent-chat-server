@@ -3,7 +3,7 @@
   "schemaVersion": "1.0",
   "ledgerType": "EXECUTED_SACS_EVIDENCE",
   "requiredCount": 40,
-  "decision": "IN_PROGRESS",
+  "decision": "SACS_WSGS_FROZEN_WORLD_ANALYSIS_CONSUMER_DEV_READY",
   "rule": "DEV_READY requires every REQUIRED row to be PASS with actual evidence. EXCLUDED/ENVIRONMENTAL do not count in REQUIRED pass rate.",
   "scenarios": [
     {
@@ -969,12 +969,27 @@
       "scenario": "分析关闭/可选能力缺失；旧1.0/1.1、Chat/Reference/地理/A2A受控回归；配置脚本。",
       "expected": "相关旧行为保持；Native deferred 不阻塞本次；核心 suite 无 Docker/真实上游/发布构建依赖；实际命令和未执行项记录完整。",
       "evidenceRequired": "typecheck、focused regression、源码运行文档",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-delivery.contract.test.ts:43: \"AC-040 %s selects only explicit source Jest files without Docker/DB/build/release runners\",",
+        "tests/v06-frozen-delivery.contract.test.ts:73: it(\"AC-040 all includes every frozen source suite and the deduplicated predecessor groups\", () => {",
+        "tests/v06-frozen-delivery.contract.test.ts:110: it(\"AC-039 AC-040 http includes the normal shared-entry integration and real adapter peer suites\", () => {",
+        "tests/v06-frozen-delivery.contract.test.ts:126: it(\"AC-040 rejects arbitrary command/path arguments without running tests\", () => {",
+        "tests/v06-frozen-delivery.contract.test.ts:144: it(\"AC-040 package exposes only direct source commands and preserves pinned runtime/license\", () => {",
+        "tests/v06-frozen-delivery.contract.test.ts:173: it(\"AC-040 development documentation names evidence, environmental limits and source startup accurately\", () => {",
+        "tests/v06-frozen-factory-compat.unit.test.ts:61: it(\"AC-040 disabling optional analysis preserves the ordinary legacy 1.0 reference/world path\", async () => {",
+        "tests/v06-frozen-factory-compat.unit.test.ts:165: it(\"AC-006 AC-040 unavailable historical optional capabilities do not block an independent world query\", async () => {",
+        "C06-command-2.txt: explicit frozen and affected legacy regression suites; C06-command-1.txt: source typecheck; SOURCE_RUN.md: source commands and scope"
+      ],
+      "command": "node scripts/v06-frozen-tests.mjs all",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C06.json",
+        "reports/v0.6/frozen-wsgs-consumer/C06-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     }
   ],
   "environmentAndExclusions": [

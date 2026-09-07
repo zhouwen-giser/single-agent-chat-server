@@ -19,7 +19,7 @@ Goal: complete the frozen 1.2 public consumer through the existing normal SACS c
 - [x] C03 — real source control, all five choices, scope/TTL/idempotency and immutable revisions (358 tests / 23 suites; 31/40 REQUIRED now PASS).
 - [x] C04 — interactive choice/requery, explicit LineString preview and three-requirement non-executing candidates (110 tests / 6 suites; 36/40 REQUIRED PASS; initial 20-second test timeouts preserved, bounded 60-second integration rerun passed).
 - [x] C05 — shared normal Chat/AG-UI/Control composition through actual local HTTP (116 tests / 9 suites; 39/40 REQUIRED PASS).
-- [ ] C06 — repeatable focused regressions, per-AC evidence, docs, Draft PR delivery.
+- [x] C06 — delivered source CLI regression (521 tests / 42 suites), 40/40 REQUIRED reconciled, 43 command logs hash-verified, docs and Draft PR delivery.
 
 ## Persistence decision to verify
 
@@ -35,7 +35,7 @@ The planner substep was recorded independently in C03-planner without claiming s
 - Shared normal Chat/AG-UI/Control request planning, stored 1.2 identity, original TTL and offset semantics. Internal database principal and external SDAR user identities remain distinct.
 - Normal-entry HTTP coverage of display-only actions, expiry, hidden choices, concurrent clicks, projection-crash recovery and zero A2A execution for historical candidates. No separate fake Analysis application.
 
-Final C03–C05 verification passed with stable source-tree digests. C04 added an explicit public LineString-preview assertion to the point/trace/clipping/non-navigation coverage. C05 separately reconciled the normal-entry acceptance groups. C06 will run the delivered source CLI and the full affected legacy suite, then audit all 40 rows. No readiness flag before those actual executions.
+Final C03–C06 verification passed with stable source-tree digests. C04 added an explicit public LineString-preview assertion to the point/trace/clipping/non-navigation coverage. C05 separately reconciled the normal-entry acceptance groups. C06 ran the delivered source CLI and the full affected legacy suite, then audited all 40 rows. Final decision: SACS_WSGS_FROZEN_WORLD_ANALYSIS_CONSUMER_DEV_READY, limited to consumer development; ENV-001 remains NOT_RUN and EX-001–EX-004 remain OUT_OF_SCOPE.
 
 ## Evidence rules
 

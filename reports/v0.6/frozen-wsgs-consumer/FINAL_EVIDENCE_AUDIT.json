@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-09-07T05:10:36.992Z",
+  "sourceSha": "fe2fa9956db1809293703b10e29b1f025bfacce8",
+  "sourceTreeDigest": "sha256:4bd9bf7ef350de55e07bf995f905ceb3e292fac60887e213eead75f52a6c6cb5",
+  "requiredPass": 40,
+  "semanticFieldsVerified": 280,
+  "commandsVerified": 43,
+  "evidenceReferencesVerified": 160,
+  "testLocationFilesVerified": 145,
+  "ledgerDigest": "sha256:9805940cd01977718f45cafd5839bb6f5d2a55d219caeac75c7d0bebad2a8319",
+  "phases": [
+    {
+      "phase": "C00",
+      "tests": 52,
+      "suites": 1,
+      "commands": 7
+    },
+    {
+      "phase": "C01",
+      "tests": 154,
+      "suites": 11,
+      "commands": 4
+    },
+    {
+      "phase": "C02",
+      "tests": 195,
+      "suites": 12,
+      "commands": 4
+    },
+    {
+      "phase": "C03-planner",
+      "tests": 69,
+      "suites": 2,
+      "commands": 4
+    },
+    {
+      "phase": "C03",
+      "tests": 358,
+      "suites": 23,
+      "commands": 6
+    },
+    {
+      "phase": "C04",
+      "tests": 110,
+      "suites": 6,
+      "commands": 6
+    },
+    {
+      "phase": "C05",
+      "tests": 116,
+      "suites": 9,
+      "commands": 6
+    },
+    {
+      "phase": "C06",
+      "tests": 521,
+      "suites": 42,
+      "commands": 6
+    }
+  ],
+  "preservedC04FailureDigest": "sha256:535dba5c9073d689d51e84fcc5348e9f47057dcb38732cdab968dffc75bd0d62",
+  "environment": "ENV-001 NOT_RUN",
+  "excluded": [
+    "EX-001",
+    "EX-002",
+    "EX-003",
+    "EX-004"
+  ],
+  "scope": "READ_ONLY_RECEIPT_HASH_MATRIX_AND_CURRENT_SOURCE_AUDIT; NOT_LIVE_DATABASE_OR_UPSTREAM"
+}
