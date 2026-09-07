@@ -3,6 +3,7 @@ import {
   agUiSharedStateV03Schema,
   analysisProjectionSchema,
   calculateAgUiStateSnapshotHash,
+  analysisInterventionSchema,
   type AnalysisProjection,
 } from "../../analysis-contract/src/index.js";
 import {
@@ -31,14 +32,25 @@ import { WsgsAuthoritativeContract } from "../../wsgs-geospatial-consumer/src/au
 import { FrozenWorldAnalysisContract } from "../../wsgs-geospatial-consumer/src/frozen-world-analysis.js";
 import { createInitialAnalysisProjection } from "./projection-reducer.js";
 import { emptyMapSharedState } from "../../analysis-map/src/index.js";
-import type { JsonObject } from "../../world-explanation-contract/src/index.js";
+import {
+  hashCanonicalJson,
+  type JsonObject,
+} from "../../world-explanation-contract/src/index.js";
 
 export interface GroundingSourceRuntimeOptions {
-  analysis: AnalysisRepository;
-  grounding: GroundingPersistenceRepository;
+  analysis: Pick<
+    AnalysisRepository,
+    | "bindGroundingSource"
+    | "getProjection"
+    | "getGroundingAnalysis"
+    | "projectGroundingSource"
+    | "recordHistoricalGroundingSource"
+  >;
+  grounding: Pick<GroundingPersistenceRepository, "get" | "claimRecoverable">;
   world: WorldGroundingRuntime;
   maxActivePumps?: number;
   viewLimits?: AnalysisViewLimits;
+  now?: () => Date;
 }
 /** Production source mode of the existing Analysis session/pump/projection stack. */
 export class GroundingSourceAnalysisRuntime {
@@ -58,7 +70,7 @@ export class GroundingSourceAnalysisRuntime {
         },
         maxActivePumps: options.maxActivePumps ?? 128,
       },
-      () => new Date().toISOString(),
+      () => (options.now?.() ?? new Date()).toISOString(),
     );
   }
   async accept(
@@ -68,7 +80,9 @@ export class GroundingSourceAnalysisRuntime {
     const scope = this.scope(execution);
     if (!execution.wsgsGroundingId || !execution.lastSourceStatus) return;
     if (execution.leaseOwner !== leaseOwner) return;
-    this.owners.set(scope.analysisId, leaseOwner);
+    if (sourceIsTerminal(execution.lastSourceStatus))
+      this.owners.delete(execution.groundingId);
+    else this.owners.set(execution.groundingId, leaseOwner);
     await this.options.analysis.bindGroundingSource({
       scope,
       groundingExecutionId: execution.groundingId,
@@ -78,6 +92,11 @@ export class GroundingSourceAnalysisRuntime {
       title: "世界分析",
     });
     await this.project(scope, execution);
+    const active = await this.options.analysis.getGroundingAnalysis(scope);
+    if (!active || active.groundingExecutionId !== execution.groundingId) {
+      this.owners.delete(execution.groundingId);
+      return;
+    }
     await this.pump.ensure(scope);
   }
   async getProjection(
@@ -100,7 +119,9 @@ export class GroundingSourceAnalysisRuntime {
     if (!execution) throw Error("ANALYSIS_NOT_FOUND");
     const scope = this.scope(execution);
     await this.pump.ensure(scope);
-    const iterator = this.pump.observe(scope)[Symbol.asyncIterator]();
+    const iterator = this.pump
+      .observe(scope, input.signal)
+      [Symbol.asyncIterator]();
     try {
       for (;;) {
         input.signal?.throwIfAborted();
@@ -108,7 +129,7 @@ export class GroundingSourceAnalysisRuntime {
         if (next.done) break;
         const state = next.value.snapshot;
         const run = Object.values(state.analysis.runsById).find(
-          (r) => r.revisionId === state.analysis.activeRevisionId,
+          (r) => r.revisionId === execution.analysisIntent?.["revisionId"],
         );
         if (
           run &&
@@ -123,7 +144,7 @@ export class GroundingSourceAnalysisRuntime {
           break;
       }
     } finally {
-      void iterator.return?.();
+      await iterator.return?.();
     }
     const latest = await this.options.grounding.get({
       groundingId: input.groundingExecutionId,
@@ -170,8 +191,31 @@ export class GroundingSourceAnalysisRuntime {
         contractIdentity: parseGroundingContractIdentity(
           row.analysisIntent["contractIdentity"],
         ),
+        analysisIntent: row.analysisIntent,
+        signal: this.shutdown.signal,
       });
       await this.accept(execution, this.recoveryOwner);
+      const scope = this.scope(execution);
+      const active = await this.options.analysis.getGroundingAnalysis(scope);
+      if (active && active.groundingExecutionId !== execution.groundingId) {
+        // The existing recovery pass observes superseded Sources only into history.
+        // It must not acquire or complete the current Revision's projection pump.
+        for await (const snapshot of this.options.world.observeWorldGrounding({
+          groundingExecutionId: execution.groundingId,
+          principalId: execution.principalId,
+          threadId: execution.threadId,
+          leaseOwner: this.recoveryOwner,
+          signal: this.shutdown.signal,
+        })) {
+          const historical = await this.options.grounding.get({
+            groundingId: execution.groundingId,
+            principalId: execution.principalId,
+            threadId: execution.threadId,
+          });
+          if (historical) await this.project(scope, historical);
+          if (snapshot.terminal) break;
+        }
+      }
     }
     return rows.length;
   }
@@ -238,17 +282,19 @@ export class GroundingSourceAnalysisRuntime {
         sourceIsTerminal(execution.lastSourceStatus),
     };
   }
-  private async *consume(scope: AnalysisScope) {
+  private async *consume(
+    scope: AnalysisScope & { revisionId: string; signal: AbortSignal },
+  ) {
     const bound = await this.options.analysis.getGroundingAnalysis(scope);
-    if (!bound) return;
-    const leaseOwner = this.owners.get(scope.analysisId);
+    if (!bound || bound.revision.revisionId !== scope.revisionId) return;
+    const leaseOwner = this.owners.get(bound.groundingExecutionId);
     if (!leaseOwner) throw Error("ANALYSIS_SOURCE_LEASE_NOT_OWNED");
     const input = {
       groundingExecutionId: bound.groundingExecutionId,
       principalId: scope.principalId,
       threadId: scope.threadId,
       leaseOwner,
-      signal: this.shutdown.signal,
+      signal: AbortSignal.any([this.shutdown.signal, scope.signal]),
     };
     try {
       for await (const snapshot of this.options.world.observeWorldGrounding(
@@ -264,7 +310,8 @@ export class GroundingSourceAnalysisRuntime {
         if (projection) yield { projection, terminal: snapshot.terminal };
       }
     } finally {
-      this.owners.delete(scope.analysisId);
+      if (this.owners.get(bound.groundingExecutionId) === leaseOwner)
+        this.owners.delete(bound.groundingExecutionId);
     }
   }
   private async project(
@@ -272,8 +319,26 @@ export class GroundingSourceAnalysisRuntime {
     execution: GroundingExecution,
   ): Promise<AnalysisProjection | undefined> {
     const bound = await this.options.analysis.getGroundingAnalysis(scope);
+    const revisionId = execution.analysisIntent?.["revisionId"];
+    if (
+      bound &&
+      (bound.groundingExecutionId !== execution.groundingId ||
+        bound.revision.revisionId !== revisionId)
+    ) {
+      if (typeof revisionId === "string" && execution.lastObservationHash)
+        await this.options.analysis.recordHistoricalGroundingSource({
+          scope,
+          groundingExecutionId: execution.groundingId,
+          revisionId,
+          runId: "run-" + execution.groundingId,
+          observationHash: execution.lastObservationHash,
+        });
+      return undefined;
+    }
     if (
       !bound ||
+      bound.groundingExecutionId !== execution.groundingId ||
+      bound.revision.revisionId !== execution.analysisIntent?.["revisionId"] ||
       !execution.lastSourceStatus ||
       !execution.lastObservationHash ||
       !bound.revision.source ||
@@ -298,8 +363,53 @@ export class GroundingSourceAnalysisRuntime {
       runId: bound.run.runId,
       snapshot,
       authority: this.authority,
+      now: () => (this.options.now?.() ?? new Date()).getTime(),
       ...(this.options.viewLimits ? { limits: this.options.viewLimits } : {}),
     });
+    const frozen =
+      snapshot.result &&
+      snapshot.identity.kind === "WSGS_GROUNDING_JOB" &&
+      snapshot.identity.contractIdentity?.contractVersion ===
+        "sacs-wsgs-grounding/1.2"
+        ? new FrozenWorldAnalysisContract().parse("result", snapshot.result)
+        : undefined;
+    const component = frozen?.worldAnalysisFindings;
+    const interventionId = frozen
+      ? "source-choice-" +
+        hashCanonicalJson({
+          analysisId: scope.analysisId,
+          revisionId: bound.revision.revisionId,
+          resultHash: frozen.resultHash,
+        }).slice(7)
+      : undefined;
+    const pendingIntervention =
+      frozen && component?.choices.length
+        ? analysisInterventionSchema.parse({
+            schemaVersion: "sacs-analysis-intervention/1.0",
+            interventionId,
+            interruptId: interventionId,
+            analysisId: scope.analysisId,
+            revisionId: bound.revision.revisionId,
+            runId: bound.run.runId,
+            reason: "AMBIGUITY",
+            status: "OPEN",
+            requestPayload: {
+              kind: "GROUNDING_SOURCE_CHOICE",
+              priorGroundingId: frozen.groundingId,
+              priorResultHash: frozen.resultHash,
+              findingSetHash: component.findingSetHash,
+              choiceIds: component.choices.map((choice) => choice.choiceId),
+              expiresAt: component.choices.reduce(
+                (latest, choice) =>
+                  Date.parse(choice.validUntil) > Date.parse(latest)
+                    ? choice.validUntil
+                    : latest,
+                component.choices[0]!.validUntil,
+              ),
+            },
+            createdAt: execution.updatedAt.toISOString(),
+          })
+        : undefined;
     const mapping = sourceStatusMapping[execution.lastSourceStatus];
     const session = { ...bound.session, status: mapping.session };
     const run = {
@@ -327,12 +437,27 @@ export class GroundingSourceAnalysisRuntime {
       createdAt: bound.session.createdAt,
     });
     const prior = await this.getProjection(scope);
+    const priorState = prior
+      ? agUiSharedStateV03Schema.parse(prior.state)
+      : undefined;
     const nextRevision = (prior?.stateRevision ?? 0) + 1;
     const { meta: _meta, ...body } = seed.state as ReturnType<
       typeof agUiSharedStateV03Schema.parse
     >;
     const stateBody = {
       ...body,
+      analysis: {
+        ...body.analysis,
+        revisionsById: {
+          ...priorState?.analysis.revisionsById,
+          ...body.analysis.revisionsById,
+        },
+        runsById: {
+          ...priorState?.analysis.runsById,
+          ...body.analysis.runsById,
+        },
+      },
+      ...(pendingIntervention ? { pendingIntervention } : {}),
       worldExplanation: view,
       map: {
         ...emptyMapSharedState(),

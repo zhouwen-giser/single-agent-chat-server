@@ -181,6 +181,12 @@ export function createAnalysisControlCoordinator(
     getAnalysis: (scope) => options.store.getAnalysis(scope),
     getSnapshot: (scope) => options.store.getSnapshot(scope),
     submitProposal: async (scope, command) => {
+      if ("kind" in command)
+        throw new AnalysisServiceError(
+          422,
+          "ANALYSIS_SOURCE_KIND_MISMATCH",
+          "Source queries require a Grounding analysis.",
+        );
       const proposal = analysisChangeProposalSchema.parse({
         schemaVersion: "sacs-analysis-change-proposal/1.0",
         ...command,

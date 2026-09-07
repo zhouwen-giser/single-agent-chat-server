@@ -97,7 +97,10 @@ export interface AnalysisDevelopmentPumpStatus extends AnalysisScope {
   readonly lastEventSequence: number;
   readonly subscriptionCount: number;
   readonly stopReason?:
-    "DURABLE_TERMINAL" | "TERMINAL_EVENT" | "UPSTREAM_STREAM_ENDED";
+    | "DURABLE_TERMINAL"
+    | "TERMINAL_EVENT"
+    | "UPSTREAM_STREAM_ENDED"
+    | "REVISION_SUPERSEDED";
   readonly errorCode?: string;
 }
 
@@ -275,6 +278,8 @@ type PumpNotification =
   | { readonly kind: "ERROR"; readonly errorCode: string };
 
 interface AnalysisPumpEntry extends AnalysisScope {
+  sourceRevisionId?: string;
+  readonly abort: AbortController;
   state: AnalysisDevelopmentPumpState;
   lastEventSequence: number;
   subscriptionCount: number;
@@ -293,7 +298,7 @@ export interface AnalysisSourcePumpOptions {
       { projection: AnalysisProjection; terminal: boolean } | undefined
     >;
     consume(
-      scope: AnalysisScope,
+      scope: AnalysisScope & { revisionId: string; signal: AbortSignal },
     ): AsyncIterable<{ projection: AnalysisProjection; terminal: boolean }>;
   };
   readonly maxActivePumps?: number;
@@ -303,6 +308,7 @@ export interface AnalysisSourcePumpOptions {
 /** Shared supervisor for Native event streams and Grounding Job observations. */
 export class AnalysisDevelopmentPumpSupervisor {
   private readonly entries = new Map<string, AnalysisPumpEntry>();
+  private readonly backgroundWork = new Set<Promise<void>>();
 
   constructor(
     private readonly options:
@@ -314,10 +320,25 @@ export class AnalysisDevelopmentPumpSupervisor {
     scopeValue: AnalysisScope,
   ): Promise<AnalysisDevelopmentPumpStatus> {
     const scope = validScope(scopeValue);
+    // A terminal Source belongs to a Revision, not to the lifetime of a Session.
+    // Resolve durable identity before reusing the entry, including concurrent ensures.
+    const sourceState =
+      "source" in this.options
+        ? await this.options.source.load(scope)
+        : undefined;
+    const sourceRevisionId = sourceState
+      ? projectionRevisionId(sourceState.projection)
+      : undefined;
     const existing = this.entries.get(scope.analysisId);
     if (existing !== undefined) {
       assertSameScope(existing, scope);
       if (
+        sourceRevisionId !== undefined &&
+        existing.sourceRevisionId !== sourceRevisionId
+      ) {
+        existing.abort.abort();
+        this.stop(existing, "REVISION_SUPERSEDED");
+      } else if (
         existing.state === "STARTING" ||
         existing.state === "RUNNING" ||
         (existing.state === "STOPPED" &&
@@ -331,6 +352,8 @@ export class AnalysisDevelopmentPumpSupervisor {
 
     const entry: AnalysisPumpEntry = {
       ...scope,
+      ...(sourceRevisionId ? { sourceRevisionId } : {}),
+      abort: new AbortController(),
       state: "STARTING",
       lastEventSequence: 0,
       subscriptionCount: existing?.subscriptionCount ?? 0,
@@ -370,15 +393,14 @@ export class AnalysisDevelopmentPumpSupervisor {
 
   /** Called after the source transport is aborted during application shutdown. */
   async settle(): Promise<void> {
-    await Promise.all(
-      [...this.entries.values()].map((entry) => entry.background),
-    );
+    await Promise.all(this.backgroundWork);
   }
 
   observe(
     scopeValue: AnalysisScope,
+    signal?: AbortSignal,
   ): AsyncIterable<AnalysisDevelopmentObservation> {
-    return this.observeDurableState(validScope(scopeValue));
+    return this.observeDurableState(validScope(scopeValue), signal);
   }
 
   private async initialize(entry: AnalysisPumpEntry): Promise<void> {
@@ -386,6 +408,8 @@ export class AnalysisDevelopmentPumpSupervisor {
       const source = this.options.source;
       const stored = await source.load(entry);
       if (!stored) throw new Error("ANALYSIS_NOT_FOUND");
+      if (entry.abort.signal.aborted) return;
+      entry.sourceRevisionId = projectionRevisionId(stored.projection);
       entry.lastEventSequence = stored.projection.lastEventSequence;
       if (stored.terminal) {
         this.stop(entry, "DURABLE_TERMINAL");
@@ -394,7 +418,20 @@ export class AnalysisDevelopmentPumpSupervisor {
       entry.state = "RUNNING";
       entry.subscriptionCount++;
       entry.background = (async () => {
-        for await (const observed of source.consume(entry)) {
+        for await (const observed of source.consume({
+          ...entry,
+          revisionId: entry.sourceRevisionId!,
+          signal: entry.abort.signal,
+        })) {
+          if (
+            entry.abort.signal.aborted ||
+            this.entries.get(entry.analysisId) !== entry
+          )
+            return;
+          if (
+            projectionRevisionId(observed.projection) !== entry.sourceRevisionId
+          )
+            continue;
           if (observed.projection.lastEventSequence > entry.lastEventSequence) {
             entry.lastEventSequence = observed.projection.lastEventSequence;
             this.notify(entry, {
@@ -415,7 +452,10 @@ export class AnalysisDevelopmentPumpSupervisor {
           }
         }
         this.stop(entry, "UPSTREAM_STREAM_ENDED");
-      })().catch((error) => this.fail(entry, error));
+      })().catch((error) => {
+        if (!entry.abort.signal.aborted) this.fail(entry, error);
+      });
+      this.track(entry.background);
       return;
     }
     const stored = await this.options.repository.getDevelopmentSnapshot(entry);
@@ -440,6 +480,12 @@ export class AnalysisDevelopmentPumpSupervisor {
         },
       )
       .catch(() => undefined);
+    this.track(entry.background);
+  }
+
+  private track(work: Promise<void>): void {
+    this.backgroundWork.add(work);
+    void work.then(() => this.backgroundWork.delete(work));
   }
 
   private async consume(
@@ -497,10 +543,14 @@ export class AnalysisDevelopmentPumpSupervisor {
 
   private async *observeDurableState(
     scope: AnalysisScope,
+    signal?: AbortSignal,
   ): AsyncGenerator<AnalysisDevelopmentObservation> {
+    if (signal?.aborted) return;
     const entry = this.entries.get(scope.analysisId);
     if (entry !== undefined) assertSameScope(entry, scope);
     const notifications = new PumpNotificationQueue();
+    const onAbort = () => notifications.end();
+    signal?.addEventListener("abort", onAbort, { once: true });
     const listener = (notification: PumpNotification): void => {
       notifications.push(notification);
     };
@@ -519,6 +569,7 @@ export class AnalysisDevelopmentPumpSupervisor {
           ? await this.options.source.load(scope)
           : await this.options.repository.getDevelopmentSnapshot(scope);
       if (stored === undefined) return;
+      if (signal?.aborted) return;
       if ("session" in stored) assertStoredScope(stored, scope);
       let lastEventSequence = stored.projection.lastEventSequence;
       yield {
@@ -553,6 +604,7 @@ export class AnalysisDevelopmentPumpSupervisor {
         yield notification.observation;
       }
     } finally {
+      signal?.removeEventListener("abort", onAbort);
       entry?.listeners.delete(listener);
       notifications.end();
     }
@@ -696,6 +748,11 @@ function isTerminalProjection(projection: AnalysisProjection): boolean {
     .filter((run) => run.revisionId === activeRevisionId)
     .sort((left, right) => right.attempt - left.attempt)[0];
   return currentRun !== undefined && terminalRunStatuses.has(currentRun.status);
+}
+
+function projectionRevisionId(projection: AnalysisProjection): string {
+  return agUiSharedStateV03Schema.parse(projection.state).analysis
+    .activeRevisionId;
 }
 
 const terminalRunStatuses = new Set<AnalysisRun["status"]>([

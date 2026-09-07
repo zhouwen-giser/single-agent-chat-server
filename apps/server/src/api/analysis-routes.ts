@@ -23,7 +23,7 @@ const identifier = z
   .regex(/^[A-Za-z0-9][A-Za-z0-9._:-]*$/u);
 const sha256 = z.string().regex(/^sha256:[0-9a-f]{64}$/u);
 
-const proposalCommandSchema = z
+const nativeProposalCommandSchema = z
   .object({
     commandId: identifier,
     proposalId: identifier,
@@ -37,6 +37,22 @@ const proposalCommandSchema = z
     idempotencyKey: z.string().min(1).max(256),
   })
   .strict();
+
+const proposalCommandSchema = z.union([
+  nativeProposalCommandSchema,
+  z
+    .object({
+      kind: z.literal("GROUNDING_SOURCE_QUERY"),
+      commandId: identifier,
+      idempotencyKey: z.string().min(1).max(256),
+      expectedRevisionId: identifier,
+      expectedRevisionNumber: z.number().int().min(0),
+      originalText: z.string().min(1).max(32768),
+      contextMode: z.enum(["CONTINUE", "REPLACE"]),
+      analysisSelections: z.array(z.unknown()).max(8).optional(),
+    })
+    .strict(),
+]);
 
 const cancelCommandSchema = z
   .object({

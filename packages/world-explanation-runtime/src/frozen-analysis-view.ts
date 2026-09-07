@@ -140,6 +140,7 @@ export function normalizeFrozenAnalysis(input: {
   )
     throw Error("ANALYSIS_SOURCE_RESPONSE_CONTRACT_VIOLATION");
   const world = result.worldAnalysisFindings;
+  view.source.findingSetHash = world.findingSetHash;
   const facts: string[] = [];
   const qualifiers: string[] = [
     "仅解释已发布的历史与世界分析结果；COMPLETED 不表示设备任务完成。",
@@ -438,7 +439,12 @@ export function normalizeFrozenAnalysis(input: {
       if (f.findingKind === "SPATIAL_FEATURE_COLLECTION")
         for (const [i, feature] of f.features.entries())
           if (feature.geometry)
-            layer(f, `feature-${i}`, json(feature.geometry));
+            layer(
+              f,
+              `feature-${i}`,
+              json(feature.geometry),
+              "已发布空间预览（非导航路线）",
+            );
     }
   }
   if (view.typedGaps.length)
@@ -449,6 +455,14 @@ export function normalizeFrozenAnalysis(input: {
           .join("、"),
     );
   view.warnings = unique(view.warnings);
+  if (view.choices.some((choice) => !choice.enabled))
+    qualifiers.push(
+      "候选已过期的结果仍可阅读；请重新查询，不会延长来源有效期。",
+    );
+  if (view.typedGaps.some((gap) => gap["messageCode"] === "CHOICE_LIMIT"))
+    qualifiers.push(
+      "候选列表受本地展示预算限制；选择按保存来源的候选身份解析，不能使用可见列表序号替代。",
+    );
   view.summary = {
     title:
       view.status === "WAITING_SELECTION" ? "请选择分析候选" : "世界分析结果",
@@ -468,6 +482,7 @@ export function normalizeFrozenAnalysis(input: {
     limited("VIEW_BYTE_LIMIT");
     if (view.findings.length) {
       view.findings.pop();
+      pruneDisplayDependencies(view);
       continue;
     }
     if (view.sourceProducts.length) {
@@ -517,4 +532,30 @@ export function normalizeFrozenAnalysis(input: {
     break;
   }
   return view;
+}
+
+/** Full saved results remain selection authority; displayed derived objects need their closure. */
+function pruneDisplayDependencies(view: FrozenAnalysisView): void {
+  const remaining = new Set(
+    view.findings.map((finding) => finding["findingId"]),
+  );
+  view.findings = view.findings.filter(
+    (finding) =>
+      finding["findingKind"] !== "ACTION_TARGET_CANDIDATE" ||
+      remaining.has(finding["sourceFindingId"]),
+  );
+  const visible = new Set(view.findings.map((finding) => finding["findingId"]));
+  view.map.layers = view.map.layers.filter((layer) =>
+    layer.findingIds.every((id) => visible.has(id)),
+  );
+  view.timeline.items = view.timeline.items.filter(
+    (item) => item.findingId !== undefined && visible.has(item.findingId),
+  );
+  view.actionTargets = view.actionTargets.filter(
+    (action) =>
+      visible.has(action.findingId) && visible.has(action.sourceFindingId),
+  );
+  view.evidenceLinks = view.evidenceLinks.filter((link) =>
+    visible.has(link.findingId),
+  );
 }

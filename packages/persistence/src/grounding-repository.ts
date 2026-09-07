@@ -566,7 +566,17 @@ export class GroundingPersistenceRepository {
           SELECT *
           FROM chat_service.grounding_execution
           WHERE (state IN ('GROUNDING_PENDING', 'SDAR_SUBMISSION_RESERVED') OR ($2::boolean AND state='GROUNDING_READY'))
-            AND (NOT $2::boolean OR (canonical_request_json IS NOT NULL AND (last_source_status IS NULL OR last_source_status IN ('ACCEPTED','RUNNING') OR analysis_revision_id IS NULL OR NOT EXISTS(SELECT 1 FROM chat_service.analysis_projection p WHERE p.analysis_id=grounding_execution.analysis_id))))
+            AND (NOT $2::boolean OR (canonical_request_json IS NOT NULL
+              AND NOT EXISTS(SELECT 1 FROM chat_service.analysis_control_command c
+                WHERE c.analysis_id=grounding_execution.analysis_intent_json->>'analysisId'
+                  AND c.command_kind=grounding_execution.analysis_intent_json->>'commandKind'
+                  AND c.command_id=grounding_execution.analysis_intent_json->>'commandId' AND c.status='FAILED')
+              AND (last_source_status IS NULL OR last_source_status IN ('ACCEPTED','RUNNING') OR analysis_revision_id IS NULL
+                OR NOT EXISTS(SELECT 1 FROM chat_service.analysis_event e
+                  WHERE e.analysis_id=grounding_execution.analysis_id AND e.revision_id=grounding_execution.analysis_revision_id
+                    AND e.run_id=grounding_execution.analysis_run_id AND e.event_type='GROUNDING_SOURCE_OBSERVED'
+                    AND e.payload_json->>'sourceStatus'=grounding_execution.last_source_status
+                    AND (e.payload_json->>'resultHash') IS NOT DISTINCT FROM grounding_execution.grounding_result_hash))))
             AND (lease_until IS NULL OR lease_until <= now())
           ORDER BY created_at, grounding_id
           FOR UPDATE SKIP LOCKED

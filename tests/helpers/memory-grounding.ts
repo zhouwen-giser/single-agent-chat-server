@@ -12,6 +12,9 @@ type GroundingPort = WorldGroundingRuntimeOptions["grounding"];
 export class MemoryGrounding implements GroundingPort {
   readonly rows = new Map<string, GroundingExecution>();
   readonly publications: string[] = [];
+  readonly projectionReceipts = new Map<string, string>();
+  sourceRecoveryEligible?: (execution: GroundingExecution) => boolean;
+  constructor(private readonly now: () => Date = () => new Date()) {}
   private scoped(id: string, principalId: string, threadId: string) {
     const row = this.rows.get(id);
     return row?.principalId === principalId && row.threadId === threadId
@@ -34,15 +37,30 @@ export class MemoryGrounding implements GroundingPort {
           publicCanonicalHash(input.analysisIntent ?? null)
       )
         throw Error("ANALYSIS_SOURCE_REPLAY_CONFLICT");
-      return { kind: "REPLAY", execution: prior };
+      if (prior.state !== "GROUNDING_PENDING")
+        return { kind: "REPLAY", execution: prior };
+      if (
+        prior.leaseOwner &&
+        prior.leaseOwner !== input.leaseOwner &&
+        prior.leaseUntil &&
+        prior.leaseUntil.getTime() > this.now().getTime()
+      )
+        return { kind: "BUSY", execution: prior };
+      const acquired = {
+        ...prior,
+        leaseOwner: input.leaseOwner,
+        leaseUntil: new Date(this.now().getTime() + (input.leaseMs ?? 180000)),
+      };
+      this.rows.set(prior.groundingId, acquired);
+      return { kind: "ACQUIRED", execution: acquired };
     }
     const row: GroundingExecution = {
       ...input,
       state: "GROUNDING_PENDING",
       version: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      leaseUntil: new Date(Date.now() + 180000),
+      createdAt: this.now(),
+      updatedAt: this.now(),
+      leaseUntil: new Date(this.now().getTime() + 180000),
     };
     this.rows.set(row.groundingId, row);
     return { kind: "CREATED", execution: row };
@@ -76,7 +94,7 @@ export class MemoryGrounding implements GroundingPort {
             groundingResultHash: snapshot.resultHash,
           }
         : {}),
-      updatedAt: new Date(),
+      updatedAt: this.now(),
     };
     const changed = hash !== prior.lastObservationHash;
     if (changed) this.publications.push(hash);
@@ -87,8 +105,43 @@ export class MemoryGrounding implements GroundingPort {
   async recordSourcePoll() {
     this.polls++;
   }
-  async releaseLease() {
+  async releaseLease(
+    input: Parameters<GroundingPersistenceRepository["releaseLease"]>[0],
+  ) {
+    const row = await this.get(input);
+    if (!row || row.leaseOwner !== input.leaseOwner) return false;
+    const { leaseOwner: _owner, leaseUntil: _until, ...released } = row;
+    this.rows.set(row.groundingId, released);
     return true;
+  }
+  async claimRecoverable(
+    input: Parameters<GroundingPersistenceRepository["claimRecoverable"]>[0],
+  ) {
+    const recovered: GroundingExecution[] = [];
+    for (const row of this.rows.values()) {
+      if (this.sourceRecoveryEligible && !this.sourceRecoveryEligible(row))
+        continue;
+      if (row.leaseUntil && row.leaseUntil.getTime() > this.now().getTime())
+        continue;
+      if (
+        !row.canonicalRequest ||
+        !["GROUNDING_PENDING", "GROUNDING_READY"].includes(row.state) ||
+        (row.lastSourceStatus !== undefined &&
+          !["ACCEPTED", "RUNNING"].includes(row.lastSourceStatus) &&
+          this.projectionReceipts.get(row.groundingId) ===
+            row.lastObservationHash)
+      )
+        continue;
+      const acquired = {
+        ...row,
+        leaseOwner: input.leaseOwner,
+        leaseUntil: new Date(this.now().getTime() + (input.leaseMs ?? 180000)),
+      };
+      this.rows.set(row.groundingId, acquired);
+      recovered.push(acquired);
+      if (recovered.length >= (input.limit ?? 32)) break;
+    }
+    return recovered;
   }
   async requestSourceCancellation(
     input: Parameters<
@@ -101,16 +154,66 @@ export class MemoryGrounding implements GroundingPort {
     this.rows.set(row.groundingId, row);
     return row;
   }
-  async recordGroundingReady(): Promise<never> {
-    throw Error("UNEXPECTED_LEGACY_PORT");
+  async recordGroundingReady(
+    input: Parameters<
+      GroundingPersistenceRepository["recordGroundingReady"]
+    >[0],
+  ) {
+    const row = await this.get(input);
+    if (!row) throw Error("ANALYSIS_NOT_FOUND");
+    if (row.state !== "GROUNDING_PENDING") {
+      if (
+        row.wsgsGroundingId === input.wsgsGroundingId &&
+        row.groundingResultHash === input.resultHash
+      )
+        return row;
+      throw Error("GROUNDING_RESULT_CONFLICT");
+    }
+    if (row.leaseOwner !== input.leaseOwner)
+      throw Error("GROUNDING_LEASE_CONFLICT");
+    const ready: GroundingExecution = {
+      ...row,
+      state: "GROUNDING_READY",
+      wsgsGroundingId: input.wsgsGroundingId,
+      groundingResultHash: input.resultHash,
+      groundingResult: json(input.result),
+      updatedAt: this.now(),
+    };
+    this.rows.set(row.groundingId, ready);
+    return ready;
   }
-  async complete(): Promise<never> {
-    throw Error("UNEXPECTED_LEGACY_PORT");
+  async complete(
+    input: Parameters<GroundingPersistenceRepository["complete"]>[0],
+  ) {
+    return this.terminal(input, "COMPLETED");
   }
-  async fail(): Promise<never> {
-    throw Error("UNEXPECTED_LEGACY_PORT");
+  async fail(input: Parameters<GroundingPersistenceRepository["fail"]>[0]) {
+    return this.terminal(input, "FAILED", input.failureCode);
   }
-  async cancel(): Promise<never> {
-    throw Error("UNEXPECTED_LEGACY_PORT");
+  async cancel(input: Parameters<GroundingPersistenceRepository["cancel"]>[0]) {
+    return this.terminal(input, "CANCELLED");
+  }
+  private async terminal(
+    input: Parameters<GroundingPersistenceRepository["complete"]>[0],
+    state: "COMPLETED" | "FAILED" | "CANCELLED",
+    failureCode?: string,
+  ) {
+    const row = await this.get(input);
+    if (!row) throw Error("ANALYSIS_NOT_FOUND");
+    if (row.state === state) return row;
+    if (["COMPLETED", "FAILED", "CANCELLED"].includes(row.state))
+      throw Error("GROUNDING_TERMINAL_CONFLICT");
+    if (state === "COMPLETED" && row.state !== "GROUNDING_READY")
+      throw Error("GROUNDING_NOT_READY");
+    const { leaseOwner: _owner, leaseUntil: _until, ...value } = row;
+    const terminal = {
+      ...value,
+      state,
+      ...(failureCode ? { failureCode } : {}),
+      terminalAt: this.now(),
+      updatedAt: this.now(),
+    };
+    this.rows.set(row.groundingId, terminal);
+    return terminal;
   }
 }

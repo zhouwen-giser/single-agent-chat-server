@@ -13,6 +13,103 @@ import { hybridWorldExplanationFixture } from "./fixtures/hybrid-world-explanati
 import { assemblyInput } from "./world-explanation-fixtures.js";
 
 describe("SACS v0.4 world grounding application routing", () => {
+  it("uses the resolved principal for world and conversation storage without changing external task ownership", async () => {
+    const importHistory = jest.fn(async () => ({
+      insertedUsers: 1,
+      duplicateUsers: 0,
+      matchedAssistants: 0,
+      missingAssistants: 0,
+      ignoredUnstableHistory: 0,
+      ignoredPrivilegedRoles: 0,
+      currentUserMessageSequence: 7,
+    }));
+    const assembleContext = jest.fn(async () => ({
+      threadId: "thread-1",
+      messages: [],
+      activeTasks: [],
+      recentTerminalTasks: [],
+    }));
+    const listActiveTasksForChat = jest.fn(async () => []);
+    const continuePendingChoice = jest.fn(async () => undefined);
+    const answerWorld = jest.fn(async () => "safe source answer");
+    const application = new ConversationApplicationService({
+      repository: { ...repository([]), listActiveTasksForChat },
+      coordinator: {} as SdarTaskCoordinator,
+      model: {
+        decideTurn: async () => worldPlan(),
+        answer: async () => "unused",
+      },
+      importHistory,
+      assembleContext,
+      worldGrounding: {
+        continuePendingChoice,
+        answerWorld,
+        compareHybrid: async () => "unused",
+        submitOperational: async () => "unused",
+      },
+    });
+    await expect(
+      application.execute({
+        ...turn(),
+        userId: "external-subject",
+        principalId: "resolved-principal-uuid",
+      }),
+    ).resolves.toBe("safe source answer");
+    for (const call of [
+      importHistory,
+      assembleContext,
+      continuePendingChoice,
+      answerWorld,
+    ])
+      expect(call).toHaveBeenCalledWith(
+        expect.objectContaining({
+          principalId: "resolved-principal-uuid",
+          threadId: "thread-1",
+        }),
+      );
+    expect(listActiveTasksForChat).toHaveBeenCalledWith({
+      chatId: "chat-1",
+      userId: "external-subject",
+      limit: 32,
+    });
+  });
+
+  it("keeps ordinary SDAR submission userId external when a distinct principal is resolved", async () => {
+    const submit = jest.fn(async function* () {
+      yield "ordinary SDAR response";
+    });
+    const application = createApplication(
+      {
+        decideTurn: async () => ({
+          kind: "new_task",
+          taskText: "Execute ordinary task",
+        }),
+        answer: async () => "unused",
+      },
+      undefined,
+      submit,
+    );
+    const result = await application.execute({
+      ...turn(),
+      userId: "external-subject",
+      principalId: "resolved-principal-uuid",
+    });
+    if (typeof result === "string" || !(Symbol.asyncIterator in result))
+      throw Error("Expected ordinary SDAR stream");
+    const fragments = [];
+    for await (const fragment of result) fragments.push(fragment);
+    expect(fragments).toEqual(["ordinary SDAR response"]);
+    expect(submit).toHaveBeenCalledWith(
+      {
+        userText: "Execute ordinary task",
+        userId: "external-subject",
+        chatId: "chat-1",
+        userMessageId: "message-1",
+      },
+      undefined,
+    );
+  });
+
   it("handles a pending choice before model classification", async () => {
     const decideTurn = jest.fn(async () => worldPlan());
     const continuePendingChoice = jest.fn(

@@ -7,6 +7,8 @@ export type JsonValue =
   | { readonly [key: string]: JsonValue };
 
 export interface ThreadBinding {
+  /** Durable identity, which may differ from the authenticated external subject. */
+  readonly principalId?: string;
   readonly threadId: string;
   readonly openWebUiChatId: string;
   readonly userId: string;

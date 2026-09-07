@@ -30,6 +30,40 @@ agent registry, capability-discovery service, or multi-agent router.
 
 Protocol drift fails closed. See [A2A compatibility](docs/a2a-compatibility.md).
 
+## v0.6 frozen WSGS consumer — source development
+
+The Grounding Job consumer uses the exact `sacs-wsgs-grounding/1.2` and
+`wsgs-world-analysis-findings/1.0` header pair; wire `schemaVersion` remains
+`1.0`. Normal Chat, AG-UI and Analysis Control share the same consumer path.
+Historical action candidates remain non-executing: current validation, route
+planning and execution confirmation are required; `executionAuthorized=false`.
+
+Run the dedicated development checks directly from TypeScript source:
+
+```bash
+pnpm test:v06:frozen-wsgs:contracts
+pnpm test:v06:frozen-wsgs:unit
+pnpm test:v06:frozen-wsgs:http
+pnpm test:v06:frozen-wsgs       # union of all three groups, without duplicate suites
+node scripts/v06-frozen-tests.mjs all --list  # inspect the exact test/command plan only
+```
+
+These commands use controlled persistence/model ports and real loopback HTTP
+peers with the production Grounding adapter. They do not start Docker,
+PostgreSQL, real WSGS/Provider/SDAR/MCP/device services, release gates or a build.
+The test launcher does not load the developer's `.env` or inherit real service
+endpoint/credential settings. **ENV-001 (real PostgreSQL restoration) remains
+NOT_RUN**; memory and SQL-driver boundary tests are not database-restart evidence.
+
+This is consumer development verification, not production deployment or release
+qualification. See the [source run guide](reports/v0.6/frozen-wsgs-consumer/SOURCE_RUN.md)
+and [actual acceptance ledger](reports/v0.6/frozen-wsgs-consumer/ACCEPTANCE_LEDGER.json)
+for commands, evidence and remaining/environmental scope. After normal database,
+model and authentication configuration, `pnpm dev:server` starts the ordinary
+service from source; no `pnpm build` prerequisite or production memory fallback
+is introduced. Older Native and release qualification requirements below do not
+gate this Grounding-consumer development track.
+
 ## Requirements
 
 - Node `22.14.x`

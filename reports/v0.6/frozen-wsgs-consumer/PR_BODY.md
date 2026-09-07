@@ -7,8 +7,9 @@ Continue the existing v0.6 branch with the Frozen WSGS Consumer C00–C06 goal. 
 - C00: imported 117 exact public files; real SACS loader ran all 44 official examples plus tamper/hash/boundary cases (52 tests). Commit e870717.
 - C01: exact 1.2 HTTP decoding/negotiation and budgets; stored contract identity and scoped restore; cancellation intent/uncertainty/terminal-race handling. Local HTTP and memory/SQL-driver boundaries, old 1.0/1.1 regressions. See generated C01.json and logs for final verified outcomes.
 - C02: normal mapper consumes five public Finding types plus geo; deterministic text/map/timeline preserves proof, gaps, source identities, original time bounds and ranking values. Full public validation before view clipping. The cumulative phase run passed 195 tests, typecheck, architecture and lint with zero errors.
-- C03 in progress: full-source selection request planner implemented; 69-test focused run passed (17 new planner cases plus 52 contract regressions). Actual HTTP selector submission, scope/TTL/conflict/idempotency checks are tested. This is not source-control/revision completion and advances no additional AC statuses.
-- Remaining: real source proposal/selection revisions, UI interactions, normal two-turn Chat/AG-UI/Control closure and all-40 acceptance reconciliation. This PR is still Draft, not development-ready or release-ready.
+- C03 complete: normal source proposal/Choice control, durable pre-HTTP intent, parent revision CAS, atomic next-revision binding, history-safe late observations and per-revision pump. Chat and AG-UI share the resolved internal principal while ordinary SDAR retains its external user identity. Final stable-source verification passed 358 tests / 23 suites, including all 23 real normal-entry HTTP cases; typecheck/architecture/migrations/diff passed. Lint: zero errors, 142 recorded warnings.
+- C04/C05 implementation primitives and the C06 source CLI are included where needed by the integrated tests; their separate acceptance verification remains pending. Next: explicit LineString-preview assertion, presentation/normal-entry reconciliation and final delivered source CLI regression.
+- REQUIRED ledger: 31/40 PASS, IN_PROGRESS. This PR remains Draft, not yet consumer-development-ready and not release-ready.
 
 ## Evidence and limits
 

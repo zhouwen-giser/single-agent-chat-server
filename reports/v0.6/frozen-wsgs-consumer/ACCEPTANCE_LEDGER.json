@@ -397,12 +397,23 @@
       "scenario": "从官方 ranking 与 request-selection 的关联生成下一轮请求。",
       "expected": "五个 analysisSelections 字段正确；priorGroundings 锚点完整；selectedProductIds 仅真实产品；完整请求通过公共校验。",
       "evidenceRequired": "实际第二次 POST 的 body 断言",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-request.unit.test.ts:53: it(\"AC-019 emits the five exact selection fields and empty reference selection through actual HTTP\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts:419: it(\"AC-019 AC-034 AC-039 normal Chat and AG-UI reconnect share one source before START sends a formally anchored second HTTP request\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-020",
@@ -412,12 +423,25 @@
       "scenario": "REFERENCE/TASK/METRIC_SERIES/RANKED_LOCATION/EVENT 五种选择。",
       "expected": "每类可显示、可从其公开身份定位并回传；不以 rank 或数组位置作为身份；不传 Provider 私有对象。",
       "evidenceRequired": "参数化 Choice 到请求测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-view.unit.test.ts:361: it(\"AC-020 AC-036 display clipping leaves selectors based on IDs, never rank or false product IDs\", () => {",
+        "tests/v06-frozen-request.unit.test.ts:92: \"AC-020 supports public choice kind at index %i using IDs\",",
+        "tests/v06-frozen-client.unit.test.ts:135: \"AC-020 AC-036 every Choice kind %i sends exact identities via the existing Control client\",",
+        "tests/v06-frozen-entry.integration.test.ts:579: it(\"AC-020 AC-022 every published Choice kind goes through the normal saved-intervention Control route\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-021",
@@ -427,12 +451,25 @@
       "scenario": "异用户、异会话、异 Grounding/hash/findingSet 的选择。",
       "expected": "仅使用本会话保存并验证的来源；拒绝错配/foreign selector；hash 不替代授权；错误不泄露其他会话内容。",
       "evidenceRequired": "现有 scope 边界单测",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-request.unit.test.ts:116: \"AC-021 rejects foreign %s without exposing source content\",",
+        "tests/v06-frozen-request.unit.test.ts:124: \"AC-021 ordinal text does not repair a foreign %s anchor\",",
+        "tests/v06-frozen-entry.integration.test.ts:505: it(\"AC-021 AC-039 AG-UI then Chat share the resolved internal principal when the JWT subject differs\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts:763: it(\"AC-021 AC-024 rejects foreign scopes, wrong source anchors and conflicting selector payloads before HTTP\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-022",
@@ -442,12 +479,22 @@
       "scenario": "正常 resolveIntervention 入口提交已保存 Choice 的 candidate。",
       "expected": "不返回 GROUNDING_SOURCE_REVISION_NOT_READY；经真实请求构造/Source/HTTP 调用产生新结果和 Revision。",
       "evidenceRequired": "共享组合控制入口 E2E fixture",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-entry.integration.test.ts:579: it(\"AC-020 AC-022 every published Choice kind goes through the normal saved-intervention Control route\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-023",
@@ -457,12 +504,23 @@
       "scenario": "“第二个”，分别有一个有效 Choice、多个 Choice、无 Choice。",
       "expected": "仅唯一有效语境可以解析；其余明确澄清；不总选第一项、不跨列表猜测。",
       "evidenceRequired": "受控模型/选择解析与 HTTP 次数断言",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-request.unit.test.ts:134: it(\"AC-023 only one fresh context can resolve an ordinal\", () => {",
+        "tests/v06-frozen-entry.integration.test.ts:1119: \"AC-023 ordinal with %s context clarifies without an additional HTTP request\",",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-024",
@@ -472,12 +530,23 @@
       "scenario": "点击候选1但文字指定候选2；重复/冲突 choiceId；多于8项。",
       "expected": "按公开语义拒绝或澄清；不偷偷优先某种输入；不发歧义操作。",
       "evidenceRequired": "request semantics 与控制负例",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-request.unit.test.ts:145: it(\"AC-024 rejects click/text disagreement, duplicate/conflicting choices, extra fields and more than eight selectors\", () => {",
+        "tests/v06-frozen-entry.integration.test.ts:763: it(\"AC-021 AC-024 rejects foreign scopes, wrong source anchors and conflicting selector payloads before HTTP\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-025",
@@ -487,12 +556,24 @@
       "scenario": "受控时钟在 validUntil 前后；GET、重试、重连；固定样例日期。",
       "expected": "未过期可选择；过期仅可读并提示重查；不刷新 TTL/ID；正例不靠关闭时钟检查通过。",
       "evidenceRequired": "时间注入测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-request.unit.test.ts:162: it(\"AC-025 clock boundary rejects expiry without changing source TTL or identity\", () => {",
+        "tests/v06-frozen-client.unit.test.ts:235: it(\"AC-025 AC-036 realtime expiry and missing intervention disable selection but preserve reading and requery\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts:809: it(\"AC-025 expired saved choices stay readable but cannot produce a second source\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-026",
@@ -502,12 +583,25 @@
       "scenario": "同一 command 重放、并行相同命令、冲突 proposal。",
       "expected": "同一意图稳定重放，无重复逻辑 Grounding；冲突明确；使用既有 claim/幂等机制，不建新队列。",
       "evidenceRequired": "command claim 与 HTTP 请求计数",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-request.unit.test.ts:185: it(\"AC-010 AC-026 stable command body/key; changed semantics retain key for durable conflict detection\", () => {",
+        "tests/v06-frozen-entry.integration.test.ts:647: it(\"AC-026 identical concurrent clicks claim one logical source and replay the durable command\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts:894: \"AC-009 AC-026 HTTP %i after durable prepare preserves old facts and classifies command recoverability\",",
+        "tests/v06-frozen-entry.integration.test.ts:970: it(\"AC-010 AC-026 command kind separates source-query and choice-resolution HTTP identities\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-027",
@@ -517,12 +611,23 @@
       "scenario": "“排除暂停”“改查第二次任务/丢包率”与“展开卡片/聚焦地图”。",
       "expected": "submitProposal 真实执行新语义请求/Revision；展示操作不无谓重查；不把本地裁剪冒充重新分析。",
       "evidenceRequired": "正常控制入口 + request diff",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-request.unit.test.ts:205: it(\"AC-027 AC-028 display only does not requery; context replacement removes old selections and prior anchor\", () => {",
+        "tests/v06-frozen-entry.integration.test.ts:677: it(\"AC-027 AC-028 AC-029 real proposals create new revisions, local display reuses results, and old late sources cannot overwrite\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-028",
@@ -532,12 +637,24 @@
       "scenario": "修改对象/任务/执行/阶段/指标/单位/系列/目标后再次选择。",
       "expected": "旧不适用 selector/行动目标不被重新贴标签复用；必要时重查/澄清；来源历史可保留。",
       "evidenceRequired": "多轮上下文与目标失效测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-request.unit.test.ts:205: it(\"AC-027 AC-028 display only does not requery; context replacement removes old selections and prior anchor\", () => {",
+        "tests/v06-frozen-client.unit.test.ts:289: it(\"AC-028 a new active revision makes old selectors and targets historical, never relabelled\", () => {",
+        "tests/v06-frozen-entry.integration.test.ts:677: it(\"AC-027 AC-028 AC-029 real proposals create new revisions, local display reuses results, and old late sources cannot overwrite\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-029",
@@ -547,12 +664,36 @@
       "scenario": "新 Revision 已建立后收到旧 source 的结果/观察事件。",
       "expected": "旧事件不能覆盖当前投影或完成新 run；历史归属准确；跨 analysis 不串线。",
       "evidenceRequired": "runtime 时序测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-source-pump.unit.test.ts:96: it(\"AC-029 restarts a terminal entry for a new Revision without accepting the prior source event\", async () => {",
+        "tests/v06-frozen-source-pump.unit.test.ts:132: it(\"AC-029 aborts a superseded in-flight generation and isolates its late completion\", async () => {",
+        "tests/v06-frozen-source-history.unit.test.ts:151: \"AC-029 historical %s updates only its own run as %s and appends one audit event\",",
+        "tests/v06-frozen-source-history.unit.test.ts:216: it(\"AC-029 duplicate or formerly current observations retain the existing event identity without a second write\", async () => {",
+        "tests/v06-frozen-source-history.unit.test.ts:231: it(\"AC-029 current revision is owned by the normal projector, never this history path\", async () => {",
+        "tests/v06-frozen-source-history.unit.test.ts:241: \"AC-029 local supersession never converts published %s into cancelled/failed\",",
+        "tests/v06-frozen-source-history.unit.test.ts:253: it(\"AC-029 stale observation cannot complete a different run\", async () => {",
+        "tests/v06-frozen-source-history.unit.test.ts:271: \"AC-029 rejects mismatched saved %s identity before any historical mutation\",",
+        "tests/v06-frozen-source-history.unit.test.ts:284: it(\"AC-029 rejects missing user/thread ownership without exposing source history\", async () => {",
+        "tests/v06-frozen-source-history.unit.test.ts:297: it(\"AC-029 missing source remains a no-op, not invented completion\", async () => {",
+        "tests/v06-frozen-source-history.unit.test.ts:349: \"AC-029 invalid saved status/time is never promoted %#\",",
+        "tests/v06-frozen-source-history.unit.test.ts:361: it(\"AC-029 event identity conflicts roll back without altering old or current facts\", async () => {",
+        "tests/v06-frozen-source-history.unit.test.ts:371: it(\"AC-029 run update failure rolls back the appended event and releases the connection\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts:677: it(\"AC-027 AC-028 AC-029 real proposals create new revisions, local display reuses results, and old late sources cannot overwrite\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent",
+        "tests/v06-frozen-source-pump.unit.test.ts; tests/v06-frozen-source-history.unit.test.ts: delayed source isolation and historical audit"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/multi-task-coordinator.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C03.json",
+        "reports/v0.6/frozen-wsgs-consumer/C03-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-030",

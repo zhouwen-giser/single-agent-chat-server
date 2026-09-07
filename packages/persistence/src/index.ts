@@ -25,6 +25,8 @@ export {
   type AnalysisDevelopmentSeed,
   type AnalysisDevelopmentSnapshot,
   type TrustedPublicEditSchema,
+  type PreparedSourceRevision,
+  type SourceRevisionCommandIdentity,
 } from "./analysis-development-repository.js";
 export {
   AuthorityFusionRepository,

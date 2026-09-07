@@ -2,14 +2,65 @@ import { spawnSync, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 const phase = process.argv[2];
-if (!["C00", "C01", "C02", "C03-planner"].includes(phase))
+if (
+  !["C00", "C01", "C02", "C03-planner", "C03", "C04", "C05", "C06"].includes(
+    phase,
+  )
+)
   throw Error("No verification mapping implemented for this phase yet.");
 const dir = "reports/v0.6/frozen-wsgs-consumer";
 const sha = execFileSync("git", ["rev-parse", "HEAD"], {
   encoding: "utf8",
 }).trim();
 const startedAt = new Date().toISOString();
+const listSourceFiles = () =>
+  execFileSync(
+    "git",
+    ["ls-files", "--cached", "--others", "--exclude-standard"],
+    { encoding: "utf8" },
+  )
+    .trim()
+    .split("\n")
+    .filter(
+      (path) =>
+        /^(apps|packages|tests|scripts|migrations)\//u.test(path) ||
+        /^(package\.json|pnpm-lock\.yaml|tsconfig.*\.json|jest.*)$/u.test(path),
+    );
+const sourceFiles = listSourceFiles();
+const digestSourceTree = () =>
+  "sha256:" +
+  createHash("sha256")
+    .update(
+      [...new Set(listSourceFiles())]
+        .sort()
+        .map(
+          (path) =>
+            path +
+            ":" +
+            createHash("sha256").update(readFileSync(path)).digest("hex"),
+        )
+        .join("\n"),
+    )
+    .digest("hex");
+const sourceTreeDigest = digestSourceTree();
+const environment = {
+  ...Object.fromEntries(
+    Object.entries(process.env).filter(
+      ([key]) =>
+        !/^(?:SACS_|WSGS_|SDAR_|GOWM_|GSAP_|GDPS_|OPENAI_|MODEL_|DATABASE_URL$|TEST_DATABASE_URL$|PGHOST$|PGPORT$|PGUSER$|PGPASSWORD$|PGDATABASE$)/u.test(
+          key,
+        ) &&
+        !/(?:^|_)(?:TOKEN|PASSWORD|SECRET|API_KEY|BASE_URL|ENDPOINT)(?:$|_)/u.test(
+          key,
+        ),
+    ),
+  ),
+  NODE_ENV: "test",
+  DOTENV_CONFIG_PATH: process.platform === "win32" ? "NUL" : "/dev/null",
+  DOTENV_CONFIG_QUIET: "true",
+};
 const commands = [];
+let phaseTestPaths = [];
 const commandsToRun = ["C01", "C02"].includes(phase)
   ? [
       [process.execPath, ["node_modules/typescript/bin/tsc", "--noEmit"]],
@@ -127,12 +178,89 @@ if (phase === "C03-planner") {
     ],
   );
 }
+if (["C03", "C04", "C05", "C06"].includes(phase)) {
+  const tests = [
+    "tests/v06-frozen-public.contract.test.ts",
+    "tests/v06-frozen-http.contract.test.ts",
+    "tests/v06-frozen-source.unit.test.ts",
+    "tests/v06-frozen-persistence.unit.test.ts",
+    "tests/v06-frozen-cancel.unit.test.ts",
+    "tests/v06-frozen-view.unit.test.ts",
+    "tests/v06-frozen-request.unit.test.ts",
+    "tests/v06-frozen-revision-persistence.unit.test.ts",
+    "tests/v06-frozen-source-pump.unit.test.ts",
+    "tests/v06-frozen-source-history.unit.test.ts",
+    "tests/v06-frozen-client.unit.test.ts",
+    "tests/v06-frozen-entry.integration.test.ts",
+    "tests/v06-frozen-factory-compat.unit.test.ts",
+    "tests/v05-analysis-development-runtime.unit.test.ts",
+    "tests/analysis-control-api.contract.test.ts",
+    "tests/analysis-control-coordinator.unit.test.ts",
+    "tests/analysis-reference-client.contract.test.ts",
+    "tests/multi-task-coordinator.contract.test.ts",
+    "tests/sdar-a2a-adapter.contract.test.ts",
+    "tests/openai-api.contract.test.ts",
+    "tests/openai-predecessor-regression.contract.test.ts",
+    "tests/query-service.unit.test.ts",
+    "tests/world-grounding-application.unit.test.ts",
+  ];
+  if (phase === "C06")
+    tests.splice(
+      0,
+      tests.length,
+      ...JSON.parse(
+        execFileSync(
+          process.execPath,
+          ["scripts/v06-frozen-tests.mjs", "all", "--list"],
+          { encoding: "utf8", env: environment },
+        ),
+      ).tests,
+    );
+  phaseTestPaths = [...new Set(tests)];
+  commandsToRun.splice(
+    0,
+    commandsToRun.length,
+    [process.execPath, ["node_modules/typescript/bin/tsc", "--noEmit"]],
+    [
+      process.execPath,
+      phase === "C06"
+        ? ["scripts/v06-frozen-tests.mjs", "all"]
+        : [
+            "--experimental-vm-modules",
+            "node_modules/jest/bin/jest.js",
+            "--runInBand",
+            ...tests,
+          ],
+    ],
+    [process.execPath, ["scripts/verify-architecture.mjs"]],
+    [
+      process.execPath,
+      [
+        "node_modules/eslint/bin/eslint.js",
+        ...sourceFiles.filter(
+          (path) =>
+            /\.ts$/u.test(path) &&
+            (tests.includes(path) ||
+              /^(packages\/(analysis-client|analysis-control-runtime|analysis-runtime|analysis-development-runtime|persistence|world-grounding-runtime|world-explanation-runtime|grounding-request-planner)\/src|apps\/server\/src\/(v06-grounding-analysis\.ts|api\/(analysis|openai)-routes\.ts|chat\/(conversation-application-service|sdar-chat-runner)\.ts)|tests\/helpers\/(memory-(frozen-analysis|grounding)|frozen-wsgs-http)\.ts)/u.test(
+                path,
+              )),
+        ),
+      ],
+    ],
+    [process.execPath, ["scripts/verify-migrations.mjs"]],
+    ["git", ["diff", "--check"]],
+  );
+}
 for (const [i, [program, args]] of commandsToRun.entries()) {
   const result = spawnSync(program, args, {
     encoding: "utf8",
+    env: environment,
     maxBuffer: 16 * 1024 * 1024,
   });
-  const output = (result.stdout ?? "") + (result.stderr ?? "");
+  const output =
+    (result.stdout ?? "") +
+    (result.stderr ?? "") +
+    (result.error ? `\n${result.error.message}\n` : "");
   process.stdout.write(output);
   const path = `${dir}/${phase}-command-${i + 1}.txt`;
   writeFileSync(path, output);
@@ -140,16 +268,31 @@ for (const [i, [program, args]] of commandsToRun.entries()) {
     command: [program === process.execPath ? "node" : program, ...args].join(
       " ",
     ),
-    exitCode: result.status ?? 1,
+    exitCode: result.error ? 1 : (result.status ?? 1),
     sourceSha: sha,
     outputDigest: "sha256:" + createHash("sha256").update(output).digest("hex"),
     evidencePath: path,
   });
-  if (result.status !== 0)
+  if (result.error || result.status !== 0)
     throw Error(`${phase} verification failed; ledger unchanged.`);
 }
+if (digestSourceTree() !== sourceTreeDigest)
+  throw Error(
+    `${phase} source tree changed during verification; ledger unchanged.`,
+  );
 const ledger = JSON.parse(readFileSync(`${dir}/ACCEPTANCE_LEDGER.json`));
-const mapping =
+const required = ledger.scenarios.filter(
+  (row) => row.classification === "REQUIRED",
+);
+if (
+  required.length !== 40 ||
+  new Set(required.map((row) => row.id)).size !== 40 ||
+  required.some((row) => !/^AC-(?:00[1-9]|0[1-3][0-9]|040)$/u.test(row.id))
+)
+  throw Error(
+    "Frozen acceptance matrix must retain exactly AC-001 through AC-040.",
+  );
+let mapping =
   phase === "C03-planner"
     ? {}
     : phase === "C02"
@@ -242,11 +385,66 @@ const mapping =
               ],
             },
           };
+const finalPhaseLocations = {
+  C03: Object.fromEntries(
+    Array.from({ length: 11 }, (_, i) => [
+      "AC-" + String(i + 19).padStart(3, "0"),
+      [
+        "tests/v06-frozen-entry.integration.test.ts: normal control/Chat/AG-UI two-turn, source revision and selection cases",
+        "tests/v06-frozen-request.unit.test.ts: exact selections, unique ordinals, TTL, scope and conflicts",
+        "tests/v06-frozen-revision-persistence.unit.test.ts: actual PostgreSQL repository driver-boundary CAS/claim/recovery intent",
+        ...(i === 10
+          ? [
+              "tests/v06-frozen-source-pump.unit.test.ts; tests/v06-frozen-source-history.unit.test.ts: delayed source isolation and historical audit",
+            ]
+          : []),
+      ],
+    ]),
+  ),
+  C04: Object.fromEntries(
+    Array.from({ length: 5 }, (_, i) => [
+      "AC-" + String(i + 34).padStart(3, "0"),
+      [
+        "tests/v06-frozen-client.unit.test.ts: same-source views, actual geometry, clipping closure, realtime TTL and non-executing candidates",
+        "tests/v06-frozen-view.unit.test.ts: five finding semantics and strict action requirements",
+        "tests/v06-frozen-entry.integration.test.ts: normal entries with A2A spies, stored authority and real second HTTP query",
+      ],
+    ]),
+  ),
+  C05: Object.fromEntries(
+    ["AC-007", "AC-008", "AC-039"].map((id) => [
+      id,
+      [
+        "tests/v06-frozen-entry.integration.test.ts: normal shared main composition, 200/202, Chat/AG-UI START/RECONNECT/control and different second Grounding",
+      ],
+    ]),
+  ),
+  C06: {
+    "AC-040": [
+      "C06-command-2.txt: explicit frozen and affected legacy regression suites; C06-command-1.txt: source typecheck; SOURCE_RUN.md: source commands and scope",
+    ],
+  },
+};
+if (finalPhaseLocations[phase])
+  mapping = Object.fromEntries(
+    Object.entries(finalPhaseLocations[phase]).map(([id, locations]) => [
+      id,
+      { command: commands[1], locations },
+    ]),
+  );
 for (const [id, evidence] of Object.entries(mapping)) {
   const row = ledger.scenarios.find((row) => row.id === id);
+  // Point each AC at its own executed assertion, not just a broad suite label.
+  const assertionLocations = phaseTestPaths.flatMap((path) =>
+    readFileSync(path, "utf8")
+      .split("\n")
+      .flatMap((line, index) =>
+        line.includes(id) ? [`${path}:${index + 1}: ${line.trim()}`] : [],
+      ),
+  );
   Object.assign(row, {
     status: "PASS",
-    testLocations: evidence.locations,
+    testLocations: [...new Set([...assertionLocations, ...evidence.locations])],
     command: evidence.command.command,
     exitCode: 0,
     evidencePaths: [
@@ -260,7 +458,13 @@ for (const [id, evidence] of Object.entries(mapping)) {
   });
 }
 ledger.ledgerType = "EXECUTED_SACS_EVIDENCE";
-ledger.decision = "IN_PROGRESS";
+ledger.decision =
+  phase === "C06" &&
+  ledger.scenarios
+    .filter((r) => r.classification === "REQUIRED")
+    .every((r) => r.status === "PASS")
+    ? "SACS_WSGS_FROZEN_WORLD_ANALYSIS_CONSUMER_DEV_READY"
+    : "IN_PROGRESS";
 writeFileSync(
   `${dir}/${phase}.json`,
   JSON.stringify(
@@ -268,12 +472,14 @@ writeFileSync(
       phase,
       status: "PASS",
       sourceSha: sha,
+      sourceTreeDigest,
       startedAt,
       completedAt: new Date().toISOString(),
       commands,
       acceptanceIds: Object.keys(mapping),
-      scope:
-        phase === "C03-planner"
+      scope: ["C03", "C04", "C05", "C06"].includes(phase)
+        ? "NORMAL_SACS_SOURCE_COMPOSITION_LOCAL_HTTP_AND_STORAGE_BOUNDARIES; NO_DOCKER_NO_LIVE_UPSTREAM_NO_BUILD_GATE"
+        : phase === "C03-planner"
           ? "PLANNER_ONLY; C03 source control/revisions/normal entry integration still required; NO NEW AC PASS"
           : phase === "C02"
             ? "SACS_FIVE_FINDING_PROJECTION; normal two-turn shared composition acceptance remains C05"

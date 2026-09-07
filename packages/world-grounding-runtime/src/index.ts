@@ -187,6 +187,13 @@ export interface HybridAuthoritySeparatedResult {
 }
 
 export interface WorldGroundingRuntimeOptions {
+  /** Shared frozen consumer composition. Legacy 1.0/1.1 paths remain isolated. */
+  readonly answerFrozenWorld?: (
+    input: WorldGroundingRuntimeTurn,
+  ) => Promise<string>;
+  readonly continueFrozenWorld?: (
+    input: WorldGroundingControlTurn,
+  ) => Promise<string | undefined>;
   readonly sourcePolling?: {
     pollIntervalMs: number;
     maxDurationMs: number;
@@ -297,11 +304,25 @@ export class WorldGroundingRuntime {
       groundingExecutionId: string;
       interactionRequestId: string;
       leaseOwner: string;
+      analysisIntent?: Readonly<Record<string, JsonValue>>;
     },
   ): Promise<GroundingExecution> {
     verifySourceRequest(input);
     const contractIdentity =
       input.contractIdentity ?? groundingClientIdentity(this.options.wsgs);
+    const analysisIntent = input.analysisIntent ?? {
+      analysisId: input.analysisId,
+      revisionId: input.revisionId,
+      contractIdentity,
+    };
+    if (
+      analysisIntent["analysisId"] !== input.analysisId ||
+      analysisIntent["revisionId"] !== input.revisionId ||
+      hashCanonicalJson(
+        parseGroundingContractIdentity(analysisIntent["contractIdentity"]),
+      ) !== hashCanonicalJson(contractIdentity)
+    )
+      throw new AnalysisSourceError("ANALYSIS_SOURCE_IDENTITY_INVALID");
     const client = this.sourceClient(contractIdentity);
     const repository = this.options.grounding;
     if (!repository.get || !repository.recordSourceSnapshot)
@@ -324,11 +345,7 @@ export class WorldGroundingRuntime {
       leaseOwner: input.leaseOwner,
       leaseMs: 180_000,
       canonicalRequest: asJsonValue(input.canonicalGroundingRequest),
-      analysisIntent: {
-        analysisId: input.analysisId,
-        revisionId: input.revisionId,
-        contractIdentity,
-      },
+      analysisIntent: analysisIntent as Readonly<Record<string, JsonValue>>,
     });
     if (
       claim.kind === "BUSY" ||
@@ -512,6 +529,11 @@ export class WorldGroundingRuntime {
         "WORLD_GROUNDING_CONTRACT_VIOLATION",
       );
     }
+    if (
+      this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.2" &&
+      this.options.answerFrozenWorld
+    )
+      return this.options.answerFrozenWorld(input);
     const revalidationFailure = await this.revalidateWorldFocus(
       input,
       turnPlan,
@@ -856,6 +878,11 @@ export class WorldGroundingRuntime {
     input: WorldGroundingControlTurn,
   ): Promise<string | undefined> {
     if (
+      this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.2" &&
+      this.options.continueFrozenWorld
+    )
+      return this.options.continueFrozenWorld(input);
+    if (
       this.options.worldFocus === undefined ||
       this.options.conversation === undefined ||
       this.options.grounding.get === undefined ||
@@ -1193,28 +1220,30 @@ export class WorldGroundingRuntime {
           );
         }
         assertResultIdentity(result, request);
-        await this.options.grounding.recordGroundingReady({
-          groundingId,
-          principalId: input.principalId,
-          threadId: input.threadId,
-          leaseOwner,
-          wsgsGroundingId: result.groundingId,
-          resultHash: result.resultHash,
-          result: asJsonValue(result),
-        });
-        if (result.status === "CANCELLED") {
-          await this.options.grounding.cancel({
+        if (this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.0") {
+          await this.options.grounding.recordGroundingReady({
             groundingId,
             principalId: input.principalId,
             threadId: input.threadId,
+            leaseOwner,
+            wsgsGroundingId: result.groundingId,
+            resultHash: result.resultHash,
+            result: asJsonValue(result),
           });
-        } else if (!["COMPLETED", "PARTIAL"].includes(result.status)) {
-          await this.options.grounding.fail({
-            groundingId,
-            principalId: input.principalId,
-            threadId: input.threadId,
-            failureCode: `WSGS_` + result.status,
-          });
+          if (result.status === "CANCELLED") {
+            await this.options.grounding.cancel({
+              groundingId,
+              principalId: input.principalId,
+              threadId: input.threadId,
+            });
+          } else if (!["COMPLETED", "PARTIAL"].includes(result.status)) {
+            await this.options.grounding.fail({
+              groundingId,
+              principalId: input.principalId,
+              threadId: input.threadId,
+              failureCode: `WSGS_` + result.status,
+            });
+          }
         }
       }
 
@@ -1233,6 +1262,7 @@ export class WorldGroundingRuntime {
         }
         response = await renderResult(result, requestCreatedAt, request);
         if (
+          this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.0" &&
           ["COMPLETED", "PARTIAL"].includes(result.status) &&
           groundingClaim.execution.state !== "COMPLETED"
         ) {
@@ -1246,6 +1276,9 @@ export class WorldGroundingRuntime {
     } catch (error) {
       const code = safeRuntimeCode(error);
       if (code === undefined) throw error;
+      // Source observation errors are local; only published Source snapshots set its state.
+      if (this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.0")
+        throw new WorldGroundingRuntimeError(code);
       await this.options.grounding
         .fail({
           groundingId,

@@ -160,6 +160,7 @@ export interface WorldAnalysisViewModel {
     contractVersion: string;
     resultProfile: string;
     resultHash?: string;
+    findingSetHash?: string;
   };
   summary: { title: string; primaryText: string; qualifiers: string[] };
   findings: JsonObject[];

@@ -1,6 +1,6 @@
 {
   "name": "single-agent-chat-server",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "OpenAI-compatible conversational entrance for one SDAR A2A agent.",
   "private": true,
   "type": "module",
@@ -11,7 +11,10 @@
     "pnpm": ">=11.13.1 <12"
   },
   "scripts": {
-    "test:v06:frozen-wsgs:contracts": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts",
+    "test:v06:frozen-wsgs:contracts": "node scripts/v06-frozen-tests.mjs contracts",
+    "test:v06:frozen-wsgs:unit": "node scripts/v06-frozen-tests.mjs unit",
+    "test:v06:frozen-wsgs:http": "node scripts/v06-frozen-tests.mjs http",
+    "test:v06:frozen-wsgs": "node scripts/v06-frozen-tests.mjs all",
     "test:v06:contracts": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-analysis-source.contract.test.ts tests/v06-grounding-job.contract.test.ts tests/wsgs-http-adapter.contract.test.ts",
     "test:v06:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-world-analysis-view.unit.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-source-bridge.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/world-grounding-runtime.unit.test.ts",
     "test:v06:postgres": "node scripts/v05-postgres-test-harness.mjs tests/v06-source-persistence.postgres.int.test.ts tests/v06-grounding-lifecycle.postgres.int.test.ts tests/grounding-persistence.postgres.int.test.ts",
