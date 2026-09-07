@@ -2,7 +2,7 @@ import { spawnSync, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 const phase = process.argv[2];
-if (!["C00", "C01", "C02"].includes(phase))
+if (!["C00", "C01", "C02", "C03-planner"].includes(phase))
   throw Error("No verification mapping implemented for this phase yet.");
 const dir = "reports/v0.6/frozen-wsgs-consumer";
 const sha = execFileSync("git", ["rev-parse", "HEAD"], {
@@ -100,6 +100,33 @@ if (phase === "C02") {
     "tests/v06-frozen-view.unit.test.ts",
   );
 }
+if (phase === "C03-planner") {
+  commandsToRun.splice(
+    0,
+    commandsToRun.length,
+    [process.execPath, ["node_modules/typescript/bin/tsc", "--noEmit"]],
+    [
+      process.execPath,
+      [
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "tests/v06-frozen-public.contract.test.ts",
+        "tests/v06-frozen-request.unit.test.ts",
+      ],
+    ],
+    [process.execPath, ["scripts/verify-architecture.mjs"]],
+    [
+      process.execPath,
+      [
+        "node_modules/eslint/bin/eslint.js",
+        "packages/grounding-request-planner/src/frozen-request.ts",
+        "packages/wsgs-geospatial-consumer/src/frozen-world-analysis.ts",
+        "tests/v06-frozen-request.unit.test.ts",
+      ],
+    ],
+  );
+}
 for (const [i, [program, args]] of commandsToRun.entries()) {
   const result = spawnSync(program, args, {
     encoding: "utf8",
@@ -123,96 +150,98 @@ for (const [i, [program, args]] of commandsToRun.entries()) {
 }
 const ledger = JSON.parse(readFileSync(`${dir}/ACCEPTANCE_LEDGER.json`));
 const mapping =
-  phase === "C02"
-    ? Object.fromEntries(
-        [
-          "AC-011",
-          "AC-012",
-          "AC-013",
-          "AC-014",
-          "AC-015",
-          "AC-016",
-          "AC-017",
-          "AC-018",
-        ].map((id) => [
-          id,
-          {
-            command: commands[1],
-            locations: [
-              `tests/v06-frozen-view.unit.test.ts: ${id} public examples and semantic assertions`,
-              ...(id === "AC-018"
-                ? [
-                    "tests/v06-frozen-http.contract.test.ts: caller result budget on POST and GET",
-                  ]
-                : []),
-            ],
-          },
-        ]),
-      )
-    : phase === "C01"
+  phase === "C03-planner"
+    ? {}
+    : phase === "C02"
       ? Object.fromEntries(
           [
-            [
-              "AC-004",
-              "tests/v06-frozen-http.contract.test.ts: exact config/header lifecycle and rejection cases",
-            ],
-            [
-              "AC-005",
-              "tests/v06-frozen-source.unit.test.ts: saved 1.1 / new 1.2 runtime; tests/v06-frozen-persistence.unit.test.ts: SQL identity checks",
-            ],
-            [
-              "AC-006",
-              "tests/v06-frozen-http.contract.test.ts: supported versus available, unavailable optional capabilities",
-            ],
-            [
-              "AC-009",
-              "tests/v06-frozen-http.contract.test.ts: HTTP errors / six malformed or foreign response cases",
-            ],
-            [
-              "AC-010",
-              "tests/v06-frozen-http.contract.test.ts: full body and original digest; tests/v06-frozen-persistence.unit.test.ts: profile replay conflict",
-            ],
-            [
-              "AC-030",
-              "tests/v06-frozen-http.contract.test.ts: three terminal statuses stop observation",
-            ],
-            [
-              "AC-031",
-              "tests/v06-frozen-http.contract.test.ts: local failures, abort, timeout never cancel or forge state",
-            ],
-            [
-              "AC-032",
-              "tests/v06-frozen-cancel.unit.test.ts: real control HTTP intent/replay/error; tests/v06-frozen-persistence.unit.test.ts: terminal races",
-            ],
-            [
-              "AC-033",
-              "tests/v06-frozen-source.unit.test.ts: same memory repository runtime rebuild/replay, no extra POST",
-            ],
-          ].map(([id, location]) => [
+            "AC-011",
+            "AC-012",
+            "AC-013",
+            "AC-014",
+            "AC-015",
+            "AC-016",
+            "AC-017",
+            "AC-018",
+          ].map((id) => [
             id,
-            { command: commands[1], locations: [location] },
+            {
+              command: commands[1],
+              locations: [
+                `tests/v06-frozen-view.unit.test.ts: ${id} public examples and semantic assertions`,
+                ...(id === "AC-018"
+                  ? [
+                      "tests/v06-frozen-http.contract.test.ts: caller result budget on POST and GET",
+                    ]
+                  : []),
+              ],
+            },
           ]),
         )
-      : {
-          "AC-001": {
-            command: commands[0],
-            locations: [
-              "reports/v0.6/frozen-wsgs-consumer/ExecPlan.md: Verified starting point",
-            ],
-          },
-          "AC-002": {
-            command: commands[2],
-            locations: [
-              "tests/v06-frozen-public.contract.test.ts: AC-002 verifies exact release bytes and original public dependency closure",
-            ],
-          },
-          "AC-003": {
-            command: commands[2],
-            locations: [
-              "tests/v06-frozen-public.contract.test.ts: AC-003 actual SACS loader / drift / official hash / unsupported schema cases",
-            ],
-          },
-        };
+      : phase === "C01"
+        ? Object.fromEntries(
+            [
+              [
+                "AC-004",
+                "tests/v06-frozen-http.contract.test.ts: exact config/header lifecycle and rejection cases",
+              ],
+              [
+                "AC-005",
+                "tests/v06-frozen-source.unit.test.ts: saved 1.1 / new 1.2 runtime; tests/v06-frozen-persistence.unit.test.ts: SQL identity checks",
+              ],
+              [
+                "AC-006",
+                "tests/v06-frozen-http.contract.test.ts: supported versus available, unavailable optional capabilities",
+              ],
+              [
+                "AC-009",
+                "tests/v06-frozen-http.contract.test.ts: HTTP errors / six malformed or foreign response cases",
+              ],
+              [
+                "AC-010",
+                "tests/v06-frozen-http.contract.test.ts: full body and original digest; tests/v06-frozen-persistence.unit.test.ts: profile replay conflict",
+              ],
+              [
+                "AC-030",
+                "tests/v06-frozen-http.contract.test.ts: three terminal statuses stop observation",
+              ],
+              [
+                "AC-031",
+                "tests/v06-frozen-http.contract.test.ts: local failures, abort, timeout never cancel or forge state",
+              ],
+              [
+                "AC-032",
+                "tests/v06-frozen-cancel.unit.test.ts: real control HTTP intent/replay/error; tests/v06-frozen-persistence.unit.test.ts: terminal races",
+              ],
+              [
+                "AC-033",
+                "tests/v06-frozen-source.unit.test.ts: same memory repository runtime rebuild/replay, no extra POST",
+              ],
+            ].map(([id, location]) => [
+              id,
+              { command: commands[1], locations: [location] },
+            ]),
+          )
+        : {
+            "AC-001": {
+              command: commands[0],
+              locations: [
+                "reports/v0.6/frozen-wsgs-consumer/ExecPlan.md: Verified starting point",
+              ],
+            },
+            "AC-002": {
+              command: commands[2],
+              locations: [
+                "tests/v06-frozen-public.contract.test.ts: AC-002 verifies exact release bytes and original public dependency closure",
+              ],
+            },
+            "AC-003": {
+              command: commands[2],
+              locations: [
+                "tests/v06-frozen-public.contract.test.ts: AC-003 actual SACS loader / drift / official hash / unsupported schema cases",
+              ],
+            },
+          };
 for (const [id, evidence] of Object.entries(mapping)) {
   const row = ledger.scenarios.find((row) => row.id === id);
   Object.assign(row, {
@@ -244,11 +273,13 @@ writeFileSync(
       commands,
       acceptanceIds: Object.keys(mapping),
       scope:
-        phase === "C02"
-          ? "SACS_FIVE_FINDING_PROJECTION; normal two-turn shared composition acceptance remains C05"
-          : phase === "C01"
-            ? "SACS_HTTP_SOURCE_AND_PERSISTENCE_BOUNDARIES; AC-007/008 projection completion awaits C02/C05"
-            : "SACS_PUBLIC_IMPORT_AND_LOADER_ONLY",
+        phase === "C03-planner"
+          ? "PLANNER_ONLY; C03 source control/revisions/normal entry integration still required; NO NEW AC PASS"
+          : phase === "C02"
+            ? "SACS_FIVE_FINDING_PROJECTION; normal two-turn shared composition acceptance remains C05"
+            : phase === "C01"
+              ? "SACS_HTTP_SOURCE_AND_PERSISTENCE_BOUNDARIES; AC-007/008 projection completion awaits C02/C05"
+              : "SACS_PUBLIC_IMPORT_AND_LOADER_ONLY",
       notRun: ["ENV-001"],
       excluded: ["EX-001", "EX-002", "EX-003", "EX-004"],
     },

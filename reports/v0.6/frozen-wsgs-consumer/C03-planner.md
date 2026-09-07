@@ -1,0 +1,7 @@
+# C03 planner substep — not full C03 acceptance
+
+Implemented a shared request planner using the official selection and request schemas. Full saved source is validated before resolving five-field selectors. Scope/analysis/revision checks precede disclosure; input anchors are checked before ordinal normalization. Only one fresh choice can resolve an ordinal. Click/text disagreement, duplicates, extras, expiration and context replacement conflicts are rejected. Reference-product IDs are only sent for actual reference/task candidates; other choices use selectedProductIds: []. Presentation-only text does not generate a query. Reused commands retain the submission key so durable claims can detect changed semantics; new commands receive new IDs.
+
+Actual verification: `node scripts/v06-frozen-phase-verify.mjs C03-planner`, exit 0. Typecheck, 69 tests (52 frozen-loader regressions and 17 request-planner cases), architecture and targeted lint passed; 11 lint warnings remain. One test submits the generated selector request through the actual HTTP adapter to a loopback peer. Commands, exit codes and hashes are in C03-planner.json.
+
+This is a tested implementation substep, not a claim that source controls or new revisions work. No AC status is advanced by this report. The existing Source Control unsupported proposal/intervention methods, durable new-revision binding and normal two-turn composition still require implementation. Precise dependencies are recorded in ExecPlan. ENV-001 remains NOT_RUN; no upstream/DB deployment/model/device execution was attempted.

@@ -10,6 +10,7 @@ import type { GroundingRequest12 } from "../../../dependencies/wsgs-world-analys
 import type { GroundingResult12 } from "../../../dependencies/wsgs-world-analysis-v1/public/generated/grounding-result-1.2.js";
 import type { GroundingJob12 } from "../../../dependencies/wsgs-world-analysis-v1/public/generated/grounding-job-1.2.js";
 import type { GroundingCapabilities12 } from "../../../dependencies/wsgs-world-analysis-v1/public/generated/capabilities-1.2.js";
+import type { AnalysisSelection } from "../../../dependencies/wsgs-world-analysis-v1/public/generated/analysis-selection.js";
 import { assertBoundedAnalysisJson } from "./analysis-payload.js";
 
 export {
@@ -75,6 +76,18 @@ export class FrozenWorldAnalysisContract {
   constructor() {
     verifyFrozenWorldAnalysis();
     this.validator = createPublicValidator();
+  }
+  parseSelection(value: unknown): AnalysisSelection {
+    assertBoundedAnalysisJson(value, 4096);
+    const checked = this.validator(
+      "urn:wsgs:world-analysis:1.0:analysis-selection",
+      value,
+    );
+    if (!checked.valid)
+      throw new WsgsPublicContractError(
+        checked.errors[0]?.code ?? "INVALID_SELECTION",
+      );
+    return value as AnalysisSelection;
   }
   parse<K extends keyof PublicKinds>(
     kind: K,
