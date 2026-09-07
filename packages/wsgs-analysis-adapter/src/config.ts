@@ -1,12 +1,19 @@
 import { z } from "zod";
+import { parseGroundingContractIdentity } from "../../analysis-contract/src/source.js";
 const integer = (fallback: number, min: number, max: number) =>
   z.coerce.number().int().min(min).max(max).default(fallback);
 const boolean = z.enum(["true", "false"]).transform((v) => v === "true");
 export const groundingAnalysisConfigSchema = z.strictObject({
   enabled: z.boolean(),
   transport: z.enum(["GROUNDING_JOB", "NATIVE", "FIXTURE"]),
-  contractVersion: z.literal("sacs-wsgs-grounding/1.1"),
-  resultProfile: z.literal("sacs-wsgs-geospatial-findings/1.0"),
+  contractVersion: z.enum([
+    "sacs-wsgs-grounding/1.1",
+    "sacs-wsgs-grounding/1.2",
+  ]),
+  resultProfile: z.enum([
+    "sacs-wsgs-geospatial-findings/1.0",
+    "wsgs-world-analysis-findings/1.0",
+  ]),
   pollIntervalMs: integer(250, 10, 30000),
   maxWaitMs: integer(120000, 250, 120000),
   maxConsecutivePollFailures: integer(8, 1, 10),
@@ -27,10 +34,10 @@ export function parseGroundingAnalysisConfig(
     enabled: boolean.parse(env["SACS_WSGS_ANALYSIS_ENABLED"] ?? "false"),
     transport: env["SACS_WSGS_ANALYSIS_TRANSPORT"] ?? "GROUNDING_JOB",
     contractVersion:
-      env["SACS_WSGS_ANALYSIS_CONTRACT_VERSION"] ?? "sacs-wsgs-grounding/1.1",
+      env["SACS_WSGS_ANALYSIS_CONTRACT_VERSION"] ?? "sacs-wsgs-grounding/1.2",
     resultProfile:
       env["SACS_WSGS_ANALYSIS_RESULT_PROFILE"] ??
-      "sacs-wsgs-geospatial-findings/1.0",
+      "wsgs-world-analysis-findings/1.0",
     pollIntervalMs: env["SACS_WSGS_ANALYSIS_POLL_INTERVAL_MS"],
     maxWaitMs: env["SACS_WSGS_ANALYSIS_MAX_WAIT_MS"],
     maxConsecutivePollFailures:
@@ -43,6 +50,10 @@ export function parseGroundingAnalysisConfig(
     allowLegacy10: boolean.parse(
       env["SACS_WSGS_ANALYSIS_ALLOW_LEGACY_1_0"] ?? "true",
     ),
+  });
+  parseGroundingContractIdentity({
+    contractVersion: config.contractVersion,
+    resultProfile: config.resultProfile,
   });
   if (
     config.transport === "FIXTURE" &&

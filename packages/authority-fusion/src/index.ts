@@ -253,11 +253,11 @@ export class AuthorityFusionEvaluator {
     const checks = this.evaluateChecks(task, requirements, grounding);
     const worldVersions = grounding.evidenceItems.flatMap((item) => {
       const predicate = predicateEvaluationPayloadSchema.safeParse(
-        item.safePayload,
+        "safePayload" in item ? item.safePayload : undefined,
       );
       if (predicate.success) return [predicate.data.evaluatedAtWorldVersion];
       const correlation = correlationFindingPayloadSchema.safeParse(
-        item.safePayload,
+        "safePayload" in item ? item.safePayload : undefined,
       );
       return correlation.success ? [correlation.data.worldVersion] : [];
     });
@@ -390,7 +390,9 @@ function evaluateCorrelation(
       matching.push({ item, noData: true });
       continue;
     }
-    const payload = correlationFindingPayloadSchema.safeParse(item.safePayload);
+    const payload = correlationFindingPayloadSchema.safeParse(
+      "safePayload" in item ? item.safePayload : undefined,
+    );
     if (
       payload.success &&
       payload.data.externalAuthority === hint.externalAuthority &&
@@ -475,7 +477,7 @@ function evaluatePredicate(
       return [{ item, status: "NO_DATA" as const }];
     }
     const payload = predicateEvaluationPayloadSchema.safeParse(
-      item.safePayload,
+      "safePayload" in item ? item.safePayload : undefined,
     );
     return payload.success && payload.data.predicateId === predicateId
       ? [{ item, status: payload.data.status }]

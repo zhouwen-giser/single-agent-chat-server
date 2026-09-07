@@ -8,6 +8,7 @@ import {
 import {
   sourceStatusMapping,
   sourceIsTerminal,
+  parseGroundingContractIdentity,
   type AnalysisSourceSnapshot,
 } from "../../analysis-contract/src/source.js";
 import { AnalysisDevelopmentPumpSupervisor } from "../../analysis-development-runtime/src/index.js";
@@ -27,6 +28,7 @@ import {
   type AnalysisViewLimits,
 } from "../../world-explanation-runtime/src/analysis-view.js";
 import { WsgsAuthoritativeContract } from "../../wsgs-geospatial-consumer/src/authoritative.js";
+import { FrozenWorldAnalysisContract } from "../../wsgs-geospatial-consumer/src/frozen-world-analysis.js";
 import { createInitialAnalysisProjection } from "./projection-reducer.js";
 import { emptyMapSharedState } from "../../analysis-map/src/index.js";
 import type { JsonObject } from "../../world-explanation-contract/src/index.js";
@@ -131,6 +133,14 @@ export class GroundingSourceAnalysisRuntime {
     if (!latest?.lastSourceStatus || !sourceIsTerminal(latest.lastSourceStatus))
       throw Error("ANALYSIS_SOURCE_OBSERVATION_LIMIT_EXCEEDED");
     if (!latest.groundingResult) throw Error("WSGS_" + latest.lastSourceStatus);
+    const identity = parseGroundingContractIdentity(
+      latest.analysisIntent?.["contractIdentity"],
+    );
+    if (identity.contractVersion === "sacs-wsgs-grounding/1.2")
+      return new FrozenWorldAnalysisContract().parse(
+        "result",
+        latest.groundingResult,
+      );
     this.authority.validate("result", latest.groundingResult);
     return latest.groundingResult as WsgsGroundingResult;
   }
@@ -157,6 +167,9 @@ export class GroundingSourceAnalysisRuntime {
         canonicalGroundingRequest: request,
         requestHash: "sha256:" + row.requestHash,
         idempotencyKey: row.idempotencyKey,
+        contractIdentity: parseGroundingContractIdentity(
+          row.analysisIntent["contractIdentity"],
+        ),
       });
       await this.accept(execution, this.recoveryOwner);
     }

@@ -13,6 +13,7 @@ import {
   type JsonValue,
 } from "../../world-explanation-contract/src/index.js";
 import { WsgsAuthoritativeContract } from "../../wsgs-geospatial-consumer/src/authoritative.js";
+import type { LegacyWsgsGroundingResult } from "../../wsgs-http-adapter/src/index.js";
 import {
   assertBoundedAnalysisJson,
   WsgsResultSchemaRegistry,
@@ -240,7 +241,8 @@ export function normalizeWorldAnalysis(input: {
     warnings: [],
     currentness: "UNKNOWN",
   };
-  const result = snapshot.result;
+  // This branch is the isolated legacy 1.1 mapper. It still validates before use.
+  const result = snapshot.result as LegacyWsgsGroundingResult | undefined;
   if (result) {
     assertBoundedAnalysisJson(result);
     authority.validate("result", result);

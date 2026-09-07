@@ -11,13 +11,29 @@ import type {
 } from "../../persistence/src/index.js";
 import type { WsgsHttpClient } from "../../wsgs-http-adapter/src/index.js";
 import { hashCanonicalJson } from "../../world-explanation-contract/src/index.js";
+import {
+  parseGroundingContractIdentity,
+  type GroundingContractIdentity,
+} from "../../analysis-contract/src/source.js";
+import { GroundingJobAnalysisSourceAdapter } from "../../wsgs-analysis-adapter/src/grounding-job.js";
+import { FrozenWorldAnalysisContract } from "../../wsgs-geospatial-consumer/src/frozen-world-analysis.js";
+import { parseWsgsGroundingRequest } from "../../wsgs-http-adapter/src/index.js";
 
 export function createGroundingSourceAnalysisControl(options: {
-  runtime: GroundingSourceAnalysisRuntime;
-  store: AnalysisDevelopmentRepository;
-  analysis: AnalysisRepository;
-  grounding: GroundingPersistenceRepository;
+  runtime: Pick<GroundingSourceAnalysisRuntime, "getProjection"> & {
+    pump: Pick<GroundingSourceAnalysisRuntime["pump"], "ensure">;
+  };
+  store: Pick<
+    AnalysisDevelopmentRepository,
+    | "resolveRequestScope"
+    | "claimCancel"
+    | "loadCancelContext"
+    | "commitCancellation"
+  >;
+  analysis: Pick<AnalysisRepository, "findSession" | "getGroundingAnalysis">;
+  grounding: Pick<GroundingPersistenceRepository, "requestSourceCancellation">;
   wsgs: WsgsHttpClient;
+  clientForContract?: (identity: GroundingContractIdentity) => WsgsHttpClient;
 }): AnalysisControlService {
   const resolve = async (request: AnalysisRequestScope) => {
     const scope = await options.store.resolveRequestScope(request);
@@ -90,20 +106,75 @@ export function createGroundingSourceAnalysisControl(options: {
         ...context.currentRun,
         status: "CANCEL_REQUESTED" as const,
       };
+      const transition = {
+        requested: pending,
+        settled: pending,
+        queueRevision: false,
+      };
+      await options.store.commitCancellation({
+        scope: request,
+        commandId: command.commandId,
+        claimToken: claim.claimToken,
+        transition,
+        deferCommandCompletion: true,
+        sourceCancellation: true,
+      });
+      let sourceObservationError: string | undefined;
+      try {
+        const contractIdentity = parseGroundingContractIdentity(
+          execution.analysisIntent?.["contractIdentity"],
+        );
+        const client =
+          options.clientForContract?.(contractIdentity) ?? options.wsgs;
+        if (client.contractVersion !== contractIdentity.contractVersion)
+          throw Error("ANALYSIS_SOURCE_CONTRACT_IDENTITY_INVALID");
+        const body =
+          contractIdentity.contractVersion === "sacs-wsgs-grounding/1.2"
+            ? new FrozenWorldAnalysisContract().parse(
+                "request",
+                execution.canonicalRequest,
+              )
+            : parseWsgsGroundingRequest(execution.canonicalRequest);
+        if (
+          execution.wsgsGroundingId &&
+          ![
+            "COMPLETED",
+            "PARTIAL",
+            "AMBIGUOUS",
+            "UNRESOLVED",
+            "FAILED",
+            "CANCELLED",
+          ].includes(execution.lastSourceStatus ?? "")
+        )
+          await new GroundingJobAnalysisSourceAdapter(client).cancel({
+            identity: {
+              kind: "WSGS_GROUNDING_JOB",
+              sourceId: execution.wsgsGroundingId,
+              sourceHash: "sha256:" + execution.requestHash,
+              contractIdentity,
+              requestId: execution.wsgsRequestId,
+              messageId: body.source.messageId,
+              originalTextSha256: body.source.originalTextSha256,
+              maxResultBytes: body.executionPolicy.maxResultBytes,
+              ...(execution.sourceJobId
+                ? { upstreamRunId: execution.sourceJobId }
+                : {}),
+            },
+            commandId: command.commandId,
+            idempotencyKey: command.idempotencyKey,
+            reason: command.reason,
+          });
+      } catch {
+        sourceObservationError = "WSGS_CANCEL_OBSERVATION_UNCONFIRMED";
+      }
       const result = await options.store.commitCancellation({
         scope: request,
         commandId: command.commandId,
         claimToken: claim.claimToken,
-        transition: {
-          requested: pending,
-          settled: pending,
-          queueRevision: false,
-        },
+        transition,
+        sourceCancellation: true,
+        ...(sourceObservationError ? { sourceObservationError } : {}),
       });
-      if (execution.wsgsGroundingId)
-        await options.wsgs
-          .cancelGrounding(execution.wsgsGroundingId)
-          .catch(() => undefined);
       await options.runtime.pump.ensure(scope);
       return result;
     },

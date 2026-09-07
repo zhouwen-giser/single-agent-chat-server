@@ -4,6 +4,7 @@ import {
   AnalysisSourceError,
   parseWritableAnalysisSource,
   verifySourceRequest,
+  parseGroundingContractIdentity,
   sourceIsTerminal,
   type AnalysisSourceAdapter,
   type AnalysisSourceIdentity,
@@ -34,12 +35,33 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
     options: z.input<typeof bounds> = {},
     private readonly onPoll?: (succeeded: boolean) => Promise<void>,
   ) {
-    if (client.contractVersion !== "sacs-wsgs-grounding/1.1")
+    if (
+      !["sacs-wsgs-grounding/1.1", "sacs-wsgs-grounding/1.2"].includes(
+        client.contractVersion,
+      )
+    )
       throw new AnalysisSourceError("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
     this.limits = bounds.parse(options);
   }
   async capabilities(signal?: AbortSignal) {
     const value = await this.client.capabilities(signal);
+    if ("worldAnalysis" in value)
+      return {
+        requiredReady: value.requiredCapabilitiesReady,
+        optionalAvailable: value.worldAnalysis.capabilities
+          .filter((c) => c.supported && c.available)
+          .map((c) => c.capability),
+        optionalUnavailable: value.worldAnalysis.capabilities
+          .filter((c) => !c.available)
+          .map((c) => ({
+            operationId: c.capability,
+            reasonCode: c.reasonCodes[0]!,
+            reasonCodes: c.reasonCodes,
+          })),
+        worldAnalysis: value.worldAnalysis,
+        nativeReady: false,
+        nativeReasonCode: "SACS_WSGS_NATIVE_ANALYSIS_CONTROL_DEFERRED" as const,
+      };
     return {
       requiredReady: value.requiredCapabilitiesReady,
       optionalAvailable: (value.optionalCapabilities ?? [])
@@ -59,6 +81,19 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
     request: StartWorldAnalysisRequest,
   ): Promise<AnalysisSourceSnapshot> {
     verifySourceRequest(request);
+    const contractIdentity = parseGroundingContractIdentity(
+      request.contractIdentity ?? {
+        contractVersion: this.client.contractVersion,
+        resultProfile:
+          this.client.contractVersion === "sacs-wsgs-grounding/1.2"
+            ? "wsgs-world-analysis-findings/1.0"
+            : "sacs-wsgs-geospatial-findings/1.0",
+      },
+    );
+    if (contractIdentity.contractVersion !== this.client.contractVersion)
+      throw new AnalysisSourceError(
+        "ANALYSIS_SOURCE_CONTRACT_IDENTITY_INVALID",
+      );
     request.signal?.throwIfAborted();
     const value = await this.client.createGrounding(
       request.canonicalGroundingRequest,
@@ -73,6 +108,13 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
       kind: this.mode,
       sourceId: value.groundingId,
       sourceHash: request.requestHash,
+      contractIdentity,
+      requestId: request.requestId,
+      messageId: request.canonicalGroundingRequest.source.messageId,
+      originalTextSha256:
+        request.canonicalGroundingRequest.source.originalTextSha256,
+      maxResultBytes:
+        request.canonicalGroundingRequest.executionPolicy.maxResultBytes,
       ...("jobId" in value ? { upstreamRunId: value.jobId } : {}),
     });
   }
@@ -83,7 +125,11 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
     const identity = this.identity(value);
     signal?.throwIfAborted();
     return this.snapshot(
-      await this.client.getGrounding(identity.sourceId, signal),
+      await this.client.getGrounding(
+        identity.sourceId,
+        signal,
+        identity.maxResultBytes,
+      ),
       identity,
     );
   }
@@ -156,7 +202,11 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
     const identity = this.identity(input.identity);
     input.signal?.throwIfAborted();
     return this.snapshot(
-      await this.client.cancelGrounding(identity.sourceId, input.signal),
+      await this.client.cancelGrounding(
+        identity.sourceId,
+        input.signal,
+        identity.maxResultBytes,
+      ),
       identity,
     );
   }
@@ -170,6 +220,20 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
     const identity = parseWritableAnalysisSource(value);
     if (identity.kind !== this.mode)
       throw new AnalysisSourceError("ANALYSIS_SOURCE_IDENTITY_INVALID");
+    if (
+      (identity.contractIdentity &&
+        identity.contractIdentity.contractVersion !==
+          this.client.contractVersion) ||
+      (this.client.contractVersion === "sacs-wsgs-grounding/1.2" &&
+        (!identity.contractIdentity ||
+          !identity.requestId ||
+          !identity.messageId ||
+          !identity.originalTextSha256 ||
+          !identity.maxResultBytes))
+    )
+      throw new AnalysisSourceError(
+        "ANALYSIS_SOURCE_CONTRACT_IDENTITY_INVALID",
+      );
     return identity;
   }
   private snapshot(
@@ -177,9 +241,16 @@ export class GroundingJobAnalysisSourceAdapter implements AnalysisSourceAdapter 
     identity: AnalysisSourceIdentity,
   ): AnalysisSourceSnapshot {
     const source = this.identity(identity);
-    const result = "jobId" in value ? value.result : value;
+    const result =
+      "jobId" in value ? ("result" in value ? value.result : undefined) : value;
     if (
       value.groundingId !== source.sourceId ||
+      (source.requestId !== undefined &&
+        value.requestId !== source.requestId) ||
+      (result &&
+        source.messageId !== undefined &&
+        (result.source.messageId !== source.messageId ||
+          result.source.originalTextSha256 !== source.originalTextSha256)) ||
       ("jobId" in value &&
         source.upstreamRunId !== undefined &&
         value.jobId !== source.upstreamRunId) ||

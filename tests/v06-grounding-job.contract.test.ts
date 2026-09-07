@@ -26,6 +26,10 @@ const body = () =>
   ({
     ...read("legacy/examples/01-reference-name-grounding.json"),
     requestId: result().requestId,
+    source: {
+      ...read("legacy/examples/01-reference-name-grounding.json").source,
+      ...result().source,
+    },
   }) as WsgsGroundingRequest;
 const request = () => ({
   analysisId: "a1",

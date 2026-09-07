@@ -960,11 +960,18 @@ export class AnalysisDevelopmentRepository implements AnalysisCoordinatorStore {
     readonly commandId: string;
     readonly claimToken: string;
     readonly transition: CancelTransition;
+    /** Source mode persists visible intent while retaining its existing command claim. */
+    readonly deferCommandCompletion?: boolean;
+    readonly sourceObservationError?: string;
+    readonly sourceCancellation?: boolean;
   }): Promise<unknown> {
+    if (input.sourceObservationError)
+      assertSafeFailureIdentity(input.sourceObservationError, 503);
     return this.transaction(async (client) => {
       const owned = await lockRequestScope(client, input.scope);
       if (owned === undefined) throw analysisNotFound();
-      if (owned.status !== "ACTIVE") throw revisionConflict();
+      if (owned.status !== "ACTIVE" && !input.sourceCancellation)
+        throw revisionConflict();
       const command = await requireClaimedCommand(
         client,
         owned.analysisId,
@@ -992,9 +999,11 @@ export class AnalysisDevelopmentRepository implements AnalysisCoordinatorStore {
       const currentRun = await client.query<{
         run_id: string;
         revision_number: number | string;
+        status: string;
+        source_kind: string | null;
       }>(
         `
-          SELECT run.run_id, revision.revision_number
+          SELECT run.run_id, revision.revision_number,run.status,revision.source_kind
           FROM chat_service.analysis_run run
           JOIN chat_service.analysis_revision revision
             ON revision.analysis_id = run.analysis_id
@@ -1012,6 +1021,52 @@ export class AnalysisDevelopmentRepository implements AnalysisCoordinatorStore {
           Number(command.expected_revision_number)
       ) {
         throw revisionConflict();
+      }
+      if (input.sourceCancellation) {
+        const current = currentRun.rows[0]!;
+        if (current.source_kind !== "WSGS_GROUNDING_JOB")
+          throw revisionConflict();
+        if (
+          [
+            "SUCCEEDED",
+            "PARTIAL",
+            "FAILED",
+            "CANCELLED",
+            "WAITING_INTERVENTION",
+          ].includes(current.status)
+        ) {
+          // The source won the race. Never overwrite its committed terminal run.
+          const projection = await client.query<{ state_revision: number }>(
+            "SELECT state_revision FROM chat_service.analysis_projection WHERE analysis_id=$1",
+            [owned.analysisId],
+          );
+          const result = {
+            status: current.status,
+            runId: current.run_id,
+            acknowledged: current.status === "CANCELLED",
+            queueRevision: false,
+            stateRevision: Number(projection.rows[0]?.state_revision ?? 0),
+            ...(input.sourceObservationError
+              ? { reasonCode: input.sourceObservationError }
+              : {}),
+          };
+          if (!input.deferCommandCompletion) {
+            await completeCommand(
+              client,
+              command,
+              result,
+              new Date().toISOString(),
+            );
+            await releaseMutationClaim(
+              client,
+              owned.analysisId,
+              "CANCEL",
+              input.commandId,
+              input.claimToken,
+            );
+          }
+          return result;
+        }
       }
       await persistCancelTransition(client, owned.analysisId, input.transition);
       const now =
@@ -1050,7 +1105,11 @@ export class AnalysisDevelopmentRepository implements AnalysisCoordinatorStore {
         acknowledged: input.transition.settled.status === "CANCELLED",
         queueRevision: input.transition.queueRevision,
         stateRevision: projection.stateRevision,
+        ...(input.sourceObservationError
+          ? { reasonCode: input.sourceObservationError }
+          : {}),
       };
+      if (input.deferCommandCompletion) return result;
       await completeCommand(client, command, result, now);
       await releaseMutationClaim(
         client,

@@ -9,6 +9,7 @@ import { WorldGroundingRuntime } from "../../../packages/world-grounding-runtime
 import { GroundingSourceAnalysisRuntime } from "../../../packages/analysis-runtime/src/grounding-source-runtime.js";
 import { createGroundingSourceAnalysisControl } from "../../../packages/analysis-control-runtime/src/grounding-source-control.js";
 import { GroundingJobAnalysisSourceAdapter } from "../../../packages/wsgs-analysis-adapter/src/grounding-job.js";
+import { createGroundingClientSelector } from "../../../packages/wsgs-analysis-adapter/src/contract-identity.js";
 import type { GroundingAnalysisConfig } from "../../../packages/wsgs-analysis-adapter/src/config.js";
 import type { PersistenceRuntime } from "../../../packages/persistence/src/index.js";
 import { hashCanonicalJson } from "../../../packages/world-explanation-contract/src/index.js";
@@ -33,6 +34,7 @@ export function createV06GroundingAnalysis(input: {
   sdarCompatibilityLock: unknown;
 }) {
   const { persistence, config } = input;
+  const clientForContract = createGroundingClientSelector(input.wsgsConfig);
   if (config.enabled && config.transport !== "GROUNDING_JOB")
     throw Error("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
   const wsgs = createWsgsHttpClient({
@@ -49,6 +51,7 @@ export function createV06GroundingAnalysis(input: {
     worldExplanations: persistence.worldExplanationRepository,
     conversation: persistence.conversationRepository,
     wsgs,
+    clientForContract,
     sdarCompatibilityLock: input.sdarCompatibilityLock,
     sourcePolling: {
       pollIntervalMs: config.pollIntervalMs,
@@ -98,6 +101,7 @@ export function createV06GroundingAnalysis(input: {
     analysis: persistence.analysisRepository,
     grounding: persistence.groundingRepository,
     wsgs,
+    clientForContract,
   });
   const adapter = new GroundingJobAnalysisSourceAdapter(wsgs, {
     pollIntervalMs: config.pollIntervalMs,

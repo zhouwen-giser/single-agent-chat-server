@@ -12,7 +12,7 @@ import {
 } from "../packages/world-explanation-contract/src/index.js";
 import type {
   WsgsGroundingRequest,
-  WsgsGroundingResult,
+  LegacyWsgsGroundingResult as WsgsGroundingResult,
   WsgsGroundingJob,
   WsgsHttpClient,
 } from "../packages/wsgs-http-adapter/src/index.js";

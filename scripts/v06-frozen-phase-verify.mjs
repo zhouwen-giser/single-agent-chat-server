@@ -2,7 +2,7 @@ import { spawnSync, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 const phase = process.argv[2];
-if (phase !== "C00")
+if (!["C00", "C01"].includes(phase))
   throw Error("No verification mapping implemented for this phase yet.");
 const dir = "reports/v0.6/frozen-wsgs-consumer";
 const sha = execFileSync("git", ["rev-parse", "HEAD"], {
@@ -10,38 +10,89 @@ const sha = execFileSync("git", ["rev-parse", "HEAD"], {
 }).trim();
 const startedAt = new Date().toISOString();
 const commands = [];
-const commandsToRun = [
-  [
-    "git",
-    [
-      "merge-base",
-      "--is-ancestor",
-      "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
-      "HEAD",
-    ],
-  ],
-  [process.execPath, ["node_modules/typescript/bin/tsc", "--noEmit"]],
-  [
-    process.execPath,
-    [
-      "--experimental-vm-modules",
-      "node_modules/jest/bin/jest.js",
-      "--runInBand",
-      "tests/v06-frozen-public.contract.test.ts",
-    ],
-  ],
-  [process.execPath, ["scripts/verify-architecture.mjs"]],
-  [
-    process.execPath,
-    [
-      "node_modules/eslint/bin/eslint.js",
-      "packages/wsgs-geospatial-consumer/src/frozen-world-analysis.ts",
-      "tests/v06-frozen-public.contract.test.ts",
-    ],
-  ],
-  [process.execPath, ["--check", "scripts/v06-frozen-intake.mjs"]],
-  [process.execPath, ["--check", "scripts/v06-frozen-phase-verify.mjs"]],
-];
+const commandsToRun =
+  phase === "C01"
+    ? [
+        [process.execPath, ["node_modules/typescript/bin/tsc", "--noEmit"]],
+        [
+          process.execPath,
+          [
+            "--experimental-vm-modules",
+            "node_modules/jest/bin/jest.js",
+            "--runInBand",
+            "tests/v06-frozen-public.contract.test.ts",
+            "tests/v06-frozen-http.contract.test.ts",
+            "tests/v06-frozen-source.unit.test.ts",
+            "tests/v06-frozen-persistence.unit.test.ts",
+            "tests/v06-frozen-cancel.unit.test.ts",
+            "tests/v06-grounding-job.contract.test.ts",
+            "tests/v06-analysis-config.unit.test.ts",
+            "tests/v06-analysis-source.contract.test.ts",
+            "tests/v06-world-analysis-view.unit.test.ts",
+            "tests/wsgs-http-adapter.contract.test.ts",
+            "tests/world-grounding-runtime.unit.test.ts",
+          ],
+        ],
+        [process.execPath, ["scripts/verify-architecture.mjs"]],
+        [
+          process.execPath,
+          [
+            "node_modules/eslint/bin/eslint.js",
+            "packages/wsgs-http-adapter/src/index.ts",
+            "packages/wsgs-analysis-adapter/src/grounding-job.ts",
+            "packages/wsgs-analysis-adapter/src/config.ts",
+            "packages/wsgs-analysis-adapter/src/contract-identity.ts",
+            "packages/analysis-contract/src/source.ts",
+            "packages/world-grounding-runtime/src/index.ts",
+            "packages/analysis-runtime/src/grounding-source-runtime.ts",
+            "packages/analysis-control-runtime/src/grounding-source-control.ts",
+            "packages/persistence/src/analysis-repository.ts",
+            "packages/persistence/src/grounding-repository.ts",
+            "packages/persistence/src/analysis-development-repository.ts",
+            "packages/authority-fusion/src/index.ts",
+            "packages/world-explanation-runtime/src/analysis-view.ts",
+            "apps/server/src/v06-grounding-analysis.ts",
+            "tests/v06-frozen-http.contract.test.ts",
+            "tests/v06-frozen-source.unit.test.ts",
+            "tests/v06-frozen-cancel.unit.test.ts",
+            "tests/v06-frozen-persistence.unit.test.ts",
+            "tests/helpers/frozen-wsgs-http.ts",
+            "tests/helpers/memory-grounding.ts",
+          ],
+        ],
+      ]
+    : [
+        [
+          "git",
+          [
+            "merge-base",
+            "--is-ancestor",
+            "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+            "HEAD",
+          ],
+        ],
+        [process.execPath, ["node_modules/typescript/bin/tsc", "--noEmit"]],
+        [
+          process.execPath,
+          [
+            "--experimental-vm-modules",
+            "node_modules/jest/bin/jest.js",
+            "--runInBand",
+            "tests/v06-frozen-public.contract.test.ts",
+          ],
+        ],
+        [process.execPath, ["scripts/verify-architecture.mjs"]],
+        [
+          process.execPath,
+          [
+            "node_modules/eslint/bin/eslint.js",
+            "packages/wsgs-geospatial-consumer/src/frozen-world-analysis.ts",
+            "tests/v06-frozen-public.contract.test.ts",
+          ],
+        ],
+        [process.execPath, ["--check", "scripts/v06-frozen-intake.mjs"]],
+        [process.execPath, ["--check", "scripts/v06-frozen-phase-verify.mjs"]],
+      ];
 for (const [i, [program, args]] of commandsToRun.entries()) {
   const result = spawnSync(program, args, {
     encoding: "utf8",
@@ -64,26 +115,71 @@ for (const [i, [program, args]] of commandsToRun.entries()) {
     throw Error(`${phase} verification failed; ledger unchanged.`);
 }
 const ledger = JSON.parse(readFileSync(`${dir}/ACCEPTANCE_LEDGER.json`));
-const mapping = {
-  "AC-001": {
-    command: commands[0],
-    locations: [
-      "reports/v0.6/frozen-wsgs-consumer/ExecPlan.md: Verified starting point",
-    ],
-  },
-  "AC-002": {
-    command: commands[2],
-    locations: [
-      "tests/v06-frozen-public.contract.test.ts: AC-002 verifies exact release bytes and original public dependency closure",
-    ],
-  },
-  "AC-003": {
-    command: commands[2],
-    locations: [
-      "tests/v06-frozen-public.contract.test.ts: AC-003 actual SACS loader / drift / official hash / unsupported schema cases",
-    ],
-  },
-};
+const mapping =
+  phase === "C01"
+    ? Object.fromEntries(
+        [
+          [
+            "AC-004",
+            "tests/v06-frozen-http.contract.test.ts: exact config/header lifecycle and rejection cases",
+          ],
+          [
+            "AC-005",
+            "tests/v06-frozen-source.unit.test.ts: saved 1.1 / new 1.2 runtime; tests/v06-frozen-persistence.unit.test.ts: SQL identity checks",
+          ],
+          [
+            "AC-006",
+            "tests/v06-frozen-http.contract.test.ts: supported versus available, unavailable optional capabilities",
+          ],
+          [
+            "AC-009",
+            "tests/v06-frozen-http.contract.test.ts: HTTP errors / six malformed or foreign response cases",
+          ],
+          [
+            "AC-010",
+            "tests/v06-frozen-http.contract.test.ts: full body and original digest; tests/v06-frozen-persistence.unit.test.ts: profile replay conflict",
+          ],
+          [
+            "AC-030",
+            "tests/v06-frozen-http.contract.test.ts: three terminal statuses stop observation",
+          ],
+          [
+            "AC-031",
+            "tests/v06-frozen-http.contract.test.ts: local failures, abort, timeout never cancel or forge state",
+          ],
+          [
+            "AC-032",
+            "tests/v06-frozen-cancel.unit.test.ts: real control HTTP intent/replay/error; tests/v06-frozen-persistence.unit.test.ts: terminal races",
+          ],
+          [
+            "AC-033",
+            "tests/v06-frozen-source.unit.test.ts: same memory repository runtime rebuild/replay, no extra POST",
+          ],
+        ].map(([id, location]) => [
+          id,
+          { command: commands[1], locations: [location] },
+        ]),
+      )
+    : {
+        "AC-001": {
+          command: commands[0],
+          locations: [
+            "reports/v0.6/frozen-wsgs-consumer/ExecPlan.md: Verified starting point",
+          ],
+        },
+        "AC-002": {
+          command: commands[2],
+          locations: [
+            "tests/v06-frozen-public.contract.test.ts: AC-002 verifies exact release bytes and original public dependency closure",
+          ],
+        },
+        "AC-003": {
+          command: commands[2],
+          locations: [
+            "tests/v06-frozen-public.contract.test.ts: AC-003 actual SACS loader / drift / official hash / unsupported schema cases",
+          ],
+        },
+      };
 for (const [id, evidence] of Object.entries(mapping)) {
   const row = ledger.scenarios.find((row) => row.id === id);
   Object.assign(row, {
@@ -98,7 +194,7 @@ for (const [id, evidence] of Object.entries(mapping)) {
       `${dir}/handoff-verification.json`,
     ],
     notes:
-      "Executed SACS evidence; offline contracts only, not live upstream acceptance.",
+      "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance.",
   });
 }
 ledger.ledgerType = "EXECUTED_SACS_EVIDENCE";
@@ -114,7 +210,10 @@ writeFileSync(
       completedAt: new Date().toISOString(),
       commands,
       acceptanceIds: Object.keys(mapping),
-      scope: "SACS_PUBLIC_IMPORT_AND_LOADER_ONLY",
+      scope:
+        phase === "C01"
+          ? "SACS_HTTP_SOURCE_AND_PERSISTENCE_BOUNDARIES; AC-007/008 projection completion awaits C02/C05"
+          : "SACS_PUBLIC_IMPORT_AND_LOADER_ONLY",
       notRun: ["ENV-001"],
       excluded: ["EX-001", "EX-002", "EX-003", "EX-004"],
     },

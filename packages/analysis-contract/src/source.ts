@@ -14,6 +14,30 @@ const id = z
   .max(256)
   .regex(/^[A-Za-z0-9][A-Za-z0-9._:-]*$/u);
 const common = { sourceId: id, sourceHash: sha256Schema };
+export const groundingContractIdentitySchema = z.discriminatedUnion(
+  "contractVersion",
+  [
+    z.strictObject({
+      contractVersion: z.literal("sacs-wsgs-grounding/1.1"),
+      resultProfile: z.literal("sacs-wsgs-geospatial-findings/1.0"),
+    }),
+    z.strictObject({
+      contractVersion: z.literal("sacs-wsgs-grounding/1.2"),
+      resultProfile: z.literal("wsgs-world-analysis-findings/1.0"),
+    }),
+  ],
+);
+export type GroundingContractIdentity = z.infer<
+  typeof groundingContractIdentitySchema
+>;
+export function parseGroundingContractIdentity(
+  value: unknown,
+): GroundingContractIdentity {
+  const result = groundingContractIdentitySchema.safeParse(value);
+  if (!result.success)
+    throw new AnalysisSourceError("ANALYSIS_SOURCE_CONTRACT_IDENTITY_INVALID");
+  return result.data;
+}
 export const analysisSourceModes = [
   "WSGS_GROUNDING_JOB",
   "WSGS_NATIVE_ANALYSIS",
@@ -25,6 +49,11 @@ export const analysisSourceIdentitySchema = z.discriminatedUnion("kind", [
     ...common,
     kind: z.literal("WSGS_GROUNDING_JOB"),
     upstreamRunId: id.optional(),
+    contractIdentity: groundingContractIdentitySchema.optional(),
+    requestId: id.optional(),
+    messageId: id.optional(),
+    originalTextSha256: sha256Schema.optional(),
+    maxResultBytes: z.number().int().min(1024).max(67108864).optional(),
   }),
   z.strictObject({
     ...common,
@@ -71,6 +100,7 @@ export interface AnalysisSourceSnapshot {
   result?: WsgsGroundingResult;
   observedAt: string;
   terminal: boolean;
+  observationReasonCode?: "WSGS_CANCEL_OBSERVATION_UNCONFIRMED";
 }
 export interface AnalysisSourceEvent extends AnalysisSourceSnapshot {
   eventId: string;
@@ -89,6 +119,7 @@ export interface StartWorldAnalysisRequest {
   requestHash: string;
   idempotencyKey: string;
   signal?: AbortSignal;
+  contractIdentity?: GroundingContractIdentity;
 }
 export interface AnalysisSourceAdapter {
   readonly mode: WritableAnalysisSourceIdentity["kind"];

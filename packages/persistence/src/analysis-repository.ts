@@ -10,6 +10,7 @@ import {
 import {
   analysisSourceIdentitySchema,
   parseWritableAnalysisSource,
+  parseGroundingContractIdentity,
   type AnalysisSourceIdentity,
 } from "../../analysis-contract/src/source.js";
 
@@ -308,6 +309,13 @@ export class AnalysisRepository {
         kind: "WSGS_GROUNDING_JOB" as const,
         sourceId: g.wsgs_grounding_id,
         sourceHash: "sha256:" + g.request_hash,
+        ...(g.analysis_intent_json?.["contractIdentity"]
+          ? {
+              contractIdentity: parseGroundingContractIdentity(
+                g.analysis_intent_json["contractIdentity"],
+              ),
+            }
+          : {}),
         ...(g.source_job_id ? { upstreamRunId: g.source_job_id } : {}),
       };
       const session: AnalysisSession = {
@@ -506,9 +514,11 @@ export class AnalysisRepository {
       source_hash: string;
       source_revision: number | null;
       source_upstream_run_id: string | null;
+      contract_identity?: unknown;
     }>(
-      `SELECT r.source_kind,r.source_id,r.source_hash,r.source_revision,r.source_upstream_run_id
+      `SELECT r.source_kind,r.source_id,r.source_hash,r.source_revision,r.source_upstream_run_id,g.analysis_intent_json->'contractIdentity' AS contract_identity
        FROM chat_service.analysis_revision r JOIN chat_service.analysis_session s USING(analysis_id)
+       LEFT JOIN chat_service.grounding_execution g ON g.analysis_id=r.analysis_id AND g.analysis_revision_id=r.revision_id AND g.principal_id=s.principal_id AND g.thread_id=s.thread_id
        WHERE s.analysis_id=$1 AND s.principal_id=$2 AND s.thread_id=$3 AND r.revision_id=$4`,
       [scope.analysisId, scope.principalId, scope.threadId, revisionId],
     );
@@ -518,6 +528,14 @@ export class AnalysisRepository {
       kind: row.source_kind,
       sourceId: row.source_id,
       sourceHash: row.source_hash,
+      ...(row.source_kind === "WSGS_GROUNDING_JOB" &&
+      row.contract_identity != null
+        ? {
+            contractIdentity: parseGroundingContractIdentity(
+              row.contract_identity,
+            ),
+          }
+        : {}),
       ...(row.source_revision === null
         ? {}
         : { sourceRevision: row.source_revision }),

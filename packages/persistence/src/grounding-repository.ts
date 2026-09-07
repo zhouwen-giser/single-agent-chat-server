@@ -242,6 +242,9 @@ export class GroundingPersistenceRepository {
       assertActiveLease(current, input.leaseOwner);
       if (
         identity.sourceHash !== "sha256:" + current.request_hash ||
+        (current.analysis_intent_json?.["contractIdentity"] !== undefined &&
+          hashJson(current.analysis_intent_json["contractIdentity"]) !==
+            hashJson(identity.contractIdentity ?? null)) ||
         current.canonical_request_json == null ||
         (current.wsgs_grounding_id !== null &&
           current.wsgs_grounding_id !== identity.sourceId) ||
