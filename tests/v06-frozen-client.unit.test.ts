@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from "@jest/globals";
 import { EventEncoder } from "@ag-ui/encoder";
+import type { GeoJsonLineString } from "../dependencies/wsgs-world-analysis-v1/public/generated/grounding-result-1.2.js";
 import {
   AnalysisControlClient,
   HeadlessAnalysisReferenceClient,
@@ -331,6 +332,98 @@ describe("frozen world consumer existing headless interaction C04", () => {
     const trace = viewOf(result("trace"));
     expect(trace.map.layers).toEqual([]);
     expect(trace.summary.primaryText).toContain("不跨 Gap 插值连线");
+  });
+
+  it("AC-035 published LineString previews retain exact independent segments and remain non-navigation beside a trace Gap", () => {
+    const source = result("trace");
+    const trace = source.worldAnalysisFindings.findings[0];
+    const geo = result("coexist").geospatialFindings;
+    if (trace?.findingKind !== "HISTORICAL_TRACE" || !geo)
+      throw Error("FIXTURE_KIND");
+    const period = trace.selectedPeriods[0];
+    const evidence = source.evidenceItems[0];
+    if (!period || !evidence) throw Error("FIXTURE_REFERENCE");
+    trace.trajectoryGaps = [
+      { period, kind: "SOURCE_GAP", reasonCodes: ["INCOMPLETE"] },
+    ];
+    const lines: GeoJsonLineString[] = [
+      {
+        type: "LineString",
+        coordinates: [
+          [116.1, 39.1],
+          [116.11, 39.11],
+        ],
+      },
+      {
+        type: "LineString",
+        coordinates: [
+          [116.2, 39.2],
+          [116.21, 39.21],
+        ],
+      },
+    ];
+    const evidenceItemIds = [evidence.evidenceProductId];
+    geo.sourceProducts = [
+      {
+        sourceProductId: "line-preview-source",
+        authority: "GDPS_CURRENT_PRODUCT",
+        productId: "line-preview-product",
+        productType: "SPATIAL_FEATURE_COLLECTION",
+        productProfile: "line-preview/1.0",
+        contentHash: publicCanonicalHash(lines),
+        descriptorId: "line-preview-descriptor",
+        descriptorHash: publicCanonicalHash({ id: "line-preview-descriptor" }),
+        evidenceItemIds,
+      },
+    ];
+    geo.findings = [
+      {
+        findingId: "line-preview",
+        findingKind: "SPATIAL_FEATURE_COLLECTION",
+        semanticConcept: "PUBLISHED_LINE_PREVIEW",
+        querySemantics: "PUBLISHED_GEOMETRY_ONLY",
+        status: "COMPLETED",
+        evidenceItemIds,
+        sourceProductIds: ["line-preview-source"],
+        returnedCount: 2,
+        truncated: false,
+        features: lines.map((geometry, index) => ({
+          featureId: `preview-${index}`,
+          geometry,
+        })),
+      },
+    ];
+    geo.findingSetHash = publicCanonicalHash(geo.findings);
+    geo.sourceProductSetHash = publicCanonicalHash(geo.sourceProducts);
+    source.geospatialFindings = geo;
+    source.worldAnalysisFindings.findingSetHash = publicFindingSetHash(
+      source.worldAnalysisFindings,
+    );
+    source.resultHash = publicResultHash(source);
+    const original = JSON.stringify(source);
+    const view = viewOf(source);
+    // The published spatial previews have no time-to-geometry association.
+    // Keep their independent segments; the trace Gap cannot authorize a bridge.
+    expect(view.map.layers).toHaveLength(2);
+    expect(
+      view.map.layers.map((layer) =>
+        layer.access.kind === "INLINE_GEOJSON" ? layer.access.data : null,
+      ),
+    ).toEqual(lines);
+    for (const layer of view.map.layers) {
+      expect(layer.title).toBe("已发布空间预览（非导航路线）");
+      expect(layer.findingIds).toEqual(["line-preview"]);
+    }
+    expect(view.timeline.items).toContainEqual(
+      expect.objectContaining({
+        kind: "DATA_GAP",
+        findingId: trace.findingId,
+        ...period,
+      }),
+    );
+    expect(view.summary.primaryText).toContain("不跨 Gap 插值连线");
+    expect(view.source.resultHash).toBe(source.resultHash);
+    expect(JSON.stringify(source)).toBe(original);
   });
 
   it("AC-036 view byte clipping removes dependent action/geometry/timeline when finding closure is gone", () => {

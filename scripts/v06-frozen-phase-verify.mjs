@@ -204,6 +204,31 @@ if (["C03", "C04", "C05", "C06"].includes(phase)) {
     "tests/query-service.unit.test.ts",
     "tests/world-grounding-application.unit.test.ts",
   ];
+  // C03 proves the integrated change; C04/C05 retain every assertion needed by
+  // their own AC groups. C06 reruns the delivered full frozen + legacy plan.
+  const focusedPhases = {
+    C04: [
+      "tests/v06-frozen-client.unit.test.ts",
+      "tests/v06-frozen-view.unit.test.ts",
+      "tests/v06-frozen-entry.integration.test.ts",
+      "tests/analysis-reference-client.contract.test.ts",
+      "tests/sdar-a2a-adapter.contract.test.ts",
+      "tests/world-grounding-application.unit.test.ts",
+    ],
+    C05: [
+      "tests/v06-frozen-entry.integration.test.ts",
+      "tests/v06-frozen-factory-compat.unit.test.ts",
+      "tests/v06-frozen-source.unit.test.ts",
+      "tests/v06-frozen-source-pump.unit.test.ts",
+      "tests/openai-api.contract.test.ts",
+      "tests/openai-predecessor-regression.contract.test.ts",
+      "tests/world-grounding-application.unit.test.ts",
+      "tests/query-service.unit.test.ts",
+      "tests/analysis-control-api.contract.test.ts",
+    ],
+  };
+  if (focusedPhases[phase])
+    tests.splice(0, tests.length, ...focusedPhases[phase]);
   if (phase === "C06")
     tests.splice(
       0,

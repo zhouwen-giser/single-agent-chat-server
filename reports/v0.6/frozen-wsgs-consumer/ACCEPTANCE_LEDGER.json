@@ -791,12 +791,23 @@
       "scenario": "同一 Result 的所有展示及不同 Entry 协议输出。",
       "expected": "文本事实、图层、时间轴、Choice 引用相同 Finding/Result；不展示模型臆造的数值或完成状态。",
       "evidenceRequired": "投影/AG-UI 状态快照断言",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-client.unit.test.ts:79: it(\"AC-034 official SSE keeps text, map, timeline and Choice on the same validated source\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts:423: it(\"AC-019 AC-034 AC-039 normal Chat and AG-UI reconnect share one source before START sends a formally anchored second HTTP request\", async () => {",
+        "tests/v06-frozen-client.unit.test.ts: same-source views, actual geometry, clipping closure, realtime TTL and non-executing candidates",
+        "tests/v06-frozen-view.unit.test.ts: five finding semantics and strict action requirements",
+        "tests/v06-frozen-entry.integration.test.ts: normal entries with A2A spies, stored authority and real second HTTP query"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-client.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/analysis-reference-client.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C04.json",
+        "reports/v0.6/frozen-wsgs-consumer/C04-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-035",
@@ -806,12 +817,23 @@
       "scenario": "缺道路几何、H3 ID、稀疏预览、Gap、line preview。",
       "expected": "地图只使用公开实际几何；不做道路补全/H3中心替代/跨 Gap 连线；预览不标作导航路线。",
       "evidenceRequired": "地图投影与调用边界测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-client.unit.test.ts:311: it(\"AC-035 map keeps actual points and previews only, never roads synthesized from IDs or H3\", () => {",
+        "tests/v06-frozen-client.unit.test.ts:337: it(\"AC-035 published LineString previews retain exact independent segments and remain non-navigation beside a trace Gap\", () => {",
+        "tests/v06-frozen-client.unit.test.ts: same-source views, actual geometry, clipping closure, realtime TTL and non-executing candidates",
+        "tests/v06-frozen-view.unit.test.ts: five finding semantics and strict action requirements",
+        "tests/v06-frozen-entry.integration.test.ts: normal entries with A2A spies, stored authority and real second HTTP query"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-client.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/analysis-reference-client.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C04.json",
+        "reports/v0.6/frozen-wsgs-consumer/C04-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-036",
@@ -821,12 +843,27 @@
       "scenario": "UI 隐藏部分候选，但已保存原始合法来源；依赖项丢失。",
       "expected": "可从保存的合法来源解析有效选择；只看显示数组不足；依赖缺失时禁用操作/重查；不重算公共哈希。",
       "evidenceRequired": "预算/引用/Choice 交互测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-client.unit.test.ts:136: \"AC-020 AC-036 every Choice kind %i sends exact identities via the existing Control client\",",
+        "tests/v06-frozen-client.unit.test.ts:177: it(\"AC-036 clipped display does not become the candidate authority or change source hashes\", () => {",
+        "tests/v06-frozen-client.unit.test.ts:236: it(\"AC-025 AC-036 realtime expiry and missing intervention disable selection but preserve reading and requery\", async () => {",
+        "tests/v06-frozen-client.unit.test.ts:429: it(\"AC-036 view byte clipping removes dependent action/geometry/timeline when finding closure is gone\", () => {",
+        "tests/v06-frozen-view.unit.test.ts:361: it(\"AC-020 AC-036 display clipping leaves selectors based on IDs, never rank or false product IDs\", () => {",
+        "tests/v06-frozen-entry.integration.test.ts:1102: it(\"AC-036 normal control resolves a hidden candidate from saved complete authority after view clipping\", async () => {",
+        "tests/v06-frozen-client.unit.test.ts: same-source views, actual geometry, clipping closure, realtime TTL and non-executing candidates",
+        "tests/v06-frozen-view.unit.test.ts: five finding semantics and strict action requirements",
+        "tests/v06-frozen-entry.integration.test.ts: normal entries with A2A spies, stored authority and real second HTTP query"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-client.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/analysis-reference-client.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C04.json",
+        "reports/v0.6/frozen-wsgs-consumer/C04-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-037",
@@ -836,12 +873,25 @@
       "scenario": "普通 Top-K 与明确历史行动候选请求；篡改四个标志。",
       "expected": "普通 Top-K 不自动行动；候选来源与访问 Point 一致；三个要求=true、executionAuthorized=false；非法放宽拒绝。",
       "evidenceRequired": "官方 action 样例与负例",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-client.unit.test.ts:469: it(\"AC-037 Top-K has no action; explicit public candidate retains exact point and four immutable requirements\", () => {",
+        "tests/v06-frozen-client.unit.test.ts:499: \"AC-037 rejects tampered %s in wire and local action card\",",
+        "tests/v06-frozen-view.unit.test.ts:380: it(\"AC-037 action remains exact source target with four restrictive flags, no Top-K auto-action\", () => {",
+        "tests/v06-frozen-view.unit.test.ts:405: ])(\"AC-037 rejects relaxing %s before any display\", (flag) => {",
+        "tests/v06-frozen-client.unit.test.ts: same-source views, actual geometry, clipping closure, realtime TTL and non-executing candidates",
+        "tests/v06-frozen-view.unit.test.ts: five finding semantics and strict action requirements",
+        "tests/v06-frozen-entry.integration.test.ts: normal entries with A2A spies, stored authority and real second HTTP query"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-client.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/analysis-reference-client.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C04.json",
+        "reports/v0.6/frozen-wsgs-consumer/C04-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-038",
@@ -851,12 +901,23 @@
       "scenario": "“将第二个作为返回目标”等多轮；同时运行旧普通 SDAR 受控回归。",
       "expected": "新链不调用 A2A任务/MCP/设备；只显示候选要求；不能全局禁用旧 SDAR 来蒙混此测试。",
       "evidenceRequired": "A2A/MCP spy 和旧路径测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-entry.integration.test.ts:849: it(\"AC-038 historical target text is intercepted before an SDAR model route or execution\", async () => {",
+        "tests/v06-frozen-entry.integration.test.ts:863: it(\"AC-038 deictic vehicle commands with saved historical candidates cannot enter an SDAR model route\", async () => {",
+        "tests/v06-frozen-client.unit.test.ts: same-source views, actual geometry, clipping closure, realtime TTL and non-executing candidates",
+        "tests/v06-frozen-view.unit.test.ts: five finding semantics and strict action requirements",
+        "tests/v06-frozen-entry.integration.test.ts: normal entries with A2A spies, stored authority and real second HTTP query"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-client.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-frozen-entry.integration.test.ts tests/analysis-reference-client.contract.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/world-grounding-application.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C04.json",
+        "reports/v0.6/frozen-wsgs-consumer/C04-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-039",

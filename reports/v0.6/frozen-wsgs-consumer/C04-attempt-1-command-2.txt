@@ -1,0 +1,82 @@
+(node:768186) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/v06-frozen-entry.integration.test.ts (351.324 s)
+  ● frozen normal composition HTTP entries (memory storage, not PostgreSQL) › AC-020 AC-022 every published Choice kind goes through the normal saved-intervention Control route
+
+    thrown: "Exceeded timeout of 20000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      577 |     }
+      578 |   });
+    > 579 |   it("AC-020 AC-022 every published Choice kind goes through the normal saved-intervention Control route", async () => {
+          |   ^
+      580 |     const app = await setup({ examples: ["all-choices", "empty"] });
+      581 |     try {
+      582 |       const first = stateFrom(
+
+      at tests/v06-frozen-entry.integration.test.ts:579:3
+      at tests/v06-frozen-entry.integration.test.ts:354:1
+
+  ● frozen normal composition HTTP entries (memory storage, not PostgreSQL) › AC-038 deictic vehicle commands with saved historical candidates cannot enter an SDAR model route
+
+    thrown: "Exceeded timeout of 20000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      857 |     }
+      858 |   });
+    > 859 |   it("AC-038 deictic vehicle commands with saved historical candidates cannot enter an SDAR model route", async () => {
+          |   ^
+      860 |     const executionPlan = parseTurnPlan({
+      861 |       schemaVersion: "0.4",
+      862 |       turnRoute: "SDAR_TASK",
+
+      at tests/v06-frozen-entry.integration.test.ts:859:3
+      at tests/v06-frozen-entry.integration.test.ts:354:1
+
+  ● frozen normal composition HTTP entries (memory storage, not PostgreSQL) › AC-009 AC-026 HTTP 400 after durable prepare preserves old facts and classifies command recoverability
+
+    thrown: "Exceeded timeout of 20000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      891 |     }
+      892 |   });
+    > 893 |   it.each([400, 406, 503] as const)(
+          |                                    ^
+      894 |     "AC-009 AC-026 HTTP %i after durable prepare preserves old facts and classifies command recoverability",
+      895 |     async (status) => {
+      896 |       let timestamp = frozenNow().getTime();
+
+      at node_modules/.pnpm/jest-each@29.7.0/node_modules/jest-each/build/bind.js:47:15
+          at Array.forEach (<anonymous>)
+      at tests/v06-frozen-entry.integration.test.ts:893:36
+      at tests/v06-frozen-entry.integration.test.ts:354:1
+
+  ● frozen normal composition HTTP entries (memory storage, not PostgreSQL) › AC-009 AC-026 HTTP 406 after durable prepare preserves old facts and classifies command recoverability
+
+    thrown: "Exceeded timeout of 20000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      891 |     }
+      892 |   });
+    > 893 |   it.each([400, 406, 503] as const)(
+          |                                    ^
+      894 |     "AC-009 AC-026 HTTP %i after durable prepare preserves old facts and classifies command recoverability",
+      895 |     async (status) => {
+      896 |       let timestamp = frozenNow().getTime();
+
+      at node_modules/.pnpm/jest-each@29.7.0/node_modules/jest-each/build/bind.js:47:15
+          at Array.forEach (<anonymous>)
+      at tests/v06-frozen-entry.integration.test.ts:893:36
+      at tests/v06-frozen-entry.integration.test.ts:354:1
+
+PASS tests/v06-frozen-view.unit.test.ts (38.138 s)
+PASS tests/v06-frozen-client.unit.test.ts (23.074 s)
+PASS tests/world-grounding-application.unit.test.ts
+PASS tests/analysis-reference-client.contract.test.ts
+PASS tests/sdar-a2a-adapter.contract.test.ts
+
+Test Suites: 1 failed, 5 passed, 6 total
+Tests:       4 failed, 106 passed, 110 total
+Snapshots:   0 total
+Time:        418.461 s
+Ran all test suites matching /tests\/v06-frozen-client.unit.test.ts|tests\/v06-frozen-view.unit.test.ts|tests\/v06-frozen-entry.integration.test.ts|tests\/analysis-reference-client.contract.test.ts|tests\/sdar-a2a-adapter.contract.test.ts|tests\/world-grounding-application.unit.test.ts/i.

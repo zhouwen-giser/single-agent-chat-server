@@ -34,6 +34,10 @@ import {
 } from "./helpers/memory-frozen-analysis.js";
 import { MemoryGrounding } from "./helpers/memory-grounding.js";
 
+// These multi-turn cases repeatedly validate the complete public schema closure.
+// Allow bounded CPU contention without changing any production HTTP/TTL budget.
+jest.setTimeout(60_000);
+
 const read = (path: string): unknown => JSON.parse(readFileSync(path, "utf8"));
 const secret = "frozen-entry-test-secret-32-characters-minimum";
 const userId = "local-user";
