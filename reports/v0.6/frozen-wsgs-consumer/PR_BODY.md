@@ -9,8 +9,9 @@ Continue the existing v0.6 branch with the Frozen WSGS Consumer C00–C06 goal. 
 - C02: normal mapper consumes five public Finding types plus geo; deterministic text/map/timeline preserves proof, gaps, source identities, original time bounds and ranking values. Full public validation before view clipping. The cumulative phase run passed 195 tests, typecheck, architecture and lint with zero errors.
 - C03 complete: normal source proposal/Choice control, durable pre-HTTP intent, parent revision CAS, atomic next-revision binding, history-safe late observations and per-revision pump. Chat and AG-UI share the resolved internal principal while ordinary SDAR retains its external user identity. Final stable-source verification passed 358 tests / 23 suites, including all 23 real normal-entry HTTP cases; typecheck/architecture/migrations/diff passed. Lint: zero errors, 142 recorded warnings.
 - C04 complete: 110 tests / 6 suites passed, including exact independent LineString previews, same-source text/map/timeline/Choice, authoritative hidden selection and non-executing historical targets. Typecheck/architecture/migrations/diff passed; lint 0 errors / 108 warnings. Initial four 20-second Jest timeouts are preserved; a bounded 60-second integration test budget passed the rerun without changing production timeouts, TTL or assertions.
-- C05 normal-entry reconciliation and C06 delivered 42-suite source CLI regression remain pending.
-- REQUIRED ledger: 36/40 PASS, IN_PROGRESS. This PR remains Draft, not yet consumer-development-ready and not release-ready.
+- C05 complete: 116 tests / 9 suites passed, including all 23 normal-entry cases, synchronous/asynchronous source projection and both cross-entry directions. Typecheck/architecture/migrations/diff passed; lint 0 errors / 88 warnings. Logs retain exact stdout/stderr bytes.
+- C06 delivered 42-suite source CLI regression and final evidence audit remain pending.
+- REQUIRED ledger: 39/40 PASS, IN_PROGRESS. This PR remains Draft, not yet consumer-development-ready and not release-ready.
 
 ## Evidence and limits
 
