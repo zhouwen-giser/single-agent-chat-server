@@ -41,3 +41,5 @@ reports/closure/
 # Immutable v0.6 task and WSGS contract source bytes.
 config/v0.6/task-package/
 dependencies/wsgs-v06/
+dependencies/wsgs-world-analysis-v1/public/
+config/v0.6/frozen-consumer-task/

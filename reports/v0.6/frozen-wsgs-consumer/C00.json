@@ -1,0 +1,73 @@
+{
+  "phase": "C00",
+  "status": "PASS",
+  "sourceSha": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+  "startedAt": "2026-09-07T02:45:21.462Z",
+  "completedAt": "2026-09-07T02:46:06.771Z",
+  "commands": [
+    {
+      "command": "git merge-base --is-ancestor 7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2 HEAD",
+      "exitCode": 0,
+      "sourceSha": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C00-command-1.txt"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "sourceSha": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C00-command-2.txt"
+    },
+    {
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts",
+      "exitCode": 0,
+      "sourceSha": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+      "outputDigest": "sha256:900c34effb975c88f49f084f102ca85f439ab1ff9136fbfcbb2f995c3b8db165",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C00-command-3.txt"
+    },
+    {
+      "command": "node scripts/verify-architecture.mjs",
+      "exitCode": 0,
+      "sourceSha": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+      "outputDigest": "sha256:011b68544cf1a78dd56861d57dbc86389cb64d46b1dbd81ef990535d0e38e045",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C00-command-4.txt"
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js packages/wsgs-geospatial-consumer/src/frozen-world-analysis.ts tests/v06-frozen-public.contract.test.ts",
+      "exitCode": 0,
+      "sourceSha": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C00-command-5.txt"
+    },
+    {
+      "command": "node --check scripts/v06-frozen-intake.mjs",
+      "exitCode": 0,
+      "sourceSha": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C00-command-6.txt"
+    },
+    {
+      "command": "node --check scripts/v06-frozen-phase-verify.mjs",
+      "exitCode": 0,
+      "sourceSha": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C00-command-7.txt"
+    }
+  ],
+  "acceptanceIds": [
+    "AC-001",
+    "AC-002",
+    "AC-003"
+  ],
+  "scope": "SACS_PUBLIC_IMPORT_AND_LOADER_ONLY",
+  "notRun": [
+    "ENV-001"
+  ],
+  "excluded": [
+    "EX-001",
+    "EX-002",
+    "EX-003",
+    "EX-004"
+  ]
+}

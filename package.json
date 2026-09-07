@@ -11,6 +11,7 @@
     "pnpm": ">=11.13.1 <12"
   },
   "scripts": {
+    "test:v06:frozen-wsgs:contracts": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts",
     "test:v06:contracts": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-analysis-source.contract.test.ts tests/v06-grounding-job.contract.test.ts tests/wsgs-http-adapter.contract.test.ts",
     "test:v06:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-world-analysis-view.unit.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-source-bridge.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/world-grounding-runtime.unit.test.ts",
     "test:v06:postgres": "node scripts/v05-postgres-test-harness.mjs tests/v06-source-persistence.postgres.int.test.ts tests/v06-grounding-lifecycle.postgres.int.test.ts tests/grounding-persistence.postgres.int.test.ts",
@@ -166,6 +167,7 @@
     "@langchain/langgraph-checkpoint-postgres": "1.0.4",
     "@opentelemetry/api": "1.9.1",
     "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
     "fastify": "5.10.0",
     "pg": "8.22.0",
     "zod": "4.4.3"
