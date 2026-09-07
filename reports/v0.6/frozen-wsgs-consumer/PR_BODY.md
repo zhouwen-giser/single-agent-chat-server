@@ -6,7 +6,8 @@ Continue the existing v0.6 branch with the Frozen WSGS Consumer C00–C06 goal. 
 
 - C00: imported 117 exact public files; real SACS loader ran all 44 official examples plus tamper/hash/boundary cases (52 tests). Commit e870717.
 - C01: exact 1.2 HTTP decoding/negotiation and budgets; stored contract identity and scoped restore; cancellation intent/uncertainty/terminal-race handling. Local HTTP and memory/SQL-driver boundaries, old 1.0/1.1 regressions. See generated C01.json and logs for final verified outcomes.
-- Remaining: five-finding mapping, real source proposal/selection revisions, UI interactions, normal two-turn Chat/AG-UI/Control closure and all-40 acceptance reconciliation. This PR is still Draft, not development-ready or release-ready.
+- C02: normal mapper consumes five public Finding types plus geo; deterministic text/map/timeline preserves proof, gaps, source identities, original time bounds and ranking values. Full public validation before view clipping. The cumulative phase run passed 195 tests, typecheck, architecture and lint with zero errors.
+- Remaining: real source proposal/selection revisions, UI interactions, normal two-turn Chat/AG-UI/Control closure and all-40 acceptance reconciliation. This PR is still Draft, not development-ready or release-ready.
 
 ## Evidence and limits
 

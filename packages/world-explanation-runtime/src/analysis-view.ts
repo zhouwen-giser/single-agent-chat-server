@@ -15,6 +15,11 @@ import {
 import { WsgsAuthoritativeContract } from "../../wsgs-geospatial-consumer/src/authoritative.js";
 import type { LegacyWsgsGroundingResult } from "../../wsgs-http-adapter/src/index.js";
 import {
+  normalizeFrozenAnalysis,
+  type FrozenChoiceView,
+  type FrozenAnalysisView,
+} from "./frozen-analysis-view.js";
+import {
   assertBoundedAnalysisJson,
   WsgsResultSchemaRegistry,
 } from "../../wsgs-geospatial-consumer/src/analysis-payload.js";
@@ -133,6 +138,12 @@ export interface WorldAnalysisTimelineItem {
   sourceId: "wsgs";
   start: string;
   end?: string;
+  findingId?: string;
+  resultHash?: string;
+  bounds?: "[)" | "[]" | "(]" | "()" | "UNSPECIFIED";
+  extent?: JsonObject;
+  sourceEventId?: string;
+  periodRole?: string;
   evidenceItemIds: string[];
 }
 export interface WorldAnalysisViewModel {
@@ -161,11 +172,18 @@ export interface WorldAnalysisViewModel {
       { sourceKind: "WSGS"; timeSemantics: string; displayRole: "HISTORICAL" }
     >;
   };
-  choices: { choiceId: string; productId: string; displayName: string }[];
-  actionTargets: Extract<
-    HistoricalFinding,
-    { findingKind: "HISTORICAL_ACTION_TARGET_CANDIDATE" }
-  >[];
+  choices: (
+    | { choiceId: string; productId: string; displayName: string }
+    | FrozenChoiceView
+  )[];
+  actionTargets: (
+    | Extract<
+        HistoricalFinding,
+        { findingKind: "HISTORICAL_ACTION_TARGET_CANDIDATE" }
+      >
+    | FrozenAnalysisView["actionTargets"][number]
+  )[];
+  evidenceLinks?: FrozenAnalysisView["evidenceLinks"];
   evidenceItemIds: string[];
   typedGaps: JsonObject[];
   warnings: string[];
@@ -197,9 +215,16 @@ export function normalizeWorldAnalysis(input: {
   snapshot: AnalysisSourceSnapshot;
   authority?: WsgsAuthoritativeContract;
   limits?: Partial<AnalysisViewLimits>;
+  now?: () => number;
 }): WorldAnalysisViewModel {
   const { snapshot } = input;
   const limits = analysisViewLimitsSchema.parse(input.limits ?? {});
+  if (
+    snapshot.identity.kind === "WSGS_GROUNDING_JOB" &&
+    snapshot.identity.contractIdentity?.contractVersion ===
+      "sacs-wsgs-grounding/1.2"
+  )
+    return normalizeFrozenAnalysis({ ...input, limits });
   const authority = input.authority ?? new WsgsAuthoritativeContract();
   const registry = new WsgsResultSchemaRegistry(
     authority,

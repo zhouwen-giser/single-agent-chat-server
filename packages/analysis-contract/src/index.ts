@@ -441,8 +441,14 @@ export const timelineProjectionSchema = z
               "METRIC_OBSERVATION",
             ]),
             sourceId: z.literal("wsgs"),
-            start: analysisDateTimeSchema,
-            end: analysisDateTimeSchema.optional(),
+            start: z.iso.datetime({ offset: true }),
+            end: z.iso.datetime({ offset: true }).optional(),
+            findingId: analysisIdSchema.optional(),
+            resultHash: sha256Schema.optional(),
+            bounds: z.enum(["[)", "[]", "(]", "()", "UNSPECIFIED"]).optional(),
+            extent: z.record(z.string(), z.json()).optional(),
+            sourceEventId: analysisIdSchema.optional(),
+            periodRole: z.string().min(1).max(128).optional(),
             evidenceItemIds: z.array(analysisIdSchema).max(128),
           })
           .refine(

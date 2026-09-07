@@ -220,12 +220,19 @@
       "scenario": "地理+空世界集合、仅世界、两者都有、合法无数据。",
       "expected": "合法 1.2 结果均正常消费；worldAnalysisFindings 缺失拒绝；空世界集合不误判失败。",
       "evidenceRequired": "公共样例投影测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-view.unit.test.ts: AC-011 public examples and semantic assertions"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C02.json",
+        "reports/v0.6/frozen-wsgs-consumer/C02-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-012",
@@ -235,12 +242,19 @@
       "scenario": "五类 Finding 的本地 evidenceProductId 链；上游 evidenceIds/receiptIds；悬空 ID。",
       "expected": "命名空间不混用；悬空引用被公共校验拒绝；禁止从未知 safePayload 字段创造事实。",
       "evidenceRequired": "schema/语义负例与证据投影测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-view.unit.test.ts: AC-012 public examples and semantic assertions"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C02.json",
+        "reports/v0.6/frozen-wsgs-consumer/C02-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-013",
@@ -250,12 +264,19 @@
       "scenario": "活动/暂停/定义/排除/Gap、多执行、offset 和各类 bounds。",
       "expected": "保留时段和执行身份；不跨 Gap 插值；不把 SEALED 当所有数据完整；时区展示不改变来源时刻。",
       "evidenceRequired": "trace/time 投影单测",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-view.unit.test.ts: AC-013 public examples and semantic assertions"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C02.json",
+        "reports/v0.6/frozen-wsgs-consumer/C02-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-014",
@@ -265,12 +286,19 @@
       "scenario": "离网、歧义、质量缺口、无几何道路 ID、最后可确认道路。",
       "expected": "保留参考模型角色与确认范围；没有几何就不补画；离网不等于错误运动；未知后缀不被省略。",
       "evidenceRequired": "road 文本/地图/时间轴断言",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-view.unit.test.ts: AC-014 public examples and semantic assertions"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C02.json",
+        "reports/v0.6/frozen-wsgs-consumer/C02-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-015",
@@ -280,12 +308,19 @@
       "scenario": "所有公共事件种类；confirmed true/false，时间窗及裁剪。",
       "expected": "保留上游证明和阻塞区间；不在 SACS 重算；独立完整证明不因其他显示项裁剪而被降级。",
       "evidenceRequired": "event 投影参数化测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-view.unit.test.ts: AC-015 public examples and semantic assertions"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C02.json",
+        "reports/v0.6/frozen-wsgs-consumer/C02-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-016",
@@ -295,12 +330,19 @@
       "scenario": "官方 ranking.json，候选1 -40/-42，候选2 -50/-45。",
       "expected": "排名中位值与代表值分别显示；原排名/系列/单位不变；metricTemporalCompletenessKnown=false 被保留；不取 RSSI 绝对值。",
       "evidenceRequired": "官方样例驱动排名断言",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-view.unit.test.ts: AC-016 public examples and semantic assertions"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C02.json",
+        "reports/v0.6/frozen-wsgs-consumer/C02-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-017",
@@ -310,12 +352,19 @@
       "scenario": "NO_DATA、INDETERMINATE、独立有效 Finding 与 Gap 共存。",
       "expected": "未知不补零/false；不把局部缺口扩大成全失败；明确样本与历史范围限制。",
       "evidenceRequired": "回答投影测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-view.unit.test.ts: AC-017 public examples and semantic assertions"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C02.json",
+        "reports/v0.6/frozen-wsgs-consumer/C02-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-018",
@@ -325,12 +374,20 @@
       "scenario": "合法大于 256 KiB且在有效 wire 预算内的结果；超出请求预算。",
       "expected": "合法线协议内容不被旧 safePayload 预算直接误拒；超线预算有界拒绝；先验证再裁剪；不改公共哈希。",
       "evidenceRequired": "边界大小/引用闭包/投影测试",
-      "status": "NOT_RUN",
-      "testLocations": [],
-      "command": null,
-      "exitCode": null,
-      "evidencePaths": [],
-      "notes": null
+      "status": "PASS",
+      "testLocations": [
+        "tests/v06-frozen-view.unit.test.ts: AC-018 public examples and semantic assertions",
+        "tests/v06-frozen-http.contract.test.ts: caller result budget on POST and GET"
+      ],
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "evidencePaths": [
+        "reports/v0.6/frozen-wsgs-consumer/C02.json",
+        "reports/v0.6/frozen-wsgs-consumer/C02-command-2.txt",
+        "reports/v0.6/frozen-wsgs-consumer/SOURCE_IMPORT.json",
+        "reports/v0.6/frozen-wsgs-consumer/handoff-verification.json"
+      ],
+      "notes": "Executed SACS evidence; local boundary tests only, not live upstream or real PostgreSQL acceptance."
     },
     {
       "id": "AC-019",

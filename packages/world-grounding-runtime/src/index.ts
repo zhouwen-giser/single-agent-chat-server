@@ -523,7 +523,7 @@ export class WorldGroundingRuntime {
       turnPlan,
       undefined,
       async (result, observedAt, request) => {
-        if (this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.1")
+        if (this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.0")
           return normalizeWorldAnalysis({
             analysisId: "answer",
             revisionId: "answer-revision",
@@ -533,6 +533,11 @@ export class WorldGroundingRuntime {
                 kind: "WSGS_GROUNDING_JOB",
                 sourceId: result.groundingId,
                 sourceHash: hashCanonicalJson(request),
+                contractIdentity: groundingClientIdentity(this.options.wsgs),
+                requestId: request.requestId,
+                messageId: request.source.messageId,
+                originalTextSha256: request.source.originalTextSha256,
+                maxResultBytes: request.executionPolicy.maxResultBytes,
               },
               sourceStatus: result.status,
               terminal: true,
@@ -1118,7 +1123,7 @@ export class WorldGroundingRuntime {
       contextUsage: turnPlan.worldFocusUsage,
       leaseOwner,
       leaseMs: 180_000,
-      ...(this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.1"
+      ...(this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.0"
         ? {
             canonicalRequest: asJsonValue(request),
             analysisIntent: {
@@ -1149,12 +1154,15 @@ export class WorldGroundingRuntime {
         }
       } else {
         const capabilities = await this.options.wsgs.capabilities(input.signal);
-        if (!capabilities.requiredCapabilitiesReady) {
+        if (
+          !capabilities.requiredCapabilitiesReady &&
+          this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.2"
+        ) {
           throw new WorldGroundingRuntimeError(
             "WORLD_GROUNDING_CAPABILITY_UNAVAILABLE",
           );
         }
-        if (this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.1") {
+        if (this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.0") {
           await this.beginWorldGrounding({
             analysisId: "analysis-" + stableHash,
             revisionId: "revision-" + stableHash,

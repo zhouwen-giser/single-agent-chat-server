@@ -15,7 +15,7 @@ Goal: complete the frozen 1.2 public consumer through the existing normal SACS c
 
 - [x] C00 — byte-identical public import, SACS loader and contract tests, baseline report (52 SACS tests; commands and exit codes in C00.json).
 - [x] C01 — exact 1.2 negotiation, stored identity, bounded lifecycle and old-protocol regression (154 tests; 9 additional AC groups evidenced; AC-007/008 full projection remains tracked in C02/C05).
-- [ ] C02 — validated five-finding mapping, same-source text/map/timeline, wire/view budgets.
+- [x] C02 — validated five-finding mapping, same-source text/map/timeline, wire/view budgets (195-test regression; AC-011–018 evidenced; interactive/entry proofs continue in C04/C05).
 - [ ] C03 — real source control, all five choices, scope/TTL/idempotency and immutable revisions.
 - [ ] C04 — interactive choice/requery and three-requirement non-executing candidates.
 - [ ] C05 — shared normal Chat/AG-UI/Control composition through actual local HTTP.
