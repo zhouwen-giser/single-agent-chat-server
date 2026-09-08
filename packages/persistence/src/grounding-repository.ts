@@ -8,6 +8,12 @@ import {
   PersistenceConflictError,
 } from "./repository.js";
 import type { JsonValue } from "./types.js";
+import {
+  analysisSourceIdentitySchema,
+  sourceIsTerminal,
+  type AnalysisSourceSnapshot,
+  type AnalysisSourceStatus,
+} from "../../analysis-contract/src/source.js";
 
 export const groundingStates = [
   "GROUNDING_PENDING",
@@ -22,6 +28,12 @@ export const groundingStates = [
 export type GroundingState = (typeof groundingStates)[number];
 
 export interface GroundingExecution {
+  readonly canonicalRequest?: JsonValue;
+  readonly analysisIntent?: Readonly<Record<string, JsonValue>>;
+  readonly sourceJobId?: string;
+  readonly lastSourceStatus?: AnalysisSourceStatus;
+  readonly lastObservationHash?: string;
+  readonly cancelRequested?: boolean;
   readonly groundingId: string;
   readonly principalId: string;
   readonly threadId: string;
@@ -87,7 +99,18 @@ export class GroundingPersistenceRepository {
     readonly contextUsage: Readonly<Record<string, JsonValue>>;
     readonly leaseOwner: string;
     readonly leaseMs?: number;
+    readonly canonicalRequest?: JsonValue;
+    readonly analysisIntent?: Readonly<Record<string, JsonValue>>;
   }): Promise<GroundingClaim> {
+    if (
+      input.canonicalRequest !== undefined &&
+      (hashJson(input.canonicalRequest) !== input.requestHash ||
+        Buffer.byteLength(JSON.stringify(input.canonicalRequest), "utf8") >
+          1_000_000)
+    )
+      throw new PersistenceConflictError(
+        "ANALYSIS_SOURCE_REQUEST_HASH_MISMATCH",
+      );
     const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
     assertLeaseMs(leaseMs);
     return this.transaction(async (client) => {
@@ -98,11 +121,11 @@ export class GroundingPersistenceRepository {
             grounding_id, principal_id, thread_id, interaction_request_id,
             wsgs_request_id, idempotency_key, request_hash, wsgs_operation,
             requested_products_json, context_usage_json, state,
-            lease_owner, lease_until
+            lease_owner, lease_until, canonical_request_json, analysis_intent_json
           ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb,
             'GROUNDING_PENDING', $11,
-            now() + ($12::bigint * interval '1 millisecond')
+            now() + ($12::bigint * interval '1 millisecond'), $13::jsonb,$14::jsonb
           )
           ON CONFLICT (principal_id, thread_id, idempotency_key) DO NOTHING
           RETURNING *
@@ -120,6 +143,12 @@ export class GroundingPersistenceRepository {
           JSON.stringify(input.contextUsage),
           input.leaseOwner,
           leaseMs,
+          input.canonicalRequest === undefined
+            ? null
+            : JSON.stringify(input.canonicalRequest),
+          input.analysisIntent === undefined
+            ? null
+            : JSON.stringify(input.analysisIntent),
         ],
       );
       const created = inserted.rows[0];
@@ -139,6 +168,12 @@ export class GroundingPersistenceRepository {
           "Grounding idempotency key was reused with a different request",
         );
       }
+      if (
+        input.analysisIntent !== undefined &&
+        hashJson(input.analysisIntent) !==
+          hashJson(existing.analysis_intent_json ?? null)
+      )
+        throw new PersistenceConflictError("ANALYSIS_SOURCE_REPLAY_CONFLICT");
       if (existing.state !== "GROUNDING_PENDING") {
         return { kind: "REPLAY", execution: mapExecution(existing) };
       }
@@ -170,6 +205,159 @@ export class GroundingPersistenceRepository {
         payload: { leaseOwner: input.leaseOwner },
       });
       return { kind: "ACQUIRED", execution: mapExecution(row) };
+    });
+  }
+
+  /** Persist published source identity/status; an unchanged poll is not a business event. */
+  async recordSourceSnapshot(
+    input: GroundingIdentity & {
+      leaseOwner: string;
+      snapshot: AnalysisSourceSnapshot;
+      leaseMs?: number;
+    },
+  ): Promise<{ execution: GroundingExecution; changed: boolean }> {
+    const identity = analysisSourceIdentitySchema.parse(
+      input.snapshot.identity,
+    );
+    if (
+      identity.kind !== "WSGS_GROUNDING_JOB" ||
+      input.snapshot.terminal !== sourceIsTerminal(input.snapshot.sourceStatus)
+    )
+      throw new PersistenceConflictError("ANALYSIS_SOURCE_IDENTITY_INVALID");
+    const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
+    assertLeaseMs(leaseMs);
+    if (
+      input.snapshot.result &&
+      (input.snapshot.result.groundingId !== identity.sourceId ||
+        input.snapshot.result.status !== input.snapshot.sourceStatus ||
+        input.snapshot.result.resultHash !== input.snapshot.resultHash ||
+        Buffer.byteLength(JSON.stringify(input.snapshot.result), "utf8") >
+          4 * 1024 * 1024)
+    )
+      throw new PersistenceConflictError(
+        "ANALYSIS_SOURCE_RESPONSE_CONTRACT_VIOLATION",
+      );
+    return this.transaction(async (client) => {
+      const current = await selectAuthorizedForUpdate(client, input);
+      assertActiveLease(current, input.leaseOwner);
+      if (
+        identity.sourceHash !== "sha256:" + current.request_hash ||
+        (current.analysis_intent_json?.["contractIdentity"] !== undefined &&
+          hashJson(current.analysis_intent_json["contractIdentity"]) !==
+            hashJson(identity.contractIdentity ?? null)) ||
+        current.canonical_request_json == null ||
+        (current.wsgs_grounding_id !== null &&
+          current.wsgs_grounding_id !== identity.sourceId) ||
+        (input.snapshot.result &&
+          input.snapshot.result.requestId !== current.wsgs_request_id)
+      )
+        throw new PersistenceConflictError("ANALYSIS_SOURCE_IDENTITY_INVALID");
+      if (
+        current.last_source_status &&
+        sourceIsTerminal(current.last_source_status)
+      ) {
+        if (
+          current.last_source_status !== input.snapshot.sourceStatus ||
+          current.grounding_result_hash !== (input.snapshot.resultHash ?? null)
+        )
+          throw new PersistenceConflictError(
+            "ANALYSIS_SOURCE_TERMINAL_IMMUTABLE",
+          );
+        return { execution: mapExecution(current), changed: false };
+      }
+      const fingerprint = hashJson({
+        identity,
+        status: input.snapshot.sourceStatus,
+        resultHash: input.snapshot.resultHash ?? null,
+      });
+      const changed = current.last_observation_hash !== fingerprint;
+      const updated = await client.query<GroundingRow>(
+        `UPDATE chat_service.grounding_execution SET state=CASE WHEN $9::jsonb IS NOT NULL THEN 'GROUNDING_READY' ELSE state END,wsgs_grounding_id=$4,source_job_id=$5,last_source_status=$6,last_observation_hash=$7,last_polled_at=now(),consecutive_poll_failures=0,grounding_result_hash=$8,grounding_result_json=$9::jsonb,lease_until=now()+($10::bigint*interval '1 millisecond'),version=version+1 WHERE grounding_id=$1 AND principal_id=$2 AND thread_id=$3 RETURNING *`,
+        [
+          input.groundingId,
+          input.principalId,
+          input.threadId,
+          identity.sourceId,
+          identity.upstreamRunId ?? null,
+          input.snapshot.sourceStatus,
+          fingerprint,
+          input.snapshot.resultHash ?? null,
+          input.snapshot.result ? JSON.stringify(input.snapshot.result) : null,
+          leaseMs,
+        ],
+      );
+      const row = requiredRow(updated.rows, "source snapshot");
+      if (changed)
+        await appendEvent(client, {
+          groundingId: input.groundingId,
+          eventKind: "GROUNDING_SOURCE_OBSERVED",
+          fromState: current.state,
+          toState: row.state,
+          payload: {
+            status: input.snapshot.sourceStatus,
+            resultHash: input.snapshot.resultHash ?? null,
+          },
+        });
+      return { execution: mapExecution(row), changed };
+    });
+  }
+
+  /** Poll health is durable telemetry, never a semantic Analysis event. */
+  async recordSourcePoll(
+    input: GroundingIdentity & {
+      leaseOwner: string;
+      succeeded: boolean;
+      leaseMs?: number;
+    },
+  ): Promise<void> {
+    const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
+    assertLeaseMs(leaseMs);
+    await this.transaction(async (client) => {
+      const current = await selectAuthorizedForUpdate(client, input);
+      assertActiveLease(current, input.leaseOwner);
+      if (!current.canonical_request_json)
+        throw new PersistenceConflictError("ANALYSIS_SOURCE_IDENTITY_INVALID");
+      await client.query(
+        `UPDATE chat_service.grounding_execution SET last_polled_at=now(),consecutive_poll_failures=CASE WHEN $4 THEN 0 ELSE LEAST(consecutive_poll_failures+1,1000000) END,lease_until=now()+($5::bigint*interval '1 millisecond'),version=version+1 WHERE grounding_id=$1 AND principal_id=$2 AND thread_id=$3`,
+        [
+          input.groundingId,
+          input.principalId,
+          input.threadId,
+          input.succeeded,
+          leaseMs,
+        ],
+      );
+    });
+  }
+
+  async requestSourceCancellation(
+    input: GroundingIdentity,
+  ): Promise<GroundingExecution> {
+    return this.transaction(async (client) => {
+      const current = await selectAuthorizedForUpdate(client, input);
+      if (current.canonical_request_json == null)
+        throw new PersistenceConflictError(
+          "ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE",
+        );
+      if (
+        current.cancel_requested ||
+        (current.last_source_status &&
+          sourceIsTerminal(current.last_source_status))
+      )
+        return mapExecution(current);
+      const updated = await client.query<GroundingRow>(
+        `UPDATE chat_service.grounding_execution SET cancel_requested=true,version=version+1 WHERE grounding_id=$1 AND principal_id=$2 AND thread_id=$3 RETURNING *`,
+        [input.groundingId, input.principalId, input.threadId],
+      );
+      const row = requiredRow(updated.rows, "cancel intent");
+      await appendEvent(client, {
+        groundingId: input.groundingId,
+        eventKind: "GROUNDING_CANCEL_REQUESTED",
+        fromState: current.state,
+        toState: row.state,
+        payload: { reason: "USER_REQUESTED" },
+      });
+      return mapExecution(row);
     });
   }
 
@@ -364,6 +552,7 @@ export class GroundingPersistenceRepository {
     readonly leaseOwner: string;
     readonly leaseMs?: number;
     readonly limit?: number;
+    readonly sourceOnly?: boolean;
   }): Promise<readonly GroundingExecution[]> {
     const leaseMs = input.leaseMs ?? this.defaultLeaseMs;
     const limit = input.limit ?? 32;
@@ -376,13 +565,24 @@ export class GroundingPersistenceRepository {
         `
           SELECT *
           FROM chat_service.grounding_execution
-          WHERE state IN ('GROUNDING_PENDING', 'SDAR_SUBMISSION_RESERVED')
+          WHERE (state IN ('GROUNDING_PENDING', 'SDAR_SUBMISSION_RESERVED') OR ($2::boolean AND state='GROUNDING_READY'))
+            AND (NOT $2::boolean OR (canonical_request_json IS NOT NULL
+              AND NOT EXISTS(SELECT 1 FROM chat_service.analysis_control_command c
+                WHERE c.analysis_id=grounding_execution.analysis_intent_json->>'analysisId'
+                  AND c.command_kind=grounding_execution.analysis_intent_json->>'commandKind'
+                  AND c.command_id=grounding_execution.analysis_intent_json->>'commandId' AND c.status='FAILED')
+              AND (last_source_status IS NULL OR last_source_status IN ('ACCEPTED','RUNNING') OR analysis_revision_id IS NULL
+                OR NOT EXISTS(SELECT 1 FROM chat_service.analysis_event e
+                  WHERE e.analysis_id=grounding_execution.analysis_id AND e.revision_id=grounding_execution.analysis_revision_id
+                    AND e.run_id=grounding_execution.analysis_run_id AND e.event_type='GROUNDING_SOURCE_OBSERVED'
+                    AND e.payload_json->>'sourceStatus'=grounding_execution.last_source_status
+                    AND (e.payload_json->>'resultHash') IS NOT DISTINCT FROM grounding_execution.grounding_result_hash))))
             AND (lease_until IS NULL OR lease_until <= now())
           ORDER BY created_at, grounding_id
           FOR UPDATE SKIP LOCKED
           LIMIT $1
         `,
-        [limit],
+        [limit, input.sourceOnly ?? false],
       );
       const recovered: GroundingExecution[] = [];
       for (const candidate of candidates.rows) {
@@ -550,6 +750,12 @@ interface GroundingIdentity {
 }
 
 interface GroundingRow {
+  canonical_request_json?: JsonValue | null;
+  analysis_intent_json?: Record<string, JsonValue> | null;
+  source_job_id?: string | null;
+  last_source_status?: AnalysisSourceStatus | null;
+  last_observation_hash?: string | null;
+  cancel_requested?: boolean;
   grounding_id: string;
   principal_id: string;
   thread_id: string;
@@ -755,6 +961,22 @@ function assertLeaseMs(value: number): void {
 
 function mapExecution(row: GroundingRow): GroundingExecution {
   return {
+    ...(row.canonical_request_json == null
+      ? {}
+      : { canonicalRequest: row.canonical_request_json }),
+    ...(row.analysis_intent_json == null
+      ? {}
+      : { analysisIntent: row.analysis_intent_json }),
+    ...(row.source_job_id == null ? {} : { sourceJobId: row.source_job_id }),
+    ...(row.last_source_status == null
+      ? {}
+      : { lastSourceStatus: row.last_source_status }),
+    ...(row.last_observation_hash == null
+      ? {}
+      : { lastObservationHash: row.last_observation_hash }),
+    ...(row.cancel_requested === undefined
+      ? {}
+      : { cancelRequested: row.cancel_requested }),
     groundingId: row.grounding_id,
     principalId: row.principal_id,
     threadId: row.thread_id,

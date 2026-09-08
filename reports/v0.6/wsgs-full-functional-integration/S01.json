@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "sacs-v06-phase-report/1.0",
+  "phaseId": "S01",
+  "status": "PASS",
+  "sourceSha": "670f411c78ba1cfab32e1a60154cfd723a4a68fd",
+  "startedAt": "2026-09-06T06:48:46.582Z",
+  "completedAt": "2026-09-06T06:49:13.499Z",
+  "commands": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "sourceBefore": "670f411c78ba1cfab32e1a60154cfd723a4a68fd",
+      "sourceAfter": "670f411c78ba1cfab32e1a60154cfd723a4a68fd",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-analysis-source.contract.test.ts tests/v06-source-bridge.unit.test.ts tests/analysis-revision.unit.test.ts",
+      "exitCode": 0,
+      "sourceBefore": "670f411c78ba1cfab32e1a60154cfd723a4a68fd",
+      "sourceAfter": "670f411c78ba1cfab32e1a60154cfd723a4a68fd",
+      "outputDigest": "sha256:e05c69837de9134b9e1958cc0cc30e17ce97c56352db60c61f16ae857ce68786"
+    },
+    {
+      "command": "node scripts/v05-postgres-test-harness.mjs tests/v06-source-persistence.postgres.int.test.ts tests/analysis-persistence.postgres.int.test.ts tests/analysis-development-persistence.postgres.int.test.ts",
+      "exitCode": 0,
+      "sourceBefore": "670f411c78ba1cfab32e1a60154cfd723a4a68fd",
+      "sourceAfter": "670f411c78ba1cfab32e1a60154cfd723a4a68fd",
+      "outputDigest": "sha256:b9b2c224c1435c908c52308cd7a0265c09797ff1fd3a84d62483bd2da199ccfe"
+    },
+    {
+      "command": "node scripts/verify-migrations.mjs",
+      "exitCode": 0,
+      "sourceBefore": "670f411c78ba1cfab32e1a60154cfd723a4a68fd",
+      "sourceAfter": "670f411c78ba1cfab32e1a60154cfd723a4a68fd",
+      "outputDigest": "sha256:fc5fbbbd61e6d915a14bc3aef8cdbd0e5b26149ce46b9e98d81671db9e40d165"
+    }
+  ],
+  "acceptanceIds": [
+    "V06-S01-001",
+    "V06-S01-002",
+    "V06-S01-003",
+    "V06-S01-004",
+    "V06-S01-005",
+    "V06-S01-006",
+    "V06-S01-007",
+    "V06-S01-008",
+    "V06-S01-009",
+    "V06-S01-010",
+    "V06-S01-011",
+    "V06-S01-012"
+  ],
+  "blockers": [],
+  "notes": [
+    "001: strict union; tests/v06-analysis-source.contract.test.ts; sha256:f9bffc1f291e88f97849c8dbf560be852f99f0f63b6c9b4cc6e1101f476fabb9",
+    "002: Grounding job has no Native plan; tests/v06-analysis-source.contract.test.ts; sha256:f9bffc1f291e88f97849c8dbf560be852f99f0f63b6c9b4cc6e1101f476fabb9",
+    "003: six methods reviewed; compiler checks both adapters; packages/analysis-contract/src/source.ts; sha256:62c34341bd0a0458e3a6deed81801f1007f1eacaa84e6c012984f5bfa3c2222d",
+    "004: five ports preserved; Native fails closed; tests/v06-source-bridge.unit.test.ts; sha256:cb6bd1aea361ad6006749a4c6c5351d8cfca0a2cb071691fab420aa8ca420a01",
+    "005: fixture success/PARTIAL and production negative; tests/v06-source-bridge.unit.test.ts; sha256:cb6bd1aea361ad6006749a4c6c5351d8cfca0a2cb071691fab420aa8ca420a01",
+    "006: pre-0017 legacy read; tests/v06-source-persistence.postgres.int.test.ts; sha256:b695177cc604a2ea6bb281d3d20eb43dceb2963969c0277849bf82841d6704ef",
+    "007: repository and SQL rejection; tests/v06-source-persistence.postgres.int.test.ts; sha256:b695177cc604a2ea6bb281d3d20eb43dceb2963969c0277849bf82841d6704ef",
+    "008: contiguous additive; no old migration changed; migrations/0017_analysis_source_identity.sql; sha256:809793cc8823d0593c394efc8c95c16d756b0a89ff5dfa12c0e964fad4067c35",
+    "009: existing events/projections unchanged; legacy plan preserved; tests/v06-source-persistence.postgres.int.test.ts; sha256:b695177cc604a2ea6bb281d3d20eb43dceb2963969c0277849bf82841d6704ef",
+    "010: all migrations on isolated empty PostgreSQL; tests/analysis-persistence.postgres.int.test.ts; sha256:e2598bbd7b74ceaccad35905d567f8edc1e918f0b33712ba0cae5716562c6772",
+    "011: wrong thread has no access; existing scope regressions; tests/v06-source-persistence.postgres.int.test.ts; sha256:b695177cc604a2ea6bb281d3d20eb43dceb2963969c0277849bf82841d6704ef",
+    "012: canonical request hash recomputed; hash tampering rejected; tests/v06-analysis-source.contract.test.ts; sha256:f9bffc1f291e88f97849c8dbf560be852f99f0f63b6c9b4cc6e1101f476fabb9"
+  ]
+}

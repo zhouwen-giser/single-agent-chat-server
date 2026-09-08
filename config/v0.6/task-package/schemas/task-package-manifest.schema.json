@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.6:task-package-manifest",
+  "title": "SACS v0.6 Task Package Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packageId",
+    "packageVersion",
+    "generatedAt",
+    "goal",
+    "sourceObservations",
+    "inventory",
+    "completionMarkers",
+    "rules"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-v06-task-package/1.0"
+    },
+    "packageId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packageVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceObservations": {
+      "type": "object"
+    },
+    "inventory": {
+      "type": "object",
+      "required": [
+        "phaseCount",
+        "acceptanceRowCount",
+        "e2eCaseCount",
+        "schemaCount",
+        "templateCount",
+        "contractCount"
+      ],
+      "properties": {
+        "phaseCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "acceptanceRowCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "e2eCaseCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "schemaCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "templateCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "contractCount": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "completionMarkers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

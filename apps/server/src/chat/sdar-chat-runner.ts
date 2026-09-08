@@ -23,7 +23,7 @@ export function createSdarChatRunner(input: SdarChatRunnerOptions): ChatRunner {
       selectionIds.length === 0
         ? []
         : ((await input.resolveStructuredSelections?.({
-            principalId: context.identity.userId,
+            principalId: context.principalId ?? context.identity.userId,
             threadId: context.threadId,
             selectionIds,
           })) ?? []);
@@ -33,6 +33,9 @@ export function createSdarChatRunner(input: SdarChatRunnerOptions): ChatRunner {
         userText: context.userText,
         clientMessages: context.clientMessages,
         userId: context.identity.userId,
+        ...(context.principalId === undefined
+          ? {}
+          : { principalId: context.principalId }),
         chatId: context.openWebUi.chatId,
         threadId: context.threadId,
         userMessageId: context.openWebUi.userMessageId,

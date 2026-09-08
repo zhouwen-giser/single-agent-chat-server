@@ -1,6 +1,21 @@
 import { createHash, randomUUID } from "node:crypto";
 
 import { z } from "zod";
+import { WsgsAuthoritativeContract } from "../../wsgs-geospatial-consumer/src/authoritative.js";
+import { normalizeWorldAnalysis } from "../../world-explanation-runtime/src/analysis-view.js";
+import { GroundingJobAnalysisSourceAdapter } from "../../wsgs-analysis-adapter/src/grounding-job.js";
+import { groundingClientIdentity } from "../../wsgs-analysis-adapter/src/contract-identity.js";
+import { FrozenWorldAnalysisContract } from "../../wsgs-geospatial-consumer/src/frozen-world-analysis.js";
+import {
+  AnalysisSourceError,
+  sourceIsTerminal,
+  verifySourceRequest,
+  parseGroundingContractIdentity,
+  type GroundingContractIdentity,
+  type AnalysisSourceSnapshot,
+  type StartWorldAnalysisRequest,
+} from "../../analysis-contract/src/source.js";
+import type { GroundingExecution } from "../../persistence/src/grounding-repository.js";
 
 import {
   AuthorityFusionEvaluator,
@@ -41,6 +56,7 @@ import type { NormalizedTask } from "../../sdar-a2a-adapter/src/index.js";
 import type { CompletedRequestResult } from "../../request-result/src/index.js";
 import {
   parseWsgsGroundingResult,
+  parseWsgsGroundingRequest,
   WsgsHttpError,
   type MapSelection,
   type WsgsGroundingJob,
@@ -171,6 +187,28 @@ export interface HybridAuthoritySeparatedResult {
 }
 
 export interface WorldGroundingRuntimeOptions {
+  /** Shared frozen consumer composition. Legacy 1.0/1.1 paths remain isolated. */
+  readonly answerFrozenWorld?: (
+    input: WorldGroundingRuntimeTurn,
+  ) => Promise<string>;
+  readonly continueFrozenWorld?: (
+    input: WorldGroundingControlTurn,
+  ) => Promise<string | undefined>;
+  readonly sourcePolling?: {
+    pollIntervalMs: number;
+    maxDurationMs: number;
+    maxConsecutiveFailures: number;
+  };
+  readonly onSourceStarted?: (
+    execution: GroundingExecution,
+    leaseOwner: string,
+  ) => Promise<void>;
+  readonly awaitSourceCompletion?: (input: {
+    groundingExecutionId: string;
+    principalId: string;
+    threadId: string;
+    signal?: AbortSignal;
+  }) => Promise<WsgsGroundingResult>;
   readonly requests: Pick<
     InteractionPersistenceRepository,
     "claimRequest" | "completeRequest" | "authorizedRequestCreatedAt"
@@ -179,7 +217,16 @@ export interface WorldGroundingRuntimeOptions {
     GroundingPersistenceRepository,
     "claim" | "recordGroundingReady" | "complete" | "fail" | "cancel"
   > &
-    Partial<Pick<GroundingPersistenceRepository, "get">>;
+    Partial<
+      Pick<
+        GroundingPersistenceRepository,
+        | "get"
+        | "recordSourceSnapshot"
+        | "recordSourcePoll"
+        | "requestSourceCancellation"
+        | "releaseLease"
+      >
+    >;
   readonly worldFocus?: WorldFocusRepository;
   readonly authorityFusion?: Pick<
     AuthorityFusionRepository,
@@ -194,6 +241,9 @@ export interface WorldGroundingRuntimeOptions {
     "loadMessageByExternalId"
   >;
   readonly wsgs: WsgsHttpClient;
+  readonly clientForContract?: (
+    identity: GroundingContractIdentity,
+  ) => WsgsHttpClient;
   readonly sdarCompatibilityLock: unknown;
   readonly nextLeaseOwner?: () => string;
   readonly requestPlanner?: (turnPlan: TurnPlan) => GroundingRequestPlan;
@@ -248,6 +298,228 @@ export class WorldGroundingRuntime {
     return typeof answer === "string" ? answer : answer.renderedText;
   }
 
+  /** Internal, authenticated application boundary. Persist intent before any HTTP. */
+  async beginWorldGrounding(
+    input: StartWorldAnalysisRequest & {
+      groundingExecutionId: string;
+      interactionRequestId: string;
+      leaseOwner: string;
+      analysisIntent?: Readonly<Record<string, JsonValue>>;
+    },
+  ): Promise<GroundingExecution> {
+    verifySourceRequest(input);
+    const contractIdentity =
+      input.contractIdentity ?? groundingClientIdentity(this.options.wsgs);
+    const analysisIntent = input.analysisIntent ?? {
+      analysisId: input.analysisId,
+      revisionId: input.revisionId,
+      contractIdentity,
+    };
+    if (
+      analysisIntent["analysisId"] !== input.analysisId ||
+      analysisIntent["revisionId"] !== input.revisionId ||
+      hashCanonicalJson(
+        parseGroundingContractIdentity(analysisIntent["contractIdentity"]),
+      ) !== hashCanonicalJson(contractIdentity)
+    )
+      throw new AnalysisSourceError("ANALYSIS_SOURCE_IDENTITY_INVALID");
+    const client = this.sourceClient(contractIdentity);
+    const repository = this.options.grounding;
+    if (!repository.get || !repository.recordSourceSnapshot)
+      throw new AnalysisSourceError("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
+    const adapter = new GroundingJobAnalysisSourceAdapter(
+      client,
+      this.options.sourcePolling,
+    );
+    const claim = await repository.claim({
+      groundingId: input.groundingExecutionId,
+      principalId: input.principalId,
+      threadId: input.threadId,
+      interactionRequestId: input.interactionRequestId,
+      wsgsRequestId: input.requestId,
+      idempotencyKey: input.idempotencyKey,
+      requestHash: input.requestHash.replace(/^sha256:/u, ""),
+      wsgsOperation: input.canonicalGroundingRequest.operation,
+      requestedProducts: input.canonicalGroundingRequest.requestedProducts,
+      contextUsage: {},
+      leaseOwner: input.leaseOwner,
+      leaseMs: 180_000,
+      canonicalRequest: asJsonValue(input.canonicalGroundingRequest),
+      analysisIntent: analysisIntent as Readonly<Record<string, JsonValue>>,
+    });
+    if (
+      claim.kind === "BUSY" ||
+      claim.execution.wsgsGroundingId !== undefined ||
+      claim.kind === "REPLAY"
+    ) {
+      await this.options.onSourceStarted?.(claim.execution, input.leaseOwner);
+      return claim.execution;
+    }
+    await client.capabilities(input.signal);
+    const snapshot = await adapter.start({ ...input, contractIdentity });
+    const execution = (
+      await repository.recordSourceSnapshot({
+        groundingId: claim.execution.groundingId,
+        principalId: input.principalId,
+        threadId: input.threadId,
+        leaseOwner: input.leaseOwner,
+        snapshot,
+        leaseMs: 180_000,
+      })
+    ).execution;
+    await this.options.onSourceStarted?.(execution, input.leaseOwner);
+    return execution;
+  }
+
+  async *observeWorldGrounding(input: {
+    groundingExecutionId: string;
+    principalId: string;
+    threadId: string;
+    leaseOwner: string;
+    signal?: AbortSignal;
+  }): AsyncIterable<AnalysisSourceSnapshot> {
+    const repository = this.options.grounding;
+    if (!repository.get || !repository.recordSourceSnapshot)
+      throw new AnalysisSourceError("ANALYSIS_SOURCE_TRANSPORT_UNAVAILABLE");
+    const scope = {
+      groundingId: input.groundingExecutionId,
+      principalId: input.principalId,
+      threadId: input.threadId,
+    };
+    const execution = await repository.get(scope);
+    if (!execution) throw new AnalysisSourceError("ANALYSIS_NOT_FOUND");
+    if (!execution.wsgsGroundingId || !execution.lastSourceStatus)
+      throw new AnalysisSourceError("WORLD_GROUNDING_IN_PROGRESS");
+    const contractIdentity = parseGroundingContractIdentity(
+      execution.analysisIntent?.["contractIdentity"],
+    );
+    const client = this.sourceClient(contractIdentity);
+    const request =
+      contractIdentity.contractVersion === "sacs-wsgs-grounding/1.2"
+        ? new FrozenWorldAnalysisContract().parse(
+            "request",
+            execution.canonicalRequest,
+          )
+        : parseWsgsGroundingRequest(execution.canonicalRequest);
+    const snapshot: AnalysisSourceSnapshot = {
+      identity: {
+        kind: "WSGS_GROUNDING_JOB",
+        sourceId: execution.wsgsGroundingId,
+        sourceHash: "sha256:" + execution.requestHash,
+        contractIdentity,
+        requestId: execution.wsgsRequestId,
+        messageId: request.source.messageId,
+        originalTextSha256: request.source.originalTextSha256,
+        maxResultBytes: request.executionPolicy.maxResultBytes,
+        ...(execution.sourceJobId
+          ? { upstreamRunId: execution.sourceJobId }
+          : {}),
+      },
+      sourceStatus: execution.lastSourceStatus,
+      terminal: sourceIsTerminal(execution.lastSourceStatus),
+      observedAt: execution.updatedAt.toISOString(),
+      ...(execution.groundingResult
+        ? {
+            result: this.parseStoredResult(
+              execution.groundingResult,
+              contractIdentity,
+            ),
+            resultHash: execution.groundingResultHash!,
+          }
+        : {}),
+    };
+    if (
+      request.requestId !== execution.wsgsRequestId ||
+      hashCanonicalJson(request) !== snapshot.identity.sourceHash ||
+      (snapshot.result &&
+        (snapshot.result.groundingId !== snapshot.identity.sourceId ||
+          snapshot.result.resultHash !== snapshot.resultHash ||
+          snapshot.result.status !== snapshot.sourceStatus ||
+          snapshot.result.requestId !== request.requestId ||
+          snapshot.result.source.messageId !== request.source.messageId ||
+          snapshot.result.source.originalTextSha256 !==
+            request.source.originalTextSha256))
+    )
+      throw new AnalysisSourceError(
+        "ANALYSIS_SOURCE_RESPONSE_CONTRACT_VIOLATION",
+      );
+    yield snapshot;
+    if (snapshot.terminal) return;
+    if (execution.leaseOwner !== input.leaseOwner)
+      throw new AnalysisSourceError("WORLD_GROUNDING_IN_PROGRESS");
+    const adapter = new GroundingJobAnalysisSourceAdapter(
+      client,
+      this.options.sourcePolling,
+      async (succeeded) =>
+        repository.recordSourcePoll?.({
+          ...scope,
+          leaseOwner: input.leaseOwner,
+          succeeded,
+          leaseMs: 180_000,
+        }),
+    );
+    let terminalObserved = false;
+    try {
+      if (execution.cancelRequested) {
+        try {
+          await client.cancelGrounding(
+            execution.wsgsGroundingId,
+            input.signal,
+            request.executionPolicy.maxResultBytes,
+          );
+        } catch (error) {
+          if (!(error instanceof WsgsHttpError) || !error.retryable)
+            throw error;
+          // Report uncertain delivery, then bounded GET may establish actual source state.
+          yield {
+            ...snapshot,
+            observationReasonCode: "WSGS_CANCEL_OBSERVATION_UNCONFIRMED",
+          };
+        }
+      }
+      for await (const observed of adapter.observe({
+        analysisId: String(execution.analysisIntent?.["analysisId"]),
+        revisionId: String(execution.analysisIntent?.["revisionId"]),
+        runId: execution.groundingId,
+        identity: snapshot.identity,
+        signal: input.signal,
+      })) {
+        const committed = await repository.recordSourceSnapshot({
+          ...scope,
+          leaseOwner: input.leaseOwner,
+          snapshot: observed,
+          leaseMs: 180_000,
+        });
+        terminalObserved = observed.terminal;
+        if (committed.changed) yield observed;
+      }
+    } finally {
+      if (!terminalObserved)
+        await repository.releaseLease?.({
+          ...scope,
+          leaseOwner: input.leaseOwner,
+        });
+    }
+  }
+
+  async completeWorldGrounding(input: {
+    groundingExecutionId: string;
+    principalId: string;
+    threadId: string;
+    leaseOwner: string;
+    signal?: AbortSignal;
+  }): Promise<WsgsGroundingResult> {
+    if (this.options.awaitSourceCompletion)
+      return this.options.awaitSourceCompletion(input);
+    for await (const snapshot of this.observeWorldGrounding(input)) {
+      if (snapshot.terminal) {
+        if (snapshot.result) return snapshot.result;
+        throw new AnalysisSourceError("WSGS_" + snapshot.sourceStatus);
+      }
+    }
+    throw new AnalysisSourceError("WORLD_GROUNDING_IN_PROGRESS");
+  }
+
   async answerWorldExplanation(
     input: WorldGroundingRuntimeTurn,
   ): Promise<WorldExplanationV1 | string> {
@@ -257,6 +529,11 @@ export class WorldGroundingRuntime {
         "WORLD_GROUNDING_CONTRACT_VIOLATION",
       );
     }
+    if (
+      this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.2" &&
+      this.options.answerFrozenWorld
+    )
+      return this.options.answerFrozenWorld(input);
     const revalidationFailure = await this.revalidateWorldFocus(
       input,
       turnPlan,
@@ -267,7 +544,30 @@ export class WorldGroundingRuntime {
       input,
       turnPlan,
       undefined,
-      async (result, observedAt) => {
+      async (result, observedAt, request) => {
+        if (this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.0")
+          return normalizeWorldAnalysis({
+            analysisId: "answer",
+            revisionId: "answer-revision",
+            runId: "answer-run",
+            snapshot: {
+              identity: {
+                kind: "WSGS_GROUNDING_JOB",
+                sourceId: result.groundingId,
+                sourceHash: hashCanonicalJson(request),
+                contractIdentity: groundingClientIdentity(this.options.wsgs),
+                requestId: request.requestId,
+                messageId: request.source.messageId,
+                originalTextSha256: request.source.originalTextSha256,
+                maxResultBytes: request.executionPolicy.maxResultBytes,
+              },
+              sourceStatus: result.status,
+              terminal: true,
+              observedAt,
+              resultHash: result.resultHash,
+              result,
+            },
+          }).summary.primaryText;
         if (result.geospatialFindings === undefined) {
           return renderSafeWorldAnswer(result);
         }
@@ -578,6 +878,11 @@ export class WorldGroundingRuntime {
     input: WorldGroundingControlTurn,
   ): Promise<string | undefined> {
     if (
+      this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.2" &&
+      this.options.continueFrozenWorld
+    )
+      return this.options.continueFrozenWorld(input);
+    if (
       this.options.worldFocus === undefined ||
       this.options.conversation === undefined ||
       this.options.grounding.get === undefined ||
@@ -747,6 +1052,7 @@ export class WorldGroundingRuntime {
     renderResult: (
       result: WsgsGroundingResult,
       observedAt: string,
+      request: WsgsGroundingRequest,
     ) => string | Promise<string>,
     overrides: ReadOnlyGroundingOverrides = {},
   ): Promise<{ readonly text: string; readonly result?: WsgsGroundingResult }> {
@@ -769,6 +1075,9 @@ export class WorldGroundingRuntime {
       input,
       turnPlan,
       asJsonValue({
+        ...(this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.2"
+          ? { contractIdentity: groundingClientIdentity(this.options.wsgs) }
+          : {}),
         ...(hashExtension === undefined ? {} : { hashExtension }),
         ...(overrides.source === undefined ? {} : { source: overrides.source }),
       }),
@@ -806,7 +1115,7 @@ export class WorldGroundingRuntime {
       const result =
         execution?.groundingResult === undefined
           ? undefined
-          : parseWsgsGroundingResult(execution.groundingResult);
+          : this.parseStoredResult(execution.groundingResult);
       return {
         text: outerClaim.result.renderedText,
         ...(result === undefined ? {} : { result }),
@@ -841,6 +1150,16 @@ export class WorldGroundingRuntime {
       contextUsage: turnPlan.worldFocusUsage,
       leaseOwner,
       leaseMs: 180_000,
+      ...(this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.0"
+        ? {
+            canonicalRequest: asJsonValue(request),
+            analysisIntent: {
+              analysisId: "analysis-" + stableHash,
+              revisionId: "revision-" + stableHash,
+              contractIdentity: groundingClientIdentity(this.options.wsgs),
+            },
+          }
+        : {}),
     });
     if (groundingClaim.kind === "BUSY") {
       return { text: "WORLD_GROUNDING_IN_PROGRESS" };
@@ -856,46 +1175,75 @@ export class WorldGroundingRuntime {
             groundingClaim.execution.failureCode ?? "WORLD_GROUNDING_FAILED",
           );
         } else {
-          result = parseWsgsGroundingResult(
+          result = this.parseStoredResult(
             groundingClaim.execution.groundingResult,
           );
         }
       } else {
         const capabilities = await this.options.wsgs.capabilities(input.signal);
-        if (!capabilities.requiredCapabilitiesReady) {
+        if (
+          !capabilities.requiredCapabilitiesReady &&
+          this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.2"
+        ) {
           throw new WorldGroundingRuntimeError(
             "WORLD_GROUNDING_CAPABILITY_UNAVAILABLE",
           );
         }
-        result = await resolveGroundingResult(
-          this.options.wsgs,
-          request,
-          `wsgs-grounding-` + stableHash,
-          input.signal,
-        );
+        if (this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.0") {
+          await this.beginWorldGrounding({
+            analysisId: "analysis-" + stableHash,
+            revisionId: "revision-" + stableHash,
+            groundingExecutionId: groundingId,
+            interactionRequestId: outerClaim.requestId,
+            leaseOwner,
+            principalId: input.principalId,
+            threadId: input.threadId,
+            requestId: request.requestId,
+            canonicalGroundingRequest: request,
+            requestHash: hashCanonicalJson(request),
+            idempotencyKey: "wsgs-grounding-" + stableHash,
+            signal: input.signal,
+          });
+          result = await this.completeWorldGrounding({
+            groundingExecutionId: groundingId,
+            principalId: input.principalId,
+            threadId: input.threadId,
+            leaseOwner,
+            signal: input.signal,
+          });
+        } else {
+          result = await resolveGroundingResult(
+            this.options.wsgs,
+            request,
+            `wsgs-grounding-` + stableHash,
+            input.signal,
+          );
+        }
         assertResultIdentity(result, request);
-        await this.options.grounding.recordGroundingReady({
-          groundingId,
-          principalId: input.principalId,
-          threadId: input.threadId,
-          leaseOwner,
-          wsgsGroundingId: result.groundingId,
-          resultHash: result.resultHash,
-          result: asJsonValue(result),
-        });
-        if (result.status === "CANCELLED") {
-          await this.options.grounding.cancel({
+        if (this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.0") {
+          await this.options.grounding.recordGroundingReady({
             groundingId,
             principalId: input.principalId,
             threadId: input.threadId,
+            leaseOwner,
+            wsgsGroundingId: result.groundingId,
+            resultHash: result.resultHash,
+            result: asJsonValue(result),
           });
-        } else if (!["COMPLETED", "PARTIAL"].includes(result.status)) {
-          await this.options.grounding.fail({
-            groundingId,
-            principalId: input.principalId,
-            threadId: input.threadId,
-            failureCode: `WSGS_` + result.status,
-          });
+          if (result.status === "CANCELLED") {
+            await this.options.grounding.cancel({
+              groundingId,
+              principalId: input.principalId,
+              threadId: input.threadId,
+            });
+          } else if (!["COMPLETED", "PARTIAL"].includes(result.status)) {
+            await this.options.grounding.fail({
+              groundingId,
+              principalId: input.principalId,
+              threadId: input.threadId,
+              failureCode: `WSGS_` + result.status,
+            });
+          }
         }
       }
 
@@ -912,8 +1260,9 @@ export class WorldGroundingRuntime {
               overrides.originMessageId ?? input.externalRequestId,
           });
         }
-        response = await renderResult(result, requestCreatedAt);
+        response = await renderResult(result, requestCreatedAt, request);
         if (
+          this.options.wsgs.contractVersion === "sacs-wsgs-grounding/1.0" &&
           ["COMPLETED", "PARTIAL"].includes(result.status) &&
           groundingClaim.execution.state !== "COMPLETED"
         ) {
@@ -927,6 +1276,9 @@ export class WorldGroundingRuntime {
     } catch (error) {
       const code = safeRuntimeCode(error);
       if (code === undefined) throw error;
+      // Source observation errors are local; only published Source snapshots set its state.
+      if (this.options.wsgs.contractVersion !== "sacs-wsgs-grounding/1.0")
+        throw new WorldGroundingRuntimeError(code);
       await this.options.grounding
         .fail({
           groundingId,
@@ -953,6 +1305,31 @@ export class WorldGroundingRuntime {
       text: response,
       ...(resultForOutcome === undefined ? {} : { result: resultForOutcome }),
     };
+  }
+
+  private sourceClient(identity: GroundingContractIdentity): WsgsHttpClient {
+    const saved = parseGroundingContractIdentity(identity);
+    const client = this.options.clientForContract?.(saved) ?? this.options.wsgs;
+    if (client.contractVersion !== saved.contractVersion)
+      throw new AnalysisSourceError(
+        "ANALYSIS_SOURCE_CONTRACT_IDENTITY_INVALID",
+      );
+    return client;
+  }
+
+  private parseStoredResult(
+    value: unknown,
+    identity?: GroundingContractIdentity,
+  ): WsgsGroundingResult {
+    const version =
+      identity?.contractVersion ?? this.options.wsgs.contractVersion;
+    if (version === "sacs-wsgs-grounding/1.2")
+      return new FrozenWorldAnalysisContract().parse("result", value);
+    if (version === "sacs-wsgs-grounding/1.1") {
+      new WsgsAuthoritativeContract().validate("result", value);
+      return value as WsgsGroundingResult;
+    }
+    return parseWsgsGroundingResult(value);
   }
 
   private async assembleContext(
@@ -1433,7 +1810,7 @@ export function renderSafeWorldAnswer(result: WsgsGroundingResult): string {
   ];
   for (const reference of parsed.referenceProducts) {
     const summary =
-      reference.safeSummary === undefined
+      !("safeSummary" in reference) || reference.safeSummary === undefined
         ? ""
         : ` — ` + safeJson(reference.safeSummary);
     lines.push(`Reference: ` + safeText(reference.displayName) + summary);
@@ -1486,7 +1863,7 @@ async function resolveGroundingResult(
   const created = await wsgs.createGrounding(request, idempotencyKey, signal);
   if (!("jobId" in created)) return created;
   const job: WsgsGroundingJob =
-    created.result === undefined &&
+    (!("result" in created) || created.result === undefined) &&
     ![
       "COMPLETED",
       "PARTIAL",
@@ -1497,7 +1874,7 @@ async function resolveGroundingResult(
     ].includes(created.status)
       ? await wsgs.waitForGrounding(created.groundingId, signal)
       : created;
-  if (job.result === undefined) {
+  if (!("result" in job) || job.result === undefined) {
     if (job.error !== undefined) {
       throw new WsgsHttpError(
         job.error.code,

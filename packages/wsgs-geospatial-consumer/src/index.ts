@@ -200,7 +200,7 @@ export const wsgsGeospatialConsumerLockSchema = z
     sources: z.strictObject({
       wsgsSha: gitSha,
       gowmSha: gitSha,
-      gdpsSha: gitSha,
+      gdpsSha: gitSha.optional(),
     }),
     groundingContract: z.strictObject({
       contractVersion: z.string().min(1).max(128),

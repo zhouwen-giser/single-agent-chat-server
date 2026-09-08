@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "sacs-v06-phase-report/1.0",
+  "phaseId": "S02",
+  "status": "PASS",
+  "sourceSha": "e563846e83b0c559c9bc03f342420255f5b5a7de",
+  "startedAt": "2026-09-06T07:02:51.548Z",
+  "completedAt": "2026-09-06T07:03:23.162Z",
+  "commands": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "sourceBefore": "e563846e83b0c559c9bc03f342420255f5b5a7de",
+      "sourceAfter": "e563846e83b0c559c9bc03f342420255f5b5a7de",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-grounding-job.contract.test.ts tests/wsgs-http-adapter.contract.test.ts tests/wsgs-geospatial-consumer-lock.contract.test.ts",
+      "exitCode": 0,
+      "sourceBefore": "e563846e83b0c559c9bc03f342420255f5b5a7de",
+      "sourceAfter": "e563846e83b0c559c9bc03f342420255f5b5a7de",
+      "outputDigest": "sha256:9e77bc42487cd1673765920f2ca4f02f2ea934c0b7aeaeb5e5b840e18d2c201a"
+    },
+    {
+      "command": "node scripts/v05-postgres-test-harness.mjs tests/v06-grounding-lifecycle.postgres.int.test.ts tests/grounding-persistence.postgres.int.test.ts",
+      "exitCode": 0,
+      "sourceBefore": "e563846e83b0c559c9bc03f342420255f5b5a7de",
+      "sourceAfter": "e563846e83b0c559c9bc03f342420255f5b5a7de",
+      "outputDigest": "sha256:dcc1761e301483325135f9c7da457549df9af68ac952115d19fc0356d4ce9b90"
+    }
+  ],
+  "acceptanceIds": [
+    "V06-S02-001",
+    "V06-S02-002",
+    "V06-S02-003",
+    "V06-S02-004",
+    "V06-S02-005",
+    "V06-S02-006",
+    "V06-S02-007",
+    "V06-S02-008",
+    "V06-S02-009",
+    "V06-S02-010",
+    "V06-S02-011",
+    "V06-S02-012",
+    "V06-S02-013",
+    "V06-S02-014"
+  ],
+  "blockers": [],
+  "notes": [
+    "Native routes absent by design; only existing WsgsHttpClient is injected.",
+    "Raw release lock and all consumed artifacts revalidated before READY consumer lock generation.",
+    "Durable replay verifies identical request/key after response loss and rejects changed canonical request before sending.",
+    "packages/wsgs-geospatial-consumer/src/authoritative.ts sha256:9d9ce3573c87e7d920da264134e3a0584c4c3974f67f9ecb66fa9e83293b87c9",
+    "packages/wsgs-http-adapter/src/index.ts sha256:fb92649635aea77129862fa57ea12ddb556da538fbf7d97c00c61317766a9e90",
+    "packages/wsgs-analysis-adapter/src/grounding-job.ts sha256:d4435e89ed3789a7624fed68b302c837efb8e2eaec157327d2ee5d2929144dac",
+    "tests/v06-grounding-job.contract.test.ts sha256:a27ada01fa6b2686fe626a3b498ec555fda9a3347f4e2b84c5755ac59092a5a2",
+    "tests/v06-grounding-lifecycle.postgres.int.test.ts sha256:8c359d56a7b149c7f4fd4b25ab8884b001faadaf1b61d57f19c9a17d26e49dde"
+  ]
+}

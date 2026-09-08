@@ -1,4 +1,18 @@
 import { z } from "zod";
+import { createHash } from "node:crypto";
+import {
+  FrozenWorldAnalysisContract,
+  WSGS_V12_HEADERS,
+  WsgsPublicContractError,
+  type GroundingRequest12,
+  type GroundingResult12,
+  type GroundingJob12,
+  type GroundingCapabilities12,
+} from "../../wsgs-geospatial-consumer/src/frozen-world-analysis.js";
+import {
+  WsgsAuthoritativeContract,
+  WSGS_V11_HEADERS,
+} from "../../wsgs-geospatial-consumer/src/authoritative.js";
 
 import {
   wsgsOperations,
@@ -359,10 +373,18 @@ const terminalStatuses = new Set([
   "CANCELLED",
 ]);
 
-export type WsgsGroundingRequest = z.infer<typeof groundingRequestSchema>;
-export type WsgsGroundingResult = z.infer<typeof groundingResultSchema>;
-export type WsgsGroundingJob = z.infer<typeof groundingJobSchema>;
-export type WsgsCapabilities = z.infer<typeof capabilitiesSchema>;
+export type WsgsGroundingRequest =
+  z.infer<typeof groundingRequestSchema> | GroundingRequest12;
+export type LegacyWsgsGroundingResult = z.infer<typeof groundingResultSchema>;
+export type WsgsGroundingResult = LegacyWsgsGroundingResult | GroundingResult12;
+export type WsgsGroundingJob =
+  z.infer<typeof groundingJobSchema> | GroundingJob12;
+export type WsgsCapabilities =
+  z.infer<typeof capabilitiesSchema> | GroundingCapabilities12;
+export type WsgsContractVersion =
+  | "sacs-wsgs-grounding/1.0"
+  | "sacs-wsgs-grounding/1.1"
+  | "sacs-wsgs-grounding/1.2";
 export type KnownWorldReference = z.infer<typeof knownWorldReferenceSchema>;
 export type PriorGroundingReference = z.infer<
   typeof priorGroundingReferenceSchema
@@ -390,11 +412,14 @@ export function parseWsgsGroundingContextCapsule(
   return groundingContextCapsuleSchema.parse(value);
 }
 
-export function parseWsgsGroundingResult(value: unknown): WsgsGroundingResult {
+export function parseWsgsGroundingResult(
+  value: unknown,
+): LegacyWsgsGroundingResult {
   return groundingResultSchema.parse(value);
 }
 
 export interface WsgsHttpAdapterConfig {
+  readonly contractVersion?: WsgsContractVersion;
   readonly baseUrl: string;
   readonly operationTimeoutMs?: number;
   readonly pollIntervalMs?: number;
@@ -407,7 +432,7 @@ export interface WsgsHttpAdapterConfig {
 }
 
 export interface WsgsHttpClient {
-  readonly contractVersion: "sacs-wsgs-grounding/1.0";
+  readonly contractVersion: WsgsContractVersion;
   readonly endpoint: string;
   readonly geospatialConsumerLock: WsgsGeospatialConsumerLock;
   capabilities(signal?: AbortSignal): Promise<WsgsCapabilities>;
@@ -419,6 +444,7 @@ export interface WsgsHttpClient {
   getGrounding(
     groundingId: string,
     signal?: AbortSignal,
+    maxResultBytes?: number,
   ): Promise<WsgsGroundingJob>;
   waitForGrounding(
     groundingId: string,
@@ -427,6 +453,7 @@ export interface WsgsHttpClient {
   cancelGrounding(
     groundingId: string,
     signal?: AbortSignal,
+    maxResultBytes?: number,
   ): Promise<WsgsGroundingJob>;
 }
 
@@ -501,8 +528,45 @@ export function createWsgsHttpClient(
     bearerToken: input.bearerToken,
   });
   const endpoint = normalizedEndpoint(parsed.baseUrl);
+  const contractVersion = input.contractVersion ?? "sacs-wsgs-grounding/1.0";
+  if (
+    ![
+      "sacs-wsgs-grounding/1.0",
+      "sacs-wsgs-grounding/1.1",
+      "sacs-wsgs-grounding/1.2",
+    ].includes(contractVersion)
+  )
+    throw new WsgsHttpError("WSGS_CONTRACT_SELECTION_INVALID");
+  const authoritative =
+    contractVersion === "sacs-wsgs-grounding/1.1"
+      ? new WsgsAuthoritativeContract()
+      : undefined;
+  const frozen =
+    contractVersion === "sacs-wsgs-grounding/1.2"
+      ? new FrozenWorldAnalysisContract()
+      : undefined;
+  const negotiation = frozen
+    ? WSGS_V12_HEADERS
+    : authoritative
+      ? WSGS_V11_HEADERS
+      : undefined;
+  function parseFrozen<K extends "request" | "result" | "job" | "capabilities">(
+    kind: K,
+    value: unknown,
+    maxResultBytes?: number,
+  ) {
+    try {
+      return frozen!.parse(kind, value, maxResultBytes);
+    } catch (error) {
+      if (error instanceof WsgsPublicContractError)
+        throw new WsgsHttpError(error.reasonCode);
+      throw new WsgsHttpError("WSGS_PUBLIC_CONTRACT_INVALID");
+    }
+  }
   const geospatialConsumerLock = parseWsgsGeospatialConsumerLock(
-    input.geospatialConsumerLock ?? defaultWsgsGeospatialConsumerLock,
+    authoritative?.consumerLock ??
+      input.geospatialConsumerLock ??
+      defaultWsgsGeospatialConsumerLock,
   );
   const fetchImpl = input.fetchImpl ?? fetch;
   const sleepImpl =
@@ -517,9 +581,11 @@ export function createWsgsHttpClient(
       body?: unknown;
       idempotencyKey?: string;
       signal?: AbortSignal;
+      maxResultBytes?: number;
     } = {},
   ): Promise<{ status: number; value: unknown }> {
     const headers: Record<string, string> = { accept: "application/json" };
+    if (negotiation) Object.assign(headers, negotiation);
     if (options.body !== undefined)
       headers["content-type"] = "application/json";
     if (options.idempotencyKey !== undefined) {
@@ -536,6 +602,7 @@ export function createWsgsHttpClient(
     try {
       response = await fetchImpl(new URL(path, endpoint), {
         method,
+        redirect: "error",
         headers,
         ...(options.body === undefined
           ? {}
@@ -545,17 +612,44 @@ export function createWsgsHttpClient(
     } catch {
       throw new WsgsHttpError("WSGS_TRANSPORT_ERROR", undefined, true);
     }
-    const value = await readBoundedJson(response, parsed.maxResponseBytes);
+    if (negotiation && response.ok)
+      for (const [key, expected] of Object.entries(negotiation)) {
+        if (response.headers.get(key) !== expected)
+          throw new WsgsHttpError("WSGS_CONTRACT_RESPONSE_HEADER_MISMATCH");
+      }
+    // Bound bytes before JSON allocation; Job metadata gets its own small allowance.
+    const wireBudget = frozen
+      ? Math.min(
+          parsed.maxResponseBytes,
+          Math.min(options.maxResultBytes ?? 1048576, 1048576) + 16384,
+        )
+      : parsed.maxResponseBytes;
+    const value = await readBoundedJson(response, wireBudget);
     if (!response.ok) throw protocolFailure(response.status, value);
     return { status: response.status, value };
   }
 
   return {
-    contractVersion: "sacs-wsgs-grounding/1.0",
+    contractVersion,
     endpoint: endpoint.href,
     geospatialConsumerLock,
     async capabilities(signal) {
       const response = await request("GET", "/v1/capabilities", { signal });
+      if (response.status !== 200)
+        throw new WsgsHttpError("WSGS_UNEXPECTED_HTTP_STATUS");
+      if (frozen) return parseFrozen("capabilities", response.value);
+      if (authoritative) {
+        authoritative.validate("capabilities", response.value);
+        const value = response.value as WsgsCapabilities;
+        if (
+          !value.requiredCapabilitiesReady ||
+          wsgsOperations.some(
+            (operation) => !value.supportedOperations.includes(operation),
+          )
+        )
+          throw new WsgsHttpError("WSGS_REQUIRED_OPERATION_UNAVAILABLE");
+        return value;
+      }
       const capabilities = parseContract(
         capabilitiesSchema,
         response.value,
@@ -571,14 +665,64 @@ export function createWsgsHttpClient(
       return capabilities;
     },
     async createGrounding(requestBody, idempotencyKey, signal) {
-      const body = groundingRequestSchema.parse(requestBody);
+      const body = frozen
+        ? parseFrozen("request", requestBody)
+        : groundingRequestSchema.parse(requestBody);
+      if (
+        frozen &&
+        body.source.originalTextSha256 !==
+          "sha256:" +
+            createHash("sha256").update(body.source.originalText).digest("hex")
+      )
+        throw new WsgsHttpError("WSGS_ORIGINAL_TEXT_HASH_MISMATCH");
+      authoritative?.validate("request", body);
       assertNoForbiddenFields(body, forbiddenAuthorityFields);
       const response = await request("POST", "/v1/groundings", {
         body,
         idempotencyKey,
         signal,
+        maxResultBytes: body.executionPolicy.maxResultBytes,
       });
+      if (frozen) {
+        if (response.status !== 200 && response.status !== 202)
+          throw new WsgsHttpError(
+            "WSGS_UNEXPECTED_CREATE_STATUS",
+            response.status,
+          );
+        const value =
+          response.status === 200
+            ? parseFrozen(
+                "result",
+                response.value,
+                body.executionPolicy.maxResultBytes,
+              )
+            : parseFrozen(
+                "job",
+                response.value,
+                body.executionPolicy.maxResultBytes,
+              );
+        const result =
+          "jobId" in value
+            ? "result" in value
+              ? value.result
+              : undefined
+            : value;
+        if (
+          value.requestId !== body.requestId ||
+          (result &&
+            (result.source.messageId !== body.source.messageId ||
+              result.source.originalTextSha256 !==
+                body.source.originalTextSha256))
+        )
+          throw new WsgsHttpError("WSGS_RESPONSE_IDENTITY_MISMATCH");
+        return value;
+      }
       if (response.status === 200) {
+        authoritative?.validate("result", response.value);
+        if (authoritative) {
+          assertNoForbiddenFields(response.value, forbiddenDecisionFields);
+          return response.value as WsgsGroundingResult;
+        }
         const result = parseContract(
           groundingResultSchema,
           response.value,
@@ -589,6 +733,11 @@ export function createWsgsHttpClient(
         return result;
       }
       if (response.status === 202) {
+        authoritative?.validate("job", response.value);
+        if (authoritative) {
+          assertNoForbiddenFields(response.value, forbiddenDecisionFields);
+          return response.value as WsgsGroundingJob;
+        }
         const job = parseContract(
           groundingJobSchema,
           response.value,
@@ -600,19 +749,34 @@ export function createWsgsHttpClient(
       }
       throw new WsgsHttpError("WSGS_UNEXPECTED_CREATE_STATUS", response.status);
     },
-    async getGrounding(groundingId, signal) {
+    async getGrounding(groundingId, signal, maxResultBytes) {
       const response = await request(
         "GET",
         `/v1/groundings/${encodeURIComponent(
           requiredIdentifier(groundingId, "groundingId"),
         )}`,
-        { signal },
+        { signal, maxResultBytes },
       );
+      if (response.status !== 200)
+        throw new WsgsHttpError("WSGS_UNEXPECTED_HTTP_STATUS");
+      if (frozen) {
+        const value = parseFrozen("job", response.value, maxResultBytes);
+        if (value.groundingId !== groundingId)
+          throw new WsgsHttpError("WSGS_RESPONSE_IDENTITY_MISMATCH");
+        return value;
+      }
+      if (authoritative) {
+        authoritative.validate("job", response.value);
+        assertNoForbiddenFields(response.value, forbiddenDecisionFields);
+        return response.value as WsgsGroundingJob;
+      }
       const job = parseContract(
         groundingJobSchema,
         response.value,
         "WSGS_JOB_CONTRACT_VIOLATION",
       );
+      if (response.status !== 200)
+        throw new WsgsHttpError("WSGS_UNEXPECTED_HTTP_STATUS");
       assertNoForbiddenFields(job, forbiddenDecisionFields);
       assertConsumerLockResult(job.result, geospatialConsumerLock);
       return job;
@@ -625,19 +789,34 @@ export function createWsgsHttpClient(
       }
       throw new WsgsHttpError("WSGS_POLL_LIMIT_EXCEEDED", undefined, true);
     },
-    async cancelGrounding(groundingId, signal) {
+    async cancelGrounding(groundingId, signal, maxResultBytes) {
       const response = await request(
         "POST",
         `/v1/groundings/${encodeURIComponent(
           requiredIdentifier(groundingId, "groundingId"),
         )}:cancel`,
-        { signal },
+        { signal, maxResultBytes },
       );
+      if (response.status !== 200)
+        throw new WsgsHttpError("WSGS_UNEXPECTED_HTTP_STATUS");
+      if (frozen) {
+        const value = parseFrozen("job", response.value, maxResultBytes);
+        if (value.groundingId !== groundingId)
+          throw new WsgsHttpError("WSGS_RESPONSE_IDENTITY_MISMATCH");
+        return value;
+      }
+      if (authoritative) {
+        authoritative.validate("job", response.value);
+        assertNoForbiddenFields(response.value, forbiddenDecisionFields);
+        return response.value as WsgsGroundingJob;
+      }
       const job = parseContract(
         groundingJobSchema,
         response.value,
         "WSGS_JOB_CONTRACT_VIOLATION",
       );
+      if (response.status !== 200)
+        throw new WsgsHttpError("WSGS_UNEXPECTED_HTTP_STATUS");
       assertConsumerLockResult(job.result, geospatialConsumerLock);
       return job;
     },
@@ -645,7 +824,7 @@ export function createWsgsHttpClient(
 }
 
 function assertConsumerLockCapabilities(
-  capabilities: WsgsCapabilities,
+  capabilities: z.infer<typeof capabilitiesSchema>,
   lock: WsgsGeospatialConsumerLock,
 ): void {
   try {
@@ -705,14 +884,50 @@ async function readBoundedJson(
   if (declared > maxBytes) {
     throw new WsgsHttpError("WSGS_RESPONSE_TOO_LARGE", response.status);
   }
-  const text = await response.text();
+  const reader = response.body?.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  if (reader)
+    try {
+      for (;;) {
+        const part = await reader.read();
+        if (part.done) break;
+        size += part.value.byteLength;
+        if (size > maxBytes) {
+          await reader.cancel();
+          throw new WsgsHttpError("WSGS_RESPONSE_TOO_LARGE", response.status);
+        }
+        chunks.push(part.value);
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  const text = new TextDecoder().decode(Buffer.concat(chunks));
   if (new TextEncoder().encode(text).byteLength > maxBytes) {
     throw new WsgsHttpError("WSGS_RESPONSE_TOO_LARGE", response.status);
   }
   try {
-    return JSON.parse(text) as unknown;
+    const value: unknown = JSON.parse(text);
+    assertJsonTraversalBound(value);
+    return value;
   } catch {
     throw new WsgsHttpError("WSGS_INVALID_JSON_RESPONSE", response.status);
+  }
+}
+
+function assertJsonTraversalBound(value: unknown): void {
+  const stack: { value: unknown; depth: number }[] = [{ value, depth: 0 }];
+  let nodes = 0;
+  while (stack.length) {
+    const item = stack.pop()!;
+    if (++nodes > 100_000 || item.depth > 32)
+      throw new WsgsHttpError("WSGS_RESPONSE_TOO_LARGE");
+    if (item.value !== null && typeof item.value === "object")
+      for (const [key, child] of Object.entries(item.value)) {
+        if (["__proto__", "constructor", "prototype"].includes(key))
+          throw new WsgsHttpError("WSGS_INVALID_JSON_RESPONSE");
+        stack.push({ value: child, depth: item.depth + 1 });
+      }
   }
 }
 
@@ -749,15 +964,15 @@ function assertNoForbiddenFields(
   value: unknown,
   forbidden: ReadonlySet<string>,
 ): void {
-  if (Array.isArray(value)) {
-    for (const item of value) assertNoForbiddenFields(item, forbidden);
-    return;
-  }
-  if (value === null || typeof value !== "object") return;
-  for (const [key, child] of Object.entries(value)) {
-    if (forbidden.has(key)) {
-      throw new WsgsHttpError("WSGS_FORBIDDEN_AUTHORITY_FIELD");
+  assertJsonTraversalBound(value);
+  const stack = [value];
+  while (stack.length) {
+    const item = stack.pop();
+    if (item === null || typeof item !== "object") continue;
+    for (const [key, child] of Object.entries(item)) {
+      if (forbidden.has(key))
+        throw new WsgsHttpError("WSGS_FORBIDDEN_AUTHORITY_FIELD");
+      stack.push(child);
     }
-    assertNoForbiddenFields(child, forbidden);
   }
 }

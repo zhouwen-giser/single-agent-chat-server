@@ -1,0 +1,20 @@
+(node:8854) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-frozen-view.unit.test.ts (28.554 s)
+PASS tests/v06-frozen-http.contract.test.ts (12.772 s)
+PASS tests/v06-grounding-job.contract.test.ts (7.355 s)
+PASS tests/v06-frozen-source.unit.test.ts (6.968 s)
+PASS tests/v06-frozen-cancel.unit.test.ts
+PASS tests/v06-frozen-public.contract.test.ts
+PASS tests/v06-frozen-persistence.unit.test.ts
+PASS tests/v06-world-analysis-view.unit.test.ts
+PASS tests/world-grounding-runtime.unit.test.ts
+PASS tests/wsgs-http-adapter.contract.test.ts
+PASS tests/v06-analysis-source.contract.test.ts
+PASS tests/v06-analysis-config.unit.test.ts
+
+Test Suites: 12 passed, 12 total
+Tests:       195 passed, 195 total
+Snapshots:   0 total
+Time:        65.172 s, estimated 71 s
+Ran all test suites matching /tests\/v06-frozen-public.contract.test.ts|tests\/v06-frozen-http.contract.test.ts|tests\/v06-frozen-source.unit.test.ts|tests\/v06-frozen-persistence.unit.test.ts|tests\/v06-frozen-cancel.unit.test.ts|tests\/v06-grounding-job.contract.test.ts|tests\/v06-analysis-config.unit.test.ts|tests\/v06-analysis-source.contract.test.ts|tests\/v06-world-analysis-view.unit.test.ts|tests\/wsgs-http-adapter.contract.test.ts|tests\/world-grounding-runtime.unit.test.ts|tests\/v06-frozen-view.unit.test.ts/i.

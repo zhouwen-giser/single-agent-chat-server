@@ -1,0 +1,49 @@
+
+/home/zhouwen/web-download/single-agent-chat-server/apps/server/src/v06-grounding-analysis.ts
+  64:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  65:53  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/analysis-runtime/src/grounding-source-runtime.ts
+  291:25  warning  Forbidden non-null assertion                @typescript-eslint/no-non-null-assertion
+  331:19  warning  '_meta' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/persistence/src/analysis-development-repository.ts
+  1026:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/world-grounding-runtime/src/index.ts
+  410:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/wsgs-analysis-adapter/src/grounding-job.ts
+  58:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/wsgs-http-adapter/src/index.ts
+  559:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  922:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/helpers/frozen-wsgs-http.ts
+  71:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  72:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/v06-frozen-http.contract.test.ts
+   95:25  warning  Forbidden non-null assertion             @typescript-eslint/no-non-null-assertion
+  164:14  warning  Forbidden non-null assertion             @typescript-eslint/no-non-null-assertion
+  164:43  warning  Forbidden non-null assertion             @typescript-eslint/no-non-null-assertion
+  211:14  warning  Forbidden non-null assertion             @typescript-eslint/no-non-null-assertion
+  318:16  warning  Forbidden non-null assertion             @typescript-eslint/no-non-null-assertion
+  339:26  warning  '_e' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  385:26  warning  '_e' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/v06-frozen-persistence.unit.test.ts
+   56:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   57:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  105:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  147:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/v06-frozen-source.unit.test.ts
+   96:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   99:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  203:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  247:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 26 problems (0 errors, 26 warnings)
+

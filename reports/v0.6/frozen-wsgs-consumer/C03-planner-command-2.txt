@@ -1,0 +1,10 @@
+(node:87472) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-frozen-request.unit.test.ts (25.055 s)
+PASS tests/v06-frozen-public.contract.test.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       69 passed, 69 total
+Snapshots:   0 total
+Time:        27.505 s
+Ran all test suites matching /tests\/v06-frozen-public.contract.test.ts|tests\/v06-frozen-request.unit.test.ts/i.

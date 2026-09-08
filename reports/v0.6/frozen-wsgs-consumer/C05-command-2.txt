@@ -1,0 +1,17 @@
+(node:982655) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-frozen-entry.integration.test.ts (236.865 s)
+PASS tests/v06-frozen-factory-compat.unit.test.ts (9.291 s)
+PASS tests/v06-frozen-source.unit.test.ts (7.906 s)
+PASS tests/openai-predecessor-regression.contract.test.ts
+PASS tests/world-grounding-application.unit.test.ts
+PASS tests/openai-api.contract.test.ts
+PASS tests/analysis-control-api.contract.test.ts
+PASS tests/query-service.unit.test.ts
+PASS tests/v06-frozen-source-pump.unit.test.ts
+
+Test Suites: 9 passed, 9 total
+Tests:       116 passed, 116 total
+Snapshots:   0 total
+Time:        266.759 s
+Ran all test suites matching /tests\/v06-frozen-entry.integration.test.ts|tests\/v06-frozen-factory-compat.unit.test.ts|tests\/v06-frozen-source.unit.test.ts|tests\/v06-frozen-source-pump.unit.test.ts|tests\/openai-api.contract.test.ts|tests\/openai-predecessor-regression.contract.test.ts|tests\/world-grounding-application.unit.test.ts|tests\/query-service.unit.test.ts|tests\/analysis-control-api.contract.test.ts/i.

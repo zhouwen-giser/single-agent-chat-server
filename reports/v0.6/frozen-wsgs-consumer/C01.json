@@ -1,0 +1,58 @@
+{
+  "phase": "C01",
+  "status": "PASS",
+  "sourceSha": "e870717f36998a4935c30706a63986fb4eb80aa9",
+  "startedAt": "2026-09-07T03:09:41.985Z",
+  "completedAt": "2026-09-07T03:11:05.682Z",
+  "commands": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "sourceSha": "e870717f36998a4935c30706a63986fb4eb80aa9",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C01-command-1.txt"
+    },
+    {
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts",
+      "exitCode": 0,
+      "sourceSha": "e870717f36998a4935c30706a63986fb4eb80aa9",
+      "outputDigest": "sha256:4d259d6fdfa4455c68399077d15dbfa1d0ab809b3e7e58c22117b13ee72d1961",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C01-command-2.txt"
+    },
+    {
+      "command": "node scripts/verify-architecture.mjs",
+      "exitCode": 0,
+      "sourceSha": "e870717f36998a4935c30706a63986fb4eb80aa9",
+      "outputDigest": "sha256:89455ce324fcfd08d2bc3d450a60f9e00d01c1a47e590d6b1c270b705b7dbca8",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C01-command-3.txt"
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js packages/wsgs-http-adapter/src/index.ts packages/wsgs-analysis-adapter/src/grounding-job.ts packages/wsgs-analysis-adapter/src/config.ts packages/wsgs-analysis-adapter/src/contract-identity.ts packages/analysis-contract/src/source.ts packages/world-grounding-runtime/src/index.ts packages/analysis-runtime/src/grounding-source-runtime.ts packages/analysis-control-runtime/src/grounding-source-control.ts packages/persistence/src/analysis-repository.ts packages/persistence/src/grounding-repository.ts packages/persistence/src/analysis-development-repository.ts packages/authority-fusion/src/index.ts packages/world-explanation-runtime/src/analysis-view.ts apps/server/src/v06-grounding-analysis.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/helpers/frozen-wsgs-http.ts tests/helpers/memory-grounding.ts",
+      "exitCode": 0,
+      "sourceSha": "e870717f36998a4935c30706a63986fb4eb80aa9",
+      "outputDigest": "sha256:0d1522b0706c6e1c3d1f12cc921f77ebdf6910aab1fc7995f34ac7eba2947685",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C01-command-4.txt"
+    }
+  ],
+  "acceptanceIds": [
+    "AC-004",
+    "AC-005",
+    "AC-006",
+    "AC-009",
+    "AC-010",
+    "AC-030",
+    "AC-031",
+    "AC-032",
+    "AC-033"
+  ],
+  "scope": "SACS_HTTP_SOURCE_AND_PERSISTENCE_BOUNDARIES; AC-007/008 projection completion awaits C02/C05",
+  "notRun": [
+    "ENV-001"
+  ],
+  "excluded": [
+    "EX-001",
+    "EX-002",
+    "EX-003",
+    "EX-004"
+  ]
+}

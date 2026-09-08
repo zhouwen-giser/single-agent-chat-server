@@ -1,0 +1,48 @@
+{
+  "phase": "C03-planner",
+  "status": "PASS",
+  "sourceSha": "867c4fee48e5b4c28acedb07cda6b4d8c82c1ff6",
+  "startedAt": "2026-09-07T03:30:06.949Z",
+  "completedAt": "2026-09-07T03:31:04.582Z",
+  "commands": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "sourceSha": "867c4fee48e5b4c28acedb07cda6b4d8c82c1ff6",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C03-planner-command-1.txt"
+    },
+    {
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-request.unit.test.ts",
+      "exitCode": 0,
+      "sourceSha": "867c4fee48e5b4c28acedb07cda6b4d8c82c1ff6",
+      "outputDigest": "sha256:6adae89e230e0e8ceaeca4bf937c14c6823ececc0eeac13f20c146f9f9c841c1",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C03-planner-command-2.txt"
+    },
+    {
+      "command": "node scripts/verify-architecture.mjs",
+      "exitCode": 0,
+      "sourceSha": "867c4fee48e5b4c28acedb07cda6b4d8c82c1ff6",
+      "outputDigest": "sha256:9244a9c6529d3e2799335e984366ebdb7e40f0c4a97e96f750c353587001d758",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C03-planner-command-3.txt"
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js packages/grounding-request-planner/src/frozen-request.ts packages/wsgs-geospatial-consumer/src/frozen-world-analysis.ts tests/v06-frozen-request.unit.test.ts",
+      "exitCode": 0,
+      "sourceSha": "867c4fee48e5b4c28acedb07cda6b4d8c82c1ff6",
+      "outputDigest": "sha256:7b6b1a287aa174baf2e8b3ff8a06ab04dd0ad56b1acc40a809f3460b8ca81b5b",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C03-planner-command-4.txt"
+    }
+  ],
+  "acceptanceIds": [],
+  "scope": "PLANNER_ONLY; C03 source control/revisions/normal entry integration still required; NO NEW AC PASS",
+  "notRun": [
+    "ENV-001"
+  ],
+  "excluded": [
+    "EX-001",
+    "EX-002",
+    "EX-003",
+    "EX-004"
+  ]
+}

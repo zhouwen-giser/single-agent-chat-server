@@ -19,6 +19,18 @@ export interface AnalysisProposalCommand {
   readonly idempotencyKey: string;
 }
 
+/** Source queries do not fabricate native WSGS Plan nodes or JSON patches. */
+export interface GroundingSourceProposalCommand {
+  readonly kind: "GROUNDING_SOURCE_QUERY";
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly expectedRevisionId: string;
+  readonly expectedRevisionNumber: number;
+  readonly originalText: string;
+  readonly contextMode: "CONTINUE" | "REPLACE";
+  readonly analysisSelections?: readonly unknown[];
+}
+
 export interface AnalysisCancelCommand {
   readonly commandId: string;
   readonly expectedRevisionId: string;
@@ -38,7 +50,7 @@ export interface AnalysisControlService {
   getSnapshot(scope: AnalysisRequestScope): Promise<unknown | undefined>;
   submitProposal(
     scope: AnalysisRequestScope,
-    command: AnalysisProposalCommand,
+    command: AnalysisProposalCommand | GroundingSourceProposalCommand,
   ): Promise<unknown>;
   requestCancel(
     scope: AnalysisRequestScope,

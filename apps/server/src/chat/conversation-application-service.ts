@@ -46,6 +46,8 @@ export interface ConversationApplicationTurn {
   readonly userText: string;
   readonly clientMessages: readonly ClientHistoryMessage[];
   readonly userId: string;
+  /** Internal world/conversation scope, distinct from the external SDAR userId. */
+  readonly principalId?: string;
   readonly chatId: string;
   readonly threadId: string;
   readonly userMessageId: string;
@@ -281,7 +283,7 @@ export class ConversationApplicationService {
     turn: ConversationApplicationTurn,
   ): Promise<ConversationContext> {
     const imported = await this.options.importHistory?.({
-      principalId: turn.userId,
+      principalId: turn.principalId ?? turn.userId,
       threadId: turn.threadId,
       protocol: turn.protocol,
       requestId: turn.userMessageId,
@@ -299,7 +301,7 @@ export class ConversationApplicationService {
     return this.options.assembleContext === undefined
       ? fallbackContext(turn.threadId, activeBindings)
       : this.options.assembleContext({
-          principalId: turn.userId,
+          principalId: turn.principalId ?? turn.userId,
           threadId: turn.threadId,
           currentUserText: turn.userText,
           ...(imported?.currentUserMessageSequence === undefined
@@ -371,7 +373,7 @@ function toWorldGroundingTurn(
 ): WorldGroundingTurn {
   return {
     protocol: turn.protocol,
-    principalId: turn.userId,
+    principalId: turn.principalId ?? turn.userId,
     threadId: turn.threadId,
     externalRequestId: turn.userMessageId,
     userText: turn.userText,
@@ -388,7 +390,7 @@ function toWorldGroundingControlTurn(
 ): Omit<WorldGroundingTurn, "turnPlan"> {
   return {
     protocol: turn.protocol,
-    principalId: turn.userId,
+    principalId: turn.principalId ?? turn.userId,
     threadId: turn.threadId,
     externalRequestId: turn.userMessageId,
     userText: turn.userText,

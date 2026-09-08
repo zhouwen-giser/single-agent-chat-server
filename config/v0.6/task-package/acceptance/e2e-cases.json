@@ -1,0 +1,743 @@
+{
+  "schemaVersion": "sacs-v06-e2e-cases/1.0",
+  "packageId": "sacs-v0.6-wsgs-full-functional-integration-codex-goal",
+  "generatedAt": "2026-09-06T05:32:35Z",
+  "cases": [
+    {
+      "id": "E2E-V06-001",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_REAL_HTTP_STUB",
+      "title": "Legacy 1.0 synchronous Grounding",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "contract-aware test server returns a valid authoritative 1.0 result"
+      ],
+      "steps": [
+        "request capabilities under 1.0",
+        "submit one GROUND_REFERENCES request",
+        "receive HTTP 200 terminal result"
+      ],
+      "assertions": [
+        "only legacy headers are used",
+        "result validates against 1.0 schema",
+        "no geospatial profile is inferred",
+        "source snapshot is terminal COMPLETED"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-002",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_REAL_HTTP_STUB",
+      "title": "Explicit 1.1 negotiation",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "authoritative SACS consumer lock is READY",
+        "test server enforces exact 1.1 headers"
+      ],
+      "steps": [
+        "request 1.1 capabilities",
+        "submit one 1.1 world query"
+      ],
+      "assertions": [
+        "exact contract and profile header pair is sent",
+        "response headers are verified",
+        "geospatial findings validate against the locked schema"
+      ],
+      "forbiddenSubstitutions": [
+        "shape-only parsing",
+        "silent 1.0 downgrade"
+      ]
+    },
+    {
+      "id": "E2E-V06-003",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_REAL_HTTP_STUB",
+      "title": "Asynchronous Grounding Job lifecycle",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "server returns 202 then ACCEPTED/RUNNING/COMPLETED"
+      ],
+      "steps": [
+        "submit request with stable idempotency key",
+        "poll by groundingId",
+        "observe terminal result"
+      ],
+      "assertions": [
+        "groundingId/jobId are preserved",
+        "status transitions are normalized",
+        "polling is bounded",
+        "result hash is retained"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-004",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_REAL_HTTP_STUB",
+      "title": "Grounding submit replay and conflict",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "same idempotency key can be replayed"
+      ],
+      "steps": [
+        "submit canonical request",
+        "repeat exact request/key",
+        "submit changed request with same key"
+      ],
+      "assertions": [
+        "exact replay returns same source identity",
+        "changed request conflicts",
+        "only one semantic Grounding is bound"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-005",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_POSTGRES",
+      "title": "Poll deduplication",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "real PostgreSQL",
+        "adapter returns repeated identical RUNNING snapshots"
+      ],
+      "steps": [
+        "start analysis",
+        "return identical RUNNING snapshot multiple times",
+        "return COMPLETED"
+      ],
+      "assertions": [
+        "only semantic transitions create analysis events",
+        "poll telemetry still counts attempts",
+        "projection revision does not advance on duplicates"
+      ],
+      "forbiddenSubstitutions": [
+        "in-memory-only repository"
+      ]
+    },
+    {
+      "id": "E2E-V06-006",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_POSTGRES",
+      "title": "Restart recovery",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "real PostgreSQL",
+        "nonterminal Grounding persisted"
+      ],
+      "steps": [
+        "start analysis and stop runtime while RUNNING",
+        "construct new runtime",
+        "run startup reconciliation",
+        "observe terminal result"
+      ],
+      "assertions": [
+        "same groundingId is reused",
+        "no duplicate WSGS create occurs",
+        "pump lease is reclaimed",
+        "terminal projection is correct"
+      ],
+      "forbiddenSubstitutions": [
+        "continuing same runtime instance"
+      ]
+    },
+    {
+      "id": "E2E-V06-007",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_POSTGRES",
+      "title": "Stale revision isolation",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "two revisions exist and revision 2 is active"
+      ],
+      "steps": [
+        "deliver delayed terminal event for revision 1",
+        "deliver revision 2 result"
+      ],
+      "assertions": [
+        "revision 1 event is retained for audit if valid",
+        "active projection remains revision 2",
+        "no map/timeline rollback occurs"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-008",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_POSTGRES",
+      "title": "Cancellation uncertainty recovery",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "cancel call outcome is transport-uncertain"
+      ],
+      "steps": [
+        "persist CANCEL_REQUESTED",
+        "simulate transport error",
+        "poll WSGS",
+        "observe CANCELLED"
+      ],
+      "assertions": [
+        "SACS never writes CANCELLED before observation",
+        "retry/restart continues from durable state",
+        "final state is monotonic"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-009",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_CONTRACT",
+      "title": "Authoritative WSGS 1.1 finding normalization",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "locked WSGS upstream examples are available"
+      ],
+      "steps": [
+        "load examples by exact bytes/hash",
+        "parse every world finding type",
+        "normalize view model"
+      ],
+      "assertions": [
+        "all evidence/source/gap links remain",
+        "canonical view hash is deterministic",
+        "no extra facts are added"
+      ],
+      "forbiddenSubstitutions": [
+        "locally invented schema declared authoritative"
+      ]
+    },
+    {
+      "id": "E2E-V06-010",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_CONTRACT",
+      "title": "Unknown finding schema",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "payload uses unknown URI or wrong hash"
+      ],
+      "steps": [
+        "pass payload to registry"
+      ],
+      "assertions": [
+        "no normalizer is selected",
+        "UNSUPPORTED_FINDING_SCHEMA typed gap is produced",
+        "no geometry/reference/fact is inferred"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-011",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_AGUI",
+      "title": "AG-UI v0.3 Grounding Job success",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "real PostgreSQL",
+        "actual Fastify listener",
+        "headless reference client"
+      ],
+      "steps": [
+        "start v0.3 world analysis",
+        "observe state/activity updates",
+        "receive final text"
+      ],
+      "assertions": [
+        "RUN_STARTED and full initial snapshots exist",
+        "only world-grounding coarse step is used",
+        "terminal snapshots validate",
+        "RUN_FINISHED is successful"
+      ],
+      "forbiddenSubstitutions": [
+        "calling handler directly without HTTP/SSE"
+      ]
+    },
+    {
+      "id": "E2E-V06-012",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_AGUI",
+      "title": "AG-UI ambiguity interrupt",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "source result is AMBIGUOUS"
+      ],
+      "steps": [
+        "start analysis",
+        "receive choices",
+        "finish run with interrupt"
+      ],
+      "assertions": [
+        "state and activity snapshots precede RUN_FINISHED interrupt",
+        "choice IDs are bounded and scoped",
+        "no default choice is applied"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-013",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_AGUI",
+      "title": "Reconnect snapshot recovery",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "client disconnects after deltas"
+      ],
+      "steps": [
+        "disconnect",
+        "reconnect",
+        "request full state/activity",
+        "continue or finish"
+      ],
+      "assertions": [
+        "full snapshots are sent",
+        "hash/revisions validate",
+        "stale run data is not revived"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-014",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_PRESENTATION",
+      "title": "Map non-fabrication",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "result contains road name and entry/exit points but no road geometry",
+        "trajectory is bounded preview"
+      ],
+      "steps": [
+        "build map projection"
+      ],
+      "assertions": [
+        "no invented road line exists",
+        "preview is not presented as full line",
+        "entry/exit points are allowed",
+        "qualifiers disclose boundedness"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-015",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_PRESENTATION",
+      "title": "Metric point versus H3 auxiliary geometry",
+      "required": true,
+      "capabilityCondition": "AUTHORITATIVE_WSGS_METRIC_RANKING_SCHEMA",
+      "preconditions": [
+        "metric candidate contains representative visited position and optional H3 cell"
+      ],
+      "steps": [
+        "build map/action projection"
+      ],
+      "assertions": [
+        "primary point equals representative visited position",
+        "H3 center is never a target",
+        "H3 boundary is auxiliary/hidden by default"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-016",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_POSTGRES_HTTP",
+      "title": "Trajectory follow-up to last junction",
+      "required": true,
+      "capabilityCondition": "AUTHORITATIVE_WSGS_TEMPORAL_EVENT_SCHEMA",
+      "preconditions": [
+        "prior Grounding contains an authorized historical trajectory product"
+      ],
+      "steps": [
+        "submit trajectory question",
+        "submit follow-up asking last junction"
+      ],
+      "assertions": [
+        "priorGrounding/resultHash/product IDs are sent to WSGS",
+        "SACS does not call map-matching/event Provider",
+        "new revision/run is created",
+        "LAST confirmation is preserved"
+      ],
+      "forbiddenSubstitutions": [
+        "local Provider emulation"
+      ]
+    },
+    {
+      "id": "E2E-V06-017",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_POSTGRES_HTTP",
+      "title": "Top-K follow-up to rank N",
+      "required": true,
+      "capabilityCondition": "AUTHORITATIVE_WSGS_METRIC_RANKING_SCHEMA",
+      "preconditions": [
+        "prior result contains ranked candidates"
+      ],
+      "steps": [
+        "ask for top three",
+        "ask for second candidate"
+      ],
+      "assertions": [
+        "trusted existing rank is reused only when present",
+        "missing rank triggers new Grounding",
+        "historical/current qualifier remains"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-018",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_POSTGRES_HTTP",
+      "title": "Metric-series explicit choice",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "WSGS returns two authorized metric-series candidates"
+      ],
+      "steps": [
+        "receive ambiguity",
+        "choose one candidate",
+        "resume/revise analysis"
+      ],
+      "assertions": [
+        "only published candidate is accepted",
+        "new Grounding is submitted",
+        "other candidate injection is rejected",
+        "old revision remains immutable"
+      ],
+      "forbiddenSubstitutions": [
+        "select first candidate automatically"
+      ]
+    },
+    {
+      "id": "E2E-V06-019",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_POSTGRES_HTTP",
+      "title": "Phase-scope change creates new Grounding",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "a completed prior analysis exists"
+      ],
+      "steps": [
+        "user says exclude paused phases",
+        "submit revised request"
+      ],
+      "assertions": [
+        "new immutable revision/run/source identity exists",
+        "old result is not locally trimmed",
+        "parent lineage is recorded"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-020",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_NETWORK_BOUNDARY",
+      "title": "Historical candidate does not execute",
+      "required": true,
+      "capabilityCondition": "AUTHORITATIVE_WSGS_ACTION_TARGET_SCHEMA",
+      "preconditions": [
+        "historical ranked candidate exists"
+      ],
+      "steps": [
+        "user asks vehicle to return to candidate"
+      ],
+      "assertions": [
+        "SACS emits non-executing target candidate",
+        "current validation and route planning are required",
+        "no SDAR/A2A/device/route call occurs"
+      ],
+      "forbiddenSubstitutions": [
+        "mocked SDAR call counted as no call"
+      ]
+    },
+    {
+      "id": "E2E-V06-021",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_PROCESS",
+      "title": "Normal production composition",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "NODE_ENV=production",
+        "analysis enabled",
+        "Grounding Job mode",
+        "test WSGS endpoint"
+      ],
+      "steps": [
+        "start normal SACS main",
+        "query analysis capabilities",
+        "run one AG-UI v0.3 analysis"
+      ],
+      "assertions": [
+        "normal main wires real Grounding Job adapter",
+        "fixture is absent",
+        "analysis control is available",
+        "server shuts down cleanly"
+      ],
+      "forbiddenSubstitutions": [
+        "v05-analysis-main development entrypoint"
+      ]
+    },
+    {
+      "id": "E2E-V06-022",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_PROCESS",
+      "title": "Transport eligibility negatives",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "production configuration matrix"
+      ],
+      "steps": [
+        "start with FIXTURE",
+        "start NATIVE without bundle",
+        "start disabled analysis"
+      ],
+      "assertions": [
+        "FIXTURE fails safely",
+        "NATIVE fails closed",
+        "disabled analysis preserves legacy server behavior"
+      ],
+      "forbiddenSubstitutions": []
+    },
+    {
+      "id": "E2E-V06-023",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "mode": "REAL",
+      "title": "Real WSGS 1.0 and 1.1 capabilities",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "real WSGS API/worker and authorized SACS principal"
+      ],
+      "steps": [
+        "call capabilities through SACS under 1.0",
+        "call capabilities through SACS under 1.1"
+      ],
+      "assertions": [
+        "both responses validate",
+        "1.1 exact headers are visible in safe transport evidence",
+        "optional unavailable capabilities are not promoted"
+      ],
+      "forbiddenSubstitutions": [
+        "mock server",
+        "recorded response",
+        "direct curl bypassing SACS as sole evidence"
+      ]
+    },
+    {
+      "id": "E2E-V06-024",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "mode": "REAL",
+      "title": "Real Grounding Job to SACS projection",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "real source-built WSGS and SACS",
+        "isolated persistence"
+      ],
+      "steps": [
+        "submit world query through SACS",
+        "observe WSGS lifecycle",
+        "read SACS analysis snapshot",
+        "receive final answer"
+      ],
+      "assertions": [
+        "real Grounding ID is created",
+        "source and projection hashes align",
+        "evidence IDs are present when WSGS publishes them",
+        "no fixture counter/path is used"
+      ],
+      "forbiddenSubstitutions": [
+        "fixture adapter",
+        "static JSON result"
+      ]
+    },
+    {
+      "id": "E2E-V06-025",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "mode": "REAL",
+      "title": "Real geospatial finding",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "real WSGS 1.1 geospatial result path is configured and ready"
+      ],
+      "steps": [
+        "submit a supported geospatial query",
+        "consume result extension through SACS"
+      ],
+      "assertions": [
+        "profile/hash verify",
+        "map/text projection is truthful",
+        "source products/gaps remain linked"
+      ],
+      "forbiddenSubstitutions": [
+        "loading WSGS example file instead of running service"
+      ]
+    },
+    {
+      "id": "E2E-V06-026",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "mode": "REAL",
+      "title": "Real cancellation",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "a sufficiently long real WSGS Grounding can be created"
+      ],
+      "steps": [
+        "start Grounding",
+        "request cancel through SACS",
+        "observe WSGS terminal status"
+      ],
+      "assertions": [
+        "SACS records CANCEL_REQUESTED first",
+        "WSGS cancel endpoint is called",
+        "CANCELLED is written only after authoritative observation"
+      ],
+      "forbiddenSubstitutions": [
+        "aborting client connection as cancellation"
+      ]
+    },
+    {
+      "id": "E2E-V06-027",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "mode": "REAL",
+      "title": "Real advanced historical result",
+      "required": true,
+      "capabilityCondition": "AUTHORITATIVE_WSGS_ADVANCED_HISTORY_CAPABILITY",
+      "preconditions": [
+        "locked WSGS advertises an authoritative advanced-history schema/capability and test data exists"
+      ],
+      "steps": [
+        "run at least one road, temporal or metric query through SACS→WSGS"
+      ],
+      "assertions": [
+        "the result is created by real WSGS",
+        "SACS uses the locked northbound schema",
+        "Provider is not contacted directly",
+        "completeness qualifiers remain"
+      ],
+      "forbiddenSubstitutions": [
+        "SACS fixture",
+        "Provider direct call",
+        "copied Provider output"
+      ]
+    },
+    {
+      "id": "E2E-V06-028",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "mode": "REAL",
+      "title": "Real restart recovery",
+      "required": true,
+      "capabilityCondition": "REAL_WSGS_LONG_RUNNING_JOB_AVAILABLE",
+      "preconditions": [
+        "real nonterminal WSGS job",
+        "durable PostgreSQL"
+      ],
+      "steps": [
+        "start via SACS",
+        "stop SACS only",
+        "restart SACS",
+        "recover and finish"
+      ],
+      "assertions": [
+        "same Grounding ID is used",
+        "WSGS is not restarted or mutated",
+        "no duplicate semantic Grounding",
+        "final projection succeeds"
+      ],
+      "forbiddenSubstitutions": [
+        "same-process reconnect only"
+      ]
+    },
+    {
+      "id": "E2E-V06-029",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "mode": "REAL",
+      "title": "Real network boundary",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "network/process observation is available"
+      ],
+      "steps": [
+        "run real integration cases",
+        "capture bounded destination evidence"
+      ],
+      "assertions": [
+        "SACS connects to WSGS, SDAR if required, and its own PostgreSQL only",
+        "no SACS connection reaches GOWM/GDPS/Provider databases or Provider ports"
+      ],
+      "forbiddenSubstitutions": [
+        "source-code assertion as the only evidence"
+      ]
+    },
+    {
+      "id": "E2E-V06-030",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "mode": "LOCAL_REGRESSION",
+      "title": "Legacy OpenAI and AG-UI v0.2 regression",
+      "required": true,
+      "capabilityCondition": null,
+      "preconditions": [
+        "existing v0.5 APIs and clients"
+      ],
+      "steps": [
+        "run ordinary OpenAI chat/world query",
+        "run AG-UI v0.2 interaction",
+        "run SDAR task query"
+      ],
+      "assertions": [
+        "existing schemas/status behavior remain compatible",
+        "v0.6 analysis does not intercept utility requests",
+        "no extra WSGS request is created"
+      ],
+      "forbiddenSubstitutions": []
+    }
+  ]
+}

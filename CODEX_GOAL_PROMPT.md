@@ -1,4 +1,14 @@
-# Codex Goal Prompt — single-agent-chat-server v0.1.0 (R2)
+# Active goal — SACS v0.6
+
+The active implementation requirements are in `config/v0.6/task-package/`.
+Extend v0.5 with truthful WSGS Grounding Job source identity, explicit authoritative
+1.1 negotiation, durable observation/recovery and unified text/map/timeline/AG-UI
+presentation. Preserve the SDAR security boundaries below. Upstream repositories
+are read-only. Work on `codex/sacs-v0.6-wsgs-full-functional-integration` and keep
+the PR Draft. Release qualification, merge, tags and deployment require a separate
+user request. Historical instructions below describe the v0.1 baseline only.
+
+# Historical Codex Goal Prompt — single-agent-chat-server v0.1.0 (R2)
 
 你正在一个新的或已有的 Git 仓库中，自主完成 `single-agent-chat-server` 项目。
 

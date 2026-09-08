@@ -1,4 +1,5 @@
 import { EventType, type AGUIEvent, type Interrupt } from "@ag-ui/core";
+import { WsgsAuthoritativeContract } from "../../wsgs-geospatial-consumer/src/authoritative.js";
 
 import {
   assertSacsAgUiEvent,
@@ -103,6 +104,14 @@ export function createAnalysisAgUiV03RunHandler(
   ) {
     throw new Error("AG_UI_ANALYSIS_RUNTIME_NOT_READY");
   }
+  return wrapAndBrandAnalysisHandler(handler);
+}
+
+/** Grounding mode has a separate, truthful authority gate, not a Native lock. */
+export function createGroundingAnalysisAgUiV03RunHandler(
+  handler: AgUiRunHandler,
+): AnalysisAgUiV03RunHandler {
+  new WsgsAuthoritativeContract();
   return wrapAndBrandAnalysisHandler(handler);
 }
 

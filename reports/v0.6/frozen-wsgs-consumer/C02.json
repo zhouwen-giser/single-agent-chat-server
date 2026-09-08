@@ -1,0 +1,57 @@
+{
+  "phase": "C02",
+  "status": "PASS",
+  "sourceSha": "46cc2c308125ea2015fbdc0e2c09d1ed0c2b18ec",
+  "startedAt": "2026-09-07T03:21:15.715Z",
+  "completedAt": "2026-09-07T03:22:55.161Z",
+  "commands": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "sourceSha": "46cc2c308125ea2015fbdc0e2c09d1ed0c2b18ec",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C02-command-1.txt"
+    },
+    {
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-public.contract.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/world-grounding-runtime.unit.test.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "sourceSha": "46cc2c308125ea2015fbdc0e2c09d1ed0c2b18ec",
+      "outputDigest": "sha256:667156a335bd4dde98a067fde933a764051880762f6bc2787cf33009c53dc07b",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C02-command-2.txt"
+    },
+    {
+      "command": "node scripts/verify-architecture.mjs",
+      "exitCode": 0,
+      "sourceSha": "46cc2c308125ea2015fbdc0e2c09d1ed0c2b18ec",
+      "outputDigest": "sha256:7c83479b0852a47ccbb701147dc87ae25b7156a468f7e0b31d85008501fb8b65",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C02-command-3.txt"
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js packages/wsgs-http-adapter/src/index.ts packages/wsgs-analysis-adapter/src/grounding-job.ts packages/wsgs-analysis-adapter/src/config.ts packages/wsgs-analysis-adapter/src/contract-identity.ts packages/analysis-contract/src/source.ts packages/world-grounding-runtime/src/index.ts packages/analysis-runtime/src/grounding-source-runtime.ts packages/analysis-control-runtime/src/grounding-source-control.ts packages/persistence/src/analysis-repository.ts packages/persistence/src/grounding-repository.ts packages/persistence/src/analysis-development-repository.ts packages/authority-fusion/src/index.ts packages/world-explanation-runtime/src/analysis-view.ts apps/server/src/v06-grounding-analysis.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-persistence.unit.test.ts tests/helpers/frozen-wsgs-http.ts tests/helpers/memory-grounding.ts packages/world-explanation-runtime/src/frozen-analysis-view.ts packages/analysis-contract/src/index.ts tests/v06-frozen-view.unit.test.ts",
+      "exitCode": 0,
+      "sourceSha": "46cc2c308125ea2015fbdc0e2c09d1ed0c2b18ec",
+      "outputDigest": "sha256:b1b5f7121bc8e2b4d247e50af08c5d3aabe0f49ac80ff27bb10664356cba5194",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C02-command-4.txt"
+    }
+  ],
+  "acceptanceIds": [
+    "AC-011",
+    "AC-012",
+    "AC-013",
+    "AC-014",
+    "AC-015",
+    "AC-016",
+    "AC-017",
+    "AC-018"
+  ],
+  "scope": "SACS_FIVE_FINDING_PROJECTION; normal two-turn shared composition acceptance remains C05",
+  "notRun": [
+    "ENV-001"
+  ],
+  "excluded": [
+    "EX-001",
+    "EX-002",
+    "EX-003",
+    "EX-004"
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.6:phase-report",
+  "title": "SACS v0.6 Phase Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "phaseId",
+    "status",
+    "sourceSha",
+    "startedAt",
+    "commands",
+    "acceptanceIds",
+    "blockers"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-v06-phase-report/1.0"
+    },
+    "phaseId": {
+      "enum": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09"
+      ]
+    },
+    "status": {
+      "enum": [
+        "IN_PROGRESS",
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL"
+      ]
+    },
+    "sourceSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "command",
+          "exitCode",
+          "sourceBefore",
+          "sourceAfter",
+          "outputDigest"
+        ],
+        "properties": {
+          "command": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "exitCode": {
+            "type": "integer"
+          },
+          "sourceBefore": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "sourceAfter": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "outputDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "evidencePaths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "acceptanceIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^V06-S[0-9]{2}-[0-9]{3}$"
+      },
+      "uniqueItems": true
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "classification",
+          "safeDetail"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "classification": {
+            "enum": [
+              "INTERNAL",
+              "EXTERNAL",
+              "ENVIRONMENT"
+            ]
+          },
+          "safeDetail": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "evidenceRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "commitSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "push": {
+      "enum": [
+        "NOT_RUN",
+        "PUSHED",
+        "FAILED"
+      ]
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 2000
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "artifact": "SACS_v0.6_Frozen_WSGS_Consumer_Codex_Goal",
+  "validationScope": "TASK_PACKAGE_FILES_ONLY_NOT_SACS_IMPLEMENTATION_TESTS",
+  "status": "PASS",
+  "validatedOn": "2026-09-07",
+  "checks": {
+    "utf8Readable": true,
+    "jsonParse": true,
+    "relativeMarkdownLinks": true,
+    "markdownCodeFences": true,
+    "sourceReferenceResolution": true,
+    "requiredScenarioIdsUniqueAndComplete": true,
+    "allImplementationTestsInitiallyNotRun": true,
+    "singleRepositoryScope": true,
+    "sourceRunNoBuildPrerequisite": true,
+    "noLiveDeviceExecution": true
+  },
+  "countsBeforeThisReportAndChecksums": {
+    "markdownFiles": 12,
+    "jsonFiles": 4,
+    "requiredScenarios": 40,
+    "sourceReferences": 18
+  },
+  "notExecuted": [
+    "SACS pnpm/Jest tests",
+    "WSGS offline verify.mjs",
+    "live services",
+    "database recovery",
+    "device actions"
+  ],
+  "contractBundleIncluded": false
+}

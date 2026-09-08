@@ -34,11 +34,9 @@ import {
   createSdarA2aClient,
   parseSdarA2aConfig,
 } from "../../../packages/sdar-a2a-adapter/src/index.js";
-import {
-  createWsgsHttpClient,
-  parseWsgsHttpConfig,
-} from "../../../packages/wsgs-http-adapter/src/index.js";
-import { WorldGroundingRuntime } from "../../../packages/world-grounding-runtime/src/index.js";
+import { parseWsgsHttpConfig } from "../../../packages/wsgs-http-adapter/src/index.js";
+import { createV06GroundingAnalysis } from "./v06-grounding-analysis.js";
+import { parseGroundingAnalysisConfig } from "../../../packages/wsgs-analysis-adapter/src/config.js";
 import { adaptConversationModel } from "../../../src/agent/model.js";
 
 import type { ChatRunner, ChatRunnerResult } from "./api/openai-routes.js";
@@ -86,16 +84,13 @@ try {
     rawConversationModel === undefined
       ? undefined
       : instrumentChatModel(rawConversationModel, telemetry);
-  const worldGrounding = new WorldGroundingRuntime({
-    requests: activePersistence.interactionRepository,
-    grounding: activePersistence.groundingRepository,
-    worldFocus: activePersistence.worldFocusRepository,
-    authorityFusion: activePersistence.authorityFusionRepository,
-    worldExplanations: activePersistence.worldExplanationRepository,
-    conversation: activePersistence.conversationRepository,
-    wsgs: createWsgsHttpClient(parseWsgsHttpConfig(process.env)),
+  const analysisIntegration = createV06GroundingAnalysis({
+    persistence: activePersistence,
+    config: parseGroundingAnalysisConfig(process.env),
+    wsgsConfig: parseWsgsHttpConfig(process.env),
     sdarCompatibilityLock: sdarGroundingCompatibilityLock,
   });
+  const worldGrounding = analysisIntegration.world;
   const chatModel =
     conversationModel === undefined
       ? undefined
@@ -222,6 +217,13 @@ try {
   );
   const server = buildServer({
     config,
+    analysisCapabilities: analysisIntegration.capabilities,
+    ...(analysisIntegration.analysisControl
+      ? { analysisControl: analysisIntegration.analysisControl }
+      : {}),
+    ...(analysisIntegration.runAgUiV03
+      ? { runAgUiV03: analysisIntegration.runAgUiV03 }
+      : {}),
     logger: createSecureLoggerOptions(config.logLevel),
     telemetry,
     readinessCheck: () => activePersistence.readiness(),
@@ -293,7 +295,13 @@ try {
       });
     },
   });
-  server.addHook("onClose", async () => activePersistence.close());
+  analysisIntegration.source?.startRecovery(30_000, (code) =>
+    server.log.warn({ code }, "analysis source recovery deferred"),
+  );
+  server.addHook("onClose", async () => {
+    await analysisIntegration.source?.close();
+    await activePersistence.close();
+  });
   installGracefulShutdown(server);
   server.log.info(
     {

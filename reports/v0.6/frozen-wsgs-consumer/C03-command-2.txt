@@ -1,0 +1,31 @@
+(node:664217) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-frozen-view.unit.test.ts (24.651 s)
+PASS tests/v06-frozen-request.unit.test.ts (20.852 s)
+PASS tests/v06-frozen-client.unit.test.ts (13.118 s)
+PASS tests/v06-frozen-http.contract.test.ts (12.26 s)
+PASS tests/v06-frozen-entry.integration.test.ts (176.043 s)
+PASS tests/v06-frozen-factory-compat.unit.test.ts (12.872 s)
+PASS tests/v06-frozen-source.unit.test.ts (7.146 s)
+PASS tests/v06-frozen-revision-persistence.unit.test.ts (5.074 s)
+PASS tests/v06-frozen-cancel.unit.test.ts
+PASS tests/openai-predecessor-regression.contract.test.ts
+PASS tests/v06-frozen-public.contract.test.ts
+PASS tests/openai-api.contract.test.ts
+PASS tests/v05-analysis-development-runtime.unit.test.ts
+PASS tests/multi-task-coordinator.contract.test.ts
+PASS tests/world-grounding-application.unit.test.ts
+PASS tests/analysis-control-api.contract.test.ts
+PASS tests/query-service.unit.test.ts
+PASS tests/v06-frozen-source-pump.unit.test.ts
+PASS tests/v06-frozen-persistence.unit.test.ts
+PASS tests/sdar-a2a-adapter.contract.test.ts
+PASS tests/analysis-reference-client.contract.test.ts
+PASS tests/analysis-control-coordinator.unit.test.ts
+PASS tests/v06-frozen-source-history.unit.test.ts
+
+Test Suites: 23 passed, 23 total
+Tests:       358 passed, 358 total
+Snapshots:   0 total
+Time:        291.363 s
+Ran all test suites matching /tests\/v06-frozen-public.contract.test.ts|tests\/v06-frozen-http.contract.test.ts|tests\/v06-frozen-source.unit.test.ts|tests\/v06-frozen-persistence.unit.test.ts|tests\/v06-frozen-cancel.unit.test.ts|tests\/v06-frozen-view.unit.test.ts|tests\/v06-frozen-request.unit.test.ts|tests\/v06-frozen-revision-persistence.unit.test.ts|tests\/v06-frozen-source-pump.unit.test.ts|tests\/v06-frozen-source-history.unit.test.ts|tests\/v06-frozen-client.unit.test.ts|tests\/v06-frozen-entry.integration.test.ts|tests\/v06-frozen-factory-compat.unit.test.ts|tests\/v05-analysis-development-runtime.unit.test.ts|tests\/analysis-control-api.contract.test.ts|tests\/analysis-control-coordinator.unit.test.ts|tests\/analysis-reference-client.contract.test.ts|tests\/multi-task-coordinator.contract.test.ts|tests\/sdar-a2a-adapter.contract.test.ts|tests\/openai-api.contract.test.ts|tests\/openai-predecessor-regression.contract.test.ts|tests\/query-service.unit.test.ts|tests\/world-grounding-application.unit.test.ts/i.

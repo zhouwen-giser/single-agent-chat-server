@@ -1,0 +1,1786 @@
+{
+  "status": "PASS",
+  "scope": "OFFLINE_PUBLIC_HANDOFF_ONLY",
+  "files": 483,
+  "dependencies": 6,
+  "selectionLink": {
+    "status": "PASS",
+    "scope": "SAMPLE_CONSISTENCY_NOT_SERVER_AUTHORIZATION_OR_TTL",
+    "selectionNegatives": [
+      {
+        "field": "priorResultHash",
+        "rejection": "HANDOFF_SELECTION_ANCHOR_MISMATCH",
+        "status": "PASS"
+      },
+      {
+        "field": "candidateId",
+        "rejection": "HANDOFF_SELECTION_CANDIDATE_MISMATCH",
+        "status": "PASS"
+      }
+    ]
+  },
+  "positiveExamples": 20,
+  "negativeExamples": 24,
+  "results": [
+    {
+      "path": "examples/ranking.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/trace.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/road.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/event.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/action.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/all-choices.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/empty.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/trace-no-data.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/projection-pending.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/provider-failure.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/action-requirements.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/event-incomplete.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/event-display-truncated-proof-retained.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/coexist.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/request-selection.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/request-first.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/job-accepted.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/job-get.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/job-cancel.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/capabilities.json",
+      "expectedValid": true,
+      "actualValid": true,
+      "errors": []
+    },
+    {
+      "path": "examples/invalid-unknown-kind.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "SCHEMA_INVALID",
+      "errors": [
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "if"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "if"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "oneOf"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-missing-series.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "SCHEMA_INVALID",
+      "errors": [
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "if"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "if"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "if"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "oneOf"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-wrong-profile.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "SCHEMA_INVALID",
+      "errors": [
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/profile",
+          "keyword": "const"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-dangling-rp.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "DANGLING_REFERENCE",
+      "errors": [
+        {
+          "code": "DANGLING_REFERENCE",
+          "path": "/worldAnalysisFindings/findings/0/trajectoryReferenceProductId"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-dangling-evidence.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "DANGLING_REFERENCE",
+      "errors": [
+        {
+          "code": "DANGLING_REFERENCE",
+          "path": "/worldAnalysisFindings/findings/0/evidenceIds"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-duplicate-finding.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "DUPLICATE_ID",
+      "errors": [
+        {
+          "code": "DUPLICATE_ID",
+          "path": "/worldAnalysisFindings/findings/1/findingId"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-rank-order.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "RANK_ORDER_MISMATCH",
+      "errors": [
+        {
+          "code": "RANK_ORDER_MISMATCH",
+          "path": "/worldAnalysisFindings/findings/0/candidates"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-wrong-median.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "RANKING_BASIS_MISMATCH",
+      "errors": [
+        {
+          "code": "RANKING_BASIS_MISMATCH",
+          "path": "/worldAnalysisFindings/findings/0/candidates"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-wrong-statistics.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "STATISTICS_INCONSISTENT",
+      "errors": [
+        {
+          "code": "STATISTICS_INCONSISTENT",
+          "path": "/worldAnalysisFindings/findings/0/candidates"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-wrong-unit.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "METRIC_SERIES_MISMATCH",
+      "errors": [
+        {
+          "code": "METRIC_SERIES_MISMATCH",
+          "path": "/worldAnalysisFindings/findings/0/selectedSeries"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-bad-coordinate.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "SCHEMA_INVALID",
+      "errors": [
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "if"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "if"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/candidates/0/representativeVisitedPosition/coordinates/0",
+          "keyword": "maximum"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "oneOf"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-altitude.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "SCHEMA_INVALID",
+      "errors": [
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "if"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/coverage",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "if"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/candidates/0/representativeVisitedPosition/coordinates",
+          "keyword": "maxItems"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/candidates/0/representativeVisitedPosition/coordinates",
+          "keyword": "items"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "required"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "additionalProperties"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0/findingKind",
+          "keyword": "const"
+        },
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/worldAnalysisFindings/findings/0",
+          "keyword": "oneOf"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-raw-payload.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "SCHEMA_INVALID",
+      "errors": [
+        {
+          "code": "SCHEMA_INVALID",
+          "path": "/evidenceItems/0",
+          "keyword": "additionalProperties"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-wrong-choice-rank.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "CHOICE_SOURCE_MISMATCH",
+      "errors": [
+        {
+          "code": "CHOICE_SOURCE_MISMATCH",
+          "path": "/worldAnalysisFindings/choices/0"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-action-position.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "ACTION_SOURCE_MISMATCH",
+      "errors": [
+        {
+          "code": "ACTION_SOURCE_MISMATCH",
+          "path": "/worldAnalysisFindings/findings/1"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-time-range.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "REVERSED_TIME_RANGE",
+      "errors": [
+        {
+          "code": "REVERSED_TIME_RANGE",
+          "path": "/worldAnalysisFindings/findings/0/selectedPeriods/0"
+        },
+        {
+          "code": "REVERSED_TIME_RANGE",
+          "path": "/worldAnalysisFindings/findings/0/activePeriods/0"
+        },
+        {
+          "code": "REVERSED_TIME_RANGE",
+          "path": "/worldAnalysisFindings/findings/0/requestedPeriods/0"
+        },
+        {
+          "code": "REVERSED_TIME_RANGE",
+          "path": "/worldAnalysisFindings/findings/0/definedPeriods/0"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-event-window.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "TIME_OUTSIDE_WINDOW",
+      "errors": [
+        {
+          "code": "TIME_OUTSIDE_WINDOW",
+          "path": "/worldAnalysisFindings/findings/0/events/0/extent"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-sub-millisecond-range.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "REVERSED_TIME_RANGE",
+      "errors": [
+        {
+          "code": "REVERSED_TIME_RANGE",
+          "path": "/worldAnalysisFindings/findings/0/selectedPeriods/0"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-selection-proof.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "SELECTION_PROOF_MISSING",
+      "errors": [
+        {
+          "code": "SELECTION_PROOF_MISSING",
+          "path": "/worldAnalysisFindings/findings/0/selection"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-hash.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "FINDING_SET_HASH_MISMATCH",
+      "errors": [
+        {
+          "code": "FINDING_SET_HASH_MISMATCH",
+          "path": "/worldAnalysisFindings/findingSetHash"
+        },
+        {
+          "code": "RESULT_HASH_MISMATCH",
+          "path": "/resultHash"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-duplicate-selection.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "DUPLICATE_CHOICE_SELECTION",
+      "errors": [
+        {
+          "code": "DUPLICATE_CHOICE_SELECTION",
+          "path": "/analysisSelections/1"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-prior-anchor.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "PRIOR_ANCHOR_MISMATCH",
+      "errors": [
+        {
+          "code": "PRIOR_ANCHOR_MISMATCH",
+          "path": "/analysisSelections/0"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-job-state.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "JOB_RESULT_MISMATCH",
+      "errors": [
+        {
+          "code": "JOB_RESULT_MISMATCH",
+          "path": "/result"
+        }
+      ]
+    },
+    {
+      "path": "examples/invalid-capability-reason.json",
+      "expectedValid": false,
+      "actualValid": false,
+      "expectedCode": "AVAILABILITY_REASON_MISMATCH",
+      "errors": [
+        {
+          "code": "AVAILABILITY_REASON_MISMATCH",
+          "path": "/worldAnalysis/capabilities/0"
+        }
+      ]
+    }
+  ]
+}

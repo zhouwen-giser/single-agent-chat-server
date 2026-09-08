@@ -23,6 +23,12 @@ import {
   type LocalMapState,
 } from "../../analysis-map/src/index.js";
 import { canonicalJson } from "../../world-explanation-contract/src/index.js";
+import {
+  createFrozenChoiceResolution,
+  createFrozenSourceQuery,
+  type FrozenSourceQueryCommand,
+} from "./frozen-world-analysis.js";
+export * from "./frozen-world-analysis.js";
 
 export type AnalysisClientEffect =
   "REQUEST_FULL_STATE_SNAPSHOT" | "REQUEST_FULL_ACTIVITY_SNAPSHOT";
@@ -450,7 +456,7 @@ export class AnalysisControlClient {
 
   submitProposal(
     analysisId: string,
-    proposal: AnalysisProposalCommand,
+    proposal: AnalysisProposalCommand | FrozenSourceQueryCommand,
   ): Promise<unknown> {
     return this.request(
       "POST",
@@ -484,11 +490,34 @@ export class AnalysisControlClient {
     );
   }
 
+  resolveFrozenChoice(
+    input: Parameters<typeof createFrozenChoiceResolution>[0],
+  ): Promise<unknown> {
+    const command = createFrozenChoiceResolution(input);
+    const interventionId = input.context.interventionId;
+    if (interventionId === undefined) throw new Error("SELECTION_UNAVAILABLE");
+    return this.resolveIntervention(
+      input.context.view.analysisId,
+      interventionId,
+      command,
+    );
+  }
+
+  queryFrozenAnalysis(
+    input: Parameters<typeof createFrozenSourceQuery>[0],
+  ): Promise<unknown> {
+    return this.submitProposal(
+      input.context.view.analysisId,
+      createFrozenSourceQuery(input),
+    );
+  }
+
   private async request(
     method: "GET" | "POST",
     path: string,
     body?:
       | AnalysisProposalCommand
+      | FrozenSourceQueryCommand
       | AnalysisCancelCommand
       | AnalysisInterventionResolutionCommand,
   ): Promise<unknown> {

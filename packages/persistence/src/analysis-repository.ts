@@ -1,4 +1,23 @@
 import type { Pool, PoolClient } from "pg";
+import {
+  analysisInterventionSchema,
+  analysisRevisionSchema,
+  analysisRunSchema,
+} from "../../analysis-contract/src/index.js";
+import {
+  sourceStatusMapping,
+  type AnalysisSourceStatus,
+} from "../../analysis-contract/src/source.js";
+import {
+  FrozenWorldAnalysisContract,
+  publicCanonicalHash,
+} from "../../wsgs-geospatial-consumer/src/frozen-world-analysis.js";
+import {
+  analysisSourceIdentitySchema,
+  parseWritableAnalysisSource,
+  parseGroundingContractIdentity,
+  type AnalysisSourceIdentity,
+} from "../../analysis-contract/src/source.js";
 
 import { hashJson } from "./hash.js";
 import {
@@ -6,6 +25,7 @@ import {
   PersistenceConflictError,
 } from "./repository.js";
 import type { JsonValue } from "./types.js";
+import { recordHistoricalGroundingSource } from "./grounding-source-history.js";
 
 export const ANALYSIS_STATE_MAX_BYTES = 4 * 1024 * 1024;
 export const ANALYSIS_ACTIVITY_MAX_BYTES = 2 * 1024 * 1024;
@@ -44,8 +64,9 @@ export interface AnalysisRevision {
     | "AMBIGUITY_RESOLUTION"
     | "SOURCE_ADVANCED"
     | "AUTOMATIC_RETRY";
-  readonly wsgsPlanId: string;
-  readonly planHash: string;
+  readonly wsgsPlanId?: string;
+  readonly planHash?: string;
+  readonly source?: AnalysisSourceIdentity;
   readonly changedPaths: readonly string[];
   readonly reusedNodeIds: readonly string[];
   readonly invalidatedNodeIds: readonly string[];
@@ -184,6 +205,584 @@ export interface AppendAnalysisEventResult {
 
 export class AnalysisRepository {
   constructor(private readonly pool: Pool) {}
+
+  async recordHistoricalGroundingSource(
+    input: Parameters<typeof recordHistoricalGroundingSource>[1],
+  ): Promise<void> {
+    return recordHistoricalGroundingSource(this.pool, input);
+  }
+
+  async findCurrentGroundingAnalysis(scope: {
+    principalId: string;
+    threadId: string;
+  }) {
+    const result = await this.pool.query<{ analysis_id: string }>(
+      `SELECT s.analysis_id FROM chat_service.analysis_session s
+       JOIN chat_service.analysis_revision r ON r.revision_id=s.active_revision_id AND r.analysis_id=s.analysis_id
+       WHERE s.principal_id=$1 AND s.thread_id=$2 AND r.source_kind='WSGS_GROUNDING_JOB'
+       AND s.status IN ('ACTIVE','COMPLETED') ORDER BY s.updated_at DESC,s.analysis_id LIMIT 1`,
+      [scope.principalId, scope.threadId],
+    );
+    const row = result.rows[0];
+    return row
+      ? this.getGroundingAnalysis({ ...scope, analysisId: row.analysis_id })
+      : undefined;
+  }
+
+  async getGroundingAnalysis(scope: AnalysisScope) {
+    const session = await this.findSession(scope);
+    if (!session) return undefined;
+    const result = await this.pool.query<{
+      revision: Record<string, unknown>;
+      run: Record<string, unknown>;
+      grounding_id: string;
+    }>(
+      `SELECT row_to_json(v) AS revision,row_to_json(r) AS run,g.grounding_id FROM chat_service.analysis_session s JOIN chat_service.analysis_revision v ON v.revision_id=s.active_revision_id JOIN chat_service.grounding_execution g ON g.analysis_revision_id=v.revision_id JOIN chat_service.analysis_run r ON r.run_id=g.analysis_run_id WHERE s.analysis_id=$1 AND s.principal_id=$2 AND s.thread_id=$3 AND g.principal_id=s.principal_id AND g.thread_id=s.thread_id`,
+      [scope.analysisId, scope.principalId, scope.threadId],
+    );
+    const row = result.rows[0];
+    if (!row) return undefined;
+    const v = row.revision;
+    const r = row.run;
+    const source = await this.getRevisionSource(
+      scope,
+      String(v["revision_id"]),
+    );
+    if (!source || source.kind !== "WSGS_GROUNDING_JOB") return undefined;
+    const revision = analysisRevisionSchema.parse({
+      schemaVersion: "sacs-analysis-revision/1.0",
+      revisionId: v["revision_id"],
+      analysisId: v["analysis_id"],
+      revisionNumber: v["revision_number"],
+      cause: v["cause"],
+      source,
+      changedPaths: v["changed_paths_json"],
+      reusedNodeIds: v["reused_node_ids_json"],
+      invalidatedNodeIds: v["invalidated_node_ids_json"],
+      rerunNodeIds: v["rerun_node_ids_json"],
+      status: v["status"],
+      createdAt: new Date(String(v["created_at"])).toISOString(),
+      ...(v["parent_revision_id"]
+        ? { parentRevisionId: v["parent_revision_id"] }
+        : {}),
+      ...(v["parent_run_id"] ? { parentRunId: v["parent_run_id"] } : {}),
+    });
+    const run = analysisRunSchema.parse({
+      schemaVersion: "sacs-analysis-run/1.0",
+      runId: r["run_id"],
+      revisionId: r["revision_id"],
+      attempt: r["attempt"],
+      status: r["status"],
+      startedAt: new Date(String(r["started_at"])).toISOString(),
+      ...(r["parent_run_id"] ? { parentRunId: r["parent_run_id"] } : {}),
+      ...(r["upstream_run_id"] ? { upstreamRunId: r["upstream_run_id"] } : {}),
+      ...(r["finished_at"]
+        ? { finishedAt: new Date(String(r["finished_at"])).toISOString() }
+        : {}),
+    });
+    return { session, revision, run, groundingExecutionId: row.grounding_id };
+  }
+
+  /** Atomic source binding; only an already-authorized durable intent can bind. */
+  async bindGroundingSource(input: {
+    scope: AnalysisScope;
+    groundingExecutionId: string;
+    revisionId: string;
+    runId: string;
+    leaseOwner: string;
+    title: string;
+  }): Promise<void> {
+    await this.transaction(async (client) => {
+      // Match projection/control lock order: session before its source row.
+      // Initial binding has no session yet and is still fenced by the source lease.
+      const existingSession = await findAuthorizedSession(
+        client,
+        input.scope,
+        true,
+      );
+      const selected = await client.query<{
+        wsgs_grounding_id: string | null;
+        request_hash: string;
+        source_job_id: string | null;
+        analysis_revision_id: string | null;
+        analysis_run_id: string | null;
+        analysis_intent_json: Record<string, JsonValue> | null;
+        canonical_request_json?: unknown;
+        lease_owner: string | null;
+        lease_until: Date | null;
+      }>(
+        `SELECT * FROM chat_service.grounding_execution WHERE grounding_id=$1 AND principal_id=$2 AND thread_id=$3 FOR UPDATE`,
+        [
+          input.groundingExecutionId,
+          input.scope.principalId,
+          input.scope.threadId,
+        ],
+      );
+      const g = selected.rows[0];
+      if (
+        !g ||
+        !g.wsgs_grounding_id ||
+        g.analysis_intent_json?.["analysisId"] !== input.scope.analysisId ||
+        g.analysis_intent_json?.["revisionId"] !== input.revisionId
+      )
+        throw new PersistenceAuthorizationError("ANALYSIS_NOT_FOUND");
+      if (g.analysis_revision_id !== null) {
+        if (
+          g.analysis_revision_id !== input.revisionId ||
+          g.analysis_run_id !== input.runId
+        )
+          throw new PersistenceConflictError(
+            "ANALYSIS_SOURCE_IDENTITY_INVALID",
+          );
+        return;
+      }
+      if (
+        g.lease_owner !== input.leaseOwner ||
+        !g.lease_until ||
+        g.lease_until.getTime() <= Date.now()
+      )
+        throw new PersistenceConflictError("Grounding lease is not active");
+      const now = new Date().toISOString();
+      const source = {
+        kind: "WSGS_GROUNDING_JOB" as const,
+        sourceId: g.wsgs_grounding_id,
+        sourceHash: "sha256:" + g.request_hash,
+        ...(g.analysis_intent_json?.["contractIdentity"]
+          ? {
+              contractIdentity: parseGroundingContractIdentity(
+                g.analysis_intent_json["contractIdentity"],
+              ),
+            }
+          : {}),
+        ...(g.source_job_id ? { upstreamRunId: g.source_job_id } : {}),
+      };
+      const parentRevisionId = g.analysis_intent_json?.["parentRevisionId"];
+      const parentRunId = g.analysis_intent_json?.["parentRunId"];
+      const parentNumber = g.analysis_intent_json?.["parentRevisionNumber"];
+      const commandKind = g.analysis_intent_json?.["commandKind"];
+      const commandId = g.analysis_intent_json?.["commandId"];
+      let sourceCommand:
+        { claim_token: string; intervention_id: string | null } | undefined;
+      let previousSession: AnalysisSessionRow | undefined;
+      if (parentRevisionId !== undefined) {
+        previousSession = existingSession;
+        if (!previousSession)
+          throw new PersistenceAuthorizationError("ANALYSIS_NOT_FOUND");
+        if (
+          typeof parentRevisionId !== "string" ||
+          typeof parentRunId !== "string" ||
+          !Number.isSafeInteger(parentNumber) ||
+          previousSession.active_revision_id !== parentRevisionId ||
+          Number(previousSession.latest_revision_number) !== parentNumber ||
+          !["SOURCE_REVISION", "INTERVENTION_RESOLUTION"].includes(
+            String(commandKind),
+          ) ||
+          typeof commandId !== "string"
+        )
+          throw new PersistenceConflictError("ANALYSIS_REVISION_CONFLICT");
+        const command = await client.query<{
+          claim_token: string;
+          intervention_id: string | null;
+        }>(
+          `SELECT c.claim_token,c.intervention_id FROM chat_service.analysis_control_command c
+           JOIN chat_service.analysis_session s USING(analysis_id)
+           WHERE c.analysis_id=$1 AND c.command_kind=$2 AND c.command_id=$3 AND c.status='CLAIMED'
+           AND c.expected_revision_id=$4 AND c.expected_revision_number=$5 AND c.expected_run_id=$6
+           AND s.mutation_claim_kind=c.command_kind AND s.mutation_claim_id=c.command_id AND s.mutation_claim_token=c.claim_token
+           FOR UPDATE OF c,s`,
+          [
+            input.scope.analysisId,
+            commandKind,
+            commandId,
+            parentRevisionId,
+            parentNumber,
+            parentRunId,
+          ],
+        );
+        sourceCommand = command.rows[0];
+        if (!sourceCommand)
+          throw new PersistenceConflictError("ANALYSIS_MUTATION_CLAIM_LOST");
+      }
+      const revisionNumber = previousSession ? Number(parentNumber) + 1 : 0;
+      const session: AnalysisSession = {
+        schemaVersion: "sacs-analysis-session/1.0",
+        ...input.scope,
+        groundingId: g.wsgs_grounding_id,
+        title: input.title,
+        autonomyMode: "OBSERVER",
+        status: "ACTIVE",
+        activeRevisionId: input.revisionId,
+        latestRevisionNumber: revisionNumber,
+        observerPolicyHash: canonicalHash({
+          mode: "OBSERVER",
+          source: "GROUNDING_JOB",
+        }),
+        createdAt: now,
+        updatedAt: now,
+      };
+      const revision: AnalysisRevision = {
+        schemaVersion: "sacs-analysis-revision/1.0",
+        analysisId: input.scope.analysisId,
+        revisionId: input.revisionId,
+        revisionNumber,
+        cause: previousSession
+          ? commandKind === "INTERVENTION_RESOLUTION"
+            ? "AMBIGUITY_RESOLUTION"
+            : "USER_PROPOSAL"
+          : "INITIAL_QUERY",
+        ...(previousSession
+          ? {
+              parentRevisionId: String(parentRevisionId),
+              parentRunId: String(parentRunId),
+            }
+          : {}),
+        source,
+        changedPaths: [],
+        reusedNodeIds: [],
+        invalidatedNodeIds: [],
+        rerunNodeIds: [],
+        status: "READY",
+        createdAt: now,
+      };
+      if (!previousSession) assertInitialSession(session, revision);
+      await assertThreadScope(client, input.scope);
+      if (!previousSession) await insertSession(client, session);
+      await insertRevision(client, revision);
+      await insertRun(client, {
+        schemaVersion: "sacs-analysis-run/1.0",
+        analysisId: input.scope.analysisId,
+        revisionId: input.revisionId,
+        runId: input.runId,
+        attempt: 1,
+        ...(previousSession ? { parentRunId: String(parentRunId) } : {}),
+        status: "STARTING",
+        startedAt: now,
+        ...(g.source_job_id ? { upstreamRunId: g.source_job_id } : {}),
+      });
+      await client.query(
+        `UPDATE chat_service.grounding_execution SET analysis_id=$2,analysis_revision_id=$3,analysis_run_id=$4,version=version+1 WHERE grounding_id=$1`,
+        [
+          input.groundingExecutionId,
+          input.scope.analysisId,
+          input.revisionId,
+          input.runId,
+        ],
+      );
+      if (previousSession && sourceCommand) {
+        const commandResult = {
+          analysisId: input.scope.analysisId,
+          revisionId: input.revisionId,
+          revisionNumber,
+          runId: input.runId,
+          groundingExecutionId: input.groundingExecutionId,
+          status: "ACCEPTED",
+        };
+        if (sourceCommand.intervention_id) {
+          const request = new FrozenWorldAnalysisContract().parse(
+            "request",
+            g.canonical_request_json,
+          );
+          const response = {
+            expectedRevisionId: parentRevisionId,
+            expectedRevisionNumber: parentNumber,
+            originalText: request.source.originalText,
+            analysisSelections: request.analysisSelections ?? [],
+          };
+          const resolved = await client.query(
+            `UPDATE chat_service.analysis_intervention SET status='RESOLVED',response_payload_json=$4::jsonb,
+             response_hash=$5,resolved_at=$6::timestamptz WHERE analysis_id=$1 AND intervention_id=$2 AND revision_id=$3 AND status='OPEN'`,
+            [
+              input.scope.analysisId,
+              sourceCommand.intervention_id,
+              parentRevisionId,
+              JSON.stringify(response),
+              publicCanonicalHash(response),
+              now,
+            ],
+          );
+          if (resolved.rowCount !== 1)
+            throw new PersistenceConflictError("INTERVENTION_LINEAGE_CONFLICT");
+        }
+        await client.query(
+          `UPDATE chat_service.analysis_intervention SET status='CANCELLED' WHERE analysis_id=$1 AND revision_id=$2 AND status='OPEN'`,
+          [input.scope.analysisId, parentRevisionId],
+        );
+        await client.query(
+          `UPDATE chat_service.analysis_revision SET status='SUPERSEDED' WHERE analysis_id=$1 AND revision_id=$2 AND status IN ('READY','QUEUED','RUNNING','COMPILING')`,
+          [input.scope.analysisId, parentRevisionId],
+        );
+        const advanced = await client.query(
+          `UPDATE chat_service.analysis_session SET active_revision_id=$4,latest_revision_number=$5,status='ACTIVE',updated_at=$6::timestamptz,grounding_id=$7,
+           mutation_claim_kind=NULL,mutation_claim_id=NULL,mutation_claim_token=NULL,mutation_claimed_at=NULL
+           WHERE analysis_id=$1 AND active_revision_id=$2 AND mutation_claim_token=$3`,
+          [
+            input.scope.analysisId,
+            parentRevisionId,
+            sourceCommand.claim_token,
+            input.revisionId,
+            revisionNumber,
+            now,
+            g.wsgs_grounding_id,
+          ],
+        );
+        if (advanced.rowCount !== 1)
+          throw new PersistenceConflictError("ANALYSIS_REVISION_CONFLICT");
+        const completed = await client.query(
+          `UPDATE chat_service.analysis_control_command SET status='COMPLETED',result_json=$5::jsonb,updated_at=$6::timestamptz
+           WHERE analysis_id=$1 AND command_kind=$2 AND command_id=$3 AND claim_token=$4 AND status='CLAIMED'`,
+          [
+            input.scope.analysisId,
+            commandKind,
+            commandId,
+            sourceCommand.claim_token,
+            JSON.stringify(commandResult),
+            now,
+          ],
+        );
+        if (completed.rowCount !== 1)
+          throw new PersistenceConflictError(
+            "ANALYSIS_COMMAND_COMPLETION_CONFLICT",
+          );
+      }
+    });
+  }
+
+  /** Reuses the append-only event/projection transaction and local sequences. */
+  async projectGroundingSource(input: {
+    scope: AnalysisScope;
+    groundingExecutionId: string;
+    revisionId: string;
+    runId: string;
+    observationHash: string;
+    state: Readonly<Record<string, JsonValue>>;
+  }): Promise<AnalysisProjection | undefined> {
+    return this.transaction(async (client) => {
+      const session = await lockAuthorizedSession(client, input.scope);
+      if (session.active_revision_id !== input.revisionId) return undefined;
+      const selected = await client.query<{
+        last_source_status: AnalysisSourceStatus;
+        last_observation_hash: string;
+        grounding_result_hash: string | null;
+        cancel_requested: boolean;
+        grounding_result_json?: unknown;
+        contract_identity?: unknown;
+      }>(
+        `SELECT g.last_source_status,g.last_observation_hash,g.grounding_result_hash,g.cancel_requested,g.grounding_result_json,g.analysis_intent_json->'contractIdentity' AS contract_identity FROM chat_service.grounding_execution g JOIN chat_service.analysis_run r ON r.run_id=g.analysis_run_id WHERE g.grounding_id=$1 AND g.principal_id=$2 AND g.thread_id=$3 AND g.analysis_id=$4 AND g.analysis_revision_id=$5 AND g.analysis_run_id=$6 AND NOT EXISTS(SELECT 1 FROM chat_service.analysis_run newer WHERE newer.revision_id=r.revision_id AND newer.attempt>r.attempt) FOR UPDATE OF g,r`,
+        [
+          input.groundingExecutionId,
+          input.scope.principalId,
+          input.scope.threadId,
+          input.scope.analysisId,
+          input.revisionId,
+          input.runId,
+        ],
+      );
+      const g = selected.rows[0];
+      if (!g || g.last_observation_hash !== input.observationHash)
+        return undefined;
+      const eventId =
+        "event-" +
+        hashJson({
+          runId: input.runId,
+          sourceObservation: input.observationHash,
+        });
+      const prior = await client.query(
+        "SELECT 1 FROM chat_service.analysis_event WHERE event_id=$1",
+        [eventId],
+      );
+      if (prior.rowCount)
+        return requiredProjection(client, input.scope.analysisId);
+      const current = await findProjectionForUpdate(
+        client,
+        input.scope.analysisId,
+      );
+      const counters = await client.query<{ a: string; r: string }>(
+        `SELECT COALESCE(MAX(analysis_sequence),0)::text a,COALESCE(MAX(run_sequence) FILTER(WHERE run_id=$2),0)::text r FROM chat_service.analysis_event WHERE analysis_id=$1`,
+        [input.scope.analysisId, input.runId],
+      );
+      const sequence = Number(counters.rows[0]?.a ?? 0) + 1;
+      const now = new Date().toISOString();
+      const pending = input.state["pendingIntervention"];
+      if (pending) {
+        const intervention = analysisInterventionSchema.parse(pending);
+        const raw = new FrozenWorldAnalysisContract().parse(
+          "result",
+          g.grounding_result_json,
+        );
+        const choices = raw.worldAnalysisFindings.choices;
+        const payload = intervention.requestPayload;
+        const expiresAt = choices.reduce(
+          (latest, choice) =>
+            Date.parse(choice.validUntil) > Date.parse(latest)
+              ? choice.validUntil
+              : latest,
+          choices[0]?.validUntil ?? "",
+        );
+        const expectedId =
+          "source-choice-" +
+          canonicalHash({
+            analysisId: input.scope.analysisId,
+            revisionId: input.revisionId,
+            resultHash: raw.resultHash,
+          }).slice(7);
+        if (
+          parseGroundingContractIdentity(g.contract_identity)
+            .contractVersion !== "sacs-wsgs-grounding/1.2" ||
+          intervention.analysisId !== input.scope.analysisId ||
+          intervention.revisionId !== input.revisionId ||
+          intervention.runId !== input.runId ||
+          intervention.interventionId !== expectedId ||
+          intervention.interruptId !== expectedId ||
+          intervention.status !== "OPEN" ||
+          choices.length === 0 ||
+          publicCanonicalHash(payload) !==
+            publicCanonicalHash({
+              kind: "GROUNDING_SOURCE_CHOICE",
+              priorGroundingId: raw.groundingId,
+              priorResultHash: raw.resultHash,
+              findingSetHash: raw.worldAnalysisFindings.findingSetHash,
+              choiceIds: choices.map((c) => c.choiceId),
+              expiresAt,
+            })
+        )
+          throw new PersistenceConflictError(
+            "ANALYSIS_SOURCE_INTERVENTION_INVALID",
+          );
+        await client.query(
+          `INSERT INTO chat_service.analysis_intervention(intervention_id,analysis_id,revision_id,run_id,interrupt_id,
+           reason,status,request_payload_json,request_hash,created_at)
+           VALUES($1,$2,$3,$4,$1,'AMBIGUITY','OPEN',$5::jsonb,$6,$7::timestamptz)
+           ON CONFLICT(intervention_id) DO NOTHING`,
+          [
+            intervention.interventionId,
+            intervention.analysisId,
+            intervention.revisionId,
+            intervention.runId,
+            JSON.stringify(payload),
+            publicCanonicalHash(payload),
+            intervention.createdAt,
+          ],
+        );
+      }
+      const payload = {
+        sourceStatus: g.last_source_status,
+        resultHash: g.grounding_result_hash,
+      };
+      const activity = {
+        sourceStatus: g.last_source_status,
+        transport: "GROUNDING_JOB",
+      };
+      const event: AnalysisEvent = {
+        schemaVersion: "sacs-analysis-event/1.0",
+        eventId,
+        analysisId: input.scope.analysisId,
+        revisionId: input.revisionId,
+        runId: input.runId,
+        analysisSequence: sequence,
+        runSequence: Number(counters.rows[0]?.r ?? 0) + 1,
+        eventType: "GROUNDING_SOURCE_OBSERVED",
+        correlationId: input.runId,
+        occurredAt: now,
+        payload,
+        payloadHash: canonicalHash(payload),
+      };
+      const projection: AnalysisProjection = {
+        schemaVersion: "sacs-analysis-projection/1.0",
+        analysisId: input.scope.analysisId,
+        stateRevision: Number(current?.stateRevision ?? 0) + 1,
+        activityRevision: Number(current?.activityRevision ?? 0) + 1,
+        state: input.state,
+        stateHash: canonicalHash(input.state),
+        activity,
+        activityHash: canonicalHash(activity),
+        lastEventSequence: sequence,
+        updatedAt: now,
+      };
+      assertEvent(event);
+      const committed = await this.appendEventInTransaction(client, {
+        scope: input.scope,
+        event,
+        projection,
+      });
+      const mapping = sourceStatusMapping[g.last_source_status];
+      if (!mapping)
+        throw new PersistenceConflictError(
+          "ANALYSIS_SOURCE_RESPONSE_CONTRACT_VIOLATION",
+        );
+      await client.query(
+        `UPDATE chat_service.analysis_run SET status=$2,finished_at=CASE WHEN $2 IN ('SUCCEEDED','PARTIAL','FAILED','CANCELLED') THEN $3::timestamptz ELSE finished_at END WHERE run_id=$1`,
+        [
+          input.runId,
+          g.cancel_requested &&
+          ["ACCEPTED", "RUNNING"].includes(g.last_source_status)
+            ? "CANCEL_REQUESTED"
+            : mapping.run,
+          now,
+        ],
+      );
+      await client.query(
+        `UPDATE chat_service.analysis_session SET status=$2,updated_at=$3::timestamptz WHERE analysis_id=$1`,
+        [input.scope.analysisId, mapping.session, now],
+      );
+      await client.query(
+        `UPDATE chat_service.analysis_revision SET status=$2 WHERE revision_id=$1`,
+        [
+          input.revisionId,
+          g.last_source_status === "COMPLETED"
+            ? "COMPLETED"
+            : ["PARTIAL", "UNRESOLVED"].includes(g.last_source_status)
+              ? "PARTIAL"
+              : ["FAILED", "CANCELLED"].includes(g.last_source_status)
+                ? "FAILED"
+                : "RUNNING",
+        ],
+      );
+      return committed.projection;
+    });
+  }
+
+  async getRevisionSource(
+    scope: AnalysisScope,
+    revisionId: string,
+  ): Promise<AnalysisSourceIdentity | undefined> {
+    const result = await this.pool.query<{
+      source_kind: string;
+      source_id: string;
+      source_hash: string;
+      source_revision: number | null;
+      source_upstream_run_id: string | null;
+      contract_identity?: unknown;
+    }>(
+      `SELECT r.source_kind,r.source_id,r.source_hash,r.source_revision,r.source_upstream_run_id,g.analysis_intent_json->'contractIdentity' AS contract_identity
+       FROM chat_service.analysis_revision r JOIN chat_service.analysis_session s USING(analysis_id)
+       LEFT JOIN chat_service.grounding_execution g ON g.analysis_id=r.analysis_id AND g.analysis_revision_id=r.revision_id AND g.principal_id=s.principal_id AND g.thread_id=s.thread_id
+       WHERE s.analysis_id=$1 AND s.principal_id=$2 AND s.thread_id=$3 AND r.revision_id=$4`,
+      [scope.analysisId, scope.principalId, scope.threadId, revisionId],
+    );
+    const row = result.rows[0];
+    if (!row) return undefined;
+    return analysisSourceIdentitySchema.parse({
+      kind: row.source_kind,
+      sourceId: row.source_id,
+      sourceHash: row.source_hash,
+      ...(row.source_kind === "WSGS_GROUNDING_JOB" &&
+      row.contract_identity != null
+        ? {
+            contractIdentity: parseGroundingContractIdentity(
+              row.contract_identity,
+            ),
+          }
+        : {}),
+      ...(row.source_revision === null
+        ? {}
+        : { sourceRevision: row.source_revision }),
+      ...(row.source_kind === "LEGACY_PLAN"
+        ? { readOnly: true }
+        : row.source_upstream_run_id === null
+          ? {}
+          : { upstreamRunId: row.source_upstream_run_id }),
+    });
+  }
 
   async createSessionWithInitialRevision(input: {
     readonly session: AnalysisSession;
@@ -669,49 +1268,55 @@ export class AnalysisRepository {
     if (input.event.analysisId !== input.scope.analysisId) {
       throw new PersistenceConflictError("Analysis event scope mismatch");
     }
-    return this.transaction(async (client) => {
-      const session = await lockAuthorizedSession(client, input.scope);
-      const collision = await findEventCollision(client, input.event);
-      if (collision !== undefined) {
-        if (!sameEvent(collision, input.event)) {
-          throw new PersistenceConflictError(
-            "Analysis event sequence conflict",
-          );
-        }
-        const projection = await requiredProjection(
-          client,
-          input.scope.analysisId,
-        );
-        return {
-          created: false,
-          projected: false,
-          event: collision,
-          projection,
-        };
+    return this.transaction((client) =>
+      this.appendEventInTransaction(client, input),
+    );
+  }
+
+  private async appendEventInTransaction(
+    client: PoolClient,
+    input: Parameters<AnalysisRepository["appendEventAndProject"]>[0],
+  ): Promise<AppendAnalysisEventResult> {
+    const session = await lockAuthorizedSession(client, input.scope);
+    const collision = await findEventCollision(client, input.event);
+    if (collision !== undefined) {
+      if (!sameEvent(collision, input.event)) {
+        throw new PersistenceConflictError("Analysis event sequence conflict");
       }
-      await assertEventLineage(client, input.event);
-      await assertNextSequences(client, input.event);
-      const currentProjection = await findProjectionForUpdate(
+      const projection = await requiredProjection(
         client,
         input.scope.analysisId,
       );
-      const isActiveRevision =
-        session.active_revision_id === input.event.revisionId;
-      const nextProjection = isActiveRevision
-        ? requireNextProjection(
-            input.scope.analysisId,
-            input.event.analysisSequence,
-            currentProjection,
-            input.projection,
-          )
-        : auditOnlyProjection(
-            input.event.analysisSequence,
-            currentProjection,
-            input.event.occurredAt,
-          );
-      try {
-        const inserted = await client.query<AnalysisEventRow>(
-          `
+      return {
+        created: false,
+        projected: false,
+        event: collision,
+        projection,
+      };
+    }
+    await assertEventLineage(client, input.event);
+    await assertNextSequences(client, input.event);
+    const currentProjection = await findProjectionForUpdate(
+      client,
+      input.scope.analysisId,
+    );
+    const isActiveRevision =
+      session.active_revision_id === input.event.revisionId;
+    const nextProjection = isActiveRevision
+      ? requireNextProjection(
+          input.scope.analysisId,
+          input.event.analysisSequence,
+          currentProjection,
+          input.projection,
+        )
+      : auditOnlyProjection(
+          input.event.analysisSequence,
+          currentProjection,
+          input.event.occurredAt,
+        );
+    try {
+      const inserted = await client.query<AnalysisEventRow>(
+        `
           INSERT INTO chat_service.analysis_event(
             event_id, analysis_id, revision_id, run_id, analysis_sequence,
             run_sequence, upstream_sequence, event_type, node_id,
@@ -723,34 +1328,33 @@ export class AnalysisRepository {
           )
           RETURNING *
         `,
-          [
-            input.event.eventId,
-            input.event.analysisId,
-            input.event.revisionId,
-            input.event.runId,
-            input.event.analysisSequence,
-            input.event.runSequence,
-            input.event.upstreamSequence ?? null,
-            input.event.eventType,
-            input.event.nodeId ?? null,
-            input.event.correlationId,
-            input.event.causationId ?? null,
-            input.event.occurredAt,
-            JSON.stringify(input.event.payload),
-            input.event.payloadHash,
-          ],
-        );
-        const storedProjection = await upsertProjection(client, nextProjection);
-        return {
-          created: true,
-          projected: isActiveRevision,
-          event: mapEvent(requiredRow(inserted.rows, "analysis event insert")),
-          projection: storedProjection,
-        };
-      } catch (error) {
-        throw persistenceWriteError(error, "Analysis event commit conflict");
-      }
-    });
+        [
+          input.event.eventId,
+          input.event.analysisId,
+          input.event.revisionId,
+          input.event.runId,
+          input.event.analysisSequence,
+          input.event.runSequence,
+          input.event.upstreamSequence ?? null,
+          input.event.eventType,
+          input.event.nodeId ?? null,
+          input.event.correlationId,
+          input.event.causationId ?? null,
+          input.event.occurredAt,
+          JSON.stringify(input.event.payload),
+          input.event.payloadHash,
+        ],
+      );
+      const storedProjection = await upsertProjection(client, nextProjection);
+      return {
+        created: true,
+        projected: isActiveRevision,
+        event: mapEvent(requiredRow(inserted.rows, "analysis event insert")),
+        projection: storedProjection,
+      };
+    } catch (error) {
+      throw persistenceWriteError(error, "Analysis event commit conflict");
+    }
   }
 
   async getProjection(
@@ -942,10 +1546,10 @@ async function insertRevision(
         revision_id, analysis_id, revision_number, parent_revision_id,
         parent_run_id, cause, wsgs_plan_id, plan_hash, changed_paths_json,
         reused_node_ids_json, invalidated_node_ids_json, rerun_node_ids_json,
-        status, created_at
+        status, created_at, source_kind, source_id, source_hash, source_revision, source_upstream_run_id
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb,
-        $11::jsonb, $12::jsonb, $13, $14::timestamptz
+        $11::jsonb, $12::jsonb, $13, $14::timestamptz, $15, $16, $17, $18, $19
       )
     `,
     [
@@ -963,6 +1567,15 @@ async function insertRevision(
       JSON.stringify(revision.rerunNodeIds),
       revision.status,
       revision.createdAt,
+      revision.source?.kind ?? null,
+      revision.source?.sourceId ?? null,
+      revision.source?.sourceHash ?? null,
+      revision.source && "sourceRevision" in revision.source
+        ? (revision.source.sourceRevision ?? null)
+        : null,
+      revision.source && "upstreamRunId" in revision.source
+        ? (revision.source.upstreamRunId ?? null)
+        : null,
     ],
   );
 }
@@ -1411,8 +2024,21 @@ function assertInitialSession(
 function assertRevision(revision: AnalysisRevision): void {
   assertIdentifier(revision.revisionId, "revisionId");
   assertIdentifier(revision.analysisId, "analysisId");
-  assertIdentifier(revision.wsgsPlanId, "wsgsPlanId");
-  assertSha256(revision.planHash, "planHash");
+  if (revision.source !== undefined)
+    parseWritableAnalysisSource(revision.source);
+  if (revision.source?.kind !== "WSGS_GROUNDING_JOB") {
+    if (!revision.wsgsPlanId || !revision.planHash)
+      throw new PersistenceConflictError("Native plan identity required");
+    assertIdentifier(revision.wsgsPlanId, "wsgsPlanId");
+    assertSha256(revision.planHash, "planHash");
+  } else if (
+    revision.wsgsPlanId !== undefined ||
+    revision.planHash !== undefined
+  ) {
+    throw new PersistenceConflictError(
+      "Grounding jobs cannot carry Native plan identity",
+    );
+  }
   timestamp(revision.createdAt, "createdAt");
   if (
     !Number.isInteger(revision.revisionNumber) ||

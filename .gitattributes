@@ -1,0 +1,3 @@
+# Verification receipts hash the exact captured stdout/stderr, including final
+# blank lines. Preserve those bytes; source-code whitespace checks are unchanged.
+reports/v0.6/frozen-wsgs-consumer/*command-*.txt whitespace=-blank-at-eof

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "sacs-wsgs-geospatial-consumer-lock/1.0",
+  "provenance": "AUTHORITATIVE_WSGS_HANDOFF",
+  "sources": {
+    "wsgsSha": "565e52705bb7656d4623a04655001325ca61acd0",
+    "gowmSha": "c49bf415fdb4cbe19a09f341c34b6dd825e3ca14"
+  },
+  "groundingContract": {
+    "contractVersion": "sacs-wsgs-grounding/1.1",
+    "resultSchemaHash": "sha256:793d3106b2ba6b0abf0a928c910a538cff72f9ad8bb263c26a3f4831e23894d7",
+    "capabilitiesSchemaHash": "sha256:de51ed3b35adeed5a26816e1c36445778b702ba4f4cf98f3a77564e24f70cbd3"
+  },
+  "geospatialProfile": {
+    "profile": "sacs-wsgs-geospatial-findings/1.0",
+    "transportMode": "RESULT_EXTENSION",
+    "profileSchemaHash": "sha256:0590ba82c33d0fe54de8f7aaec936e95614186e9033433e564a4dd81691907e1",
+    "findingSchemaHash": "sha256:90d12a8b7810e66960d71745dff4bf0a94bb0bd4aa70f69862c34de6f6d524a0",
+    "sourceProductSchemaHash": "sha256:f44839fad6b6bc4ad9fc2ff54957a3ef012e603bb0dd3a2d034f3112b394a5cd",
+    "gapSchemaHash": "sha256:07a7fe050b83fd5df13161bf69538ee05151fec180a3211e0bab4f5c978da02c",
+    "requestedProducts": []
+  },
+  "currentness": {
+    "mode": "UNSUPPORTED"
+  },
+  "status": "READY",
+  "consumerLockHash": "sha256:2719ebff5f93066727cdc559cbb6a69e9469d30fb2ac8f55e832181cd3db07b3"
+}
