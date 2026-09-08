@@ -31,10 +31,16 @@ describe("SACS v0.5 interactive analysis persistence contract", () => {
     const files = readdirSync(new URL("../migrations", import.meta.url))
       .filter((file) => /^\d{4}_[a-z0-9_]+\.sql$/u.test(file))
       .sort();
-    expect(files.at(-4)).toBe("0013_world_explanation.sql");
-    expect(files.at(-3)).toBe("0014_structured_world_selection.sql");
-    expect(files.at(-2)).toBe("0015_interactive_analysis.sql");
-    expect(files.at(-1)).toBe("0016_analysis_development_control.sql");
+    // Historical migrations retain their positions when newer versions append.
+    expect(files.slice(12, 16)).toEqual([
+      "0013_world_explanation.sql",
+      "0014_structured_world_selection.sql",
+      "0015_interactive_analysis.sql",
+      "0016_analysis_development_control.sql",
+    ]);
+    expect(files.map((file) => Number(file.slice(0, 4)))).toEqual(
+      files.map((_, index) => index + 1),
+    );
   });
 
   it("extends legacy proposals without rewriting their status or requiring development claims", () => {

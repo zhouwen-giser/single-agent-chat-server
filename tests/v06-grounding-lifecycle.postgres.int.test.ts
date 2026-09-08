@@ -16,6 +16,7 @@ import {
 import { WSGS_V11_HEADERS } from "../packages/wsgs-geospatial-consumer/src/authoritative.js";
 import { hashCanonicalJson } from "../packages/world-explanation-contract/src/index.js";
 import type { AnalysisSourceSnapshot } from "../packages/analysis-contract/src/source.js";
+import { parseGroundingContractIdentity } from "../packages/analysis-contract/src/source.js";
 import { GroundingSourceAnalysisRuntime } from "../packages/analysis-runtime/src/grounding-source-runtime.js";
 import { AnalysisDevelopmentRepository } from "../packages/persistence/src/index.js";
 import { createGroundingSourceAnalysisControl } from "../packages/analysis-control-runtime/src/grounding-source-control.js";
@@ -141,6 +142,11 @@ suite("v06 durable Grounding lifecycle", () => {
       ),
       requestId: input.requestId,
       groundingId: job(input).groundingId,
+      source: {
+        messageId: input.canonicalGroundingRequest.source.messageId,
+        originalTextSha256:
+          input.canonicalGroundingRequest.source.originalTextSha256,
+      },
     };
     const { source, world } = composed(async (url, init) =>
       String(url).endsWith("capabilities")
@@ -392,6 +398,11 @@ suite("v06 durable Grounding lifecycle", () => {
         sourceId: job(input).groundingId,
         sourceHash: input.requestHash,
         upstreamRunId: job(input).jobId,
+        contractIdentity: parseGroundingContractIdentity(
+          (await grounding.get(scope(input)))?.analysisIntent?.[
+            "contractIdentity"
+          ],
+        ),
       },
       sourceStatus: "RUNNING",
       terminal: false,

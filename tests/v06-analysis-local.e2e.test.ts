@@ -155,6 +155,9 @@ suite("v06 normal composition local HTTP / PostgreSQL E2E", () => {
       persistence,
       config: parseGroundingAnalysisConfig({
         SACS_WSGS_ANALYSIS_ENABLED: "true",
+        // This regression fixture deliberately serves the legacy v1.1 contract.
+        SACS_WSGS_ANALYSIS_CONTRACT_VERSION: "sacs-wsgs-grounding/1.1",
+        SACS_WSGS_ANALYSIS_RESULT_PROFILE: "sacs-wsgs-geospatial-findings/1.0",
         SACS_WSGS_ANALYSIS_POLL_INTERVAL_MS: "10",
       }),
       wsgsConfig: { baseUrl: "http://127.0.0.1:" + address.port },
