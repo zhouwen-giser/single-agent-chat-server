@@ -1,0 +1,42 @@
+
+/home/zhouwen/web-download/single-agent-chat-server/apps/server/src/v06-grounding-analysis.ts
+  61:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  62:53  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/analysis-runtime/src/grounding-source-runtime.ts
+  278:25  warning  Forbidden non-null assertion                @typescript-eslint/no-non-null-assertion
+  318:19  warning  '_meta' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/world-grounding-runtime/src/index.ts
+  379:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/wsgs-geospatial-consumer/src/authoritative.ts
+   79:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   91:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   92:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  102:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  102:38  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  102:46  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  104:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/wsgs-http-adapter/src/index.ts
+  813:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/v06-analysis-local.e2e.test.ts
+   79:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   80:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:24  warning  Forbidden non-null assertion              @typescript-eslint/no-non-null-assertion
+   98:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  233:22  warning  Forbidden non-null assertion              @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/v06-grounding-lifecycle.postgres.int.test.ts
+   28:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  539:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  547:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  556:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/v06-source-persistence.postgres.int.test.ts
+  19:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 23 problems (0 errors, 23 warnings)
+

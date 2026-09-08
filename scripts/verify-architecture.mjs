@@ -61,7 +61,9 @@ for (const file of files) {
   if (
     /from ["']@ag-ui\/(?:core|encoder)["']/u.test(content) &&
     !name.startsWith("packages/ag-ui-api-contract/") &&
-    !name.startsWith("packages/ag-ui-interaction-adapter/")
+    !name.startsWith("packages/ag-ui-interaction-adapter/") &&
+    !name.startsWith("packages/ag-ui-analysis-adapter/") &&
+    !name.startsWith("packages/analysis-client/")
   ) {
     violations.push(`${name}: official AG-UI import outside protocol adapter`);
   }

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v0.6:progressive-status",
+  "title": "SACS v0.6 Progressive Status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sourceSha",
+    "updatedAt",
+    "development",
+    "realWsgsIntegration",
+    "release",
+    "markers",
+    "pendingReasons",
+    "hardFailures"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-v06-progressive-status/1.0"
+    },
+    "sourceSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "development": {
+      "enum": [
+        "NOT_STARTED",
+        "IN_PROGRESS",
+        "READY",
+        "FAILED"
+      ]
+    },
+    "realWsgsIntegration": {
+      "enum": [
+        "NOT_STARTED",
+        "IN_PROGRESS",
+        "READY",
+        "PARTIAL_EXTERNAL_BLOCKERS",
+        "FAILED"
+      ]
+    },
+    "release": {
+      "enum": [
+        "NOT_REQUESTED",
+        "IN_PROGRESS",
+        "READY",
+        "FAILED"
+      ]
+    },
+    "markers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$"
+      },
+      "uniqueItems": true
+    },
+    "pendingReasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$"
+      },
+      "uniqueItems": true
+    },
+    "hardFailures": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$"
+      },
+      "uniqueItems": true
+    }
+  }
+}

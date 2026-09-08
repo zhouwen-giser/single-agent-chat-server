@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "sacs-observer-policy-matrix/1.0",
+  "defaultDecision": "AUTO_CONTINUE",
+  "rules": [
+    {
+      "id": "READ_ONLY_CLEAR",
+      "riskLevel": "READ_ONLY",
+      "ambiguity": "NONE",
+      "decision": "AUTO_CONTINUE"
+    },
+    {
+      "id": "READ_ONLY_LONG",
+      "riskLevel": "READ_ONLY",
+      "longRunning": true,
+      "decision": "NOTIFY_ONLY"
+    },
+    {
+      "id": "USER_SUGGEST",
+      "userRequest": "SUGGEST_CHANGE",
+      "decision": "QUEUE_REVISION"
+    },
+    {
+      "id": "REFERENCE_AMBIGUITY",
+      "ambiguity": "AFFECTS_OUTCOME_UNRESOLVED",
+      "decision": "INTERRUPT_REQUIRED",
+      "interruptType": "AMBIGUITY"
+    },
+    {
+      "id": "PRODUCT_AMBIGUITY",
+      "ambiguity": "PRODUCT_SELECTION_UNRESOLVED",
+      "decision": "INTERRUPT_REQUIRED",
+      "interruptType": "AMBIGUITY"
+    },
+    {
+      "id": "PERMISSION",
+      "permissionRequired": true,
+      "decision": "INTERRUPT_REQUIRED",
+      "interruptType": "PERMISSION"
+    },
+    {
+      "id": "BUDGET",
+      "budgetRequiresApproval": true,
+      "decision": "INTERRUPT_REQUIRED",
+      "interruptType": "BUDGET"
+    },
+    {
+      "id": "HIGH_RISK",
+      "riskLevel": [
+        "CONTROLLED",
+        "IRREVERSIBLE"
+      ],
+      "decision": "INTERRUPT_REQUIRED",
+      "interruptType": "HIGH_RISK"
+    },
+    {
+      "id": "USER_INTERRUPT",
+      "userRequest": "INTERRUPT_AND_CHANGE",
+      "decision": "INTERRUPT_REQUIRED",
+      "interruptType": "USER_REQUESTED"
+    },
+    {
+      "id": "DATA_GAP",
+      "terminalGap": "DATA_GAP",
+      "decision": "AUTO_CONTINUE"
+    },
+    {
+      "id": "COVERAGE_GAP",
+      "terminalGap": "COVERAGE_GAP",
+      "decision": "AUTO_CONTINUE"
+    },
+    {
+      "id": "CAPABILITY_GAP",
+      "terminalGap": "CAPABILITY_GAP",
+      "decision": "AUTO_CONTINUE"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "sacs-v05-implementation-matrix/1.0",
+  "sourceSha": "06c286433dedc8c5887eb887238628d9e588efef",
+  "items": [
+    {
+      "component": "analysis contracts",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "migration 0015",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "principal/thread-scoped analysis repository",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "event pump and projection reducer",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "ObserverFirstPolicy",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "AG-UI v0.3 negotiation and projections",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "map focus and timeline state",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "public tool edit model",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "proposal cancel and intervention coordination",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "headless reference client",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "focused unit and PostgreSQL tests",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "unacknowledged cancellation state",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "five stable WSGS analysis ports",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "fixture WSGS analysis adapter",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "PostgreSQL analysis development runtime",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "actual HTTP and AG-UI development composition",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "eight-case HTTP PostgreSQL local E2E",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "progressive three-track gates and reports",
+      "status": "IMPLEMENTED",
+      "action": "PRESERVE"
+    },
+    {
+      "component": "authoritative WSGS analysis-control handoff",
+      "status": "EXTERNAL_DEPENDENCY",
+      "action": "TRACK_INTEGRATION"
+    },
+    {
+      "component": "exact release qualification evidence",
+      "status": "EXTERNAL_DEPENDENCY",
+      "action": "DEFER_RELEASE"
+    }
+  ]
+}

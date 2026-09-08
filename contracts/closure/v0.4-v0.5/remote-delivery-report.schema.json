@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:remote-delivery-report:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "branch",
+    "localSha",
+    "trackingSha",
+    "remoteSha",
+    "prState",
+    "ciState"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-remote-delivery-report/1.0"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "localSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "trackingSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "remoteSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "prState": {
+      "enum": [
+        "NONE",
+        "DRAFT",
+        "READY",
+        "MERGED",
+        "CLOSED"
+      ]
+    },
+    "ciState": {
+      "enum": [
+        "NOT_RUN",
+        "PENDING",
+        "PASS",
+        "FAIL"
+      ]
+    },
+    "pullRequestNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "workflowRunIds": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "protectedActions": {
+      "type": "array",
+      "maxItems": 0
+    }
+  }
+}

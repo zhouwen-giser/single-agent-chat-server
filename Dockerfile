@@ -17,7 +17,9 @@ COPY dependencies ./dependencies
 COPY apps ./apps
 COPY packages ./packages
 COPY src ./src
+COPY scripts/copy-runtime-assets.mjs ./scripts/copy-runtime-assets.mjs
 RUN pnpm exec tsc -p tsconfig.build.json
+RUN node scripts/copy-runtime-assets.mjs
 
 FROM toolchain AS production-dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -26,12 +28,14 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 
 FROM node:22.14.0-bookworm-slim AS runtime
 LABEL org.opencontainers.image.title="single-agent-chat-server" \
-      org.opencontainers.image.version="0.4.0" \
+      org.opencontainers.image.version="0.5.0" \
       org.opencontainers.image.licenses="Apache-2.0"
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
+COPY --chown=node:node dependencies/wsgs-v06 ./dependencies/wsgs-v06
+COPY --chown=node:node dependencies/wsgs-world-analysis-v1/public ./dependencies/wsgs-world-analysis-v1/public
 COPY --chown=node:node package.json LICENSE ./
 COPY --chown=node:node migrations ./migrations
 USER node

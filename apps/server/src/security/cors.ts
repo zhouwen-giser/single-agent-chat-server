@@ -7,6 +7,7 @@ const allowedHeaders = new Set([
   "accept",
   "authorization",
   "content-type",
+  "x-sacs-ag-ui-profile",
   "x-openwebui-user-jwt",
   "x-request-id",
 ]);
@@ -32,6 +33,10 @@ export function registerCorsPolicy(
       return;
     }
     void reply.header("access-control-allow-origin", origin);
+    void reply.header(
+      "access-control-expose-headers",
+      "x-request-id, x-sacs-ag-ui-profile",
+    );
     void reply.header("vary", "Origin");
   });
 

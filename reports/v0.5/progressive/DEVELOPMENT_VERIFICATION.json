@@ -1,0 +1,467 @@
+{
+  "schemaVersion": "sacs-v05-gate-result/1.0",
+  "gateId": "SACS_V05_DEVELOPMENT",
+  "track": "DEVELOPMENT",
+  "status": "PASS",
+  "source": {
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+    "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+    "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+    "worktreeExclusions": [
+      "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+      "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+      "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+    ]
+  },
+  "verificationRun": {
+    "schemaVersion": "sacs-v05-development-run-evidence/1.0",
+    "runId": "development-4f9be22f-4067-4a81-9a0b-7cf2cc630f46",
+    "startedAt": "2026-09-05T05:48:48.736Z",
+    "finishedAt": "2026-09-05T05:49:48.272Z",
+    "source": {
+      "repository": "zhouwen-giser/single-agent-chat-server",
+      "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+      "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+      "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+      "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+      "worktreeExclusions": [
+        "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+        "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+        "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+      ]
+    },
+    "commands": [
+      {
+        "id": "development-contracts",
+        "executable": "node",
+        "arguments": ["scripts/v05-progressive-development-validate.mjs"],
+        "exitCode": 0,
+        "status": "PASS",
+        "startedAt": "2026-09-05T05:48:49.242Z",
+        "finishedAt": "2026-09-05T05:48:49.834Z",
+        "sourceBefore": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        },
+        "sourceAfter": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        }
+      },
+      {
+        "id": "typecheck",
+        "executable": "pnpm",
+        "arguments": ["typecheck"],
+        "exitCode": 0,
+        "status": "PASS",
+        "startedAt": "2026-09-05T05:48:50.287Z",
+        "finishedAt": "2026-09-05T05:49:02.878Z",
+        "sourceBefore": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        },
+        "sourceAfter": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        }
+      },
+      {
+        "id": "build",
+        "executable": "pnpm",
+        "arguments": ["build"],
+        "exitCode": 0,
+        "status": "PASS",
+        "startedAt": "2026-09-05T05:49:03.112Z",
+        "finishedAt": "2026-09-05T05:49:16.911Z",
+        "sourceBefore": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        },
+        "sourceAfter": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        }
+      },
+      {
+        "id": "focused-tests",
+        "executable": "pnpm",
+        "arguments": ["test:v05:focused"],
+        "exitCode": 0,
+        "status": "PASS",
+        "startedAt": "2026-09-05T05:49:17.094Z",
+        "finishedAt": "2026-09-05T05:49:31.404Z",
+        "sourceBefore": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        },
+        "sourceAfter": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        }
+      },
+      {
+        "id": "postgres-and-local-e2e",
+        "executable": "node",
+        "arguments": [
+          "scripts/v05-postgres-test-harness.mjs",
+          "tests/analysis-persistence.postgres.int.test.ts",
+          "tests/analysis-development-persistence.postgres.int.test.ts",
+          "tests/v05-analysis-local.e2e.test.ts"
+        ],
+        "exitCode": 0,
+        "status": "PASS",
+        "startedAt": "2026-09-05T05:49:31.545Z",
+        "finishedAt": "2026-09-05T05:49:46.092Z",
+        "sourceBefore": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        },
+        "sourceAfter": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        }
+      },
+      {
+        "id": "migration-chain",
+        "executable": "node",
+        "arguments": ["scripts/verify-migrations.mjs"],
+        "exitCode": 0,
+        "status": "PASS",
+        "startedAt": "2026-09-05T05:49:46.252Z",
+        "finishedAt": "2026-09-05T05:49:46.434Z",
+        "sourceBefore": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        },
+        "sourceAfter": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        }
+      },
+      {
+        "id": "v05-architecture",
+        "executable": "node",
+        "arguments": ["scripts/verify-v05-architecture.mjs"],
+        "exitCode": 0,
+        "status": "PASS",
+        "startedAt": "2026-09-05T05:49:46.648Z",
+        "finishedAt": "2026-09-05T05:49:47.135Z",
+        "sourceBefore": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        },
+        "sourceAfter": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        }
+      },
+      {
+        "id": "repository-architecture",
+        "executable": "node",
+        "arguments": ["scripts/verify-architecture.mjs"],
+        "exitCode": 0,
+        "status": "PASS",
+        "startedAt": "2026-09-05T05:49:47.302Z",
+        "finishedAt": "2026-09-05T05:49:47.575Z",
+        "sourceBefore": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        },
+        "sourceAfter": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        }
+      },
+      {
+        "id": "secret-scan",
+        "executable": "node",
+        "arguments": ["scripts/verify-secrets.mjs"],
+        "exitCode": 0,
+        "status": "PASS",
+        "startedAt": "2026-09-05T05:49:47.760Z",
+        "finishedAt": "2026-09-05T05:49:48.272Z",
+        "sourceBefore": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        },
+        "sourceAfter": {
+          "repository": "zhouwen-giser/single-agent-chat-server",
+          "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+          "headSha": "9cf665aa1d18d7d8b3b46272060acb00834ef83d",
+          "worktreeDigestAlgorithm": "sacs-v05-git-worktree-content/1.0",
+          "worktreeDigest": "sha256:20b79f5ade3e57510d12bdf9eae08ae1ea5564232669ac6acfc47e31c3fccdd3",
+          "worktreeExclusions": [
+            "reports/v0.5/progressive/DEVELOPMENT_VERIFICATION.json",
+            "reports/v0.5/progressive/INTEGRATION_STATUS.json",
+            "reports/v0.5/progressive/PROGRESSIVE_STATUS.json"
+          ]
+        }
+      }
+    ],
+    "evidenceDigest": "sha256:b3068e8137d9c82dbeb4bdc05be0436fdf7be6c26ca4d05644300fd71d4a4c60"
+  },
+  "checks": [
+    {
+      "id": "DEV-SOURCE",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-001"],
+      "evidence": ["source reconciliation"],
+      "commandIds": ["development-contracts"]
+    },
+    {
+      "id": "DEV-CONTRACT",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-002", "DEV-003"],
+      "evidence": ["focused contracts/typecheck"],
+      "commandIds": ["development-contracts", "typecheck", "build"]
+    },
+    {
+      "id": "DEV-POSTGRES",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-004", "DEV-005"],
+      "evidence": ["real PostgreSQL analysis persistence"],
+      "commandIds": ["postgres-and-local-e2e", "migration-chain"]
+    },
+    {
+      "id": "DEV-POLICY",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-006", "DEV-007", "DEV-008"],
+      "evidence": ["observer policy tests"],
+      "commandIds": ["focused-tests"]
+    },
+    {
+      "id": "DEV-AGUI",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-009", "DEV-010", "DEV-011"],
+      "evidence": ["AG-UI v0.2/v0.3 tests"],
+      "commandIds": ["focused-tests", "postgres-and-local-e2e"]
+    },
+    {
+      "id": "DEV-MAP",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-012", "DEV-013", "DEV-014"],
+      "evidence": ["map/focus reducer tests"],
+      "commandIds": ["focused-tests", "postgres-and-local-e2e"]
+    },
+    {
+      "id": "DEV-SECURITY",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-015", "DEV-017", "DEV-035"],
+      "evidence": ["ownership/public-args checks"],
+      "commandIds": [
+        "focused-tests",
+        "postgres-and-local-e2e",
+        "v05-architecture",
+        "repository-architecture",
+        "secret-scan"
+      ]
+    },
+    {
+      "id": "DEV-CONTROL",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-016", "DEV-018", "DEV-019", "DEV-022"],
+      "evidence": ["control coordinator tests"],
+      "commandIds": ["focused-tests", "postgres-and-local-e2e"]
+    },
+    {
+      "id": "DEV-REVISION",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-020"],
+      "evidence": ["revision tests"],
+      "commandIds": ["focused-tests", "postgres-and-local-e2e"]
+    },
+    {
+      "id": "DEV-ARCH",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-021", "DEV-034"],
+      "evidence": ["minimal architecture checks"],
+      "commandIds": [
+        "focused-tests",
+        "migration-chain",
+        "v05-architecture",
+        "repository-architecture"
+      ]
+    },
+    {
+      "id": "DEV-FIXTURE",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-023", "DEV-024", "DEV-025"],
+      "evidence": ["development composition tests"],
+      "commandIds": [
+        "focused-tests",
+        "postgres-and-local-e2e",
+        "v05-architecture"
+      ]
+    },
+    {
+      "id": "DEV-E2E",
+      "status": "PASS",
+      "acceptanceIds": [
+        "DEV-026",
+        "DEV-027",
+        "DEV-028",
+        "DEV-029",
+        "DEV-030",
+        "DEV-031",
+        "DEV-032",
+        "DEV-033"
+      ],
+      "evidence": [
+        "real SACS HTTP/PostgreSQL/fixture WSGS/reference-client E2E"
+      ],
+      "commandIds": ["postgres-and-local-e2e"]
+    },
+    {
+      "id": "DEV-TRUTH",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-036", "DEV-037"],
+      "evidence": ["gap and authority tests"],
+      "commandIds": ["focused-tests", "postgres-and-local-e2e"]
+    },
+    {
+      "id": "DEV-STATUS",
+      "status": "PASS",
+      "acceptanceIds": ["DEV-038"],
+      "evidence": ["development verification report and feature marker"],
+      "commandIds": ["development-contracts", "focused-tests"]
+    }
+  ]
+}

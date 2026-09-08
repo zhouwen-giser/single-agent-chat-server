@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "sacs-v05-local-verification/1.0",
+  "qualificationStatus": "SUPERSEDED_STRICT_QUALIFICATION",
+  "implementationCommit": "9ce9b224b3d8d94cf6844b9cdd61fca24849ca09",
+  "scopePolicy": "V05_AND_DIRECTLY_AFFECTED_BOUNDARIES_ONLY",
+  "status": "PASS_WITH_EXTERNAL_BLOCKERS",
+  "checks": [
+    {
+      "name": "focused-jest",
+      "status": "PASS",
+      "suitePass": 16,
+      "suiteSkip": 0,
+      "testPass": 116,
+      "testSkip": 0,
+      "testTotal": 116,
+      "note": "Only the 16 v0.5 and directly affected non-PostgreSQL suites were rerun."
+    },
+    {
+      "name": "typescript-typecheck",
+      "status": "PASS"
+    },
+    {
+      "name": "scoped-eslint",
+      "status": "PASS",
+      "note": "Only v0.5 and directly affected TypeScript files were linted. Repository parser configuration excludes .mjs; both new scripts were validated by direct execution."
+    },
+    {
+      "name": "v05-architecture",
+      "status": "PASS",
+      "files": 111
+    },
+    {
+      "name": "existing-architecture-regression",
+      "status": "PASS",
+      "files": 115
+    },
+    {
+      "name": "migration-gate",
+      "status": "PASS",
+      "contiguousMigrations": 15
+    },
+    {
+      "name": "v05-acceptance-ledger-check",
+      "status": "PASS",
+      "ledger": {
+        "pass": 0,
+        "fail": 0,
+        "notRun": 347,
+        "blocked": 71,
+        "total": 418
+      },
+      "packageContractConflicts": 3
+    },
+    {
+      "name": "typescript-build",
+      "status": "PASS"
+    },
+    {
+      "name": "secret-pattern-gate",
+      "status": "PASS",
+      "files": 843
+    },
+    {
+      "name": "git-diff-check",
+      "status": "PASS"
+    },
+    {
+      "name": "real-postgresql",
+      "status": "PASS",
+      "suitePass": 1,
+      "testPass": 7,
+      "isolation": "DEDICATED_EPHEMERAL_POSTGRES_16",
+      "cleanup": "CONTAINER_REMOVED"
+    },
+    {
+      "name": "basic-real-wsgs-grounding",
+      "status": "PASS",
+      "scope": "SUPPLEMENTARY_GROUND_REFERENCES_ONLY",
+      "runtimeSourceSha": "b3315cbb5dce9635911a90ac095b93b1efab8e70",
+      "createHttpStatus": 202,
+      "terminalHttpStatus": 200,
+      "terminalStatus": "COMPLETED",
+      "referenceProductCount": 1,
+      "capabilityGapCount": 0,
+      "resultHash": "sha256:1458ab0e3570611925f206e025d06f2742c98f1b3316377bf0db760cffa4b45c",
+      "limitations": [
+        "Does not satisfy the authoritative geospatial handoff",
+        "Does not satisfy sacs-wsgs-analysis-presentation/1.0",
+        "Does not exercise the A14 analysis chain"
+      ]
+    },
+    {
+      "name": "real-wsgs-and-a14-chain",
+      "status": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_ANALYSIS_HANDOFF_MISSING"
+    },
+    {
+      "name": "docker-container-and-live-e2e",
+      "status": "NOT_RUN",
+      "reasonCode": "OUTSIDE_MINIMAL_LOCAL_VERIFICATION_SCOPE"
+    }
+  ]
+}

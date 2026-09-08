@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "sacs-v04-v05-closure-source-lock/1.0",
+  "capturedAt": "2026-08-30T19:11:57.5372842+08:00",
+  "status": "PARTIAL",
+  "reasonCode": "SACS_PUBLICATION_OBSERVED_UPSTREAM_REFRESH_INCOMPLETE",
+  "taskPackage": {
+    "name": "SACS v0.4/v0.5 Closure and Qualification Codex Goal",
+    "packageVersion": "R1",
+    "archiveSha256": "sha256:8109d1747241e604595b87ea38c723098b9dc321303d4edb1cfdecd72fa63794",
+    "manifestSha256": "sha256:6d4b3bf3c965bfc8dd84a759dff135b1f01119d79a8c8614610637ab8ce561a3",
+    "integrity": {
+      "actualFiles": 47,
+      "manifestPayloadFiles": 46,
+      "payloadHashesVerified": 46,
+      "schemas": 8,
+      "requiredAcceptance": 298,
+      "status": "PASS"
+    }
+  },
+  "sacs": {
+    "repository": "single-agent-chat-server",
+    "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "headSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "worktreeHeadSha": null,
+    "baselineQualificationSourceSha": "8d611e3195c786854f2d0efd18ac19000441ab4a",
+    "headCommittedAt": "2026-08-30T19:02:38+08:00",
+    "qualificationSourcePinned": true,
+    "closureArtifactCommitIsNotQualificationSource": true,
+    "dirtyOutsideClosure": [],
+    "committedChangesOutsideClosure": [],
+    "closurePathsExcludedFromDirtyAssessment": true,
+    "v04": {
+      "branch": "codex/sacs-v0.4-geospatial-explanation",
+      "localSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "cachedRemoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "remoteRefRefresh": "PINNED_OBSERVATION"
+    },
+    "v05": {
+      "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+      "localSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "trackingSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "cachedRemoteSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "remoteRefRefresh": "PINNED_OBSERVATION"
+    },
+    "worktreeHeadIdentity": "EXTERNAL_TO_REPORT_CONTENT"
+  },
+  "publication": {
+    "v04": {
+      "branch": "codex/sacs-v0.4-geospatial-explanation",
+      "qualificationSourceSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "remoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "push": "PERFORMED",
+      "pullRequestNumber": 17,
+      "pullRequestState": "DRAFT",
+      "pullRequestBaseBranch": "main",
+      "ciState": "PASS",
+      "ciObservedForSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "workflowRunIds": [
+        33307359129
+      ]
+    },
+    "v05": {
+      "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+      "qualificationSourceSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "trackingSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "remoteSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "push": "PERFORMED",
+      "pullRequestNumber": 18,
+      "pullRequestState": "DRAFT",
+      "pullRequestBaseBranch": "codex/sacs-v0.4-geospatial-explanation",
+      "ciState": "PASS",
+      "ciObservedForSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "workflowRunIds": [
+        33307975653
+      ]
+    },
+    "closureReportCommit": {
+      "sha": null,
+      "identity": "EXTERNAL_TO_REPORT_CONTENT",
+      "qualificationSource": false,
+      "reason": "Embedding the commit that contains this file would create a Git object-id self-reference."
+    }
+  },
+  "packageGenerationBaselines": {
+    "sacsMain": "f60083c03c2c0aa602ab711090b6ff79c1b77d3e",
+    "sacsV04Base": "2dcbbe1c6074a54e0c332337f03a4e5574c19e06",
+    "sacsV04Geospatial": "0d67125ba1e8f2d69ad07480bacbe7ecf5bab774",
+    "wsgs": "65c3716f956c688f48e08a43322548b75af849b8",
+    "gdpsMain": "574b6aa90364c67e2f59baf7714013cdd3d48526",
+    "gowmMain": "f2894d86eeca121f9cea76c70797ece3b091d51f",
+    "gowmRepair": "931366884853dd571de9e1c159e3d94a3dadcebe"
+  },
+  "upstreamCurrentSources": {
+    "wsgs": {
+      "status": "NOT_RUN",
+      "sourceSha": null
+    },
+    "gdps": {
+      "status": "NOT_RUN",
+      "sourceSha": null
+    },
+    "gowm": {
+      "status": "NOT_RUN",
+      "sourceSha": null
+    }
+  },
+  "runtime": {
+    "status": "PARTIAL",
+    "wsgs": {
+      "readiness": "PASS",
+      "endpoint": "http://127.0.0.1:18277",
+      "runtimeRevision": "b3315cbb5dce9635911a90ac095b93b1efab8e70",
+      "baseOperationSmoke": "PASS",
+      "authoritativeGeospatialHandoff": "NOT_VERIFIED",
+      "authoritativeAnalysisHandoff": "NOT_VERIFIED"
+    },
+    "gowm": {
+      "readiness": "NOT_RUN",
+      "availability": "NOT_RUN"
+    },
+    "credentialsPrintedOrPersisted": false
+  },
+  "nonClaims": [
+    "Package-generation SHAs are context, not current source truth.",
+    "The report generator consumes the pinned publication observation and does not perform a network refresh.",
+    "The recorded ordinary grounding POST does not establish either authoritative handoff or a downstream GOWM/GDPS/STAS chain."
+  ]
+}

@@ -7,8 +7,11 @@ import { EventEncoder } from "@ag-ui/encoder";
 
 import {
   assertSacsAgUiEvent,
+  SACS_AG_UI_V02_PROFILE_ID,
+  SACS_AG_UI_V03_PROFILE_ID,
   type AGUIEvent,
   type RunAgentInput,
+  type SacsAgUiProfileId,
 } from "../../ag-ui-api-contract/src/index.js";
 import { safePublicText } from "../../interaction-contract/src/index.js";
 
@@ -21,6 +24,8 @@ export interface AgUiRunContext {
   readonly principalId: string;
   readonly internalThreadId: string;
   readonly signal: AbortSignal;
+  readonly profile?: SacsAgUiProfileId;
+  readonly disconnectSemantics?: "DETACH_OBSERVER";
 }
 
 export type AgUiRunHandler = (
@@ -40,11 +45,15 @@ export function createTextAgUiRunHandler(
   answer: (context: TextAgUiAnswerContext) => Promise<string>,
 ): AgUiRunHandler {
   return async function* run(context) {
-    yield profileEvent({
-      type: EventType.RUN_STARTED,
-      threadId: context.input.threadId,
-      runId: context.input.runId,
-    });
+    const profile = context.profile ?? SACS_AG_UI_V02_PROFILE_ID;
+    yield profileEvent(
+      {
+        type: EventType.RUN_STARTED,
+        threadId: context.input.threadId,
+        runId: context.input.runId,
+      },
+      profile,
+    );
     const text = safePublicText(
       await answer({
         userText: lastUserText(context.input),
@@ -57,61 +66,91 @@ export function createTextAgUiRunHandler(
     );
     if (context.signal.aborted) return;
     const messageId = `${context.input.runId}:assistant`;
-    yield profileEvent({
-      type: EventType.TEXT_MESSAGE_START,
-      messageId,
-      role: "assistant",
-    });
-    if (text !== undefined) {
-      yield profileEvent({
-        type: EventType.TEXT_MESSAGE_CONTENT,
+    yield profileEvent(
+      {
+        type: EventType.TEXT_MESSAGE_START,
         messageId,
-        delta: text,
-      });
+        role: "assistant",
+      },
+      profile,
+    );
+    if (text !== undefined) {
+      yield profileEvent(
+        {
+          type: EventType.TEXT_MESSAGE_CONTENT,
+          messageId,
+          delta: text,
+        },
+        profile,
+      );
     }
-    yield profileEvent({ type: EventType.TEXT_MESSAGE_END, messageId });
-    yield profileEvent({
-      type: EventType.RUN_FINISHED,
-      threadId: context.input.threadId,
-      runId: context.input.runId,
-      outcome: { type: "success" },
-    });
+    yield profileEvent(
+      { type: EventType.TEXT_MESSAGE_END, messageId },
+      profile,
+    );
+    yield profileEvent(
+      {
+        type: EventType.RUN_FINISHED,
+        threadId: context.input.threadId,
+        runId: context.input.runId,
+        outcome: { type: "success" },
+      },
+      profile,
+    );
   };
 }
 
 export function createUnavailableAgUiRunHandler(): AgUiRunHandler {
   return async function* unavailable(context) {
-    yield profileEvent({
-      type: EventType.RUN_STARTED,
-      threadId: context.input.threadId,
-      runId: context.input.runId,
-    });
-    yield createSafeAgUiRunError("AG-UI interaction execution is unavailable.");
+    const profile = context.profile ?? SACS_AG_UI_V02_PROFILE_ID;
+    yield profileEvent(
+      {
+        type: EventType.RUN_STARTED,
+        threadId: context.input.threadId,
+        runId: context.input.runId,
+      },
+      profile,
+    );
+    yield createSafeAgUiRunError(
+      "AG-UI interaction execution is unavailable.",
+      "interaction_error",
+      profile,
+    );
   };
 }
 
 export function createSafeAgUiRunError(
   message = "The AG-UI run failed safely.",
   code = "interaction_error",
+  profile: SacsAgUiProfileId = SACS_AG_UI_V02_PROFILE_ID,
 ): AGUIEvent {
-  return profileEvent({
-    type: EventType.RUN_ERROR,
-    message: safePublicText(message, 512) ?? "The AG-UI run failed safely.",
-    code,
-  });
+  return profileEvent(
+    {
+      type: EventType.RUN_ERROR,
+      message: safePublicText(message, 512) ?? "The AG-UI run failed safely.",
+      code,
+    },
+    profile,
+  );
 }
 
-export function encodeProfileAgUiSse(event: AGUIEvent): string {
-  return sseEncoder.encodeSSE(assertSacsAgUiEvent(event));
+export function encodeProfileAgUiSse(
+  event: AGUIEvent,
+  profile: SacsAgUiProfileId = SACS_AG_UI_V02_PROFILE_ID,
+): string {
+  return sseEncoder.encodeSSE(assertSacsAgUiEvent(event, profile));
 }
 
-export function createSacsAgUiCapabilities(): AgentCapabilities {
+export function createSacsAgUiCapabilities(
+  profile: SacsAgUiProfileId = SACS_AG_UI_V02_PROFILE_ID,
+): AgentCapabilities {
+  const v03 = profile === SACS_AG_UI_V03_PROFILE_ID;
   return AgentCapabilitiesSchema.parse({
     identity: {
       name: "single-agent-chat-server",
       type: "langgraph",
       description: "Single-SDAR interaction gateway",
-      version: "0.2.0",
+      version: v03 ? "0.3.0" : "0.2.0",
       provider: "single-agent-chat-server",
     },
     transport: {
@@ -122,7 +161,7 @@ export function createSacsAgUiCapabilities(): AgentCapabilities {
       resumable: false,
     },
     tools: {
-      supported: false,
+      supported: v03,
       clientProvided: false,
       parallelCalls: false,
       items: [],
@@ -154,10 +193,14 @@ export function createSacsAgUiCapabilities(): AgentCapabilities {
       interventions: true,
       feedback: false,
       interrupts: true,
-      approveWithEdits: false,
+      approveWithEdits: v03,
     },
     custom: {
-      sacsProfile: "sacs-ag-ui-v0.2",
+      sacsProfile: profile,
+      backwardCompatibleProfile: v03 ? SACS_AG_UI_V02_PROFILE_ID : undefined,
+      eventFamilies: v03
+        ? ["RUN", "STEP", "TOOL_CALL", "TEXT_MESSAGE", "STATE", "ACTIVITY"]
+        : undefined,
       rawEvents: false,
       inferredToolCalls: false,
       runIsTask: false,
@@ -167,8 +210,11 @@ export function createSacsAgUiCapabilities(): AgentCapabilities {
   });
 }
 
-function profileEvent(input: unknown): AGUIEvent {
-  return assertSacsAgUiEvent(input);
+function profileEvent(
+  input: unknown,
+  profile: SacsAgUiProfileId = SACS_AG_UI_V02_PROFILE_ID,
+): AGUIEvent {
+  return assertSacsAgUiEvent(input, profile);
 }
 
 function lastUserText(input: RunAgentInput): string {

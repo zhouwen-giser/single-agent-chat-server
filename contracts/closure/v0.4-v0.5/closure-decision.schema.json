@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v04-v05-closure-decision:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "track",
+    "decision",
+    "sourceSha",
+    "acceptance",
+    "blockers",
+    "nonClaims"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-closure-decision/1.0"
+    },
+    "track": {
+      "enum": [
+        "V0_4",
+        "V0_5"
+      ]
+    },
+    "decision": {
+      "enum": [
+        "MERGE_READY",
+        "BLOCKED_UPSTREAM",
+        "BLOCKED_ENVIRONMENT",
+        "REAL_READY",
+        "DEVELOPMENT_READY_BLOCKED_LIVE",
+        "BLOCKED_PREREQUISITE",
+        "FAILED"
+      ]
+    },
+    "sourceSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "acceptance": {
+      "type": "object",
+      "required": [
+        "required",
+        "pass",
+        "fail",
+        "notRun",
+        "blocked"
+      ],
+      "properties": {
+        "required": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pass": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fail": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notRun": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "nonClaims": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pullRequest": {
+      "type": "object"
+    }
+  }
+}

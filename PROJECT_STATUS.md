@@ -1,27 +1,34 @@
 # Project status
 
-Status: `SACS_V0_4_WORLD_GROUNDING_GEOSPATIAL_EXPLANATION_BLOCKED` — S13 and
-the local S15-S19/S23 implementation gates pass on the dedicated stacked
-branch. S14, S20-S22 and S24 remain fail-closed: the authoritative WSGS-owned
-geospatial consumer bundle is absent, the frozen northbound contracts do not
-define a trusted Finding/MapSelection envelope, and no REAL_WSGS geospatial
-chain or exact-head CI/Git publication evidence exists. No fixture, isolated
-PostgreSQL run, container health, or four-operation capability response is
-counted as live geospatial authority evidence.
+Status: `SACS_V05_FEATURE_COMPLETE`.
 
-The current goal starts from PR #15 head `2dcbbe1c` on
-`codex/sacs-v0.4-geospatial-explanation`. Its source reconciliation, PR/CI
-state, four-repository observations and pre-change 411-test baseline are in
-[`S13-source-lock.json`](reports/v0.4/geospatial/S13-source-lock.json) and the
-[`S13 completion report`](reports/v0.4/geospatial/S13-completion.md).
+The active v0.5 decision is split into independent tracks on
+`codex/sacs-v0.5-observer-first-interactive-analysis`:
 
-The current local closure is recorded in
-[`FINAL_REPORT.md`](reports/v0.4/geospatial/FINAL_REPORT.md) and the independent
-305-row [`acceptance-ledger.json`](reports/v0.4/geospatial/acceptance-ledger.json):
-189 PASS, 0 FAIL, 3 NOT_RUN and 113 BLOCKED. The final local regression passed
-60 suites / 456 tests, with 15 suites / 109 tests skipped (565 total).
+- DEVELOPMENT: `SACS_V05_FEATURE_COMPLETE`; all 38 active development rows
+  pass through the source-bound development Gate, including focused contracts,
+  real PostgreSQL, and eight actual HTTP/AG-UI local E2E scenarios.
+- INTEGRATION: `SACS_V05_INTEGRATION_PENDING` because the authoritative WSGS
+  analysis-control handoff is not published; this does not block development.
+- RELEASE: `SACS_V05_RELEASE_HARDENING_PENDING` because release qualification
+  was not requested.
 
-The detailed S00–S05 history below is retained as historical evidence. The
+The R2 progressive task package passed its official integrity preflight with
+seven schemas, ten phases, and 60 active acceptance rows (38 development, 12
+integration, 10 release). The prior 418-row global qualification and its
+reports are retained only as `SUPERSEDED_STRICT_QUALIFICATION`; they no longer
+drive the active product decision. Active evidence is limited to the four JSON
+reports under
+[`reports/v0.5/progressive`](reports/v0.5/progressive/PROGRESSIVE_STATUS.json).
+
+Production remains fail-closed: fixture analysis is restricted to explicit
+test/development composition, while the normal server continues to withhold
+AG-UI v0.3 and Analysis Control until a real compatible adapter is composed.
+The implementation matrix records the fetched `06c2864` D00 reconciliation
+baseline; the source-bound development report records the complete tested
+worktree independently.
+
+The detailed v0.4 S00–S05 history below is retained as historical evidence. The
 later S06–S12 development closure is recorded in
 [`S12-completion.md`](reports/v0.4/S12-completion.md); it must not be inferred
 from the older phase summaries.

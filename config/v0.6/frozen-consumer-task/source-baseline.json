@@ -1,0 +1,45 @@
+{
+  "taskId": "SACS-V06-FROZEN-WSGS-CONSUMER",
+  "observedOn": "2026-09-07",
+  "timezone": "Asia/Tokyo",
+  "purpose": "READ_SOURCE_SNAPSHOT_AND_CONTRACT_IMPORT_PROVENANCE_NOT_RUNTIME_HEAD_GATE",
+  "sacs": {
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "observedFeatureBranch": "codex/sacs-v0.6-wsgs-full-functional-integration",
+    "observedFeatureCommit": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "observedMainCommit": "a957cdaa60dec5a2b3d291f2a97a2ff96a72a182",
+    "suggestedWorkBranch": "codex/sacs-v0.6-wsgs-frozen-world-analysis-consumer",
+    "executionRule": "Inspect current workspace and reuse equivalent or later completed work; do not reset user changes or assume unmerged merely from different SHAs."
+  },
+  "wsgs": {
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "observedHandoffBranch": "codex/wsgs-v0.2.4-stable-world-analysis-service",
+    "handoffSnapshotCommit": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "publicFreezeCommit": "e05e6d4d5ac8de617857edc8e81b935e5efc7daf",
+    "consumerRoot": "contracts/consumers/sacs-world-analysis-v1",
+    "publicRoot": "contracts/consumers/sacs-world-analysis-v1/public",
+    "offlineVerification": {
+      "workingDirectory": "contracts/consumers/sacs-world-analysis-v1",
+      "command": "node verify.mjs",
+      "runtime": "Node.js >=22",
+      "requiresLiveService": false
+    },
+    "reportedOriginalFreezePath": "contracts/wsgs-v0.2.4-world-analysis",
+    "reportedReleaseLockHash": "sha256:45f027673834f3d9e654a889eea25eaf81522f594af8dddf6939b91a0dd4c41a",
+    "reportedLockHashNote": "Reported by W01; use the actual handoff lock/checksum rules at import, do not substitute this value for unrelated files.",
+    "contractVersion": "sacs-wsgs-grounding/1.2",
+    "resultProfile": "wsgs-world-analysis-findings/1.0",
+    "wireSchemaVersion": "1.0",
+    "headers": {
+      "WSGS-Contract-Version": "sacs-wsgs-grounding/1.2",
+      "WSGS-Result-Profile": "wsgs-world-analysis-findings/1.0"
+    },
+    "upstreamModificationAllowed": false,
+    "requireRuntimeExactHeadMatch": false,
+    "requireRefreeze": false,
+    "fullConsumerBundleIncludedInTaskZip": false,
+    "sourceVerificationScope": "Source and report reading only; no independent runtime or test execution during task authoring."
+  },
+  "sourceIndex": "reference/source-index.json",
+  "sourceAuthorityRule": "Frozen public contract and its complete official validator/semantics override informal examples in task prose. Resolve mismatches by correcting SACS/task assumptions, not by modifying upstream frozen bytes."
+}

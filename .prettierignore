@@ -26,3 +26,33 @@ contracts/v0.4/authority-fusion-record.schema.json
 
 # Generated supply-chain evidence.
 reports/security/sbom.cdx.json
+
+# Preserve imported SACS v0.5 task-package bytes and generated ledgers.
+acceptance/v0.5/observer-first-interactive-analysis/
+config/v0.5/observer-first-interactive-analysis/
+contracts/v0.5/observer-first-interactive-analysis/
+
+# Preserve imported closure-package bytes and deterministic generated reports.
+acceptance/closure/
+config/closure/
+contracts/closure/
+reports/closure/
+
+# Immutable v0.6 task and WSGS contract source bytes.
+config/v0.6/task-package/
+dependencies/wsgs-v06/
+dependencies/wsgs-world-analysis-v1/public/
+config/v0.6/frozen-consumer-task/
+
+# Preserve deterministic verification receipts and historical acceptance evidence.
+# Keep source files, hand-written reports, and other JSON files under format checks.
+reports/v0.6/frozen-wsgs-consumer/C00.json
+reports/v0.6/frozen-wsgs-consumer/C01.json
+reports/v0.6/frozen-wsgs-consumer/C02.json
+reports/v0.6/frozen-wsgs-consumer/C03-planner.json
+reports/v0.6/frozen-wsgs-consumer/C03.json
+reports/v0.6/frozen-wsgs-consumer/C04.json
+reports/v0.6/frozen-wsgs-consumer/C05.json
+reports/v0.6/frozen-wsgs-consumer/C06.json
+reports/v0.6/frozen-wsgs-consumer/FINAL_EVIDENCE_AUDIT.json
+reports/v0.6/wsgs-full-functional-integration/ACCEPTANCE_LEDGER.json

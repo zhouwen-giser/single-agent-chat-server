@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:wsgs-tool-interaction:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "toolCallId",
+    "nodeId",
+    "operationKey",
+    "executionArgsHash",
+    "publicArgs",
+    "publicArgsHash",
+    "publicEditSchemaUri",
+    "publicEditSchemaHash",
+    "editablePaths",
+    "editorHints",
+    "editSemantics",
+    "editPolicy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-wsgs-tool-interaction/1.0"
+    },
+    "toolCallId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "nodeId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "operationKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "executionArgsHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "publicArgs": {
+      "type": "object"
+    },
+    "publicArgsHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "publicEditSchemaUri": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "publicEditSchemaHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "editablePaths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^/"
+      },
+      "maxItems": 64
+    },
+    "editorHints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "editor"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^/"
+          },
+          "editor": {
+            "enum": [
+              "MAP_POINT",
+              "MAP_LINE",
+              "MAP_POLYGON",
+              "MAP_RADIUS",
+              "NUMBER_RANGE",
+              "TIME_RANGE",
+              "ENUM_MULTISELECT",
+              "AUTHORIZED_CANDIDATE_SELECT",
+              "READ_ONLY"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "minimum": {
+            "type": "number"
+          },
+          "maximum": {
+            "type": "number"
+          },
+          "geometryTypes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "Point",
+                "LineString",
+                "Polygon",
+                "MultiPolygon"
+              ]
+            },
+            "maxItems": 4
+          },
+          "candidateSource": {
+            "type": "string",
+            "maxLength": 256
+          }
+        }
+      },
+      "maxItems": 64
+    },
+    "editSemantics": {
+      "enum": [
+        "CHANGE_CONSTRAINT",
+        "CREATE_GEOMETRY_OVERRIDE",
+        "SELECT_AUTHORIZED_CANDIDATE",
+        "NOT_EDITABLE"
+      ]
+    },
+    "editPolicy": {
+      "enum": [
+        "SUGGEST_NEXT_REVISION",
+        "CANCEL_AND_RESTART_ALLOWED",
+        "NOT_EDITABLE"
+      ]
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

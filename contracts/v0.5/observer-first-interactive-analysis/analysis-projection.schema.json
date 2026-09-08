@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:analysis-projection:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "analysisId",
+    "stateRevision",
+    "activityRevision",
+    "state",
+    "stateHash",
+    "activity",
+    "activityHash",
+    "lastEventSequence",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-analysis-projection/1.0"
+    },
+    "analysisId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "stateRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "activityRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "state": {
+      "type": "object"
+    },
+    "stateHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "activity": {
+      "type": "object"
+    },
+    "activityHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "lastEventSequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

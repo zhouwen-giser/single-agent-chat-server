@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "sacs-real-e2e-report/1.0",
+  "track": "V0_4",
+  "sourceSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+  "environmentFingerprint": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "cases": [
+    {
+      "caseId": "AC-V4-E2E-001",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "2号车当前位置的坡度是多少？",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-002",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "A区内坡度15到30度的区域有哪些？",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-003",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "A区内有哪些洪水高风险区域？",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-004",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "2号车附近500米有哪些排水沟？",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-005",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "A区内有哪些高地？",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-006",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "A区内有哪些湿地？",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-007",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "2号车当前位置是什么地表覆盖？",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-008",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "2号车当前位置为什么属于该通行性等级？",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-009",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "明确指定数据产品查询",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-010",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "地图选择稳定引用后续",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-011",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "Descriptor/Data gap",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-012",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "Coverage gap",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-013",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "Reference ambiguity",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-014",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "Truncated result",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-015",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "Unknown finding schema",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-016",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "Source changed",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-017",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "Foreign scope",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    },
+    {
+      "caseId": "AC-V4-E2E-018",
+      "status": "BLOCKED",
+      "evidence": [],
+      "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+      "scenario": "Hybrid Task/world/fusion",
+      "credentialsPrintedOrPersisted": false,
+      "rawReferenceIdsPersisted": false
+    }
+  ],
+  "decision": "BLOCKED"
+}

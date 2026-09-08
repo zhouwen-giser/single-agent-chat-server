@@ -1,0 +1,65 @@
+{
+  "phase": "C06",
+  "status": "PASS",
+  "sourceSha": "fe2fa9956db1809293703b10e29b1f025bfacce8",
+  "sourceTreeDigest": "sha256:4bd9bf7ef350de55e07bf995f905ceb3e292fac60887e213eead75f52a6c6cb5",
+  "startedAt": "2026-09-07T04:58:54.966Z",
+  "completedAt": "2026-09-07T05:09:47.111Z",
+  "commands": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "sourceSha": "fe2fa9956db1809293703b10e29b1f025bfacce8",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C06-command-1.txt"
+    },
+    {
+      "command": "node scripts/v06-frozen-tests.mjs all",
+      "exitCode": 0,
+      "sourceSha": "fe2fa9956db1809293703b10e29b1f025bfacce8",
+      "outputDigest": "sha256:9a1de5984f4afe327d9157459dcacb2ff784796f4aedeaa3766ecccba83fe847",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C06-command-2.txt"
+    },
+    {
+      "command": "node scripts/verify-architecture.mjs",
+      "exitCode": 0,
+      "sourceSha": "fe2fa9956db1809293703b10e29b1f025bfacce8",
+      "outputDigest": "sha256:1f9eeec5ee5fe232047f8c469dd99174d6ec19d76adbaa7ed5134bd824893ea5",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C06-command-3.txt"
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js apps/server/src/api/analysis-routes.ts apps/server/src/api/openai-routes.ts apps/server/src/chat/conversation-application-service.ts apps/server/src/chat/sdar-chat-runner.ts apps/server/src/v06-grounding-analysis.ts packages/analysis-client/src/frozen-world-analysis.ts packages/analysis-client/src/index.ts packages/analysis-control-runtime/src/coordinator.ts packages/analysis-control-runtime/src/grounding-source-control.ts packages/analysis-control-runtime/src/index.ts packages/analysis-development-runtime/src/index.ts packages/analysis-runtime/src/event-pump.ts packages/analysis-runtime/src/grounding-source-runtime.ts packages/analysis-runtime/src/index.ts packages/analysis-runtime/src/projection-reducer.ts packages/analysis-runtime/src/revision-coordinator.ts packages/grounding-request-planner/src/frozen-request.ts packages/grounding-request-planner/src/index.ts packages/persistence/src/agui-task-coordinator-repository.ts packages/persistence/src/analysis-development-repository.ts packages/persistence/src/analysis-repository.ts packages/persistence/src/authority-fusion-repository.ts packages/persistence/src/checkpoint.ts packages/persistence/src/config.ts packages/persistence/src/conversation-repository.ts packages/persistence/src/grounding-repository.ts packages/persistence/src/grounding-source-history.ts packages/persistence/src/hash.ts packages/persistence/src/index.ts packages/persistence/src/interaction-repository.ts packages/persistence/src/interaction-types.ts packages/persistence/src/migrations.ts packages/persistence/src/observation.ts packages/persistence/src/repository.ts packages/persistence/src/runtime.ts packages/persistence/src/structured-world-selection-repository.ts packages/persistence/src/types.ts packages/persistence/src/world-explanation-repository.ts packages/persistence/src/world-focus-repository.ts packages/world-explanation-runtime/src/analysis-view.ts packages/world-explanation-runtime/src/frozen-analysis-view.ts packages/world-explanation-runtime/src/index.ts packages/world-explanation-runtime/src/normalizer.ts packages/world-explanation-runtime/src/renderer.ts packages/world-grounding-runtime/src/index.ts tests/agui-v03-analysis-projection.unit.test.ts tests/agui-v03-development-readiness.unit.test.ts tests/analysis-control-api.contract.test.ts tests/analysis-control-coordinator.unit.test.ts tests/analysis-reference-client.contract.test.ts tests/authority-fusion-input.contract.test.ts tests/authority-fusion-input.unit.test.ts tests/finding-reference-resolver.unit.test.ts tests/grounding-request-planner.unit.test.ts tests/helpers/frozen-wsgs-http.ts tests/helpers/memory-frozen-analysis.ts tests/helpers/memory-grounding.ts tests/multi-task-coordinator.contract.test.ts tests/openai-api.contract.test.ts tests/openai-predecessor-regression.contract.test.ts tests/query-service.unit.test.ts tests/sdar-a2a-adapter.contract.test.ts tests/structured-world-selection-api.contract.test.ts tests/structured-world-selection-resolver.unit.test.ts tests/structured-world-selection.contract.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/v06-analysis-config.unit.test.ts tests/v06-analysis-source.contract.test.ts tests/v06-frozen-cancel.unit.test.ts tests/v06-frozen-client.unit.test.ts tests/v06-frozen-delivery.contract.test.ts tests/v06-frozen-entry.integration.test.ts tests/v06-frozen-factory-compat.unit.test.ts tests/v06-frozen-http.contract.test.ts tests/v06-frozen-persistence.unit.test.ts tests/v06-frozen-public.contract.test.ts tests/v06-frozen-request.unit.test.ts tests/v06-frozen-revision-persistence.unit.test.ts tests/v06-frozen-source-history.unit.test.ts tests/v06-frozen-source-pump.unit.test.ts tests/v06-frozen-source.unit.test.ts tests/v06-frozen-view.unit.test.ts tests/v06-grounding-job.contract.test.ts tests/v06-source-bridge.unit.test.ts tests/v06-world-analysis-view.unit.test.ts tests/world-explanation-renderer.unit.test.ts tests/world-grounding-application.unit.test.ts tests/world-grounding-explanation.unit.test.ts tests/world-grounding-runtime.unit.test.ts tests/wsgs-http-adapter.contract.test.ts",
+      "exitCode": 0,
+      "sourceSha": "fe2fa9956db1809293703b10e29b1f025bfacce8",
+      "outputDigest": "sha256:9dc4e7f18c03e810386036d207e048bceb5bec24df5930adef7a9610b838cc41",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C06-command-4.txt"
+    },
+    {
+      "command": "node scripts/verify-migrations.mjs",
+      "exitCode": 0,
+      "sourceSha": "fe2fa9956db1809293703b10e29b1f025bfacce8",
+      "outputDigest": "sha256:83bebbc266813636d4295bbe3bc49ced373793d4ca1d0e95ef9ce8b635304d53",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C06-command-5.txt"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "sourceSha": "fe2fa9956db1809293703b10e29b1f025bfacce8",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePath": "reports/v0.6/frozen-wsgs-consumer/C06-command-6.txt"
+    }
+  ],
+  "acceptanceIds": [
+    "AC-040"
+  ],
+  "scope": "NORMAL_SACS_SOURCE_COMPOSITION_LOCAL_HTTP_AND_STORAGE_BOUNDARIES; NO_DOCKER_NO_LIVE_UPSTREAM_NO_BUILD_GATE",
+  "notRun": [
+    "ENV-001"
+  ],
+  "excluded": [
+    "EX-001",
+    "EX-002",
+    "EX-003",
+    "EX-004"
+  ]
+}

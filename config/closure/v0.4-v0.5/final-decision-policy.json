@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "sacs-v04-v05-final-decision-policy/1.0",
+  "v04": {
+    "allowed": [
+      "MERGE_READY",
+      "BLOCKED_UPSTREAM",
+      "BLOCKED_ENVIRONMENT",
+      "FAILED"
+    ],
+    "mergeReady": "all required PASS and exact-head PR/CI evidence"
+  },
+  "v05": {
+    "allowed": [
+      "REAL_READY",
+      "DEVELOPMENT_READY_BLOCKED_LIVE",
+      "BLOCKED_PREREQUISITE",
+      "FAILED"
+    ],
+    "realReady": "all required real-chain gates PASS",
+    "developmentReady": "local implementation PASS but real handoff/environment blocked"
+  },
+  "independentDenominators": true,
+  "aggregatePassForbidden": true
+}

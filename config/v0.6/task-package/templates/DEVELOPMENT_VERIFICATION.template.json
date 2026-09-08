@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "sacs-v06-verification-evidence/1.0",
+  "track": "DEVELOPMENT",
+  "source": {
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "branch": "REPLACE",
+    "commit": "0000000000000000000000000000000000000000",
+    "worktreeDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "startedAt": "2026-01-01T00:00:00Z",
+  "finishedAt": "2026-01-01T00:00:00Z",
+  "commands": [],
+  "acceptanceIds": [],
+  "decision": "PENDING",
+  "blockers": [],
+  "evidenceDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+}

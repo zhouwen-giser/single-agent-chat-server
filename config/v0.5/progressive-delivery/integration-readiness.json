@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "sacs-v05-integration-readiness/1.0",
+  "repositoryEnvironmentVariable": "SACS_WSGS_REPOSITORY_DIR",
+  "expectedRepository": "zhouwen-giser/world-semantic-grounding-service",
+  "defaultRepositoryDirectory": "../world-semantic-grounding-service",
+  "environmentVariable": "SACS_WSGS_ANALYSIS_HANDOFF_DIR",
+  "expectedShaEnvironmentVariable": "SACS_WSGS_ANALYSIS_EXPECTED_SHA",
+  "defaultHandoffDirectory": "contracts/consumers/sacs-analysis-control-v1",
+  "missingHandoffDecision": "INTEGRATION_PENDING",
+  "pendingExitCode": 0,
+  "httpAdapterAvailable": false,
+  "realIntegrationRunner": {
+    "available": false,
+    "cases": [
+      "AUTONOMOUS_RUN",
+      "PROPOSAL_REVISION",
+      "AMBIGUITY_INTERVENTION",
+      "DATA_GAP",
+      "CANCEL_ACKNOWLEDGEMENT",
+      "RECONNECT_SNAPSHOT"
+    ]
+  },
+  "requiredLockSemantics": {
+    "sequenceSemantics": "MONOTONIC_PER_UPSTREAM_ANALYSIS_ID",
+    "idempotencySemantics": "EVENT_ID_AND_SEQUENCE_PAYLOAD_HASH",
+    "recoverySemantics": "SNAPSHOT_THEN_LIVE_EVENTS",
+    "statusSemantics": "PUBLISHED_STATUS_ONLY"
+  },
+  "requiredArtifacts": [
+    {
+      "capability": "CONSUMER_LOCK",
+      "file": "WSGS_ANALYSIS_CONSUMER_LOCK.json"
+    },
+    {
+      "capability": "PLAN_SNAPSHOT",
+      "file": "WSGS_ANALYSIS_PLAN_SCHEMA_LOCK.json",
+      "requiredSemanticProperties": [
+        "schemaVersion",
+        "upstreamAnalysisId",
+        "planId",
+        "planHash",
+        "planRevision",
+        "status",
+        "nodes"
+      ]
+    },
+    {
+      "capability": "EVENT_TRANSPORT",
+      "file": "WSGS_ANALYSIS_EVENT_SCHEMA_LOCK.json",
+      "requiredSemanticProperties": [
+        "schemaVersion",
+        "eventId",
+        "upstreamAnalysisId",
+        "planId",
+        "planHash",
+        "planRevision",
+        "sequence",
+        "eventType",
+        "payload",
+        "payloadHash"
+      ]
+    },
+    {
+      "capability": "TOOL_INTERACTION",
+      "file": "WSGS_TOOL_INTERACTION_SCHEMA_LOCK.json",
+      "requiredSemanticProperties": [
+        "schemaVersion",
+        "toolCallId",
+        "nodeId",
+        "operationKey",
+        "executionArgsHash",
+        "publicArgs",
+        "publicArgsHash",
+        "publicEditSchemaUri",
+        "publicEditSchemaHash",
+        "editablePaths",
+        "editPolicy"
+      ]
+    },
+    {
+      "capability": "REVISION_COMPILE",
+      "file": "WSGS_REVISION_CONTROL_SCHEMA_LOCK.json",
+      "requiredSemanticProperties": [
+        "analysisId",
+        "parentPlanId",
+        "parentPlanHash",
+        "parentRevisionNumber",
+        "changedPaths",
+        "publicArgs",
+        "upstreamAnalysisId",
+        "planId",
+        "planHash",
+        "planRevision"
+      ]
+    },
+    {
+      "capability": "CANCEL",
+      "file": "WSGS_CANCEL_SCHEMA_LOCK.json",
+      "requiredSemanticProperties": [
+        "analysisId",
+        "upstreamRunId",
+        "reason",
+        "supported",
+        "acknowledged"
+      ]
+    },
+    {
+      "capability": "INTERVENTION_RESOLVE",
+      "file": "WSGS_INTERVENTION_SCHEMA_LOCK.json",
+      "requiredSemanticProperties": [
+        "analysisId",
+        "interventionId",
+        "interruptId",
+        "response",
+        "accepted",
+        "upstreamRunId"
+      ]
+    },
+    { "capability": "CHECKSUMS", "file": "CHECKSUMS.json" }
+  ]
+}

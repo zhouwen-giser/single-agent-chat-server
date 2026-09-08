@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "sacs-v05-progressive-evidence/1.0",
+  "entries": [
+    {
+      "acceptanceId": "DEV-026",
+      "status": "NOT_RUN",
+      "evidenceGroups": ["DEV-E2E"]
+    },
+    {
+      "acceptanceId": "INT-001",
+      "status": "PENDING",
+      "evidenceGroups": ["INT-READINESS"]
+    }
+  ]
+}

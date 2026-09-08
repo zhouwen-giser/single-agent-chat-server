@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v04-v05-branch-plan:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "v04",
+    "v05",
+    "protectedActions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-v04-v05-branch-plan/1.0"
+    },
+    "v04": {
+      "type": "object",
+      "required": [
+        "headBranch",
+        "basePolicy",
+        "title"
+      ],
+      "properties": {
+        "headBranch": {
+          "const": "codex/sacs-v0.4-geospatial-explanation"
+        },
+        "basePolicy": {
+          "type": "string"
+        },
+        "title": {
+          "const": "feat: add grounded geospatial explanation to SACS v0.4"
+        }
+      }
+    },
+    "v05": {
+      "type": "object",
+      "required": [
+        "headBranch",
+        "basePolicy",
+        "title"
+      ],
+      "properties": {
+        "headBranch": {
+          "const": "codex/sacs-v0.5-observer-first-interactive-analysis"
+        },
+        "basePolicy": {
+          "type": "string"
+        },
+        "title": {
+          "const": "feat: add observer-first interactive analysis coordination to SACS v0.5"
+        }
+      }
+    },
+    "protectedActions": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "MERGE",
+          "TAG",
+          "RELEASE",
+          "DEPLOY"
+        ]
+      },
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true
+    }
+  }
+}

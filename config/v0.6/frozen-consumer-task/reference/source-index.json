@@ -1,0 +1,182 @@
+[
+  {
+    "id": "S01",
+    "title": "WSGS 最终开发报告",
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "ref": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "path": "reports/wsgs-v0.2.4-stable-world-analysis-service/FINAL_REPORT.md",
+    "gitBlobSha": "b8363ee53f2935bce28d962d8d0ddeb3fc4fb1bc",
+    "url": "https://github.com/zhouwen-giser/world-semantic-grounding-service/blob/75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5/reports/wsgs-v0.2.4-stable-world-analysis-service/FINAL_REPORT.md",
+    "reviewNote": "记录 DEV_READY、冻结提交和真实环境未运行范围。仅视为上游报告，不视为本次重跑。"
+  },
+  {
+    "id": "S02",
+    "title": "独立消费者交接 README",
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "ref": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "path": "contracts/consumers/sacs-world-analysis-v1/README.md",
+    "gitBlobSha": "3a8d70ad1b249001f440f11e03c70b6effd13d63",
+    "url": "https://github.com/zhouwen-giser/world-semantic-grounding-service/blob/75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5/contracts/consumers/sacs-world-analysis-v1/README.md",
+    "reviewNote": "说明 Node 22+ 的 node verify.mjs、public/ 与校验运行依赖。"
+  },
+  {
+    "id": "S03",
+    "title": "公共协议 README",
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "ref": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "path": "contracts/consumers/sacs-world-analysis-v1/public/README.md",
+    "gitBlobSha": "ce10dfd1822d8116aa1d6c75274893bb6ffaabdb",
+    "url": "https://github.com/zhouwen-giser/world-semantic-grounding-service/blob/75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5/contracts/consumers/sacs-world-analysis-v1/public/README.md",
+    "reviewNote": "精确协议二元组、公共校验器、人工示例与生成规则。"
+  },
+  {
+    "id": "S04",
+    "title": "公共协议 SEMANTICS",
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "ref": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "path": "contracts/consumers/sacs-world-analysis-v1/public/SEMANTICS.md",
+    "gitBlobSha": "4b234a16ab2356d9f9ae32f0bbaec585bb033f88",
+    "url": "https://github.com/zhouwen-giser/world-semantic-grounding-service/blob/75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5/contracts/consumers/sacs-world-analysis-v1/public/SEMANTICS.md",
+    "reviewNote": "选择、身份、时间、排名、行动非授权、hash、状态与大小等规范。"
+  },
+  {
+    "id": "S05",
+    "title": "公共包内 W01 冻结状态",
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "ref": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "path": "contracts/consumers/sacs-world-analysis-v1/public/contract-freeze.json",
+    "gitBlobSha": "a0be5c355434f878a7666bca22c085049a64373e",
+    "url": "https://github.com/zhouwen-giser/world-semantic-grounding-service/blob/75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5/contracts/consumers/sacs-world-analysis-v1/public/contract-freeze.json",
+    "reviewNote": "记录冻结时候选状态；不能当运行时进度字段去修改。"
+  },
+  {
+    "id": "S06",
+    "title": "W01 独立冻结报告",
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "ref": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "path": "reports/wsgs-v0.2.4-stable-world-analysis-service/W01/contract-freeze.json",
+    "gitBlobSha": "bf086193c9091d7716dfb5f01c8fd3544f145e9f",
+    "url": "https://github.com/zhouwen-giser/world-semantic-grounding-service/blob/75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5/reports/wsgs-v0.2.4-stable-world-analysis-service/W01/contract-freeze.json",
+    "reviewNote": "记录真实 freezeCommit、原始合同路径和报告中的 release lock hash。"
+  },
+  {
+    "id": "S07",
+    "title": "官方完整选择请求样例",
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "ref": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "path": "contracts/consumers/sacs-world-analysis-v1/public/examples/request-selection.json",
+    "gitBlobSha": "55494fb0b00d7e6f3ca583d0e17e3d96e2f6cf60",
+    "url": "https://github.com/zhouwen-giser/world-semantic-grounding-service/blob/75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5/contracts/consumers/sacs-world-analysis-v1/public/examples/request-selection.json",
+    "reviewNote": "完整 1.2 请求、priorGroundings.selectedProductIds 和五字段 analysisSelections。"
+  },
+  {
+    "id": "S08",
+    "title": "SACS 正常启动 main.ts",
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "ref": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "path": "apps/server/src/main.ts",
+    "gitBlobSha": "91d6bef5c5cea260d2fa80c7b683e349264610a6",
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/blob/7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2/apps/server/src/main.ts",
+    "reviewNote": "本次读取前210行：已有 v0.6 组合注入、persistence 与 model 配置。非全文件审查。"
+  },
+  {
+    "id": "S09",
+    "title": "SACS v0.6 组合工厂",
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "ref": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "path": "apps/server/src/v06-grounding-analysis.ts",
+    "gitBlobSha": "318d4bcfd8e9199248a62f75340025d323a5a6eb",
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/blob/7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2/apps/server/src/v06-grounding-analysis.ts",
+    "reviewNote": "正常 Source/Control/AG-UI 组合；START 内联空上下文。"
+  },
+  {
+    "id": "S10",
+    "title": "真实 Grounding Source 控制",
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "ref": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "path": "packages/analysis-control-runtime/src/grounding-source-control.ts",
+    "gitBlobSha": "38a4e27f89214e5f136f5c5342635112d7698602",
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/blob/7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2/packages/analysis-control-runtime/src/grounding-source-control.ts",
+    "reviewNote": "submitProposal/resolveIntervention 尚为503占位，已有取消实现。"
+  },
+  {
+    "id": "S11",
+    "title": "Grounding Job Source Adapter",
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "ref": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "path": "packages/wsgs-analysis-adapter/src/grounding-job.ts",
+    "gitBlobSha": "7b39fff53dd525674816e7e253aa472dd8968383",
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/blob/7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2/packages/wsgs-analysis-adapter/src/grounding-job.ts",
+    "reviewNote": "此前同一已核实基线读取：1.1限制、start/get/observe/cancel、revise/resolveChoice委托。"
+  },
+  {
+    "id": "S12",
+    "title": "分析配置 Schema",
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "ref": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "path": "packages/wsgs-analysis-adapter/src/config.ts",
+    "gitBlobSha": "ab02811e09c95f23b920281c1675f87e5a01f48d",
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/blob/7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2/packages/wsgs-analysis-adapter/src/config.ts",
+    "reviewNote": "1.1与旧Profile literal、显示/观察限制和Native deferred。"
+  },
+  {
+    "id": "S13",
+    "title": "现有历史视图测试",
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "ref": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "path": "tests/v06-world-analysis-view.unit.test.ts",
+    "gitBlobSha": "467f8078ec3d71178a77fe10a33a69f5a13fcd42",
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/blob/7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2/tests/v06-world-analysis-view.unit.test.ts",
+    "reviewNote": "此前同一基线读取：本地历史类型、手工历史样例和地理集合投影。"
+  },
+  {
+    "id": "S14",
+    "title": "SACS package.json",
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "ref": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "path": "package.json",
+    "gitBlobSha": null,
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/blob/7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2/package.json",
+    "reviewNote": "此前同一基线读取：pnpm/Jest、typecheck、源码dev:server、v06相关测试入口。读取工具脚本部分，不声明完整依赖审计。"
+  },
+  {
+    "id": "S15",
+    "title": "官方排名 Result 样例",
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "ref": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "path": "contracts/consumers/sacs-world-analysis-v1/public/examples/ranking.json",
+    "gitBlobSha": "86f4b963f21e3acc656d20475af29a1c747f97ac",
+    "url": "https://github.com/zhouwen-giser/world-semantic-grounding-service/blob/75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5/contracts/consumers/sacs-world-analysis-v1/public/examples/ranking.json",
+    "reviewNote": "人工数据：候选中位排名值与代表样本值不同；Choice 与选择请求锚点关联。"
+  },
+  {
+    "id": "S16",
+    "title": "公共 Metric Ranking Schema",
+    "repository": "zhouwen-giser/world-semantic-grounding-service",
+    "ref": "75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5",
+    "path": "contracts/consumers/sacs-world-analysis-v1/public/metric-ranking.schema.json",
+    "gitBlobSha": "a24b78381ff00bde6e925b44dab7e4a013d28977",
+    "url": "https://github.com/zhouwen-giser/world-semantic-grounding-service/blob/75d14147f72ff27d3e2e1f15194ff6e25ba6e9f5/contracts/consumers/sacs-world-analysis-v1/public/metric-ranking.schema.json",
+    "reviewNote": "公共 discriminator、所选系列、候选与 coverage 等模型。"
+  },
+  {
+    "id": "S17",
+    "title": "SACS 环境配置示例",
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "ref": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "path": ".env.example",
+    "gitBlobSha": "e67777247cffd32836df40fa638c0a0fcd113f11",
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/blob/7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2/.env.example",
+    "reviewNote": "现有变量名、WSGS_BASE_URL 与 PostgreSQL harness 说明；不包含真实凭据。"
+  },
+  {
+    "id": "S18",
+    "title": "SACS AGENTS.md",
+    "repository": "zhouwen-giser/single-agent-chat-server",
+    "ref": "7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2",
+    "path": "AGENTS.md",
+    "gitBlobSha": "f366de49bfbe3c313cacba005dbf0f8c95cd2f15",
+    "url": "https://github.com/zhouwen-giser/single-agent-chat-server/blob/7838a52c74b0cfb3575f34cb46c13ceb6f7c0ef2/AGENTS.md",
+    "reviewNote": "产品/架构边界和分支、提交、Draft PR规则。"
+  }
+]

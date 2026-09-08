@@ -1,0 +1,299 @@
+id,required,track,phase,area,scenario,expected,evidence
+AC-C00-001,yes,GLOBAL,C00,Reconciliation,SACS main,Actual SHA recorded,SOURCE/GIT/CI
+AC-C00-002,yes,GLOBAL,C00,Reconciliation,PR15 state,Actual state/base/head/CI recorded,SOURCE/GIT/CI
+AC-C00-003,yes,GLOBAL,C00,Reconciliation,v0.4 geospatial branch,Actual remote head recorded,SOURCE/GIT/CI
+AC-C00-004,yes,GLOBAL,C00,Reconciliation,v0.4 compare,Ahead/behind and file delta recorded,SOURCE/GIT/CI
+AC-C00-005,yes,GLOBAL,C00,Reconciliation,v0.4 PR search,Actual PR presence/absence recorded,SOURCE/GIT/CI
+AC-C00-006,yes,GLOBAL,C00,Reconciliation,v0.4 CI,Exact-head workflow/status recorded,SOURCE/GIT/CI
+AC-C00-007,yes,GLOBAL,C00,Reconciliation,v0.5 branch search,Actual remote presence/absence recorded,SOURCE/GIT/CI
+AC-C00-008,yes,GLOBAL,C00,Reconciliation,WSGS PR6,Actual head/state/body drift recorded,SOURCE/GIT/CI
+AC-C00-009,yes,GLOBAL,C00,Reconciliation,GDPS main,Actual v0.2 ancestry recorded,SOURCE/GIT/CI
+AC-C00-010,yes,GLOBAL,C00,Reconciliation,GOWM main,Actual currentness repair ancestry recorded,SOURCE/GIT/CI
+AC-C00-011,yes,GLOBAL,C00,Reconciliation,Migration chain,Actual next migration discovered,SOURCE/GIT/CI
+AC-C00-012,yes,GLOBAL,C00,Reconciliation,Implementation matrix,Every feature classified,SOURCE/GIT/CI
+AC-C00-013,yes,GLOBAL,C00,Reconciliation,Stale report detection,Remote/local statement conflicts listed,SOURCE/GIT/CI
+AC-C00-014,yes,GLOBAL,C00,Reconciliation,Running environment,Actual service availability discovered,SOURCE/GIT/CI
+AC-C00-015,yes,GLOBAL,C00,Reconciliation,No protected action,No merge/tag/release/deploy,SOURCE/GIT/CI
+AC-V4-PRESERVE-001,yes,V0_4,C01,Implemented,WorldExplanation contract,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-002,yes,V0_4,C01,Implemented,Canonical explanation hash,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-003,yes,V0_4,C01,Implemented,Strict finding normalizer,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-004,yes,V0_4,C01,Implemented,Unknown schema fail-closed,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-005,yes,V0_4,C01,Implemented,Deterministic Chinese renderer,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-006,yes,V0_4,C01,Implemented,Deterministic English renderer,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-007,yes,V0_4,C01,Implemented,OpenAI projection,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-008,yes,V0_4,C01,Implemented,AG-UI projection,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-009,yes,V0_4,C01,Implemented,Map projection,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-010,yes,V0_4,C01,Implemented,Source product projection,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-011,yes,V0_4,C01,Implemented,Migration 0013,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-012,yes,V0_4,C01,Implemented,World explanation repository,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-013,yes,V0_4,C01,Implemented,Exact replay key,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-014,yes,V0_4,C01,Implemented,Physical PostgreSQL restart replay,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-015,yes,V0_4,C01,Implemented,Gap policy,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-016,yes,V0_4,C01,Implemented,Currentness policy,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-017,yes,V0_4,C01,Implemented,Finding reference resolver,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-018,yes,V0_4,C01,Implemented,Map selection validator,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-019,yes,V0_4,C01,Implemented,Conversation world focus extension,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-020,yes,V0_4,C01,Implemented,Authority Fusion boundary,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-021,yes,V0_4,C01,Implemented,Architecture guard,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-PRESERVE-022,yes,V0_4,C01,Implemented,Secret guard,Existing implementation remains source-compatible and its regression passes,SOURCE/UNIT/REAL_POSTGRES
+AC-V4-DELIVERY-001,yes,V0_4,C01,Delivery,Remote branch truth,Reports no longer claim branch is local-only,GIT/CI
+AC-V4-DELIVERY-002,yes,V0_4,C01,Delivery,Exact local/tracking/remote SHA,All equal,GIT/CI
+AC-V4-DELIVERY-003,yes,V0_4,C01,Delivery,Stacked PR,Created with correct base,GIT/CI
+AC-V4-DELIVERY-004,yes,V0_4,C01,Delivery,PR description,Truthful implemented/blocker summary,GIT/CI
+AC-V4-DELIVERY-005,yes,V0_4,C01,Delivery,Hosted push CI,Exact head passes,GIT/CI
+AC-V4-DELIVERY-006,yes,V0_4,C01,Delivery,Hosted PR CI,Exact head passes,GIT/CI
+AC-V4-DELIVERY-007,yes,V0_4,C01,Delivery,Migration gate,0013 contiguous,GIT/CI
+AC-V4-DELIVERY-008,yes,V0_4,C01,Delivery,Architecture gate,Pass,GIT/CI
+AC-V4-DELIVERY-009,yes,V0_4,C01,Delivery,Secret gate,Pass,GIT/CI
+AC-V4-DELIVERY-010,yes,V0_4,C01,Delivery,Container gate,Pass,GIT/CI
+AC-V4-DELIVERY-011,yes,V0_4,C01,Delivery,Compose gate,Pass when real upstream available,GIT/CI
+AC-V4-DELIVERY-012,yes,V0_4,C01,Delivery,No merge,PR remains user-controlled,GIT/CI
+AC-V4-HANDOFF-001,yes,V0_4,C02,WSGSHandoff,Consumer bundle,Authoritative WSGS bundle present,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-002,yes,V0_4,C02,WSGSHandoff,Checksums,All bytes verified,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-003,yes,V0_4,C02,WSGSHandoff,WSGS SHA,Matches actual runtime/candidate,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-004,yes,V0_4,C02,WSGSHandoff,Result schema hash,Matches,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-005,yes,V0_4,C02,WSGSHandoff,WorldFinding hash,Matches,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-006,yes,V0_4,C02,WSGSHandoff,SourceProduct hash,Matches,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-007,yes,V0_4,C02,WSGSHandoff,TypedGap hash,Matches,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-008,yes,V0_4,C02,WSGSHandoff,Transport mode,Explicit,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-009,yes,V0_4,C02,WSGSHandoff,Currentness mode,Explicit,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-010,yes,V0_4,C02,WSGSHandoff,GOWM provenance,Locked,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-011,yes,V0_4,C02,WSGSHandoff,GDPS provenance,Locked,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-012,yes,V0_4,C02,WSGSHandoff,No provisional promotion,Provisional lock cannot become READY,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-013,yes,V0_4,C02,WSGSHandoff,Generated consumer,No drift,UPSTREAM_LOCK/CONTRACT
+AC-V4-HANDOFF-014,yes,V0_4,C02,WSGSHandoff,Adapter capability check,Lock-driven,UPSTREAM_LOCK/CONTRACT
+AC-V4-SELECT-001,yes,V0_4,C03,Selection,Finding selection schema,Stable identity required,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-002,yes,V0_4,C03,Selection,Map selection schema,Stable identity required,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-003,yes,V0_4,C03,Selection,Reference-set selection,Stable identity required,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-004,yes,V0_4,C03,Selection,Principal ownership,Enforced,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-005,yes,V0_4,C03,Selection,Thread ownership,Enforced,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-006,yes,V0_4,C03,Selection,Grounding identity,Enforced,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-007,yes,V0_4,C03,Selection,Explanation identity,Enforced,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-008,yes,V0_4,C03,Selection,Finding/source hash,Enforced,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-009,yes,V0_4,C03,Selection,Selection revision,CAS,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-010,yes,V0_4,C03,Selection,Selection expiry,Enforced,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-011,yes,V0_4,C03,Selection,ReferenceKey path,Accepted,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-012,yes,V0_4,C03,Selection,Upstream selection token,Accepted,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-013,yes,V0_4,C03,Selection,Bare ordinal,Rejected as durable identity,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-014,yes,V0_4,C03,Selection,Cross-thread selection,Non-disclosure,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-015,yes,V0_4,C03,Selection,Cross-principal selection,Non-disclosure,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-SELECT-016,yes,V0_4,C03,Selection,Stale selection,Revalidate or reject,CONTRACT/REAL_POSTGRES/REAL_WSGS
+AC-V4-GAP-001,yes,V0_4,C04,GapCurrentness,normal completed,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-002,yes,V0_4,C04,GapCurrentness,completed empty,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-003,yes,V0_4,C04,GapCurrentness,data gap,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-004,yes,V0_4,C04,GapCurrentness,coverage gap,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-005,yes,V0_4,C04,GapCurrentness,capability gap,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-006,yes,V0_4,C04,GapCurrentness,reference ambiguity,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-007,yes,V0_4,C04,GapCurrentness,product ambiguity,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-008,yes,V0_4,C04,GapCurrentness,truncated,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-009,yes,V0_4,C04,GapCurrentness,source changed during query,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-010,yes,V0_4,C04,GapCurrentness,currentness CURRENT,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-011,yes,V0_4,C04,GapCurrentness,currentness CHANGED,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-GAP-012,yes,V0_4,C04,GapCurrentness,currentness NOT_AVAILABLE,Real WSGS evidence maps to exact SACS explanation semantics,REAL_WSGS/RUNNING_GOWM/REAL_GDPS
+AC-V4-E2E-001,yes,V0_4,C05,RealE2E,2号车当前位置的坡度是多少？,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-002,yes,V0_4,C05,RealE2E,A区内坡度15到30度的区域有哪些？,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-003,yes,V0_4,C05,RealE2E,A区内有哪些洪水高风险区域？,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-004,yes,V0_4,C05,RealE2E,2号车附近500米有哪些排水沟？,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-005,yes,V0_4,C05,RealE2E,A区内有哪些高地？,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-006,yes,V0_4,C05,RealE2E,A区内有哪些湿地？,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-007,yes,V0_4,C05,RealE2E,2号车当前位置是什么地表覆盖？,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-008,yes,V0_4,C05,RealE2E,2号车当前位置为什么属于该通行性等级？,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-009,yes,V0_4,C05,RealE2E,明确指定数据产品查询,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-010,yes,V0_4,C05,RealE2E,地图选择稳定引用后续,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-011,yes,V0_4,C05,RealE2E,Descriptor/Data gap,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-012,yes,V0_4,C05,RealE2E,Coverage gap,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-013,yes,V0_4,C05,RealE2E,Reference ambiguity,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-014,yes,V0_4,C05,RealE2E,Truncated result,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-015,yes,V0_4,C05,RealE2E,Unknown finding schema,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-016,yes,V0_4,C05,RealE2E,Source changed,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-017,yes,V0_4,C05,RealE2E,Foreign scope,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-E2E-018,yes,V0_4,C05,RealE2E,Hybrid Task/world/fusion,Real SACS→WSGS→GOWM→GDPS path with PostgreSQL and protocol parity,OPENAI/AGUI/REAL_WSGS/RUNNING_GOWM/REAL_GDPS/REAL_POSTGRES
+AC-V4-FINAL-001,yes,V0_4,C06,Final,SACS restart,Exact explanation replay,CI/GIT/REPORT
+AC-V4-FINAL-002,yes,V0_4,C06,Final,WSGS outage,Safe failure and recovery,CI/GIT/REPORT
+AC-V4-FINAL-003,yes,V0_4,C06,Final,OpenAI/AGUI parity,Same explanation hash,CI/GIT/REPORT
+AC-V4-FINAL-004,yes,V0_4,C06,Final,Required ledger,Zero fail/not-run/blocked,CI/GIT/REPORT
+AC-V4-FINAL-005,yes,V0_4,C06,Final,Exact head CI,Pass,CI/GIT/REPORT
+AC-V4-FINAL-006,yes,V0_4,C06,Final,PR Ready,Open and non-Draft when gates pass,CI/GIT/REPORT
+AC-V4-FINAL-007,yes,V0_4,C06,Final,Final report,Truthful,CI/GIT/REPORT
+AC-V4-FINAL-008,yes,V0_4,C06,Final,Decision,MERGE_READY only if all pass,CI/GIT/REPORT
+AC-V5-BASE-001,yes,V0_5,C07,Baseline,No remote v0.5 assumption,Search repeated,SOURCE/GIT
+AC-V5-BASE-002,yes,V0_5,C07,Baseline,Exact v0.4 parent,Ancestry locked,SOURCE/GIT
+AC-V5-BASE-003,yes,V0_5,C07,Baseline,Dedicated v0.5 branch,Created,SOURCE/GIT
+AC-V5-BASE-004,yes,V0_5,C07,Baseline,Stacked PR base,Correct,SOURCE/GIT
+AC-V5-BASE-005,yes,V0_5,C07,Baseline,AG-UI package versions,Actual versions locked,SOURCE/GIT
+AC-V5-BASE-006,yes,V0_5,C07,Baseline,WSGS analysis handoff search,Actual availability recorded,SOURCE/GIT
+AC-V5-BASE-007,yes,V0_5,C07,Baseline,No duplicate explanation contracts,v0.4 reused,SOURCE/GIT
+AC-V5-BASE-008,yes,V0_5,C07,Baseline,No upstream repository mutation,Protected,SOURCE/GIT
+AC-V5-AGUI-001,yes,V0_5,C08,AGUI,v0.2 official client regression,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-AGUI-002,yes,V0_5,C08,AGUI,v0.3 profile negotiation,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-AGUI-003,yes,V0_5,C08,AGUI,STEP_STARTED/FINISHED parse,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-AGUI-004,yes,V0_5,C08,AGUI,TOOL_CALL lifecycle parse,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-AGUI-005,yes,V0_5,C08,AGUI,STATE snapshot/delta parse,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-AGUI-006,yes,V0_5,C08,AGUI,ACTIVITY snapshot/delta parse,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-AGUI-007,yes,V0_5,C08,AGUI,Interrupt parse,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-AGUI-008,yes,V0_5,C08,AGUI,Resume parse,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-AGUI-009,yes,V0_5,C08,AGUI,approve-with-edits parse,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-AGUI-010,yes,V0_5,C08,AGUI,resumable remains false,Actual installed AG-UI contract validated,CONTRACT/AGUI_OFFICIAL_CLIENT
+AC-V5-HANDOFF-001,yes,V0_5,C08,WSGSAnalysisHandoff,analysis consumer lock,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-002,yes,V0_5,C08,WSGSAnalysisHandoff,plan schema,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-003,yes,V0_5,C08,WSGSAnalysisHandoff,event schema,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-004,yes,V0_5,C08,WSGSAnalysisHandoff,tool interaction schema,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-005,yes,V0_5,C08,WSGSAnalysisHandoff,revision compile schema,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-006,yes,V0_5,C08,WSGSAnalysisHandoff,cancel schema,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-007,yes,V0_5,C08,WSGSAnalysisHandoff,intervention schema,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-008,yes,V0_5,C08,WSGSAnalysisHandoff,transport mode,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-009,yes,V0_5,C08,WSGSAnalysisHandoff,sequence semantics,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-010,yes,V0_5,C08,WSGSAnalysisHandoff,idempotency semantics,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-011,yes,V0_5,C08,WSGSAnalysisHandoff,recovery semantics,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-012,yes,V0_5,C08,WSGSAnalysisHandoff,endpoint/profile lock,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-HANDOFF-013,yes,V0_5,C08,WSGSAnalysisHandoff,no inferred tool events,Authoritative WSGS-owned contract passes,UPSTREAM_LOCK/CONTRACT
+AC-V5-LIFECYCLE-001,yes,V0_5,C09,Lifecycle,AnalysisSession,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-002,yes,V0_5,C09,Lifecycle,AnalysisRevision,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-003,yes,V0_5,C09,Lifecycle,AnalysisRun,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-004,yes,V0_5,C09,Lifecycle,AnalysisNodeState axes,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-005,yes,V0_5,C09,Lifecycle,AnalysisEvent,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-006,yes,V0_5,C09,Lifecycle,AnalysisProjection,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-007,yes,V0_5,C09,Lifecycle,append-only migrations,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-008,yes,V0_5,C09,Lifecycle,event idempotency,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-009,yes,V0_5,C09,Lifecycle,sequence conflict,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-010,yes,V0_5,C09,Lifecycle,late old-plan event,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-011,yes,V0_5,C09,Lifecycle,Persist Before Publish,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-012,yes,V0_5,C09,Lifecycle,CAS active revision,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-LIFECYCLE-013,yes,V0_5,C09,Lifecycle,restart projection recovery,"Contract, runtime and real PostgreSQL evidence pass",SCHEMA/UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-001,yes,V0_5,C09,ObserverPolicy,read-only clear,AUTO_CONTINUE,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-002,yes,V0_5,C09,ObserverPolicy,long read-only,NOTIFY_ONLY,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-003,yes,V0_5,C09,ObserverPolicy,ordinary edit,QUEUE_REVISION,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-004,yes,V0_5,C09,ObserverPolicy,reference ambiguity,INTERRUPT_REQUIRED,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-005,yes,V0_5,C09,ObserverPolicy,product ambiguity,INTERRUPT_REQUIRED,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-006,yes,V0_5,C09,ObserverPolicy,permission,INTERRUPT_REQUIRED,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-007,yes,V0_5,C09,ObserverPolicy,budget,INTERRUPT_REQUIRED,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-008,yes,V0_5,C09,ObserverPolicy,controlled/irreversible,INTERRUPT_REQUIRED,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-009,yes,V0_5,C09,ObserverPolicy,data gap,AUTO_CONTINUE to explanation,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-010,yes,V0_5,C09,ObserverPolicy,coverage gap,AUTO_CONTINUE to explanation,UNIT/REAL_POSTGRES
+AC-V5-OBSERVER-011,yes,V0_5,C09,ObserverPolicy,capability gap,AUTO_CONTINUE to explanation,UNIT/REAL_POSTGRES
+AC-V5-PROJECTION-001,yes,V0_5,C10,AGUIProjection,Run projection,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-002,yes,V0_5,C10,AGUIProjection,Step projection,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-003,yes,V0_5,C10,AGUIProjection,ToolCall projection,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-004,yes,V0_5,C10,AGUIProjection,bounded ToolCallResult,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-005,yes,V0_5,C10,AGUIProjection,Activity snapshot,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-006,yes,V0_5,C10,AGUIProjection,Activity delta,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-007,yes,V0_5,C10,AGUIProjection,State snapshot,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-008,yes,V0_5,C10,AGUIProjection,State delta revision guard,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-009,yes,V0_5,C10,AGUIProjection,Custom transient command,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-010,yes,V0_5,C10,AGUIProjection,final explanation text,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-011,yes,V0_5,C10,AGUIProjection,v0.2 profile isolation,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-PROJECTION-012,yes,V0_5,C10,AGUIProjection,v0.3 profile isolation,Protocol contract and reference client pass,UNIT/AGUI_OFFICIAL_CLIENT/REFERENCE_CLIENT
+AC-V5-MAP-001,yes,V0_5,C10,MapFocus,INLINE_GEOJSON,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-002,yes,V0_5,C10,MapFocus,REFERENCE_SET,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-003,yes,V0_5,C10,MapFocus,PAYLOAD_REFERENCE,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-004,yes,V0_5,C10,MapFocus,executionFocus,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-005,yes,V0_5,C10,MapFocus,interventionFocus,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-006,yes,V0_5,C10,MapFocus,pinnedFocus,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-007,yes,V0_5,C10,MapFocus,conversationFocus,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-008,yes,V0_5,C10,MapFocus,inspectionFocus local-only,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-009,yes,V0_5,C10,MapFocus,map pan zero command,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-010,yes,V0_5,C10,MapFocus,map zoom zero command,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-011,yes,V0_5,C10,MapFocus,hover zero command,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-012,yes,V0_5,C10,MapFocus,ordinary click zero command,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-013,yes,V0_5,C10,MapFocus,authoritative geometry read-only,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-014,yes,V0_5,C10,MapFocus,user override separate,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-015,yes,V0_5,C10,MapFocus,old revision layers superseded,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-MAP-016,yes,V0_5,C10,MapFocus,layer failure does not fail analysis,Expected map/focus semantics pass,REFERENCE_CLIENT/UNIT
+AC-V5-STEER-001,yes,V0_5,C11,SteeringRevision,public args separate from execution args,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-002,yes,V0_5,C11,SteeringRevision,public schema hash,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-003,yes,V0_5,C11,SteeringRevision,editable path allowlist,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-004,yes,V0_5,C11,SteeringRevision,editor hints,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-005,yes,V0_5,C11,SteeringRevision,security fields absent,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-006,yes,V0_5,C11,SteeringRevision,proposal ownership,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-007,yes,V0_5,C11,SteeringRevision,revision CAS,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-008,yes,V0_5,C11,SteeringRevision,idempotent replay,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-009,yes,V0_5,C11,SteeringRevision,idempotency conflict,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-010,yes,V0_5,C11,SteeringRevision,one pending proposal,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-011,yes,V0_5,C11,SteeringRevision,expired tool interaction,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-012,yes,V0_5,C11,SteeringRevision,forbidden path,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-013,yes,V0_5,C11,SteeringRevision,invalid patched args,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-014,yes,V0_5,C11,SteeringRevision,SUGGEST_NEXT_REVISION keeps current run,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-015,yes,V0_5,C11,SteeringRevision,INTERRUPT_AND_APPLY policy,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-016,yes,V0_5,C11,SteeringRevision,APPLY_AFTER_CURRENT_NODE rejected,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-017,yes,V0_5,C11,SteeringRevision,WSGS compileRevision,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-018,yes,V0_5,C11,SteeringRevision,WSGS node reuse decision,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-019,yes,V0_5,C11,SteeringRevision,new immutable revision,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-STEER-020,yes,V0_5,C11,SteeringRevision,old evidence retained,Safe proposal/recompile/revision behavior passes,UNIT/REAL_POSTGRES/REAL_WSGS
+AC-V5-INTERRUPT-001,yes,V0_5,C11,InterruptCancel,ambiguity interrupt,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-INTERRUPT-002,yes,V0_5,C11,InterruptCancel,snapshot before interrupt,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-INTERRUPT-003,yes,V0_5,C11,InterruptCancel,intervention persistence,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-INTERRUPT-004,yes,V0_5,C11,InterruptCancel,same principal/thread resume,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-INTERRUPT-005,yes,V0_5,C11,InterruptCancel,parent run lineage,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-INTERRUPT-006,yes,V0_5,C11,InterruptCancel,cancel requested,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-INTERRUPT-007,yes,V0_5,C11,InterruptCancel,cancel acknowledged before cancelled,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-INTERRUPT-008,yes,V0_5,C11,InterruptCancel,cancel unsupported keeps old run,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-INTERRUPT-009,yes,V0_5,C11,InterruptCancel,gap does not interrupt,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-INTERRUPT-010,yes,V0_5,C11,InterruptCancel,intervention expiry,Exceptional intervention semantics pass,AGUI_OFFICIAL_CLIENT/REAL_WSGS/REAL_POSTGRES
+AC-V5-RECOVERY-001,yes,V0_5,C12,RecoveryClientTimeline,browser disconnect does not cancel,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-002,yes,V0_5,C12,RecoveryClientTimeline,reconnect state snapshot,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-003,yes,V0_5,C12,RecoveryClientTimeline,reconnect activity snapshot,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-004,yes,V0_5,C12,RecoveryClientTimeline,duplicate event idempotent,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-005,yes,V0_5,C12,RecoveryClientTimeline,same sequence different payload fails,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-006,yes,V0_5,C12,RecoveryClientTimeline,late event audit only,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-007,yes,V0_5,C12,RecoveryClientTimeline,WSGS outage safe,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-008,yes,V0_5,C12,RecoveryClientTimeline,SACS restart recovery,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-009,yes,V0_5,C12,RecoveryClientTimeline,state delta conflict resync,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-010,yes,V0_5,C12,RecoveryClientTimeline,reference client reducers,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-011,yes,V0_5,C12,RecoveryClientTimeline,engine-neutral MapEngineAdapter,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-012,yes,V0_5,C12,RecoveryClientTimeline,analysis time window,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-013,yes,V0_5,C12,RecoveryClientTimeline,playback cursor local-only,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-014,yes,V0_5,C12,RecoveryClientTimeline,GDPS CURRENT_BACKGROUND,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-RECOVERY-015,yes,V0_5,C12,RecoveryClientTimeline,resumable false,Recovery/client/time semantics pass,REFERENCE_CLIENT/REAL_POSTGRES/REAL_WSGS
+AC-V5-E2E-001,yes,V0_5,C13,RealE2E,unattended read-only zero interrupt,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-002,yes,V0_5,C13,RealE2E,map browse zero command,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-003,yes,V0_5,C13,RealE2E,pin without analysis,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-004,yes,V0_5,C13,RealE2E,non-blocking radius proposal,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-005,yes,V0_5,C13,RealE2E,range proposal partial rerun,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-006,yes,V0_5,C13,RealE2E,node reuse display,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-007,yes,V0_5,C13,RealE2E,old revision inspectable,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-008,yes,V0_5,C13,RealE2E,reference ambiguity interrupt,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-009,yes,V0_5,C13,RealE2E,intervention resume,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-010,yes,V0_5,C13,RealE2E,explicit stop and apply,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-011,yes,V0_5,C13,RealE2E,cancel unsupported,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-012,yes,V0_5,C13,RealE2E,data gap zero interrupt,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-013,yes,V0_5,C13,RealE2E,capability gap zero interrupt,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-014,yes,V0_5,C13,RealE2E,stale proposal conflict,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-015,yes,V0_5,C13,RealE2E,invalid edit path,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-016,yes,V0_5,C13,RealE2E,state-delta resync,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-017,yes,V0_5,C13,RealE2E,disconnect snapshot recovery,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-018,yes,V0_5,C13,RealE2E,layer load failure,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-019,yes,V0_5,C13,RealE2E,focus independence,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-020,yes,V0_5,C13,RealE2E,historical window/current background,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-021,yes,V0_5,C13,RealE2E,OpenAI/AGUI identity parity,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-E2E-022,yes,V0_5,C13,RealE2E,foreign scope non-disclosure,Real SACS→WSGS→GOWM→GDPS/STAS chain passes,AGUI_OFFICIAL_CLIENT/REAL_WSGS/RUNNING_GOWM/REAL_GDPS_OR_STAS/REAL_POSTGRES
+AC-V5-NONGOAL-001,yes,V0_5,C12,NonGoal,MVT,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-002,yes,V0_5,C12,NonGoal,Raster Tile,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-003,yes,V0_5,C12,NonGoal,CZML,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-004,yes,V0_5,C12,NonGoal,Presentation Proxy,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-005,yes,V0_5,C12,NonGoal,Full Event Cursor Replay,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-006,yes,V0_5,C12,NonGoal,resumable=true,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-007,yes,V0_5,C12,NonGoal,WebSocket Steering,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-008,yes,V0_5,C12,NonGoal,APPLY_AFTER_CURRENT_NODE,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-009,yes,V0_5,C12,NonGoal,Production Cesium UI,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-010,yes,V0_5,C12,NonGoal,Large-scale trajectory playback,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-011,yes,V0_5,C12,NonGoal,SACS direct GOWM client,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-012,yes,V0_5,C12,NonGoal,SACS direct GDPS client,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-013,yes,V0_5,C12,NonGoal,SACS direct STAS client,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-014,yes,V0_5,C12,NonGoal,SACS spatial computation,Absent or not advertised in v0.5,STATIC_GUARD
+AC-V5-NONGOAL-015,yes,V0_5,C12,NonGoal,SACS node reuse algorithm,Absent or not advertised in v0.5,STATIC_GUARD
+AC-FINAL-001,yes,GLOBAL,C14,FinalDelivery,Separate v4 denominator,Present,REPORT/GIT/CI
+AC-FINAL-002,yes,GLOBAL,C14,FinalDelivery,Separate v5 denominator,Present,REPORT/GIT/CI
+AC-FINAL-003,yes,GLOBAL,C14,FinalDelivery,No aggregate pass,Enforced,REPORT/GIT/CI
+AC-FINAL-004,yes,GLOBAL,C14,FinalDelivery,V4 source SHA,Exact,REPORT/GIT/CI
+AC-FINAL-005,yes,GLOBAL,C14,FinalDelivery,V5 source SHA,Exact if branch created,REPORT/GIT/CI
+AC-FINAL-006,yes,GLOBAL,C14,FinalDelivery,V4 PR URL/state,Reported,REPORT/GIT/CI
+AC-FINAL-007,yes,GLOBAL,C14,FinalDelivery,V5 PR URL/state,Reported if branch created,REPORT/GIT/CI
+AC-FINAL-008,yes,GLOBAL,C14,FinalDelivery,CI run IDs,Reported,REPORT/GIT/CI
+AC-FINAL-009,yes,GLOBAL,C14,FinalDelivery,Real environment fingerprint,Reported without secrets,REPORT/GIT/CI
+AC-FINAL-010,yes,GLOBAL,C14,FinalDelivery,Migration state,Reported,REPORT/GIT/CI
+AC-FINAL-011,yes,GLOBAL,C14,FinalDelivery,Architecture/security,Pass or explicit fail,REPORT/GIT/CI
+AC-FINAL-012,yes,GLOBAL,C14,FinalDelivery,Upstream blockers,Exact,REPORT/GIT/CI
+AC-FINAL-013,yes,GLOBAL,C14,FinalDelivery,No upstream repository write,Pass,REPORT/GIT/CI
+AC-FINAL-014,yes,GLOBAL,C14,FinalDelivery,No merge/tag/release/deploy,Pass,REPORT/GIT/CI
+AC-FINAL-015,yes,GLOBAL,C14,FinalDelivery,Final V4 decision,Allowed enum,REPORT/GIT/CI
+AC-FINAL-016,yes,GLOBAL,C14,FinalDelivery,Final V5 decision,Allowed enum,REPORT/GIT/CI

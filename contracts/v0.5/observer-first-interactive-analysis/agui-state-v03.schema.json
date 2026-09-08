@@ -1,0 +1,1267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:agui-state-v03:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "meta",
+    "conversation",
+    "analysis",
+    "map",
+    "timeline",
+    "proposalsById"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "io.sacs/agui-state/v0.3"
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stateRevision",
+        "snapshotHash"
+      ],
+      "properties": {
+        "stateRevision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "snapshotHash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "conversation": {
+      "type": "object"
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session",
+        "activeRevisionId",
+        "revisionsById",
+        "runsById",
+        "nodesById"
+      ],
+      "properties": {
+        "session": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schemaVersion",
+            "analysisId",
+            "principalId",
+            "threadId",
+            "groundingId",
+            "title",
+            "autonomyMode",
+            "status",
+            "activeRevisionId",
+            "latestRevisionNumber",
+            "observerPolicyHash",
+            "createdAt",
+            "updatedAt"
+          ],
+          "properties": {
+            "schemaVersion": {
+              "const": "sacs-analysis-session/1.0"
+            },
+            "analysisId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "principalId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "threadId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "groundingId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "autonomyMode": {
+              "enum": [
+                "OBSERVER",
+                "ADVISORY",
+                "INTERVENTION"
+              ]
+            },
+            "status": {
+              "enum": [
+                "ACTIVE",
+                "COMPLETED",
+                "CANCELLED",
+                "ARCHIVED"
+              ]
+            },
+            "activeRevisionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "latestRevisionNumber": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "observerPolicyHash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "activeRevisionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "revisionsById": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schemaVersion",
+              "revisionId",
+              "analysisId",
+              "revisionNumber",
+              "cause",
+              "wsgsPlanId",
+              "planHash",
+              "changedPaths",
+              "reusedNodeIds",
+              "invalidatedNodeIds",
+              "rerunNodeIds",
+              "status",
+              "createdAt"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "sacs-analysis-revision/1.0"
+              },
+              "revisionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "analysisId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "revisionNumber": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "parentRevisionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "parentRunId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "cause": {
+                "enum": [
+                  "INITIAL_QUERY",
+                  "USER_PROPOSAL",
+                  "USER_INTERVENTION",
+                  "AMBIGUITY_RESOLUTION",
+                  "SOURCE_ADVANCED",
+                  "AUTOMATIC_RETRY"
+                ]
+              },
+              "wsgsPlanId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "planHash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "changedPaths": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^/"
+                },
+                "maxItems": 128
+              },
+              "reusedNodeIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "maxItems": 256
+              },
+              "invalidatedNodeIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "maxItems": 256
+              },
+              "rerunNodeIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "maxItems": 256
+              },
+              "status": {
+                "enum": [
+                  "COMPILING",
+                  "READY",
+                  "QUEUED",
+                  "RUNNING",
+                  "SUPERSEDED",
+                  "COMPLETED",
+                  "PARTIAL",
+                  "FAILED"
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "runsById": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schemaVersion",
+              "runId",
+              "revisionId",
+              "attempt",
+              "status",
+              "startedAt"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "sacs-analysis-run/1.0"
+              },
+              "runId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "revisionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "attempt": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "parentRunId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "upstreamRunId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "status": {
+                "enum": [
+                  "STARTING",
+                  "RUNNING",
+                  "WAITING_INTERVENTION",
+                  "SUCCEEDED",
+                  "PARTIAL",
+                  "FAILED",
+                  "CANCEL_REQUESTED",
+                  "CANCELLED"
+                ]
+              },
+              "startedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "finishedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "nodesById": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schemaVersion",
+              "nodeId",
+              "executionStatus",
+              "relevanceStatus",
+              "currentness",
+              "inputLayerIds",
+              "outputLayerIds",
+              "findingIds"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "sacs-analysis-node-state/1.0"
+              },
+              "nodeId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "executionStatus": {
+                "enum": [
+                  "PENDING",
+                  "READY",
+                  "RUNNING",
+                  "SUCCEEDED",
+                  "PARTIAL",
+                  "FAILED",
+                  "CANCELLED"
+                ]
+              },
+              "relevanceStatus": {
+                "enum": [
+                  "ACTIVE",
+                  "SUPERSEDED",
+                  "INVALIDATED"
+                ]
+              },
+              "currentness": {
+                "enum": [
+                  "CURRENT",
+                  "STALE",
+                  "UNKNOWN"
+                ]
+              },
+              "inputHash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "outputHash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "inputLayerIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "maxItems": 128
+              },
+              "outputLayerIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "maxItems": 128
+              },
+              "findingIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "maxItems": 256
+              },
+              "progress": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "completed"
+                ],
+                "properties": {
+                  "completed": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "total": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "messageCode": {
+                    "type": "string",
+                    "maxLength": 128
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "sceneRevision",
+        "layersById",
+        "pinnedFocusById"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "io.sacs/map-scene/v1"
+        },
+        "sceneRevision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "layersById": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schemaVersion",
+              "layerId",
+              "title",
+              "role",
+              "representation",
+              "sourceAuthority",
+              "access",
+              "visibleByDefault",
+              "selectable",
+              "editable",
+              "analysisId",
+              "revisionId",
+              "findingIds",
+              "loadStatus",
+              "relevanceStatus",
+              "currentness",
+              "styleToken"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "sacs-map-layer/1.0"
+              },
+              "layerId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              "role": {
+                "enum": [
+                  "BASE_CONTEXT",
+                  "TASK_CONTEXT",
+                  "QUERY_INPUT",
+                  "TOOL_SCOPE",
+                  "INTERMEDIATE_RESULT",
+                  "FINAL_FINDING",
+                  "FOCUS",
+                  "GAP"
+                ]
+              },
+              "representation": {
+                "enum": [
+                  "INLINE_GEOJSON",
+                  "REFERENCE_SET",
+                  "PAYLOAD_REFERENCE"
+                ]
+              },
+              "sourceAuthority": {
+                "enum": [
+                  "USER",
+                  "SACS",
+                  "WSGS",
+                  "GOWM",
+                  "GDPS",
+                  "STAS",
+                  "SDAR"
+                ]
+              },
+              "access": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "kind",
+                      "data"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "const": "INLINE_GEOJSON"
+                      },
+                      "data": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "kind",
+                      "referenceKeys"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "const": "REFERENCE_SET"
+                      },
+                      "referenceKeys": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        },
+                        "maxItems": 256
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "kind",
+                      "payloadRef"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "const": "PAYLOAD_REFERENCE"
+                      },
+                      "payloadRef": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024
+                      }
+                    }
+                  }
+                ]
+              },
+              "visibleByDefault": {
+                "type": "boolean"
+              },
+              "selectable": {
+                "type": "boolean"
+              },
+              "editable": {
+                "type": "boolean"
+              },
+              "analysisId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "revisionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "nodeId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "findingIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "maxItems": 256
+              },
+              "loadStatus": {
+                "enum": [
+                  "PENDING",
+                  "LOADING",
+                  "READY",
+                  "ERROR"
+                ]
+              },
+              "relevanceStatus": {
+                "enum": [
+                  "ACTIVE",
+                  "SUPERSEDED"
+                ]
+              },
+              "currentness": {
+                "enum": [
+                  "CURRENT",
+                  "STALE",
+                  "UNKNOWN"
+                ]
+              },
+              "styleToken": {
+                "enum": [
+                  "base.context",
+                  "task.context",
+                  "analysis.input",
+                  "analysis.scope",
+                  "analysis.intermediate",
+                  "finding.primary",
+                  "finding.candidate",
+                  "focus.execution",
+                  "focus.intervention",
+                  "focus.pinned",
+                  "gap.data",
+                  "gap.coverage",
+                  "gap.ambiguity",
+                  "source.stale"
+                ]
+              }
+            }
+          }
+        },
+        "executionFocus": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "focusId",
+            "targetKind",
+            "semanticRole",
+            "currentness"
+          ],
+          "properties": {
+            "focusId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "targetKind": {
+              "enum": [
+                "WORLD_REFERENCE",
+                "FINDING_FEATURE",
+                "TOOL_INPUT",
+                "TOOL_OUTPUT",
+                "TASK_OBJECT",
+                "USER_GEOMETRY"
+              ]
+            },
+            "referenceKey": {
+              "type": "object"
+            },
+            "findingId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "featureId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "analysisNodeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "layerId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "semanticRole": {
+              "enum": [
+                "SUBJECT",
+                "ANCHOR",
+                "TARGET",
+                "QUERY_SCOPE",
+                "CANDIDATE",
+                "SELECTED_RESULT",
+                "EXCLUDED",
+                "WARNING"
+              ]
+            },
+            "displayName": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "currentness": {
+              "enum": [
+                "CURRENT",
+                "STALE",
+                "UNKNOWN"
+              ]
+            },
+            "validTime": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "end": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        },
+        "interventionFocus": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "focusId",
+            "targetKind",
+            "semanticRole",
+            "currentness"
+          ],
+          "properties": {
+            "focusId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "targetKind": {
+              "enum": [
+                "WORLD_REFERENCE",
+                "FINDING_FEATURE",
+                "TOOL_INPUT",
+                "TOOL_OUTPUT",
+                "TASK_OBJECT",
+                "USER_GEOMETRY"
+              ]
+            },
+            "referenceKey": {
+              "type": "object"
+            },
+            "findingId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "featureId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "analysisNodeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "layerId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "semanticRole": {
+              "enum": [
+                "SUBJECT",
+                "ANCHOR",
+                "TARGET",
+                "QUERY_SCOPE",
+                "CANDIDATE",
+                "SELECTED_RESULT",
+                "EXCLUDED",
+                "WARNING"
+              ]
+            },
+            "displayName": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "currentness": {
+              "enum": [
+                "CURRENT",
+                "STALE",
+                "UNKNOWN"
+              ]
+            },
+            "validTime": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "end": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        },
+        "pinnedFocusById": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "focusId",
+              "targetKind",
+              "semanticRole",
+              "currentness"
+            ],
+            "properties": {
+              "focusId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "targetKind": {
+                "enum": [
+                  "WORLD_REFERENCE",
+                  "FINDING_FEATURE",
+                  "TOOL_INPUT",
+                  "TOOL_OUTPUT",
+                  "TASK_OBJECT",
+                  "USER_GEOMETRY"
+                ]
+              },
+              "referenceKey": {
+                "type": "object"
+              },
+              "findingId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "featureId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "analysisNodeId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "layerId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "semanticRole": {
+                "enum": [
+                  "SUBJECT",
+                  "ANCHOR",
+                  "TARGET",
+                  "QUERY_SCOPE",
+                  "CANDIDATE",
+                  "SELECTED_RESULT",
+                  "EXCLUDED",
+                  "WARNING"
+                ]
+              },
+              "displayName": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "currentness": {
+                "enum": [
+                  "CURRENT",
+                  "STALE",
+                  "UNKNOWN"
+                ]
+              },
+              "validTime": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "sources"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "sacs-shared-timeline/1.0"
+        },
+        "analysisTimeWindow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "start",
+            "end",
+            "authority"
+          ],
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "authority": {
+              "enum": [
+                "EVENT_TIME",
+                "OBSERVED_TIME",
+                "VALID_TIME"
+              ]
+            }
+          }
+        },
+        "sources": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sourceKind",
+              "timeSemantics"
+            ],
+            "properties": {
+              "sourceKind": {
+                "enum": [
+                  "GOWM",
+                  "GDPS",
+                  "STAS",
+                  "SDAR"
+                ]
+              },
+              "timeSemantics": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "displayRole": {
+                "enum": [
+                  "LIVE",
+                  "HISTORICAL",
+                  "CURRENT_BACKGROUND",
+                  "PLANNED"
+                ]
+              },
+              "timeExtent": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "proposalsById": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schemaVersion",
+          "commandId",
+          "proposalId",
+          "analysisId",
+          "expectedRevisionId",
+          "expectedRevisionNumber",
+          "targetNodeId",
+          "publicArgsHash",
+          "editSchemaHash",
+          "patch",
+          "mode",
+          "idempotencyKey",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "const": "sacs-analysis-change-proposal/1.0"
+          },
+          "commandId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "proposalId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "analysisId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "expectedRevisionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "expectedRevisionNumber": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "targetNodeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "publicArgsHash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "editSchemaHash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "patch": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "op",
+                "path"
+              ],
+              "properties": {
+                "op": {
+                  "enum": [
+                    "add",
+                    "remove",
+                    "replace",
+                    "test"
+                  ]
+                },
+                "path": {
+                  "type": "string",
+                  "pattern": "^/"
+                },
+                "value": {}
+              }
+            }
+          },
+          "mode": {
+            "enum": [
+              "SUGGEST_NEXT_REVISION",
+              "INTERRUPT_AND_APPLY"
+            ]
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "status": {
+            "enum": [
+              "SUBMITTED",
+              "VALIDATING",
+              "REJECTED",
+              "CONFLICT",
+              "ACCEPTED",
+              "COMPILING",
+              "COMPILE_FAILED",
+              "COMPILED",
+              "APPLIED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appliedRevisionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          }
+        }
+      }
+    },
+    "pendingIntervention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "interventionId",
+        "analysisId",
+        "revisionId",
+        "runId",
+        "interruptId",
+        "reason",
+        "status",
+        "requestPayload",
+        "createdAt"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "sacs-analysis-intervention/1.0"
+        },
+        "interventionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "analysisId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "revisionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "runId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "interruptId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "reason": {
+          "enum": [
+            "AMBIGUITY",
+            "PERMISSION",
+            "HIGH_RISK",
+            "BUDGET",
+            "USER_REQUESTED"
+          ]
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "RESOLVED",
+            "EXPIRED",
+            "CANCELLED"
+          ]
+        },
+        "requestPayload": {
+          "type": "object"
+        },
+        "responsePayload": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolvedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "worldExplanation": {
+      "type": "object"
+    }
+  }
+}

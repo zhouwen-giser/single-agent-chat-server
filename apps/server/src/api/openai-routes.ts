@@ -42,6 +42,8 @@ export interface ChatRunnerContext {
   readonly userText: string;
   readonly clientMessages: readonly ClientHistoryMessage[];
   readonly identity: OpenWebUiIdentity;
+  /** Internal principal resolved by persistence; JWT subject remains identity.userId. */
+  readonly principalId?: string;
   readonly openWebUi: OpenWebUiRequestContext;
   readonly threadId: string;
   readonly runId: string;
@@ -215,6 +217,9 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
         userText,
         clientMessages,
         identity,
+        ...(thread.principalId === undefined
+          ? {}
+          : { principalId: thread.principalId }),
         openWebUi,
         threadId: thread.threadId,
         runId: id,
@@ -253,7 +258,7 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
         return;
       }
       await options.persistAssistantMessage({
-        principalId: identity.userId,
+        principalId: thread.principalId ?? identity.userId,
         threadId: thread.threadId,
         externalMessageId: openWebUi.messageId,
         requestId: openWebUi.userMessageId,

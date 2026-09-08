@@ -1,0 +1,251 @@
+{
+  "name": "SACS v0.4/v0.5 Closure and Qualification Codex Goal",
+  "packageVersion": "R1",
+  "generatedAt": "2026-08-30",
+  "targetRepository": "zhouwen-giser/single-agent-chat-server",
+  "knownBaselines": {
+    "sacsMain": "f60083c03c2c0aa602ab711090b6ff79c1b77d3e",
+    "sacsV04Base": "2dcbbe1c6074a54e0c332337f03a4e5574c19e06",
+    "sacsV04Geospatial": "0d67125ba1e8f2d69ad07480bacbe7ecf5bab774",
+    "wsgs": "65c3716f956c688f48e08a43322548b75af849b8",
+    "gdpsMain": "574b6aa90364c67e2f59baf7714013cdd3d48526",
+    "gowmMain": "f2894d86eeca121f9cea76c70797ece3b091d51f",
+    "gowmRepair": "931366884853dd571de9e1c159e3d94a3dadcebe"
+  },
+  "v04Branch": "codex/sacs-v0.4-geospatial-explanation",
+  "v05Branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+  "schemas": 8,
+  "requiredAcceptance": 298,
+  "files": [
+    {
+      "path": "00_REMOTE_IMPLEMENTATION_RECONCILIATION.md",
+      "bytes": 650,
+      "sha256": "d716f1281560c4a1ca2320a8b522e93abcb6788595a7eb222e925346636739ad"
+    },
+    {
+      "path": "01_V04_REMOTE_DELIVERY.md",
+      "bytes": 383,
+      "sha256": "591c19f610f2baa369a10b2f6a7f4380337e368ec8e611069762d50d3cca0ce4"
+    },
+    {
+      "path": "02_V04_WSGS_HANDOFF.md",
+      "bytes": 405,
+      "sha256": "287b24efb05788e97dc3e459c62f717d739a772bbaf6e9aed5635ab0f0d727a5"
+    },
+    {
+      "path": "03_V04_STRUCTURED_SELECTION.md",
+      "bytes": 403,
+      "sha256": "10092874eef74f0cae0c6c2038f1b23fff3512fb2c2b246a9456e3d3db663e7e"
+    },
+    {
+      "path": "04_V04_GAP_CURRENTNESS.md",
+      "bytes": 319,
+      "sha256": "eda301339a502b6942fc1261c85b6b537f4e6450c57e9e3eecbd2762646e34b8"
+    },
+    {
+      "path": "05_V04_REAL_E2E_AND_CLOSURE.md",
+      "bytes": 386,
+      "sha256": "d5a8a690c0a674dc3be973d64d5eb76cdaab8dd1242febfe269274ee8f4f06b5"
+    },
+    {
+      "path": "06_V05_BRANCH_AND_PREREQUISITES.md",
+      "bytes": 351,
+      "sha256": "19260adae9c364f3d05e4ddaa1cf7b8f7b98bde043519a1f84647ba6fa79c08e"
+    },
+    {
+      "path": "07_V05_AGUI_WSGS_CONSUMER.md",
+      "bytes": 312,
+      "sha256": "f7a1c2266923e7cadf09b9addaf434b20077bdc186661144af81e803076eb62f"
+    },
+    {
+      "path": "08_V05_LIFECYCLE_POLICY.md",
+      "bytes": 289,
+      "sha256": "6554d6464b48c3c59097c4c6275c16b45f4b79419c58610dfdab2f35287605b2"
+    },
+    {
+      "path": "09_V05_MAP_AND_PROJECTION.md",
+      "bytes": 293,
+      "sha256": "a7bceab8684ae17301f7607328921d3c7e4563ca2c5306c6f5c395a5bd0d14cc"
+    },
+    {
+      "path": "10_V05_STEERING_REVISION.md",
+      "bytes": 303,
+      "sha256": "a2bd6939af62f42a3bf063bb5d0ef829f21e5c033c647b41f1329508ece23a9e"
+    },
+    {
+      "path": "11_V05_RECOVERY_CLIENT_TIMELINE.md",
+      "bytes": 308,
+      "sha256": "d6f3c0e76cc9388fa3c750336cd0753392d0a9859e1c3bd32e8cbc49f2e9c4fe"
+    },
+    {
+      "path": "12_V05_REAL_E2E_AND_FINAL.md",
+      "bytes": 415,
+      "sha256": "a306c2ccdf184f760d7d7ceeb77700703bbf9a0ada03284df5d42f7fb54b659b"
+    },
+    {
+      "path": "13_BRANCH_PR_POLICY.md",
+      "bytes": 391,
+      "sha256": "5a433e118aae7639f606587698a0be9dc354055665d363748c787aff8c69b0c7"
+    },
+    {
+      "path": "14_ACCEPTANCE_EVIDENCE.md",
+      "bytes": 254,
+      "sha256": "163bdd76da9da3d02466c34c4b51e057f8204ab91c3fa2dacb79435857e6ea13"
+    },
+    {
+      "path": "15_FINAL_DECISIONS.md",
+      "bytes": 247,
+      "sha256": "7834cb6b695e3ba8d5102ea977acc94c4e1b8bfd22b95362d448b07852c02e8a"
+    },
+    {
+      "path": "CODEX_GOAL_PROMPT.md",
+      "bytes": 1041,
+      "sha256": "3b331135dba23b5ad52f7be250a088b8ea0fab72ed4f6eec41036bfd9e92a007"
+    },
+    {
+      "path": "CODEX_MASTER_PROMPT.md",
+      "bytes": 14529,
+      "sha256": "77f6d4b6a5209d53007bd614bab823ec6268d56b7cb24c83db06a6c2783ab494"
+    },
+    {
+      "path": "FULL_TASK_PACKAGE.md",
+      "bytes": 25095,
+      "sha256": "efa9666ee51c5be0f9ae64c41c5364e5ca815a2b76c2299ff31bea7c1815ec6f"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2879,
+      "sha256": "acea37ede084261e675c0f6246c99c4656f51864fbdd720bd97e6ae0d9ea4c2e"
+    },
+    {
+      "path": "START_PROMPT.txt",
+      "bytes": 436,
+      "sha256": "75da5defdc2005f57b5acd47bf7c9779a8f9a0b9b6b50a125e65a3a0645c9c49"
+    },
+    {
+      "path": "TASK_INDEX.md",
+      "bytes": 1255,
+      "sha256": "b7ec8cd8a5dfa860196e62e9520ff9dcc15e441417eaf19215634564ab60b0df"
+    },
+    {
+      "path": "acceptance/acceptance-matrix.csv",
+      "bytes": 39837,
+      "sha256": "478477acd06bf011fe58417c955f1e5b072ae33c8e1e51212f5591fd4d26e80b"
+    },
+    {
+      "path": "acceptance/evidence-map.template.json",
+      "bytes": 925,
+      "sha256": "583c4126265f9683e3b049848ccc5cac8b13c4b959617a04b6461f630b951660"
+    },
+    {
+      "path": "acceptance/traceability.csv",
+      "bytes": 692,
+      "sha256": "c02f2b5deaba4dcfd84b08790b124f4fcbeb5454bb0b1d6186f272160bb0aca1"
+    },
+    {
+      "path": "config/branch-plan.json",
+      "bytes": 636,
+      "sha256": "08fa2418b8f11233a88e797df52e0e0d31a1498a103eebdd2c399163d1dcedc2"
+    },
+    {
+      "path": "config/final-decision-policy.json",
+      "bytes": 621,
+      "sha256": "c906fc5ceb6432bbcbc4a780a09e7c7129f608d62bed9630a3f3e8788e3877ff"
+    },
+    {
+      "path": "config/v04-closure-gates.json",
+      "bytes": 588,
+      "sha256": "8e978af9d8a9cc2d02eb9337cb8c43c163c5bdd1ac29d402e7878e44aca72794"
+    },
+    {
+      "path": "config/v05-implementation-gates.json",
+      "bytes": 790,
+      "sha256": "127f6d0fe161e0556f610cce9ca2585987aabfdc1934f8096029ade10320a874"
+    },
+    {
+      "path": "contracts/acceptance-evidence-map.schema.json",
+      "bytes": 870,
+      "sha256": "639f8e477d9adf20e3a7836c86a4dc4004a0aa698b029dfb075549298db7f560"
+    },
+    {
+      "path": "contracts/branch-plan.schema.json",
+      "bytes": 1481,
+      "sha256": "0e86a15f860a29a0d61d39ef9d5f8502c880365709fd3004599d11505f32ecf9"
+    },
+    {
+      "path": "contracts/closure-decision.schema.json",
+      "bytes": 1664,
+      "sha256": "d4d25db54e73b64bae31aa5d14ce6ba17d642bda335341e0aedcf40166fecdfd"
+    },
+    {
+      "path": "contracts/implementation-reconciliation.schema.json",
+      "bytes": 2452,
+      "sha256": "d88880621179a7d13f3bc449054a976088c1b887b11c7ecbbcf7d8cc5960e66d"
+    },
+    {
+      "path": "contracts/real-e2e-report.schema.json",
+      "bytes": 1262,
+      "sha256": "28183e861b3d53937cf4f2afa613523ca2bfbf09b7bfd250b98cd14b0bd82762"
+    },
+    {
+      "path": "contracts/remote-delivery-report.schema.json",
+      "bytes": 1211,
+      "sha256": "fc8e88e02a2c955d28c99cb407dd36d4999cecb134b799d19e3271da4a15808a"
+    },
+    {
+      "path": "contracts/structured-selection.schema.json",
+      "bytes": 1591,
+      "sha256": "f7e993843a580488411c3783935ae9f6fbed207d1264c3f247693a5766465071"
+    },
+    {
+      "path": "contracts/upstream-dependency-report.schema.json",
+      "bytes": 1049,
+      "sha256": "fe308796cff7c28221c1b26461d03c75134a6343f703f4cd8b3d16ded36e5119"
+    },
+    {
+      "path": "dependencies/known-remote-state.json",
+      "bytes": 1487,
+      "sha256": "6fb76e7c01038606de16379659b59529339d1318d83aea227017bb2be3edb500"
+    },
+    {
+      "path": "runbooks/CLOSURE_RUNBOOK.md",
+      "bytes": 509,
+      "sha256": "2b8dc245b054f594e5e4b5ebc46b7c55dc01d4f0506afb02280a428ff819b277"
+    },
+    {
+      "path": "scripts/preflight.sh",
+      "bytes": 196,
+      "sha256": "9558adf365dc6aa12cd2ccf6fe759213e26cd89dff5261a9349ffee5b9c8f9e2"
+    },
+    {
+      "path": "scripts/validate_task_package.py",
+      "bytes": 4557,
+      "sha256": "41120e77bcbefd128ee0fdfc507273dfd9e0712f095679d55648e34640b2e34d"
+    },
+    {
+      "path": "templates/FINAL_REPORT_TEMPLATE.md",
+      "bytes": 419,
+      "sha256": "52fc562d1ad857a1e01fd889731d06e7a0f84c26f77a2de80058b1008e535494"
+    },
+    {
+      "path": "templates/PHASE_REPORT_TEMPLATE.md",
+      "bytes": 230,
+      "sha256": "e2266e43d348886de8b54dbf11191ea036139823a60c81c98cad6ef93fb73b76"
+    },
+    {
+      "path": "templates/RECONCILIATION_REPORT_TEMPLATE.md",
+      "bytes": 274,
+      "sha256": "90e27bfc5a072ed93f82e8ad9314123e135a7a6900b6268f77b23dc901373613"
+    },
+    {
+      "path": "upstream-requests/WSGS_ANALYSIS_PRESENTATION_REQUEST.md",
+      "bytes": 403,
+      "sha256": "7a63756281d12620b945bb02fcaa528e584ab906cc3c5626ed8e63e40d79988a"
+    },
+    {
+      "path": "upstream-requests/WSGS_GEOSPATIAL_HANDOFF_REQUEST.md",
+      "bytes": 522,
+      "sha256": "d2dae3a65acf5eef5b757e52c17d78cd7d16e227815df3a8359eeefbb5ad7190"
+    }
+  ]
+}

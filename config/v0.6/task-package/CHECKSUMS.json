@@ -1,0 +1,216 @@
+{
+  "schemaVersion": "sacs-v06-task-package-checksums/1.0",
+  "algorithm": "SHA-256",
+  "generatedAt": "2026-09-06T05:32:35Z",
+  "files": [
+    {
+      "path": "ARCHITECTURE_DECISIONS.md",
+      "sha256": "sha256:4c94e5670d16da13e7e8c3d4247d86944399627976a5d5726cdfa82cf12aba2f"
+    },
+    {
+      "path": "CODEX_GOAL_PROMPT.md",
+      "sha256": "sha256:dab5ba6027ab67972d829e09e29ef85079ba52755403835ddd5178af3ef861fa"
+    },
+    {
+      "path": "DESIGN_BASELINE.md",
+      "sha256": "sha256:e757148eb0d90a0715240940022fe8abd4ba3314a107740ddf80d2aa778be276"
+    },
+    {
+      "path": "IMPLEMENTATION_FILE_MAP.md",
+      "sha256": "sha256:5e57a8a5f6cd5d584194e60c7515d860388553c55f018ef89d093a951430f720"
+    },
+    {
+      "path": "OBSERVED_GAPS_AND_CONDITIONALS.md",
+      "sha256": "sha256:fdcc819f75f9c91fe46b7116e7eb2c4a06fcd5d7be77b1b851da004b7453d658"
+    },
+    {
+      "path": "PACKAGE_MANIFEST.json",
+      "sha256": "sha256:192c67865d39c0fb23dcb6ff3b5ea2a677776135ada3d931ab683ee09c0bfb72"
+    },
+    {
+      "path": "PRODUCT_BOUNDARY.md",
+      "sha256": "sha256:f828bb61a8041e14ca3ae3f96dae0f21735e828c3afea64486a4ee9b8e17a328"
+    },
+    {
+      "path": "README.md",
+      "sha256": "sha256:1ce62970b96dc32d37092aabf92ed0e66ac4b884c6a1801b4c6dd7f03cce148a"
+    },
+    {
+      "path": "SACS_V0.6_WSGS_FULL_FUNCTIONAL_INTEGRATION_GOAL.md",
+      "sha256": "sha256:8a1804620cd78e655f0e9d42479e2dd375ec2176c3a42ead4655b1d0af1c1923"
+    },
+    {
+      "path": "SOURCE_BASELINE.json",
+      "sha256": "sha256:21cd8ee1bab98cfe8425eed1a1a55e687ea761dfb955a745eee2c89b306302fa"
+    },
+    {
+      "path": "acceptance/TRACEABILITY.md",
+      "sha256": "sha256:dad14aa4a1b2d1130ffdc6bc91b48ce9bf588da4a2a785d83f27e832bf32e1ef"
+    },
+    {
+      "path": "acceptance/acceptance-matrix.csv",
+      "sha256": "sha256:b62df2718910df94f00b4bf680fb0cf7eefea0164ba22be1b5bcad72eac2d55a"
+    },
+    {
+      "path": "acceptance/acceptance-matrix.json",
+      "sha256": "sha256:9c004db6d3dd697a2bdcaf95e7e2ed2f57fa369983da8bba770295d1ca030434"
+    },
+    {
+      "path": "acceptance/e2e-cases.json",
+      "sha256": "sha256:c37d823518f0467295f4a620cd9fe0d090809ccac6bf31472db5525c342f7414"
+    },
+    {
+      "path": "acceptance/required-commands.json",
+      "sha256": "sha256:0f91901b0f0de19454f3d9427198aa78962be510f007ecc3abef2f6832cce129"
+    },
+    {
+      "path": "contracts/ADVANCED_RESULT_CONSUMER.md",
+      "sha256": "sha256:e5bac180ae9652e60ea3c461cb32adc5d2bae73a760fbfa0e48872ce92c46f29"
+    },
+    {
+      "path": "contracts/ANALYSIS_SOURCE_ADAPTER.md",
+      "sha256": "sha256:bd4e6e94843f28bf636ed19741a2912d498b3d78dd34884305f74acbf0ffaf10"
+    },
+    {
+      "path": "contracts/API_CONFIG_READINESS_TELEMETRY.md",
+      "sha256": "sha256:36021e7c2fdd1d6bacd0fda8ca00e4987f6b8f6b105301e6c32a998f0eed40cb"
+    },
+    {
+      "path": "contracts/MAP_TIMELINE_ANSWER_AGUI.md",
+      "sha256": "sha256:168cc3d26a15ba62a4cf1b7e2e605b4201f043700232cb6a0398d028bd7c033c"
+    },
+    {
+      "path": "contracts/PERSISTENCE_POLLING_RECOVERY.md",
+      "sha256": "sha256:ff6387aa3016233d839aa71320ee0556b6a15e897a1f230a021fb0813f447f79"
+    },
+    {
+      "path": "contracts/SECURITY_EVIDENCE_NONCLAIMS.md",
+      "sha256": "sha256:2af6866780555366c1e270e91028265df4bbb8885fac478ff99198f4fb20e5ab"
+    },
+    {
+      "path": "contracts/WORLD_ANALYSIS_VIEW_MODEL.md",
+      "sha256": "sha256:24f92b9c37c59cf6e25f5f96074972a1ece69ad375562c7c38698d583da52f32"
+    },
+    {
+      "path": "contracts/WSGS_CONTRACT_NEGOTIATION.md",
+      "sha256": "sha256:9be1f33c5164a1bcb95f5d4cb75ba7a5c154a74aaf30878dcda29da93ee721a6"
+    },
+    {
+      "path": "phases/S00_SOURCE_LOCK_AND_RECONCILIATION.md",
+      "sha256": "sha256:5ab2f04bdee11635366ff2c42578c43258e7df86716fcb605b03451c4fd84f8e"
+    },
+    {
+      "path": "phases/S01_ANALYSIS_SOURCE_AND_MIGRATION.md",
+      "sha256": "sha256:fc1ac0199a83e4a83849865cd551a2ee2ad3df7d97c3c0770b1ef3fd4513ba15"
+    },
+    {
+      "path": "phases/S02_WSGS_NEGOTIATION_AND_GROUNDING_JOB_ADAPTER.md",
+      "sha256": "sha256:7743f1fed6e493fdbbed1bb2ea8c0f7935f2315b9ea7bc88703f2d80fb4728c4"
+    },
+    {
+      "path": "phases/S03_OBSERVED_LIFECYCLE_PUMP_AND_RECOVERY.md",
+      "sha256": "sha256:81b0103adc7a9e874546bb496d2b64ad274fa1a316505e60b933783e7f18913e"
+    },
+    {
+      "path": "phases/S04_RESULT_CONSUMER_AND_VIEW_MODEL.md",
+      "sha256": "sha256:571efd465f20e6d36aae19a4a83dfc7af4616e5c1de91c0ab503757bec607482"
+    },
+    {
+      "path": "phases/S05_TEXT_MAP_TIMELINE_AND_AGUI.md",
+      "sha256": "sha256:c5552cb5411a782fa7b045a4b39b1086a5539b234b3a3c775a3d997bf676ac5f"
+    },
+    {
+      "path": "phases/S06_MULTITURN_INTERVENTION_REVISION_CANCEL.md",
+      "sha256": "sha256:2fd5431016872ebc852e5accfc6df7b92bdccee3db58b438f2c336765da2e6f4"
+    },
+    {
+      "path": "phases/S07_PRODUCTION_COMPOSITION_AND_OPERATIONS.md",
+      "sha256": "sha256:792deceb691169d2b8fcdbd1d28700ea87e559dc89b53182a33c5d218df890d6"
+    },
+    {
+      "path": "phases/S08_REAL_WSGS_INTEGRATION.md",
+      "sha256": "sha256:c9de106003af232309c384d884a73626240b141330ce657019612c97f2fc26c4"
+    },
+    {
+      "path": "phases/S09_FINAL_QUALIFICATION_AND_PR.md",
+      "sha256": "sha256:d0bbea3b38019e475703aa6fb8b3a38513cf0b2e3b55b9efaa728b8bb4d46ca6"
+    },
+    {
+      "path": "phases/phase-plan.json",
+      "sha256": "sha256:3f0bb249feadf66b977ce3c565c124722cf185db9ed1b4660121feeaf7b06eb0"
+    },
+    {
+      "path": "schemas/acceptance-ledger.schema.json",
+      "sha256": "sha256:84c0b42f1aa6b9810c3ae322466e384a97d324b403066531ef4097df17a42d38"
+    },
+    {
+      "path": "schemas/acceptance-matrix.schema.json",
+      "sha256": "sha256:ad1179c960bbe900b1da58d0e776a17193aa03adbef178c54bed1c17e3fee87c"
+    },
+    {
+      "path": "schemas/e2e-cases.schema.json",
+      "sha256": "sha256:95062c0be2a75562806ddf325c307ed1bc6edf07788a5551b86149988fa4bccc"
+    },
+    {
+      "path": "schemas/integration-evidence.schema.json",
+      "sha256": "sha256:344299d11c2fbcfb5f8a710a8641a72920e2366cb79ba1ffb5bebdf73a68df59"
+    },
+    {
+      "path": "schemas/phase-report.schema.json",
+      "sha256": "sha256:415eeff0e26c13af71bd75d70c1e3b3ad513b1f477217348f9091cecb3e3064d"
+    },
+    {
+      "path": "schemas/progressive-status.schema.json",
+      "sha256": "sha256:e7b15c927dc623775397662d679fa65d14cfab8c87863813a8fd294a931fb540"
+    },
+    {
+      "path": "schemas/source-lock.schema.json",
+      "sha256": "sha256:f9b4fa421d003eebbd1991ac18e3c2c08881ab89c4fd00bef649a498972f953c"
+    },
+    {
+      "path": "schemas/task-package-manifest.schema.json",
+      "sha256": "sha256:50177cdfdbf61275281929b266770096a8d327236fe9f638d45bfccb5e39e84d"
+    },
+    {
+      "path": "schemas/verification-evidence.schema.json",
+      "sha256": "sha256:4a83bf49f783595973ccc82af4eed3482acb667efe00ffad6149fed600e88895"
+    },
+    {
+      "path": "scripts/verify_task_package.py",
+      "sha256": "sha256:6a885865b1dab64d989597d13e41a69d47499514fc4c0d3d95e001b253e2c56a"
+    },
+    {
+      "path": "templates/ACCEPTANCE_LEDGER.template.json",
+      "sha256": "sha256:c05df2fa6464d57155841bef71801bb198eb2e514beded4f949c4da562cee8c5"
+    },
+    {
+      "path": "templates/DEVELOPMENT_VERIFICATION.template.json",
+      "sha256": "sha256:3c59d95541aa69b0ad532c565d4bf7a28944872c4faf9cba9c5cce7c81c155ec"
+    },
+    {
+      "path": "templates/FINAL_REPORT.template.md",
+      "sha256": "sha256:54d4493a689070e1449dff87f3c13f00403506930348ad518fa834978038a1e0"
+    },
+    {
+      "path": "templates/INTEGRATION_EVIDENCE.template.json",
+      "sha256": "sha256:2c1b95a04386f25a0304321fd97bc285dd5136307d4e1e3f2b764ab0a7c3824f"
+    },
+    {
+      "path": "templates/PHASE_REPORT.template.json",
+      "sha256": "sha256:81400e1a0894de47abfb59c4d1f9a4ee72e1d8560d062f2113fb366fdb69405d"
+    },
+    {
+      "path": "templates/PROGRESSIVE_STATUS.template.json",
+      "sha256": "sha256:864cb63c190f4be4572427274b4dc029f0a0110cf1a9fa38978b105ba73702ff"
+    },
+    {
+      "path": "templates/PR_BODY.template.md",
+      "sha256": "sha256:6a5c67b7da37ce8eda4c76cf437ea16093ceaa22f89e5e530396cd6b247719e8"
+    },
+    {
+      "path": "templates/SOURCE_LOCK.template.json",
+      "sha256": "sha256:83bb1aa62a36b89f74df56d4c5c44a172237127bc648c6cfe014a827a06ae2e2"
+    }
+  ],
+  "bundleHash": "sha256:3d7b224777a3c602e6857ee8580f540627ee887f6f6237e6b4b858d0296eae57"
+}

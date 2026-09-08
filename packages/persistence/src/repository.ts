@@ -105,7 +105,7 @@ export class ChatPersistenceRepository {
         `,
         [randomUUID(), input.openWebUiChatId, principalId, thread.threadId],
       );
-      return thread;
+      return { ...thread, principalId };
     });
   }
 

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "sacs-v05-acceptance-evidence-map/1.0",
+  "entries": [
+    {
+      "acceptanceId": "AC-A14-E2E-01",
+      "status": "NOT_RUN",
+      "evidence": [
+        {
+          "type": "REAL_CHAIN",
+          "report": "reports/v0.5/A14-real-e2e.json",
+          "caseId": "AUTO-01"
+        }
+      ]
+    }
+  ],
+  "allowedEvidenceTypes": [
+    "SOURCE_LOCK",
+    "STATIC_GUARD",
+    "SCHEMA",
+    "UNIT",
+    "CONTRACT",
+    "REAL_POSTGRES",
+    "FAKE_WSGS",
+    "REAL_WSGS",
+    "RUNNING_GOWM_GATEWAY",
+    "REAL_GDPS_OR_STAS",
+    "AGUI_OFFICIAL_CLIENT",
+    "REFERENCE_CLIENT",
+    "RECOVERY",
+    "SECURITY",
+    "CI",
+    "GIT",
+    "REPORT_ASSERTION",
+    "LIVE_DISCOVERY",
+    "UPSTREAM_LOCK",
+    "INTEGRATION",
+    "REAL_CHAIN"
+  ]
+}

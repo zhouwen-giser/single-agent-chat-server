@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:timeline-projection:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sources"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-shared-timeline/1.0"
+    },
+    "analysisTimeWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end",
+        "authority"
+      ],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authority": {
+          "enum": [
+            "EVENT_TIME",
+            "OBSERVED_TIME",
+            "VALID_TIME"
+          ]
+        }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceKind",
+          "timeSemantics"
+        ],
+        "properties": {
+          "sourceKind": {
+            "enum": [
+              "GOWM",
+              "GDPS",
+              "STAS",
+              "SDAR"
+            ]
+          },
+          "timeSemantics": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "displayRole": {
+            "enum": [
+              "LIVE",
+              "HISTORICAL",
+              "CURRENT_BACKGROUND",
+              "PLANNED"
+            ]
+          },
+          "timeExtent": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

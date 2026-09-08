@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:wsgs-analysis-consumer-lock:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "wsgsSha",
+    "transportMode",
+    "planSchemaHash",
+    "eventSchemaHash",
+    "toolInteractionSchemaHash",
+    "revisionControlSchemaHash",
+    "cancelSchemaHash",
+    "interventionSchemaHash",
+    "endpoints",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-wsgs-analysis-consumer-lock/1.0"
+    },
+    "wsgsSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "transportMode": {
+      "enum": [
+        "STREAMING_EVENTS",
+        "POLLING_SNAPSHOT"
+      ]
+    },
+    "planSchemaHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "eventSchemaHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "toolInteractionSchemaHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "revisionControlSchemaHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "cancelSchemaHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "interventionSchemaHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "endpoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot",
+        "compileRevision",
+        "cancel",
+        "resolveIntervention"
+      ],
+      "properties": {
+        "snapshot": {
+          "type": "string"
+        },
+        "events": {
+          "type": "string"
+        },
+        "compileRevision": {
+          "type": "string"
+        },
+        "cancel": {
+          "type": "string"
+        },
+        "resolveIntervention": {
+          "type": "string"
+        }
+      }
+    },
+    "sequenceSemantics": {
+      "type": "string"
+    },
+    "recoverySemantics": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "READY",
+        "BLOCKED"
+      ]
+    }
+  }
+}

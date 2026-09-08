@@ -1,0 +1,137 @@
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/analysis-control-runtime/src/grounding-source-control.ts
+  200:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  319:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  332:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  358:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/analysis-development-runtime/src/index.ts
+  423:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/analysis-runtime/src/grounding-source-runtime.ts
+  356:25  warning  Forbidden non-null assertion                @typescript-eslint/no-non-null-assertion
+  407:17  warning  Forbidden non-null assertion                @typescript-eslint/no-non-null-assertion
+  444:19  warning  '_meta' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/grounding-request-planner/src/frozen-request.ts
+  166:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  169:41  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/persistence/src/analysis-development-repository.ts
+  1327:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/world-explanation-runtime/src/frozen-analysis-view.ts
+  227:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/packages/world-grounding-runtime/src/index.ts
+  427:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/helpers/frozen-wsgs-http.ts
+  71:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  72:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/helpers/memory-frozen-analysis.ts
+  876:21  warning  '_meta' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/helpers/memory-grounding.ts
+  113:25  warning  '_owner' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  113:45  warning  '_until' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  208:25  warning  '_owner' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  208:45  warning  '_until' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/v06-frozen-client.unit.test.ts
+  108:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  118:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  139:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  314:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  473:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  503:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  514:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/v06-frozen-entry.integration.test.ts
+   267:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   316:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   322:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   345:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   352:81  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   368:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   376:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   429:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   430:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   490:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   493:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   501:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   523:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   530:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   531:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   540:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   607:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   620:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   623:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   623:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   625:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   626:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   673:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   688:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   723:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   726:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   727:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   733:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   736:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   739:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   741:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   745:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   746:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   750:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   781:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   823:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   823:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   927:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   929:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   930:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1065:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1068:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1071:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1076:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1089:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1095:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1109:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1110:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1113:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1114:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1132:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1155:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1180:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1193:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1211:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1213:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1215:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1217:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1223:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1223:42  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/zhouwen/web-download/single-agent-chat-server/tests/v06-frozen-view.unit.test.ts
+  104:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  110:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  115:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  118:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  128:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  139:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  148:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  164:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  185:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  187:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  252:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  272:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  275:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  283:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  288:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  296:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  315:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  353:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  377:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  383:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  407:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 108 problems (0 errors, 108 warnings)
+

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "sacs-v05-package-contract-conflicts/1.0",
+  "status": "BLOCKED",
+  "canPromoteAcceptance": false,
+  "safePolicy": "Canonical task-package conflicts are preserved and block affected rows; no alias or template evidence is promoted implicitly.",
+  "conflicts": [
+    {
+      "code": "MATRIX_EVIDENCE_TYPE_NOT_ALLOWLISTED",
+      "evidenceType": "REPORT",
+      "acceptanceIds": [
+        "AC-A14-FINAL-01",
+        "AC-A14-FINAL-02",
+        "AC-A14-FINAL-03",
+        "AC-A14-FINAL-04",
+        "AC-A14-FINAL-05",
+        "AC-A14-FINAL-06",
+        "AC-A14-FINAL-07",
+        "AC-A14-FINAL-08",
+        "AC-A14-FINAL-09",
+        "AC-A14-FINAL-10",
+        "AC-A14-FINAL-11",
+        "AC-A14-FINAL-12",
+        "AC-A14-FINAL-13",
+        "AC-A14-FINAL-14",
+        "AC-A14-FINAL-15",
+        "AC-A14-FINAL-16",
+        "AC-A14-FINAL-17",
+        "AC-A14-FINAL-18",
+        "AC-A14-FINAL-19",
+        "AC-A14-FINAL-20",
+        "AC-A14-FINAL-21",
+        "AC-A14-FINAL-22",
+        "AC-A14-FINAL-23",
+        "AC-A14-FINAL-24",
+        "AC-A14-FINAL-25"
+      ],
+      "safeResolution": "Keep affected rows BLOCKED until the canonical package explicitly allowlists the type or changes the matrix; do not silently alias it."
+    },
+    {
+      "code": "A14_TEMPLATE_EVIDENCE_MISMATCH",
+      "acceptanceIds": [
+        "AC-A14-E2E-01"
+      ],
+      "matrixRequiredEvidence": [
+        "AGUI_OFFICIAL_CLIENT",
+        "REAL_WSGS",
+        "RUNNING_GOWM_GATEWAY",
+        "REAL_GDPS_OR_STAS",
+        "REAL_POSTGRES"
+      ],
+      "templateEvidence": [
+        "REAL_CHAIN"
+      ],
+      "safeResolution": "Use the matrix ALL-OF requirement and keep the row BLOCKED; REAL_CHAIN cannot replace the five required live evidence types."
+    },
+    {
+      "code": "EVIDENCE_TEMPLATE_SCHEMA_MISMATCH",
+      "acceptanceIds": [],
+      "unsupportedTemplateProperties": [
+        "allowedEvidenceTypes"
+      ],
+      "safeResolution": "Generated evidence maps omit schema-forbidden template metadata while retaining the conflict report."
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "sacs-v04-gap-currentness-report/1.0",
+  "status": "BLOCKED",
+  "sourceSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+  "reasonCode": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+  "cases": [
+    {
+      "acceptanceId": "AC-V4-GAP-001",
+      "scenario": "normal completed",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-002",
+      "scenario": "completed empty",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-003",
+      "scenario": "data gap",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-004",
+      "scenario": "coverage gap",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-005",
+      "scenario": "capability gap",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-006",
+      "scenario": "reference ambiguity",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-007",
+      "scenario": "product ambiguity",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-008",
+      "scenario": "truncated",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-009",
+      "scenario": "source changed during query",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-010",
+      "scenario": "currentness CURRENT",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-011",
+      "scenario": "currentness CHANGED",
+      "status": "BLOCKED",
+      "evidence": []
+    },
+    {
+      "acceptanceId": "AC-V4-GAP-012",
+      "scenario": "currentness NOT_AVAILABLE",
+      "status": "BLOCKED",
+      "evidence": []
+    }
+  ],
+  "nonClaims": [
+    "Local gap/currentness policy tests do not satisfy REAL_WSGS, RUNNING_GOWM, or REAL_GDPS."
+  ]
+}

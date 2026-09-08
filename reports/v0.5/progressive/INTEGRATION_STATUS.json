@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "sacs-v05-gate-result/1.0",
+  "gateId": "SACS_V05_INTEGRATION_READINESS",
+  "track": "INTEGRATION",
+  "status": "PENDING",
+  "checks": [
+    {
+      "id": "AUTHORITATIVE_WSGS_ANALYSIS_HANDOFF",
+      "status": "PENDING",
+      "readiness": "PENDING",
+      "decision": "INTEGRATION_PENDING",
+      "compatibilityLevel": "UNAVAILABLE",
+      "repository": "zhouwen-giser/world-semantic-grounding-service",
+      "handoffDirectory": "contracts/consumers/sacs-analysis-control-v1",
+      "acceptanceIds": ["INT-001", "INT-002"]
+    },
+    {
+      "id": "CONSUMER_LOCK",
+      "artifact": "WSGS_ANALYSIS_CONSUMER_LOCK.json",
+      "status": "PENDING",
+      "reason": "AUTHORITATIVE_ARTIFACT_UNAVAILABLE_AT_WSGS_HEAD"
+    },
+    {
+      "id": "PLAN_SNAPSHOT",
+      "artifact": "WSGS_ANALYSIS_PLAN_SCHEMA_LOCK.json",
+      "status": "PENDING",
+      "reason": "AUTHORITATIVE_ARTIFACT_UNAVAILABLE_AT_WSGS_HEAD"
+    },
+    {
+      "id": "EVENT_TRANSPORT",
+      "artifact": "WSGS_ANALYSIS_EVENT_SCHEMA_LOCK.json",
+      "status": "PENDING",
+      "reason": "AUTHORITATIVE_ARTIFACT_UNAVAILABLE_AT_WSGS_HEAD"
+    },
+    {
+      "id": "TOOL_INTERACTION",
+      "artifact": "WSGS_TOOL_INTERACTION_SCHEMA_LOCK.json",
+      "status": "PENDING",
+      "reason": "AUTHORITATIVE_ARTIFACT_UNAVAILABLE_AT_WSGS_HEAD"
+    },
+    {
+      "id": "REVISION_COMPILE",
+      "artifact": "WSGS_REVISION_CONTROL_SCHEMA_LOCK.json",
+      "status": "PENDING",
+      "reason": "AUTHORITATIVE_ARTIFACT_UNAVAILABLE_AT_WSGS_HEAD"
+    },
+    {
+      "id": "CANCEL",
+      "artifact": "WSGS_CANCEL_SCHEMA_LOCK.json",
+      "status": "PENDING",
+      "reason": "AUTHORITATIVE_ARTIFACT_UNAVAILABLE_AT_WSGS_HEAD"
+    },
+    {
+      "id": "INTERVENTION_RESOLVE",
+      "artifact": "WSGS_INTERVENTION_SCHEMA_LOCK.json",
+      "status": "PENDING",
+      "reason": "AUTHORITATIVE_ARTIFACT_UNAVAILABLE_AT_WSGS_HEAD"
+    },
+    {
+      "id": "CHECKSUMS",
+      "artifact": "CHECKSUMS.json",
+      "status": "PENDING",
+      "reason": "AUTHORITATIVE_ARTIFACT_UNAVAILABLE_AT_WSGS_HEAD"
+    },
+    {
+      "id": "AUTHORITATIVE_WSGS_SOURCE",
+      "status": "PASS",
+      "repository": "zhouwen-giser/world-semantic-grounding-service",
+      "headSha": "825682205deeab6ff2e6808e5f5d5c38abfb1779",
+      "verification": "INDEPENDENT_GIT_CHECKOUT_HEAD_AND_ORIGIN"
+    },
+    {
+      "id": "AUTHORITATIVE_WSGS_BUNDLE",
+      "status": "PENDING",
+      "reason": "AUTHORITATIVE_BUNDLE_UNAVAILABLE"
+    },
+    {
+      "id": "HTTP_WSGS_ANALYSIS_ADAPTER",
+      "status": "NOT_RUN",
+      "acceptanceIds": ["INT-007"],
+      "reason": "REAL_INTEGRATION_NOT_EXECUTED_BY_READINESS_CHECK"
+    },
+    {
+      "id": "REAL_INTEGRATION_E2E",
+      "status": "NOT_RUN",
+      "acceptanceIds": ["INT-008", "INT-009", "INT-010", "INT-011", "INT-012"],
+      "reason": "REAL_INTEGRATION_NOT_EXECUTED_BY_READINESS_CHECK"
+    }
+  ]
+}

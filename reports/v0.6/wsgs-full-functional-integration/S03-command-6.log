@@ -1,0 +1,13 @@
+{"event":"v05.postgres.ready","source":"ephemeral-container","image":"postgres:17-alpine"}
+(node:1607078) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-grounding-lifecycle.postgres.int.test.ts (7.424 s)
+PASS tests/v06-analysis-local.e2e.test.ts
+PASS tests/grounding-persistence.postgres.int.test.ts
+PASS tests/v06-source-persistence.postgres.int.test.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       16 passed, 16 total
+Snapshots:   0 total
+Time:        16.256 s
+Ran all test suites matching /tests\/v06-grounding-lifecycle.postgres.int.test.ts|tests\/v06-source-persistence.postgres.int.test.ts|tests\/grounding-persistence.postgres.int.test.ts|tests\/v06-analysis-local.e2e.test.ts/i.

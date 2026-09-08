@@ -1,14 +1,19 @@
 import { Readable } from "node:stream";
 
-import type { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync, FastifyReply } from "fastify";
 
 import {
+  AG_UI_PROFILE_HEADER,
   AG_UI_REQUEST_CONTENT_TYPE,
   AG_UI_SSE_CONTENT_TYPE,
   acceptsAgUiJson,
   acceptsAgUiSse,
+  negotiateSacsAgUiProfile,
   parseAgUiRunInput,
+  SACS_AG_UI_V02_PROFILE_ID,
+  SACS_AG_UI_V03_PROFILE_ID,
   type RunAgentInput,
+  type SacsAgUiProfileId,
 } from "../../../../packages/ag-ui-api-contract/src/index.js";
 import {
   createSafeAgUiRunError,
@@ -17,6 +22,10 @@ import {
   encodeProfileAgUiSse,
   type AgUiRunHandler,
 } from "../../../../packages/ag-ui-interaction-adapter/src/index.js";
+import {
+  isAnalysisAgUiV03RunHandler,
+  type AnalysisAgUiV03RunHandler,
+} from "../../../../packages/ag-ui-analysis-adapter/src/index.js";
 import type { ClientThreadBinding } from "../../../../packages/persistence/src/index.js";
 import {
   createOpenWebUiUserAuthenticator,
@@ -39,6 +48,7 @@ export interface AgUiRoutesOptions {
   readonly rateLimiter: FixedWindowRateLimiter;
   readonly resolveThread: ResolveAgUiThread;
   readonly runAgUi?: AgUiRunHandler;
+  readonly runAgUiV03?: AnalysisAgUiV03RunHandler;
   readonly persistAssistantMessages?: (
     input: PersistAgUiAssistantMessagesInput,
   ) => Promise<void>;
@@ -61,7 +71,11 @@ export const registerAgUiRoutes: FastifyPluginAsync<AgUiRoutesOptions> = async (
   options,
 ) => {
   const now = options.now ?? Date.now;
-  const runAgUi = options.runAgUi ?? createUnavailableAgUiRunHandler();
+  const runAgUiV02 = options.runAgUi ?? createUnavailableAgUiRunHandler();
+  const agUiV03Available = isAnalysisAgUiV03RunHandler(options.runAgUiV03);
+  const runAgUiV03 = agUiV03Available
+    ? options.runAgUiV03
+    : createUnavailableAgUiRunHandler();
 
   server.addHook(
     "preHandler",
@@ -86,11 +100,26 @@ export const registerAgUiRoutes: FastifyPluginAsync<AgUiRoutesOptions> = async (
     }
   });
 
-  server.get("/ag-ui/capabilities", async (_request, reply) =>
-    reply.type(AG_UI_REQUEST_CONTENT_TYPE).send(createSacsAgUiCapabilities()),
-  );
+  server.get("/ag-ui/capabilities", async (request, reply) => {
+    appendVary(reply, AG_UI_PROFILE_HEADER);
+    const profile = requestProfile(request.headers[AG_UI_PROFILE_HEADER]);
+    if (profile === undefined) return unsupportedProfile(reply);
+    if (profile === SACS_AG_UI_V03_PROFILE_ID && !agUiV03Available) {
+      return unavailableProfile(reply);
+    }
+    return reply
+      .header(AG_UI_PROFILE_HEADER, profile)
+      .type(AG_UI_REQUEST_CONTENT_TYPE)
+      .send(createSacsAgUiCapabilities(profile));
+  });
 
   server.post("/ag-ui", async (request, reply) => {
+    appendVary(reply, AG_UI_PROFILE_HEADER);
+    const profile = requestProfile(request.headers[AG_UI_PROFILE_HEADER]);
+    if (profile === undefined) return unsupportedProfile(reply);
+    if (profile === SACS_AG_UI_V03_PROFILE_ID && !agUiV03Available) {
+      return unavailableProfile(reply);
+    }
     if (!acceptsAgUiSse(request.headers.accept)) {
       return reply
         .code(406)
@@ -147,30 +176,40 @@ export const registerAgUiRoutes: FastifyPluginAsync<AgUiRoutesOptions> = async (
       import("../../../../packages/ag-ui-api-contract/src/index.js").AGUIEvent
     >;
     try {
+      const runAgUi =
+        profile === SACS_AG_UI_V03_PROFILE_ID ? runAgUiV03 : runAgUiV02;
       events = runAgUi({
         input,
         principalId: thread.principalId,
         internalThreadId: thread.threadId,
         signal: abortController.signal,
+        profile,
+        disconnectSemantics: "DETACH_OBSERVER",
       });
     } catch {
-      events = oneErrorEvent();
+      events = oneErrorEvent(profile);
     }
     return reply
       .type(AG_UI_SSE_CONTENT_TYPE)
+      .header(AG_UI_PROFILE_HEADER, profile)
       .header("cache-control", "no-cache, no-transform")
       .header("connection", "keep-alive")
       .header("x-accel-buffering", "no")
       .send(
         Readable.from(
-          encodeEventStream(events, abortController.signal, async (result) => {
-            await options.persistAssistantMessages?.({
-              principalId: thread.principalId,
-              internalThreadId: thread.threadId,
-              runInput: input,
-              ...result,
-            });
-          }),
+          encodeEventStream(
+            events,
+            abortController.signal,
+            profile,
+            async (result) => {
+              await options.persistAssistantMessages?.({
+                principalId: thread.principalId,
+                internalThreadId: thread.threadId,
+                runInput: input,
+                ...result,
+              });
+            },
+          ),
         ),
       );
   });
@@ -181,6 +220,7 @@ async function* encodeEventStream(
     import("../../../../packages/ag-ui-api-contract/src/index.js").AGUIEvent
   >,
   signal: AbortSignal,
+  profile: SacsAgUiProfileId,
   persist: (input: {
     readonly messages: readonly {
       readonly externalMessageId: string;
@@ -202,13 +242,32 @@ async function* encodeEventStream(
         terminal = true;
         failed = true;
       }
-      yield encodeProfileAgUiSse(event);
+      yield encodeProfileAgUiSse(event, profile);
+    }
+    if (!terminal && !signal.aborted) {
+      failed = true;
+      terminal = true;
+      yield encodeProfileAgUiSse(
+        createSafeAgUiRunError(
+          "The AG-UI run ended before a terminal event.",
+          "interaction_incomplete",
+          profile,
+        ),
+        profile,
+      );
     }
   } catch {
     failed = true;
     if (!signal.aborted) {
       terminal = true;
-      yield encodeProfileAgUiSse(createSafeAgUiRunError());
+      yield encodeProfileAgUiSse(
+        createSafeAgUiRunError(
+          "The AG-UI run failed safely.",
+          "interaction_error",
+          profile,
+        ),
+        profile,
+      );
     }
   } finally {
     if (published.size > 0) {
@@ -223,8 +282,12 @@ async function* encodeEventStream(
   }
 }
 
-async function* oneErrorEvent() {
-  yield createSafeAgUiRunError();
+async function* oneErrorEvent(profile: SacsAgUiProfileId) {
+  yield createSafeAgUiRunError(
+    "The AG-UI run failed safely.",
+    "interaction_error",
+    profile,
+  );
 }
 
 function validateRunLimits(
@@ -249,6 +312,51 @@ function validateRunLimits(
 
 function agUiError(code: string, message: string) {
   return { error: { code, message, type: "ag_ui_error" } };
+}
+
+function requestProfile(
+  header: string | string[] | undefined,
+): SacsAgUiProfileId | undefined {
+  if (Array.isArray(header)) return undefined;
+  try {
+    return negotiateSacsAgUiProfile(header);
+  } catch {
+    return undefined;
+  }
+}
+
+function unsupportedProfile(reply: FastifyReply) {
+  return reply
+    .code(406)
+    .send(
+      agUiError(
+        "profile_not_acceptable",
+        `Supported AG-UI profiles are ${SACS_AG_UI_V02_PROFILE_ID} and ${SACS_AG_UI_V03_PROFILE_ID}.`,
+      ),
+    );
+}
+
+function unavailableProfile(reply: FastifyReply) {
+  return reply
+    .code(503)
+    .send(
+      agUiError(
+        "profile_unavailable",
+        "The requested AG-UI analysis profile is not ready.",
+      ),
+    );
+}
+
+function appendVary(reply: FastifyReply, value: string): void {
+  const current = reply.getHeader("vary");
+  const values = new Set(
+    (Array.isArray(current) ? current : [current])
+      .flatMap((entry) => (typeof entry === "string" ? entry.split(",") : []))
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0),
+  );
+  values.add(value);
+  void reply.header("vary", [...values].join(", "));
 }
 
 function observeAssistantEvent(

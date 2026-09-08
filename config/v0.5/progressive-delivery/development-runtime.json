@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "sacs-v05-development-runtime/1.0",
+  "adapterMode": "fixture",
+  "requiredEnvironment": {
+    "NODE_ENV": ["test", "development"],
+    "SACS_ANALYSIS_ADAPTER_MODE": "fixture"
+  },
+  "components": [
+    "REAL_SACS_HTTP",
+    "REAL_POSTGRESQL",
+    "FIXTURE_WSGS_ANALYSIS_ADAPTER",
+    "AGUI_V03",
+    "ANALYSIS_CONTROL_API",
+    "REFERENCE_CLIENT"
+  ],
+  "productionDefault": "FAIL_CLOSED_WITHOUT_REAL_ADAPTER"
+}

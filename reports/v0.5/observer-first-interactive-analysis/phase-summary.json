@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "sacs-v05-phase-summary/1.0",
+  "qualificationStatus": "SUPERSEDED_STRICT_QUALIFICATION",
+  "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+  "startingCommit": "0d67125ba1e8f2d69ad07480bacbe7ecf5bab774",
+  "decision": "BLOCKED",
+  "completionMarker": "SACS_V0_5_OBSERVER_FIRST_INTERACTIVE_ANALYSIS_BLOCKED",
+  "phases": [
+    {
+      "phase": "A00",
+      "localImplementation": "COMPLETE",
+      "qualification": "BLOCKED",
+      "reasonCode": "SACS_V04_GEOSPATIAL_EXPLANATION_BASELINE_NOT_READY"
+    },
+    {
+      "phase": "A01",
+      "localImplementation": "FAIL_CLOSED_CONSUMER_READY",
+      "qualification": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_WSGS_ANALYSIS_HANDOFF_MISSING"
+    },
+    {
+      "phase": "A02-A09,A11-A12",
+      "localImplementation": "COMPONENTS_IMPLEMENTED_AND_FOCUSED_TESTED",
+      "qualification": "NOT_RUN",
+      "reasonCode": "ROW_LEVEL_EVIDENCE_NOT_POPULATED"
+    },
+    {
+      "phase": "A10,A13",
+      "localImplementation": "CONTRACTS_AND_FAIL_CLOSED_PRIMITIVES_IMPLEMENTED",
+      "qualification": "BLOCKED",
+      "reasonCode": "AUTHORITATIVE_CONTROL_RECOVERY_SEMANTICS_MISSING"
+    },
+    {
+      "phase": "A14",
+      "localImplementation": "HARNESS_CONTRACTS_ONLY",
+      "qualification": "BLOCKED",
+      "reasonCode": "INTERACTIVE_LIVE_ENVIRONMENT_NOT_READY"
+    }
+  ],
+  "acceptanceLedger": {
+    "pass": 0,
+    "fail": 0,
+    "notRun": 347,
+    "blocked": 71,
+    "total": 418,
+    "packageContractConflicts": 3
+  },
+  "publication": {
+    "implementationCommit": "80685ecf5df8076033c8fd3e58bdb98828494d34",
+    "push": "NOT_RUN",
+    "pullRequest": "NOT_RUN",
+    "ci": "NOT_RUN",
+    "deploy": "NOT_RUN"
+  }
+}

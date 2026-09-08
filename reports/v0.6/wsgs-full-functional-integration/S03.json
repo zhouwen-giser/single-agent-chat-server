@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "sacs-v06-phase-report/1.0",
+  "phaseId": "S03",
+  "status": "PASS",
+  "sourceSha": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+  "startedAt": "2026-09-06T07:46:59.809Z",
+  "completedAt": "2026-09-06T07:47:56.261Z",
+  "commands": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "sourceBefore": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "sourceAfter": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "outputDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidencePaths": [
+        "reports/v0.6/wsgs-full-functional-integration/S03-command-1.log"
+      ]
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js apps packages src tests scripts",
+      "exitCode": 0,
+      "sourceBefore": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "sourceAfter": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "outputDigest": "sha256:a7af69a2cdd2123426409451c1d842cfe38af2bedd78a12e6162a886fbcaed71",
+      "evidencePaths": [
+        "reports/v0.6/wsgs-full-functional-integration/S03-command-2.log"
+      ]
+    },
+    {
+      "command": "node scripts/verify-architecture.mjs",
+      "exitCode": 0,
+      "sourceBefore": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "sourceAfter": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "outputDigest": "sha256:03e380cff00be76f70089f203d6e9b771fa8d41b1e7a124a698b492be171300b",
+      "evidencePaths": [
+        "reports/v0.6/wsgs-full-functional-integration/S03-command-3.log"
+      ]
+    },
+    {
+      "command": "node scripts/verify-migrations.mjs",
+      "exitCode": 0,
+      "sourceBefore": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "sourceAfter": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "outputDigest": "sha256:73c744374202e9f2b235ebe46f4a5bc71d078d002c613d057cbe243c0e6e78a5",
+      "evidencePaths": [
+        "reports/v0.6/wsgs-full-functional-integration/S03-command-4.log"
+      ]
+    },
+    {
+      "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-grounding-job.contract.test.ts tests/v06-world-analysis-view.unit.test.ts tests/v06-analysis-config.unit.test.ts tests/world-grounding-runtime.unit.test.ts tests/v05-analysis-development-runtime.unit.test.ts tests/wsgs-http-adapter.contract.test.ts tests/openai-api.contract.test.ts",
+      "exitCode": 0,
+      "sourceBefore": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "sourceAfter": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "outputDigest": "sha256:15943f9e77d3aea51029ce882cd2082aa73a656c150fa3a223af45da0206b099",
+      "evidencePaths": [
+        "reports/v0.6/wsgs-full-functional-integration/S03-command-5.log"
+      ]
+    },
+    {
+      "command": "node scripts/v05-postgres-test-harness.mjs tests/v06-grounding-lifecycle.postgres.int.test.ts tests/v06-source-persistence.postgres.int.test.ts tests/grounding-persistence.postgres.int.test.ts tests/v06-analysis-local.e2e.test.ts",
+      "exitCode": 0,
+      "sourceBefore": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "sourceAfter": "9df39a0ac949420fa1b952f660b1d4ad6283ed43",
+      "outputDigest": "sha256:6343d831f5c3887acac02a165da04b7f44c65458e1ec0e7cf624a8ae0b8787df",
+      "evidencePaths": [
+        "reports/v0.6/wsgs-full-functional-integration/S03-command-6.log"
+      ]
+    }
+  ],
+  "acceptanceIds": [
+    "V06-S03-001",
+    "V06-S03-002",
+    "V06-S03-003",
+    "V06-S03-004",
+    "V06-S03-005",
+    "V06-S03-006",
+    "V06-S03-007",
+    "V06-S03-008",
+    "V06-S03-009",
+    "V06-S03-010",
+    "V06-S03-011",
+    "V06-S03-012",
+    "V06-S03-013"
+  ],
+  "blockers": [],
+  "notes": [
+    "Coverage is LOCAL only. The HTTP upstream in local E2E is simulated and is not real WSGS evidence.",
+    "Includes foundations for S04/S05/S07, which are not promoted to phase completion. Source revision/choice control remains unavailable pending S06.",
+    "Source files digest: sha256:53b64ad317e066aeb37f1de075d8c585aa11574ac9ba62d8e92a1f6a2c4a8ec8",
+    "V06-S03-001: tests/v06-grounding-lifecycle.postgres.int.test.ts: persists exact intent before network",
+    "V06-S03-002: tests/v06-grounding-job.contract.test.ts: bounded polling and semantic changes",
+    "V06-S03-003: tests/v06-grounding-lifecycle.postgres.int.test.ts: concurrent waits and terminal source result",
+    "V06-S03-004: tests/world-grounding-runtime.unit.test.ts: answerWorld regression; OpenAI API contract",
+    "V06-S03-005: tests/v06-grounding-lifecycle.postgres.int.test.ts: atomically binds a scoped revision/run",
+    "V06-S03-006: tests/v06-grounding-lifecycle.postgres.int.test.ts: one shared pump for ten concurrent ensure calls",
+    "V06-S03-007: tests/v06-grounding-lifecycle.postgres.int.test.ts: deduplicates observations; health polls do not append events",
+    "V06-S03-008: tests/v06-grounding-lifecycle.postgres.int.test.ts: post-send/pre-bind crash and cancelled intent recovery",
+    "V06-S03-009: tests/v06-grounding-lifecycle.postgres.int.test.ts: stale run rejected by active source/run guard",
+    "V06-S03-010: tests/v06-grounding-lifecycle.postgres.int.test.ts: rejects terminal reopening",
+    "V06-S03-011: tests/v06-grounding-lifecycle.postgres.int.test.ts: fences cancellation before dispatch; lost response stays requested",
+    "V06-S03-012: tests/v06-analysis-local.e2e.test.ts: full canonical snapshot after source transitions and reconnect",
+    "V06-S03-013: tests/v06-analysis-local.e2e.test.ts: foreign-user snapshot 404; scoped repository tests"
+  ]
+}

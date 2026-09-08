@@ -31,6 +31,9 @@ describe("deny-by-default CORS policy", () => {
 
     expect(allowed.statusCode).toBe(200);
     expect(allowed.headers["access-control-allow-origin"]).toBe(allowedOrigin);
+    expect(allowed.headers["access-control-expose-headers"]).toContain(
+      "x-sacs-ag-ui-profile",
+    );
     expect(allowed.headers.vary).toBe("Origin");
     expect(denied.statusCode).toBe(403);
     expect(denied.json().error.code).toBe("cors_origin_denied");
@@ -47,7 +50,7 @@ describe("deny-by-default CORS policy", () => {
         origin: allowedOrigin,
         "access-control-request-method": "POST",
         "access-control-request-headers":
-          "authorization, content-type, x-openwebui-user-jwt",
+          "authorization, content-type, x-openwebui-user-jwt, x-sacs-ag-ui-profile",
       },
     });
     const deniedHeader = await server.inject({
@@ -71,6 +74,9 @@ describe("deny-by-default CORS policy", () => {
     expect(allowed.statusCode).toBe(204);
     expect(allowed.headers["access-control-allow-origin"]).toBe(allowedOrigin);
     expect(allowed.headers["access-control-allow-methods"]).toBe("GET, POST");
+    expect(allowed.headers["access-control-allow-headers"]).toContain(
+      "x-sacs-ag-ui-profile",
+    );
     expect(allowed.headers["access-control-allow-credentials"]).toBeUndefined();
     expect(deniedHeader.statusCode).toBe(403);
     expect(deniedHeader.json().error.code).toBe("cors_headers_denied");

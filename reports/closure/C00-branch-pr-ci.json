@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "sacs-v04-v05-branch-pr-ci/1.0",
+  "capturedAt": "2026-08-30T19:11:57.5372842+08:00",
+  "status": "PUBLISHED_CI_PASS",
+  "remoteRefresh": "PINNED_OBSERVATION",
+  "v04": {
+    "branch": "codex/sacs-v0.4-geospatial-explanation",
+    "localSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "trackingSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "cachedRemoteSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+    "pullRequest": {
+      "number": 17,
+      "state": "DRAFT",
+      "baseBranch": "main",
+      "headBranch": "codex/sacs-v0.4-geospatial-explanation",
+      "headSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "createOrUpdate": "PERFORMED"
+    },
+    "ci": {
+      "state": "PASS",
+      "observedForSha": "951a1d81d640d24de60ce6eacc8bb6f95eb6ac35",
+      "workflowRunIds": [
+        33307359129
+      ],
+      "terminal": true
+    }
+  },
+  "v05": {
+    "branch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "localSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "trackingSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "cachedRemoteSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+    "pullRequest": {
+      "number": 18,
+      "state": "DRAFT",
+      "baseBranch": "codex/sacs-v0.4-geospatial-explanation",
+      "headBranch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+      "headSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "createOrUpdate": "PERFORMED"
+    },
+    "ci": {
+      "state": "PASS",
+      "observedForSha": "718963d9a2d1bb88be8ee5f9b41b2f7345d30d7c",
+      "workflowRunIds": [
+        33307975653
+      ],
+      "terminal": true
+    }
+  },
+  "protectedActions": {
+    "push": "PERFORMED",
+    "pullRequestCreateOrUpdate": "PERFORMED",
+    "merge": "NOT_PERFORMED",
+    "tag": "NOT_PERFORMED",
+    "release": "NOT_PERFORMED",
+    "deploy": "NOT_PERFORMED"
+  }
+}

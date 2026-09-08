@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "sacs-map-layer-policy/1.0",
+  "representations": [
+    "INLINE_GEOJSON",
+    "REFERENCE_SET",
+    "PAYLOAD_REFERENCE"
+  ],
+  "deferredToV051": [
+    "VECTOR_TILE",
+    "RASTER_TILE",
+    "TEMPORAL_TRACK",
+    "CZML"
+  ],
+  "roles": [
+    "BASE_CONTEXT",
+    "TASK_CONTEXT",
+    "QUERY_INPUT",
+    "TOOL_SCOPE",
+    "INTERMEDIATE_RESULT",
+    "FINAL_FINDING",
+    "FOCUS",
+    "GAP"
+  ],
+  "localOnlyState": [
+    "viewport",
+    "zoom",
+    "pitch",
+    "heading",
+    "hover",
+    "inspectionFocus",
+    "layerVisibilityPreference",
+    "unsubmittedEditDraft",
+    "playbackCursor",
+    "playbackRate",
+    "panelLayout"
+  ],
+  "sharedState": [
+    "analysisLifecycle",
+    "executionFocus",
+    "interventionFocus",
+    "pinnedFocus",
+    "submittedProposal",
+    "analysisTimeWindow",
+    "layerDescriptors",
+    "worldExplanation"
+  ],
+  "spatialComputationAllowedInSacs": false
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "sacs-v05-implementation-gates/1.0",
+  "remoteImplementationObserved": false,
+  "baseRequirement": "Exact reconciled v0.4 geospatial candidate",
+  "hardUpstream": "sacs-wsgs-analysis-presentation/1.0",
+  "coreScope": [
+    "AgUiV03Negotiation",
+    "AnalysisLifecycle",
+    "EventStoreProjection",
+    "ObserverFirstPolicy",
+    "MapFocusProjection",
+    "ToolInteractionDescriptor",
+    "ProposalApi",
+    "RevisionRecompile",
+    "InterruptCancelResume",
+    "SnapshotRecovery",
+    "ReferenceClient",
+    "TimeWindowSemantics"
+  ],
+  "deferredV051": [
+    "MVT",
+    "RasterTile",
+    "CZML",
+    "PresentationProxy",
+    "FullEventCursorReplay",
+    "AgUiResumableTrue",
+    "WebSocketSteering",
+    "ApplyAfterCurrentNode",
+    "ProductionCesiumApplication"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "sourceSha", "items"],
+  "properties": {
+    "schemaVersion": { "const": "sacs-v05-implementation-matrix/1.0" },
+    "sourceSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["component", "status", "action"],
+        "properties": {
+          "component": { "type": "string", "minLength": 1 },
+          "status": {
+            "enum": [
+              "IMPLEMENTED",
+              "PARTIAL",
+              "MISSING",
+              "EXTERNAL_DEPENDENCY",
+              "ACTUAL_DEFECT"
+            ]
+          },
+          "action": {
+            "enum": [
+              "PRESERVE",
+              "FIX",
+              "IMPLEMENT",
+              "TRACK_INTEGRATION",
+              "DEFER_RELEASE"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

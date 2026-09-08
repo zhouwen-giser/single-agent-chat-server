@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "sacs-v06-task-package/1.0",
+  "packageId": "sacs-v0.6-wsgs-full-functional-integration-codex-goal",
+  "packageVersion": "1.0.0",
+  "generatedAt": "2026-09-06T05:32:35Z",
+  "goal": "Strengthen SACS and fully integrate the real WSGS Grounding Job lifecycle, authoritative 1.1 geospatial contract, durable interactive analysis, unified text/map/timeline/AG-UI projection and multi-turn controls.",
+  "sourceObservations": {
+    "sacsBaseBranch": "codex/sacs-v0.5-observer-first-interactive-analysis",
+    "sacsObservedHead": "0cce422873f69df1ea7b78f72067dcd48e3c6b51",
+    "wsgsMainObservedHead": "565e52705bb7656d4623a04655001325ca61acd0",
+    "wsgsGeospatialObservedHead": "8c78600a8886f13cd9f4f418f9297cf9ecf39c32",
+    "mustRelockAtExecution": true
+  },
+  "inventory": {
+    "phaseCount": 10,
+    "acceptanceRowCount": 135,
+    "e2eCaseCount": 30,
+    "schemaCount": 9,
+    "templateCount": 8,
+    "contractCount": 8
+  },
+  "completionMarkers": [
+    "SACS_WSGS_FULL_FUNCTIONAL_INTEGRATION_DEV_READY",
+    "SACS_WSGS_GROUNDING_JOB_REAL_INTEGRATION_READY",
+    "SACS_V06_GOAL_COMPLETE",
+    "SACS_WSGS_NATIVE_ANALYSIS_CONTROL_DEFERRED"
+  ],
+  "rules": [
+    "Work in single-agent-chat-server only.",
+    "WSGS, GOWM+, GDPS, SDAR and Provider repositories are read-only.",
+    "GROUNDING_JOB is the required production analysis transport for v0.6.",
+    "Use exact authoritative WSGS contract negotiation; no silent downgrade.",
+    "Do not fabricate WSGS internal DAG, progress, world identity, geometry or evidence.",
+    "Do not merge, tag, release or deploy without explicit user authorization."
+  ]
+}

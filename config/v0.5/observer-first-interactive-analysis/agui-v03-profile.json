@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "sacs-agui-profile-plan/1.0",
+  "profileId": "sacs-ag-ui-v0.3",
+  "backwardCompatibleProfile": "sacs-ag-ui-v0.2",
+  "eventFamilies": [
+    "RUN",
+    "STEP",
+    "TOOL_CALL",
+    "TEXT_MESSAGE",
+    "STATE",
+    "ACTIVITY",
+    "CUSTOM"
+  ],
+  "tools": {
+    "supported": true,
+    "clientProvided": false
+  },
+  "state": {
+    "snapshots": true,
+    "deltas": true,
+    "persistentState": true
+  },
+  "humanInTheLoop": {
+    "supported": true,
+    "approvals": true,
+    "interventions": true,
+    "interrupts": true,
+    "approveWithEdits": true
+  },
+  "extensions": {
+    "io.sacs/observer-first/v1": {
+      "defaultMode": "OBSERVER",
+      "interruptPolicy": "EXCEPTION_ONLY",
+      "mapEditsDefault": "SUGGEST_NEXT_REVISION"
+    }
+  },
+  "resumable": false
+}

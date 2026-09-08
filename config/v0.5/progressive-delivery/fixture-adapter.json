@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "sacs-v05-fixture-adapter/1.0",
+  "adapterId": "FixtureWsgsAnalysisAdapter",
+  "environmentEligibility": ["test", "development", "local-compose"],
+  "supports": [
+    "PLAN",
+    "EVENTS",
+    "COMPILE_REVISION",
+    "CANCEL",
+    "INTERVENTION",
+    "DATA_GAP"
+  ],
+  "productionEligible": false
+}

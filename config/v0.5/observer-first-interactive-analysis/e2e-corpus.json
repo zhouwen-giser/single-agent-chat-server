@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "sacs-v05-e2e-corpus/1.0",
+  "requiredLivePath": [
+    "AGUI_V03_REFERENCE_CLIENT",
+    "SACS",
+    "WSGS_ANALYSIS_PRESENTATION_AND_CONTROL",
+    "GOWM_WORLD_CAPABILITY_GATEWAY",
+    "GDPS_OR_STAS_READ_ONLY_CAPABILITY",
+    "REAL_POSTGRES"
+  ],
+  "cases": [
+    {
+      "caseId": "AUTO-01",
+      "scenario": "A区有哪些高地？",
+      "expected": "zero interrupts; success"
+    },
+    {
+      "caseId": "VIEW-01",
+      "scenario": "map pan/zoom/hover/click",
+      "expected": "zero backend analysis commands"
+    },
+    {
+      "caseId": "PIN-01",
+      "scenario": "pin 2号车",
+      "expected": "pinned focus updated; no analysis"
+    },
+    {
+      "caseId": "PROPOSE-01",
+      "scenario": "change radius 1000m to 600m",
+      "expected": "current run continues; queued revision"
+    },
+    {
+      "caseId": "PROPOSE-02",
+      "scenario": "change slope 15-30 to 15-25",
+      "expected": "WSGS recompile and partial rerun"
+    },
+    {
+      "caseId": "REUSE-01",
+      "scenario": "reuse reference/current-position nodes",
+      "expected": "WSGS reuse decision displayed"
+    },
+    {
+      "caseId": "REVISION-01",
+      "scenario": "old map layers",
+      "expected": "superseded but inspectable"
+    },
+    {
+      "caseId": "AMBIGUITY-01",
+      "scenario": "滨河路附近有哪些排水沟？",
+      "expected": "interrupt required"
+    },
+    {
+      "caseId": "INTERRUPT-01",
+      "scenario": "resolve road candidate",
+      "expected": "resume with parent run"
+    },
+    {
+      "caseId": "USER-STOP-01",
+      "scenario": "立即停止并应用修改",
+      "expected": "cancel requested then acknowledged"
+    },
+    {
+      "caseId": "CANCEL-FAIL-01",
+      "scenario": "upstream cannot cancel",
+      "expected": "old run continues; new revision queued"
+    },
+    {
+      "caseId": "GAP-DATA-01",
+      "scenario": "missing product",
+      "expected": "automatic explanation; zero interrupts"
+    },
+    {
+      "caseId": "GAP-CAP-01",
+      "scenario": "missing capability",
+      "expected": "automatic explanation; zero interrupts"
+    },
+    {
+      "caseId": "CONFLICT-01",
+      "scenario": "stale revision proposal",
+      "expected": "409 ANALYSIS_REVISION_CONFLICT"
+    },
+    {
+      "caseId": "CONFLICT-02",
+      "scenario": "same idempotency key different request",
+      "expected": "409 IDEMPOTENCY_CONFLICT"
+    },
+    {
+      "caseId": "EDIT-01",
+      "scenario": "edit forbidden path",
+      "expected": "422 EDIT_PATH_NOT_ALLOWED"
+    },
+    {
+      "caseId": "EDIT-02",
+      "scenario": "invalid public args",
+      "expected": "422 PUBLIC_ARGS_SCHEMA_INVALID"
+    },
+    {
+      "caseId": "DELTA-01",
+      "scenario": "out-of-order state delta",
+      "expected": "snapshot resync"
+    },
+    {
+      "caseId": "EVENT-01",
+      "scenario": "duplicate upstream event",
+      "expected": "idempotent"
+    },
+    {
+      "caseId": "EVENT-02",
+      "scenario": "same sequence different payload",
+      "expected": "protocol failure"
+    },
+    {
+      "caseId": "EVENT-03",
+      "scenario": "late old-plan event",
+      "expected": "audit only; active state unchanged"
+    },
+    {
+      "caseId": "DISCONNECT-01",
+      "scenario": "browser disconnect",
+      "expected": "analysis continues"
+    },
+    {
+      "caseId": "RECONNECT-01",
+      "scenario": "new observer connection",
+      "expected": "state/activity snapshots"
+    },
+    {
+      "caseId": "LAYER-01",
+      "scenario": "layer load fails",
+      "expected": "analysis finding remains available"
+    },
+    {
+      "caseId": "FOCUS-01",
+      "scenario": "inspection vs execution focus",
+      "expected": "independent"
+    },
+    {
+      "caseId": "TIME-01",
+      "scenario": "historical window with GDPS",
+      "expected": "CURRENT_BACKGROUND"
+    },
+    {
+      "caseId": "PARITY-01",
+      "scenario": "OpenAI and AG-UI",
+      "expected": "same explanation/revision identity"
+    },
+    {
+      "caseId": "SECURITY-01",
+      "scenario": "foreign scope layer",
+      "expected": "no identity leak"
+    }
+  ],
+  "fixtureCannotSatisfyLive": true
+}

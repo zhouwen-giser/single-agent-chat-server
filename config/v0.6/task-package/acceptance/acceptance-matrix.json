@@ -1,0 +1,2914 @@
+{
+  "schemaVersion": "sacs-v06-acceptance-matrix/1.0",
+  "packageId": "sacs-v0.6-wsgs-full-functional-integration-codex-goal",
+  "generatedAt": "2026-09-06T05:32:35Z",
+  "tracks": {
+    "DEVELOPMENT": {
+      "completionMarker": "SACS_WSGS_FULL_FUNCTIONAL_INTEGRATION_DEV_READY",
+      "blockedExternalAllowedForConditionalRows": false
+    },
+    "REAL_WSGS_INTEGRATION": {
+      "completionMarker": "SACS_WSGS_GROUNDING_JOB_REAL_INTEGRATION_READY",
+      "blockedExternalAllowedForConditionalRows": true
+    },
+    "RELEASE": {
+      "completionMarker": "SACS_V06_RELEASE_QUALIFIED",
+      "requiresExplicitUserAuthorization": true
+    }
+  },
+  "rows": [
+    {
+      "id": "V06-S00-001",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "Task package integrity",
+      "requirement": "The extracted task package passes scripts/verify_task_package.py and its external ZIP SHA-256 is recorded.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "command",
+        "hash"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S00-002",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "Clean source intake",
+      "requirement": "The original worktree status, uncommitted changes and untracked files are captured before mutation; existing user work is preserved.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "git-status",
+        "report"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S00-003",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "v0.5-capable base selected",
+      "requirement": "The selected SACS base contains the v0.5 analysis contracts, persistence, pump, AG-UI v0.3, fixture adapter and progressive verification.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "git-sha",
+        "inventory",
+        "tests"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S00-004",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "Exact SACS source lock",
+      "requirement": "SOURCE_LOCK records the exact SACS repository, base branch, commit SHA and tree cleanliness.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "source-lock"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S00-005",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "Exact WSGS source lock",
+      "requirement": "SOURCE_LOCK records WSGS main and any selected handoff branch SHA without assuming the package-generation observation is current.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "source-lock"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S00-006",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "WSGS 1.1 artifact verification",
+      "requirement": "The authoritative WSGS 1.1 release lock and every consumed schema artifact are verified from raw bytes and SHA-256.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "artifact-hashes",
+        "command"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S00-007",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "Safe feature branch",
+      "requirement": "Work occurs on codex/sacs-v0.6-wsgs-full-functional-integration or a non-destructive equivalent; no published history is rewritten.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "git-branch",
+        "git-log"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S00-008",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "Initial acceptance ledger",
+      "requirement": "Every acceptance row is present exactly once and initialized to NOT_RUN or NOT_REQUESTED as specified.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "ledger-validation"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S00-009",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "Product-boundary reconciliation",
+      "requirement": "Root AGENTS/Codex guidance is updated so existing AG-UI/WSGS responsibilities are not contradicted while SDAR boundaries remain intact.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "diff",
+        "review"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S00-010",
+      "phase": "S00",
+      "track": "DEVELOPMENT",
+      "title": "Baseline verification",
+      "requirement": "The selected source passes the available v0.5 focused, typecheck, migration and architecture baseline or failures are explicitly recorded before implementation.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "commands",
+        "exit-codes"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-001",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "Analysis source mode contract",
+      "requirement": "A strict source-mode contract distinguishes WSGS_GROUNDING_JOB, WSGS_NATIVE_ANALYSIS, FIXTURE and read-only LEGACY_PLAN.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "contract-test",
+        "code"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-002",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "Truthful source identity union",
+      "requirement": "Source identity uses source kind/id/hash and optional source revision/run identity; Grounding IDs are not typed as plan IDs.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "contract-test",
+        "code-review"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-003",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "Source adapter interface",
+      "requirement": "A single AnalysisSourceAdapter contract covers start/get/observe/cancel/revise/resolveChoice without hiding transport truth.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "contract-test",
+        "api-review"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-004",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "Existing native behavior preserved",
+      "requirement": "The five existing Native WSGS analysis ports remain available behind the new abstraction and retain fail-closed authorization.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "regression-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-005",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "Fixture behavior preserved",
+      "requirement": "The fixture adapter implements the new abstraction without becoming production eligible.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "unit-test",
+        "production-negative"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-006",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "LEGACY_PLAN read compatibility",
+      "requirement": "Migrated v0.5 rows can be read as LEGACY_PLAN without fabricated authority.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "postgres-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-007",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "LEGACY_PLAN write prohibition",
+      "requirement": "All new revision create/write APIs reject LEGACY_PLAN.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "contract-test",
+        "postgres-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-008",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "Contiguous additive migration",
+      "requirement": "The next discovered migration number is appended contiguously and does not rewrite existing migration files.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "migration-check",
+        "git-diff"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-009",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "v0.5 upgrade safety",
+      "requirement": "A real PostgreSQL schema upgraded from v0.5 retains existing sessions, revisions, events and projections.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "postgres-upgrade-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-010",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "Empty database safety",
+      "requirement": "All migrations install successfully into an empty PostgreSQL database.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "postgres-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-011",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "Repository scope preserved",
+      "requirement": "New source identity reads/writes require the existing principal/thread scoped repository path.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "security-test",
+        "postgres-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S01-012",
+      "phase": "S01",
+      "track": "DEVELOPMENT",
+      "title": "Canonical hash determinism",
+      "requirement": "Source identity and request hashes are canonical, deterministic and verified on parse/write.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "unit-test",
+        "property-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-001",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Authoritative consumer lock",
+      "requirement": "SACS contains a READY 1.1 consumer lock only when generated/verified from the exact locked WSGS source; provisional provenance cannot be READY.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "lock-file",
+        "hash-verification"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-002",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Explicit 1.0 selection",
+      "requirement": "The client preserves the frozen legacy 1.0 request/response path.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "contract-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-003",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Exact 1.1 request headers",
+      "requirement": "Every 1.1 request sends exactly one wsgs-contract-version and one wsgs-result-profile header with the locked values.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "wire-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-004",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "1.1 response header verification",
+      "requirement": "The client verifies WSGS response contract/profile headers and rejects mismatch, duplication or silent downgrade.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "wire-test",
+        "negative-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-005",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Caller authorization failure",
+      "requirement": "An unauthorized 1.1 consumer fails closed with a stable SACS/WSGS contract error and does not retry as 1.0 when 1.1 is required.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "integration-contract-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-006",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Capability preflight",
+      "requirement": "Capabilities are fetched under the selected contract and parsed into required, optional-available and optional-unavailable states.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "unit-test",
+        "contract-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-007",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Grounding Job adapter reuse",
+      "requirement": "GroundingJobAnalysisSourceAdapter uses the existing WsgsHttpClient rather than a second ad-hoc HTTP stack.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "architecture-check",
+        "code-review"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-008",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Synchronous result support",
+      "requirement": "HTTP 200 Grounding results become correct terminal source snapshots.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "adapter-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-009",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Asynchronous job support",
+      "requirement": "HTTP 202 jobs preserve groundingId/jobId and are observed through GET polling until terminal.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "adapter-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-010",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "All status normalization",
+      "requirement": "ACCEPTED, RUNNING, COMPLETED, PARTIAL, AMBIGUOUS, UNRESOLVED, FAILED and CANCELLED map deterministically.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "table-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-011",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Bounded polling",
+      "requirement": "Poll interval, maximum duration, consecutive failures and response bytes are validated and bounded.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "timeout-test",
+        "config-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-012",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Abort propagation",
+      "requirement": "Caller AbortSignal stops local waiting without falsely marking the WSGS Grounding cancelled.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "abort-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-013",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "Stable idempotent start",
+      "requirement": "Exact canonical request + idempotency key replay returns the same operation; same key with different request conflicts.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "idempotency-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S02-014",
+      "phase": "S02",
+      "track": "DEVELOPMENT",
+      "title": "No guessed native routes",
+      "requirement": "Grounding Job mode never calls guessed Plan/Event/Revision/Intervention endpoints.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "network-boundary-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-001",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Begin API",
+      "requirement": "beginWorldGrounding durably claims/replays the request and returns a truthful handle without requiring terminal completion.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "unit-test",
+        "postgres-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-002",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Observe API",
+      "requirement": "observeWorldGrounding emits truthful source transitions and supports bounded cancellation/reconnect behavior.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "unit-test",
+        "stream-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-003",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Complete API",
+      "requirement": "completeWorldGrounding returns or safely maps the terminal WSGS result.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "unit-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-004",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "answerWorld compatibility",
+      "requirement": "Existing answerWorld behavior remains as a wrapper and ordinary OpenAI world answers regress successfully.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "regression-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-005",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Analysis binding",
+      "requirement": "Grounding source identity is durably bound to exactly one authorized analysis revision/run.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "postgres-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-006",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Single active pump",
+      "requirement": "Concurrent ensure calls result in at most one active poller per analysis revision/run.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "concurrency-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-007",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Semantic event deduplication",
+      "requirement": "Identical polls do not append duplicate business events or advance projections.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "postgres-test",
+        "counter-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-008",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Restart recovery",
+      "requirement": "STARTING/RUNNING/CANCEL_REQUESTED Grounding analyses resume after process restart from durable identity.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "restart-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-009",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Stale-run isolation",
+      "requirement": "Events/results for superseded revisions/runs cannot mutate the active projection.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "concurrency-test",
+        "postgres-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-010",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Terminal monotonicity",
+      "requirement": "Terminal source/run states cannot regress to nonterminal states.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "state-machine-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-011",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Cancel uncertainty",
+      "requirement": "Transport uncertainty leaves CANCEL_REQUESTED until WSGS proves terminality.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "failure-injection-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-012",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Projection integrity",
+      "requirement": "State/activity revisions and canonical hashes remain valid after Grounding Job transitions.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "contract-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S03-013",
+      "phase": "S03",
+      "track": "DEVELOPMENT",
+      "title": "Scoped not-found",
+      "requirement": "Cross-principal/thread analysis access is indistinguishable from unknown analysis access.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "security-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-001",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "URI+hash schema registry",
+      "requirement": "Result parsing requires both authoritative schema URI and schema hash.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "unit-test",
+        "registry-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-002",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "1.1 findings parser",
+      "requirement": "The locked WSGS geospatial findings profile parses all authoritative finding kinds.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "contract-test",
+        "fixture-from-upstream"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-003",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Source product preservation",
+      "requirement": "Source product IDs, authority, content/descriptor hashes, time and evidence links are retained.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "normalizer-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-004",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Typed gap preservation",
+      "requirement": "Typed gaps preserve kind, severity, message code, evidence links and safe detail.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "normalizer-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-005",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Unknown schema safe path",
+      "requirement": "Unknown URI produces UNSUPPORTED_FINDING_SCHEMA without inferred facts or geometry.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "negative-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-006",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Hash drift safe path",
+      "requirement": "Known URI with wrong hash is rejected/typed-gap and never parsed by shape alone.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "negative-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-007",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Bounded payload",
+      "requirement": "Oversized or deeply nested payloads fail safely before persistence/rendering.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "security-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-008",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Unified view model",
+      "requirement": "All normalized output enters one deterministic WorldAnalysisViewModel.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "contract-test",
+        "architecture-check"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-009",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Road association semantics",
+      "requirement": "Road visits, off-network, ambiguity, quality breaks and suffix completeness remain distinct.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_ROAD_ASSOCIATION_SCHEMA",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "normalizer-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-010",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Temporal event semantics",
+      "requirement": "Event type, instant/interval time, FIRST/LAST confirmation and blocking periods are retained.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_TEMPORAL_EVENT_SCHEMA",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "normalizer-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-011",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Metric ranking semantics",
+      "requirement": "Ranking retains metric concept, rank, actual representative visited position and unknown temporal completeness.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_METRIC_RANKING_SCHEMA",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "normalizer-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-012",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Action-target safety",
+      "requirement": "Historical target candidates always require current validation and route planning and are not execution-authorized.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_ACTION_TARGET_SCHEMA",
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "normalizer-test",
+        "negative-network-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-013",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "Deterministic ordering/hash",
+      "requirement": "Equivalent verified source results produce the same normalized order and canonical hash.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "determinism-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S04-014",
+      "phase": "S04",
+      "track": "DEVELOPMENT",
+      "title": "No provider package dependency",
+      "requirement": "SACS production code has no direct dependency/import on T2/T3/T4 Provider implementation packages.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "dependency-check",
+        "architecture-check"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-001",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Answer projection boundary",
+      "requirement": "Facts, qualifiers, choices and unavailable capabilities are built deterministically before optional language polishing.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "unit-test",
+        "architecture-check"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-002",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Partial answer qualification",
+      "requirement": "PARTIAL results explicitly describe limited available data.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "golden-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-003",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Unconfirmed LAST qualification",
+      "requirement": "An unconfirmed LAST is rendered as last confirmed, not absolute last.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_TEMPORAL_EVENT_SCHEMA",
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "golden-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-004",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "No-data semantics",
+      "requirement": "NO_DATA is not rendered as zero or as proof of non-occurrence when coverage is incomplete.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "golden-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-005",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Road geometry non-fabrication",
+      "requirement": "Road IDs/names without published geometry are not turned into road lines.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_ROAD_ASSOCIATION_SCHEMA",
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "map-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-006",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Trajectory preview non-fabrication",
+      "requirement": "A bounded point preview is visibly labeled bounded and is not presented as a complete trajectory.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "map-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-007",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Off-network wording",
+      "requirement": "Off-network is presented as not associated with the current reference network, not as false trajectory.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_ROAD_ASSOCIATION_SCHEMA",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "golden-test",
+        "map-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-008",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Temporal event projection",
+      "requirement": "Published event points/intervals map correctly to map and timeline items.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_TEMPORAL_EVENT_SCHEMA",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "map-test",
+        "timeline-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-009",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Metric position authority",
+      "requirement": "The map uses representative visited position; H3 center/boundary remains auxiliary.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_METRIC_RANKING_SCHEMA",
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "map-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-010",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Distinct timeline concepts",
+      "requirement": "Paused, data-gap, quality-break, off-network and ambiguity intervals remain distinct.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "timeline-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-011",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "WSGS timeline source",
+      "requirement": "Timeline can represent WSGS-organized derived findings without changing original evidence authority.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "contract-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-012",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Truthful AG-UI step",
+      "requirement": "Grounding Job emits only truthful coarse source/SACS stages and never fake Provider DAG/progress.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "agui-contract-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-013",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Snapshot-before-interrupt",
+      "requirement": "AG-UI interrupt completion is preceded by full State and Activity snapshots.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "agui-contract-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-014",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Reconnect recovery",
+      "requirement": "Reconnect, revision gap or hash mismatch requests full State and Activity snapshots.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "headless-client-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S05-015",
+      "phase": "S05",
+      "track": "DEVELOPMENT",
+      "title": "Legacy client regression",
+      "requirement": "OpenAI-compatible and AG-UI v0.2 paths remain compatible.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "regression-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-001",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Prior Grounding context",
+      "requirement": "Follow-up requests carry authorized prior groundingId, resultHash and selected product IDs.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "unit-test",
+        "request-capture"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-002",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Trajectory-to-last-junction",
+      "requirement": "A follow-up can request the last junction from a prior trajectory via WSGS rather than local Provider logic.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_TEMPORAL_EVENT_SCHEMA",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "local-e2e"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-003",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "List-to-LAST rule",
+      "requirement": "Local selection is allowed only when the prior result is complete and deterministically contains LAST; otherwise a new Grounding is submitted.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "unit-test",
+        "local-e2e"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-004",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "TopK-to-rankN rule",
+      "requirement": "Rank N is reused only when present in a trusted prior result; otherwise a new Grounding requests sufficient K.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_METRIC_RANKING_SCHEMA",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "unit-test",
+        "local-e2e"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-005",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Ambiguity intervention",
+      "requirement": "WSGS ambiguity creates a bounded Analysis Intervention/choice set.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "local-e2e",
+        "contract-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-006",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Authorized choice only",
+      "requirement": "Choice resolution rejects candidates not published for the current ambiguity and scope.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "security-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-007",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Choice creates new revision",
+      "requirement": "An accepted choice creates a new immutable revision/run/Grounding.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "postgres-test",
+        "local-e2e"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-008",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Constraint change creates new revision",
+      "requirement": "Phase scope, threshold, time window and Top-K changes create new Groundings, not local result edits.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "local-e2e",
+        "postgres-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-009",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "No native compile in job mode",
+      "requirement": "Grounding Job revision paths do not invoke Native compileRevision.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "mock-boundary-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-010",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Cancel mapping",
+      "requirement": "User cancellation calls WSGS cancel and maps confirmed terminal status without conflating disconnect.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "local-e2e"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-011",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Mutation fencing",
+      "requirement": "Proposal/cancel/intervention commands are fenced by expected revision, idempotency and one active mutation claim.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "concurrency-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-012",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Historical target remains non-executing",
+      "requirement": "Follow-up 'go to candidate' creates only an action target candidate and causes no SDAR/route/device call.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_ACTION_TARGET_SCHEMA",
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "network-boundary-test",
+        "local-e2e"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-013",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Currentness unavailable qualification",
+      "requirement": "When WSGS currentness is unavailable the view remains UNKNOWN and current validation required.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "capability-test",
+        "golden-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S06-014",
+      "phase": "S06",
+      "track": "DEVELOPMENT",
+      "title": "Multi-turn scope isolation",
+      "requirement": "Prior grounding and choices cannot be referenced across unauthorized principal/thread scopes.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "security-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-001",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Normal-server wiring",
+      "requirement": "The normal SACS server composes the contract-aware WSGS client, Grounding Job source, Analysis runtime, analysisControl and AG-UI v0.3 handler.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "bootstrap-test",
+        "local-e2e"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-002",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Persistence reuse",
+      "requirement": "The analysis integration reuses the existing persistence runtime/pool rather than creating a separate hidden database stack.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "architecture-check"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-003",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Feature flags",
+      "requirement": "Analysis enabled/transport/contract/profile/polling/limits are strictly parsed and documented.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "config-test",
+        "env-example"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-004",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Grounding Job default",
+      "requirement": "When analysis is enabled and no explicit transport is given, production chooses GROUNDING_JOB.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "bootstrap-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-005",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Fixture production rejection",
+      "requirement": "Production startup cannot select or import the fixture adapter as a runtime path.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "negative-bootstrap-test",
+        "dependency-check"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-006",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Native fail-closed",
+      "requirement": "NATIVE mode without an authoritative eight-artifact handoff fails closed and does not guess routes.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "negative-bootstrap-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-007",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Dedicated analysis readiness",
+      "requirement": "A bounded safe capability/readiness projection reports enabled transport and optional capability state.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "api-contract-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-008",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Optional capability isolation",
+      "requirement": "Missing advanced history/selection/currentness does not make unrelated chat, task or legacy grounding unhealthy.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "integration-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-009",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Bounded telemetry",
+      "requirement": "Telemetry records bounded aggregate analysis metrics with no high-cardinality IDs or payloads.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "telemetry-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-010",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Secure logging",
+      "requirement": "Logs/public errors do not expose tokens, user text, geometry, safePayload, DB URLs or raw upstream bodies.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "security-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-011",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Pump/rate limits",
+      "requirement": "Authenticated rate limits and internal pump limits prevent unbounded analysis work.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "rate-limit-test",
+        "concurrency-test"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-012",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Version/docs/changelog",
+      "requirement": "Package version, README, environment example and changelog accurately describe v0.6 and its deferred Native scope.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MINOR",
+      "evidenceRequired": [
+        "diff-review"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S07-013",
+      "phase": "S07",
+      "track": "DEVELOPMENT",
+      "title": "Development verification",
+      "requirement": "All DEVELOPMENT required rows and required v0.6 commands pass with source-bound evidence.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "verification-report",
+        "ledger"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-001",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real source lock refreshed",
+      "requirement": "Integration evidence records exact final SACS and WSGS source SHAs and verified WSGS contract hashes.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "integration-evidence",
+        "source-lock"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-002",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real services only",
+      "requirement": "The tested chain uses a real source-built/approved WSGS API and worker plus real persistence; no fixture/mock/recorded response supplies the result.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "process-evidence",
+        "network-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-003",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real 1.0 capabilities",
+      "requirement": "SACS successfully calls real WSGS legacy capabilities under the 1.0 selection.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "http-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-004",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real 1.1 capabilities",
+      "requirement": "SACS successfully negotiates real WSGS 1.1 geospatial capabilities with exact headers and authorized principal.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "http-evidence",
+        "header-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-005",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real Grounding submit",
+      "requirement": "A real world request is accepted by WSGS and produces a durable Grounding ID.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "http-evidence",
+        "database-safe-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-006",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real async observation",
+      "requirement": "At least one real nonterminal Grounding is observed through SACS polling before terminality, or authoritative WSGS evidence proves only synchronous execution is configured.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "stream-evidence",
+        "integration-report"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-007",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real terminal projection",
+      "requirement": "The real WSGS terminal result updates SACS Analysis state, map/timeline/text as applicable, with matching result/projection hashes.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "integration-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-008",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real cancellation",
+      "requirement": "A real in-flight Grounding is cancelled through the WSGS endpoint and SACS observes authoritative CANCELLED, or source evidence proves cancellation cannot be triggered in the isolated harness.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "integration-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-009",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real ordinary grounding regression",
+      "requirement": "Reference grounding/world answer remains functional through the real WSGS chain.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "e2e-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-010",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real geospatial finding",
+      "requirement": "At least one real WSGS 1.1 geospatial finding/result-extension is consumed and safely presented.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "e2e-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-011",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real ambiguity/unresolved behavior",
+      "requirement": "A real AMBIGUOUS or UNRESOLVED case is exercised when the harness can deterministically produce one; otherwise the limitation is source-bound.",
+      "required": true,
+      "conditionalOn": "REAL_WSGS_AMBIGUITY_FIXTURE_AVAILABLE",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "e2e-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-012",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real road association",
+      "requirement": "A real WSGS-advertised road-association result is normalized and projected.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_ROAD_ASSOCIATION_CAPABILITY",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "e2e-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-013",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real temporal event",
+      "requirement": "A real WSGS-advertised temporal-event result, including LAST confirmation semantics, is normalized and projected.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_TEMPORAL_EVENT_CAPABILITY",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "e2e-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-014",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real metric ranking",
+      "requirement": "A real WSGS-advertised metric-ranking result uses representative visited position and preserves completeness limits.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_METRIC_RANKING_CAPABILITY",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "e2e-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-015",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Real advanced multi-turn",
+      "requirement": "A real prior-Grounding follow-up reuses authorized context for an advanced history request.",
+      "required": true,
+      "conditionalOn": "AUTHORITATIVE_WSGS_ADVANCED_MULTITURN_CAPABILITY",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "e2e-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-016",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "No illegal direct connection",
+      "requirement": "Network/process evidence confirms SACS contacted only WSGS/SDAR and its own PostgreSQL, not Provider/upstream databases.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "network-boundary-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-017",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Accurate conditional blockers",
+      "requirement": "Every unavailable conditional integration row is BLOCKED_EXTERNAL with capability/contract evidence, never silently omitted or marked PASS.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "ledger",
+        "capability-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S08-018",
+      "phase": "S08",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "Isolated cleanup",
+      "requirement": "Temporary processes, containers, ports and databases created by the integration run are cleaned without touching shared services.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "cleanup-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-001",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Final source-bound verification",
+      "requirement": "Final reports identify the exact SACS source SHA and prove the worktree used for each verification command.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "final-report",
+        "command-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-002",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Acceptance evidence completeness",
+      "requirement": "Every required DEVELOPMENT and INTEGRATION row has PASS, FAIL or valid BLOCKED_EXTERNAL with an evidence reference.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "ledger-validation"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-003",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "No bulk promotion",
+      "requirement": "Rows are not promoted to PASS merely because a broad command succeeded; evidence remains mapped per criterion.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "ledger-audit"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-004",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Final in-scope regression",
+      "requirement": "All v0.6, affected v0.5/v0.4, API, persistence, migration, architecture and security regressions pass.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "commands",
+        "exit-codes"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-005",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Production dependency audit",
+      "requirement": "Production build contains no fixture selection path, Provider implementation dependency or direct upstream database client.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "dependency-audit",
+        "architecture-check"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-006",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Final secret scan",
+      "requirement": "The exact final tree passes secret-pattern and sensitive-evidence checks.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "secret-scan"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-007",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Final report truthfulness",
+      "requirement": "FINAL_REPORT distinguishes development, real integration, conditional blockers, release non-claims and Native Analysis deferral.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "final-report-review"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-008",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Draft PR evidence",
+      "requirement": "If GitHub credentials are available, a Draft PR is created/updated with source-bound summaries and no merge action.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "pr-url",
+        "pr-state"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-009",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Release not automatically requested",
+      "requirement": "Release remains NOT_REQUESTED unless the user explicitly starts it.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "progressive-status"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-010",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "No merge/tag/release/deploy",
+      "requirement": "The Goal performs no merge, tag, release or deployment.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "git-remote-audit",
+        "report"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    },
+    {
+      "id": "V06-S09-011",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Optional release container qualification",
+      "requirement": "Container/SBOM/compose release qualification is run only after explicit release authorization.",
+      "required": false,
+      "conditionalOn": "USER_EXPLICITLY_REQUESTED_RELEASE",
+      "severityOnFailure": "MAJOR",
+      "evidenceRequired": [
+        "release-evidence"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_REQUESTED"
+    },
+    {
+      "id": "V06-S09-012",
+      "phase": "S09",
+      "track": "RELEASE",
+      "title": "Completion marker integrity",
+      "requirement": "SACS_V06_GOAL_COMPLETE is emitted only when development and real-integration completion rules are satisfied; Native deferral remains stated.",
+      "required": true,
+      "conditionalOn": null,
+      "severityOnFailure": "CRITICAL",
+      "evidenceRequired": [
+        "final-report",
+        "ledger-validation"
+      ],
+      "allowedStatuses": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "NOT_RUN",
+        "NOT_REQUESTED"
+      ],
+      "initialStatus": "NOT_RUN"
+    }
+  ]
+}

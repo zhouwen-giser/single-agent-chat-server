@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:observer-policy-decision:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "analysisId",
+    "revisionId",
+    "nodeId",
+    "observerPolicyHash",
+    "inputSummaryHash",
+    "decision",
+    "reasonCode",
+    "occurredAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-observer-policy-decision/1.0"
+    },
+    "analysisId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "revisionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "nodeId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "observerPolicyHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "inputSummaryHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "decision": {
+      "enum": [
+        "AUTO_CONTINUE",
+        "NOTIFY_ONLY",
+        "QUEUE_REVISION",
+        "INTERRUPT_REQUIRED"
+      ]
+    },
+    "reasonCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "interruptType": {
+      "enum": [
+        "AMBIGUITY",
+        "PERMISSION",
+        "HIGH_RISK",
+        "BUDGET",
+        "USER_REQUESTED"
+      ]
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

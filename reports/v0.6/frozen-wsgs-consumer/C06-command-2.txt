@@ -1,0 +1,50 @@
+(node:1091784) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/finding-reference-resolver.unit.test.ts
+PASS tests/world-grounding-explanation.unit.test.ts
+PASS tests/world-explanation-renderer.unit.test.ts
+PASS tests/structured-world-selection-api.contract.test.ts
+PASS tests/structured-world-selection.contract.test.ts
+PASS tests/grounding-request-planner.unit.test.ts
+PASS tests/authority-fusion-input.unit.test.ts
+PASS tests/authority-fusion-input.contract.test.ts
+PASS tests/structured-world-selection-resolver.unit.test.ts
+PASS tests/v06-frozen-entry.integration.test.ts (300.799 s)
+PASS tests/v06-frozen-view.unit.test.ts (49.778 s)
+PASS tests/v06-frozen-request.unit.test.ts (50.19 s)
+PASS tests/v06-frozen-client.unit.test.ts (38.019 s)
+PASS tests/v06-frozen-http.contract.test.ts (32.744 s)
+PASS tests/v06-frozen-factory-compat.unit.test.ts (14.117 s)
+PASS tests/v06-frozen-source.unit.test.ts (10.253 s)
+PASS tests/v06-grounding-job.contract.test.ts (9.289 s)
+PASS tests/v06-frozen-revision-persistence.unit.test.ts (5.74 s)
+PASS tests/v06-frozen-cancel.unit.test.ts (5.244 s)
+PASS tests/openai-predecessor-regression.contract.test.ts (8.792 s)
+PASS tests/openai-api.contract.test.ts
+PASS tests/v06-frozen-public.contract.test.ts
+PASS tests/analysis-control-api.contract.test.ts
+PASS tests/query-service.unit.test.ts
+PASS tests/world-grounding-application.unit.test.ts
+PASS tests/v06-frozen-delivery.contract.test.ts
+PASS tests/v06-frozen-source-pump.unit.test.ts
+PASS tests/v06-frozen-persistence.unit.test.ts
+PASS tests/sdar-a2a-adapter.contract.test.ts
+PASS tests/v06-world-analysis-view.unit.test.ts
+PASS tests/v05-analysis-development-runtime.unit.test.ts
+PASS tests/analysis-reference-client.contract.test.ts
+PASS tests/v06-source-bridge.unit.test.ts
+PASS tests/multi-task-coordinator.contract.test.ts
+PASS tests/world-grounding-runtime.unit.test.ts
+PASS tests/wsgs-http-adapter.contract.test.ts
+PASS tests/v06-analysis-source.contract.test.ts
+PASS tests/v06-frozen-source-history.unit.test.ts
+PASS tests/v06-analysis-config.unit.test.ts
+PASS tests/agui-v03-analysis-projection.unit.test.ts
+PASS tests/analysis-control-coordinator.unit.test.ts
+PASS tests/agui-v03-development-readiness.unit.test.ts
+
+Test Suites: 42 passed, 42 total
+Tests:       521 passed, 521 total
+Snapshots:   0 total
+Time:        575.022 s
+Ran all test suites within paths "tests/agui-v03-analysis-projection.unit.test.ts", "tests/agui-v03-development-readiness.unit.test.ts", "tests/analysis-control-api.contract.test.ts", "tests/analysis-control-coordinator.unit.test.ts", "tests/analysis-reference-client.contract.test.ts", "tests/authority-fusion-input.contract.test.ts", "tests/authority-fusion-input.unit.test.ts", "tests/finding-reference-resolver.unit.test.ts", "tests/grounding-request-planner.unit.test.ts", "tests/multi-task-coordinator.contract.test.ts", "tests/openai-api.contract.test.ts", "tests/openai-predecessor-regression.contract.test.ts", "tests/query-service.unit.test.ts", "tests/sdar-a2a-adapter.contract.test.ts", "tests/structured-world-selection-api.contract.test.ts", "tests/structured-world-selection-resolver.unit.test.ts", "tests/structured-world-selection.contract.test.ts", "tests/v05-analysis-development-runtime.unit.test.ts", "tests/v06-analysis-config.unit.test.ts", "tests/v06-analysis-source.contract.test.ts", "tests/v06-frozen-cancel.unit.test.ts", "tests/v06-frozen-client.unit.test.ts", "tests/v06-frozen-delivery.contract.test.ts", "tests/v06-frozen-entry.integration.test.ts", "tests/v06-frozen-factory-compat.unit.test.ts", "tests/v06-frozen-http.contract.test.ts", "tests/v06-frozen-persistence.unit.test.ts", "tests/v06-frozen-public.contract.test.ts", "tests/v06-frozen-request.unit.test.ts", "tests/v06-frozen-revision-persistence.unit.test.ts", "tests/v06-frozen-source-history.unit.test.ts", "tests/v06-frozen-source-pump.unit.test.ts", "tests/v06-frozen-source.unit.test.ts", "tests/v06-frozen-view.unit.test.ts", "tests/v06-grounding-job.contract.test.ts", "tests/v06-source-bridge.unit.test.ts", "tests/v06-world-analysis-view.unit.test.ts", "tests/world-explanation-renderer.unit.test.ts", "tests/world-grounding-application.unit.test.ts", "tests/world-grounding-explanation.unit.test.ts", "tests/world-grounding-runtime.unit.test.ts", "tests/wsgs-http-adapter.contract.test.ts".

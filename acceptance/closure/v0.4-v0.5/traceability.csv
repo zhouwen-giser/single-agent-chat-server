@@ -1,0 +1,15 @@
+phase,acceptance,deliverable
+C00,AC-C00-*,global reconciliation
+C01,AC-V4-PRESERVE-*; AC-V4-DELIVERY-*,v0.4 remote delivery
+C02,AC-V4-HANDOFF-*,v0.4 WSGS handoff
+C03,AC-V4-SELECT-*,v0.4 structured selection
+C04,AC-V4-GAP-*,v0.4 real gap/currentness
+C05-C06,AC-V4-E2E-*; AC-V4-FINAL-*,v0.4 real closure
+C07,AC-V5-BASE-*,v0.5 branch/prerequisite
+C08,AC-V5-AGUI-*; AC-V5-HANDOFF-*,v0.5 consumers
+C09,AC-V5-LIFECYCLE-*; AC-V5-OBSERVER-*,v0.5 lifecycle/policy
+C10,AC-V5-PROJECTION-*; AC-V5-MAP-*,v0.5 UI projection
+C11,AC-V5-STEER-*; AC-V5-INTERRUPT-*,v0.5 steering
+C12,AC-V5-RECOVERY-*; AC-V5-NONGOAL-*,v0.5 recovery/scope
+C13,AC-V5-E2E-*,v0.5 real E2E
+C14,AC-FINAL-*,independent final decisions

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "sacs-v04-v05-acceptance-evidence-map/1.0",
+  "entries": [
+    {
+      "acceptanceId": "AC-V4-E2E-001",
+      "status": "NOT_RUN",
+      "evidence": [
+        {
+          "type": "REAL_CHAIN",
+          "report": "reports/closure/v04-real-e2e.json",
+          "caseId": "V4-E2E-01"
+        }
+      ]
+    },
+    {
+      "acceptanceId": "AC-V5-E2E-001",
+      "status": "NOT_RUN",
+      "evidence": [
+        {
+          "type": "REAL_CHAIN",
+          "report": "reports/closure/v05-real-e2e.json",
+          "caseId": "V5-E2E-01"
+        }
+      ]
+    }
+  ],
+  "allowedTypes": [
+    "SOURCE",
+    "GIT",
+    "CI",
+    "SCHEMA",
+    "CONTRACT",
+    "UNIT",
+    "STATIC_GUARD",
+    "REAL_POSTGRES",
+    "UPSTREAM_LOCK",
+    "REAL_WSGS",
+    "RUNNING_GOWM",
+    "REAL_GDPS",
+    "REAL_GDPS_OR_STAS",
+    "OPENAI",
+    "AGUI",
+    "AGUI_OFFICIAL_CLIENT",
+    "REFERENCE_CLIENT",
+    "REPORT_ASSERTION"
+  ]
+}

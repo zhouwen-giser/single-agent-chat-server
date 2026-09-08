@@ -1,0 +1,111 @@
+{
+  "taskId": "SACS-V06-FROZEN-WSGS-CONSUMER",
+  "taskPackageVersion": "1.0.0",
+  "createdOn": "2026-09-07",
+  "title": "SACS v0.6 — Frozen WSGS World Analysis Contract Consumer",
+  "artifactKind": "CODEX_GOAL_TASK_PACKAGE",
+  "implementationStatus": "NOT_STARTED",
+  "targetRepositories": [
+    "zhouwen-giser/single-agent-chat-server"
+  ],
+  "readOnlyRepositories": [
+    "zhouwen-giser/world-semantic-grounding-service"
+  ],
+  "entryDocument": "CODEX_GOAL_PROMPT_CN.md",
+  "specification": "GOAL_SPEC_CN.md",
+  "plan": "IMPLEMENTATION_PLAN_CN.md",
+  "sourceBaseline": "source-baseline.json",
+  "acceptanceLedgerTemplate": "acceptance/ledger.template.json",
+  "requiredScenarioCount": 40,
+  "stages": [
+    {
+      "id": "C00",
+      "name": "基线确认与合同导入",
+      "dependsOn": [],
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "C01",
+      "name": "1.2传输与生命周期",
+      "dependsOn": [
+        "C00"
+      ],
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "C02",
+      "name": "公共结果与统一视图",
+      "dependsOn": [
+        "C01"
+      ],
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "C03",
+      "name": "结构化选择与Revision",
+      "dependsOn": [
+        "C01",
+        "C02"
+      ],
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "C04",
+      "name": "交互与非执行候选",
+      "dependsOn": [
+        "C02",
+        "C03"
+      ],
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "C05",
+      "name": "正常入口共享组合",
+      "dependsOn": [
+        "C01",
+        "C02",
+        "C03",
+        "C04"
+      ],
+      "status": "NOT_STARTED"
+    },
+    {
+      "id": "C06",
+      "name": "回归证据与交付",
+      "dependsOn": [
+        "C00",
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05"
+      ],
+      "status": "NOT_STARTED"
+    }
+  ],
+  "requirements": {
+    "sourceRunFirst": true,
+    "releaseBuildPrerequisite": false,
+    "dockerRequired": false,
+    "liveUpstreamIntegrationRequired": false,
+    "liveDeviceExecutionAllowed": false,
+    "fixtureMayReplaceExternalPorts": true,
+    "fixtureMayReplaceWholeAnalysisSourceForCoreAcceptance": false,
+    "mustReuseNormalComposition": true,
+    "publicContractBytesMayBeEdited": false,
+    "allRequiredScenariosNeedExecutedEvidence": true
+  },
+  "outOfScope": [
+    "Native Analysis Control",
+    "Provider algorithms and DAGs",
+    "cross-repository integration",
+    "new World-to-SDAR action contract",
+    "real SDAR/UGV/MCP actions",
+    "production release gates",
+    "deployment orchestration",
+    "HA and load testing"
+  ],
+  "completionMarker": "SACS_WSGS_FROZEN_WORLD_ANALYSIS_CONSUMER_DEV_READY",
+  "completionMeaning": "Consumer development readiness at L0/L1 only; not live-system, database-recovery, model-quality, device or production acceptance.",
+  "remoteWrites": "This package authoring performs no repository writes. During implementation follow repository AGENTS and actual permissions; no automatic merge, force-push, tag or release."
+}

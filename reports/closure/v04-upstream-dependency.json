@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "sacs-upstream-dependency-report/1.0",
+  "dependencyId": "WSGS_GEospatial_PRESENTATION_HANDOFF",
+  "owner": "WSGS",
+  "status": "MISSING",
+  "requiredArtifacts": [
+    "WSGS_SACS_CONSUMER_LOCK.json",
+    "WSGS_GEOSPATIAL_FINDING_PROFILE.json",
+    "WSGS_RESULT_SCHEMA_LOCK.json",
+    "WSGS_UPSTREAM_PROVENANCE_LOCK.json",
+    "CHECKSUMS.json"
+  ],
+  "blockingGates": [
+    "C02",
+    "C03",
+    "C04",
+    "C05",
+    "C06"
+  ],
+  "details": {
+    "marker": "SACS_WSGS_GEOSPATIAL_HANDOFF_NOT_READY",
+    "authoritativeArtifactsObserved": 0,
+    "instanceReadinessDoesNotSubstituteForHandoff": true,
+    "credentialsReadOrPersisted": false
+  }
+}

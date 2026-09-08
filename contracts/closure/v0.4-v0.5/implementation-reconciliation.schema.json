@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sacs:v04-v05-implementation-reconciliation:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sources",
+    "v04",
+    "v05",
+    "generatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sacs-v04-v05-implementation-reconciliation/1.0"
+    },
+    "sources": {
+      "type": "object",
+      "required": [
+        "sacsSha",
+        "wsgsSha",
+        "gdpsSha",
+        "gowmSha"
+      ],
+      "properties": {
+        "sacsSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "wsgsSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "gdpsSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "gowmSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "v04": {
+      "type": "object",
+      "required": [
+        "branch",
+        "headSha",
+        "items"
+      ],
+      "properties": {
+        "branch": {
+          "type": "string"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "status",
+              "evidence"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "IMPLEMENTED_AND_VERIFIED",
+                  "IMPLEMENTED_LOCAL_ONLY",
+                  "IMPLEMENTED_REMOTE_NO_CI",
+                  "PROVISIONAL_ONLY",
+                  "BLOCKED_UPSTREAM",
+                  "BLOCKED_ENVIRONMENT",
+                  "MISSING",
+                  "STALE_REPORT"
+                ]
+              },
+              "evidence": {
+                "type": "array"
+              }
+            }
+          }
+        }
+      }
+    },
+    "v05": {
+      "type": "object",
+      "required": [
+        "remoteBranchFound",
+        "items"
+      ],
+      "properties": {
+        "remoteBranchFound": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array"
+        }
+      }
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

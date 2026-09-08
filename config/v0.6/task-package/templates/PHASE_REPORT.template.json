@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "sacs-v06-phase-report/1.0",
+  "phaseId": "S00",
+  "status": "IN_PROGRESS",
+  "sourceSha": "0000000000000000000000000000000000000000",
+  "startedAt": "2026-01-01T00:00:00Z",
+  "commands": [],
+  "acceptanceIds": [],
+  "blockers": [],
+  "push": "NOT_RUN",
+  "notes": []
+}
