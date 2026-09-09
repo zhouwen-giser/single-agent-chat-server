@@ -264,7 +264,7 @@ export function planFrozenGroundingRequest(input: {
     },
     executionPolicy: {
       readOnly: true,
-      deadlineMs: 30000,
+      deadlineMs: 120_000,
       maxQueryOperations: 16,
       maxCandidatesPerMention: 5,
       maxResultBytes: input.maxResultBytes ?? 1048576,

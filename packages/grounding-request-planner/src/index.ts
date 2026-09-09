@@ -32,7 +32,7 @@ export class GeospatialConsumerLockPlanningError extends Error {
 
 const executionPolicy = {
   readOnly: true,
-  deadlineMs: 30_000,
+  deadlineMs: 120_000,
   maxQueryOperations: 16,
   maxCandidatesPerMention: 5,
   maxResultBytes: 1_048_576,
