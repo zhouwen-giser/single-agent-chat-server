@@ -12,13 +12,16 @@ import {
   createSdarA2aClient,
   parseSdarA2aConfig,
 } from "/app/dist/packages/sdar-a2a-adapter/src/index.js";
+let stage = "configuration";
 try {
   parseServerConfig(process.env);
   if (!parseConversationModelConfig(process.env))
     throw Error("MODEL_CONFIG_MISSING");
   parseGroundingAnalysisConfig(process.env);
   parseWsgsHttpConfig(process.env);
+  stage = "frozen-contract";
   verifyFrozenWorldAnalysis();
+  stage = "wsgs-capabilities";
   const response = await fetch(
     new URL("/v1/capabilities", process.env.WSGS_BASE_URL),
     {
@@ -43,6 +46,7 @@ try {
     await response.json(),
   );
   if (!caps.requiredCapabilitiesReady) throw Error("WSGS_NOT_READY");
+  stage = "sdar-agent-card";
   await createSdarA2aClient(parseSdarA2aConfig(process.env));
   console.log(
     JSON.stringify({
@@ -54,8 +58,6 @@ try {
   );
 } catch {
   // Configuration/transport exceptions can embed URLs or secret values.
-  console.error(
-    "Dependency preflight failed; inspect private configuration and upstream availability.",
-  );
+  console.error(JSON.stringify({ status: "FAIL", stage }));
   process.exitCode = 1;
 }

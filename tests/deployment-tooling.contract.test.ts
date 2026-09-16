@@ -66,4 +66,36 @@ print('PASS')
     );
     expect(output.trim()).toBe("PASS");
   });
+  it("rejects modified, missing, extra and symlink package files", () => {
+    const output = execFileSync(
+      "python3",
+      [
+        "-B",
+        "-c",
+        `
+import importlib.util,tempfile,json
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('deploy','deployment/deploy.py')
+d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)
+with tempfile.TemporaryDirectory() as folder:
+ p=Path(folder)
+ names=['manifest.json','images.tar','compose.yaml','deploy.py','deploy.sh','preflight.mjs','runtime.defaults.json','.env.example','README.md']
+ for name in names:(p/name).write_text('{}')
+ (p/'SHA256SUMS').write_text(''.join(d.digest(p/name)+'  '+name+'\\n' for name in names))
+ assert d.verify(p)=={}
+ def rejected():
+  try:d.verify(p);raise AssertionError('accepted unsafe package')
+  except (RuntimeError,FileNotFoundError):pass
+ (p/'README.md').write_text('changed');rejected()
+ (p/'README.md').unlink();rejected()
+ (p/'README.md').symlink_to(p/'manifest.json');rejected()
+ (p/'README.md').unlink();(p/'README.md').write_text('{}')
+ (p/'.env').write_text('private');rejected()
+print('PASS')
+`,
+      ],
+      { encoding: "utf8" },
+    );
+    expect(output.trim()).toBe("PASS");
+  });
 });
