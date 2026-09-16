@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "codex-goal-package/1.0",
+  "files": [
+    {
+      "path": "ARCHITECTURE_DECISIONS.md",
+      "sha256": "7b1df595ec13c1b8435c8253c6829b7df5dd1c0c923d3285bcdbf6fc3db99bdc"
+    },
+    {
+      "path": "CODEX_GOAL_PROMPT.md",
+      "sha256": "323bf2ae9ab758b6c5c177322489383fa9abf6a71bb3780302ab2f08a294abff"
+    },
+    {
+      "path": "DESIGN_BASELINE.md",
+      "sha256": "36e28b133272e66fe5b0b3bee72e035ce6b126432970c5f4ff183c24b8c432f6"
+    },
+    {
+      "path": "GOAL.md",
+      "sha256": "e343c44f160bb77cb16544aa25edb363e3300f88f27f0bc4ad4b30822f4dc19c"
+    },
+    {
+      "path": "IMPLEMENTATION_FILE_MAP.md",
+      "sha256": "7d643ebb50ec518d3d04b752be9a579f24f282d151ce314c520a48c04bae17fa"
+    },
+    {
+      "path": "PRODUCT_BOUNDARY.md",
+      "sha256": "2e403e7ea89064a94866b030d923c5afc7b856ef1952475e445682a6ce9a0969"
+    },
+    {
+      "path": "README.md",
+      "sha256": "8e9f97e841ebbc43ab8f4b5652b7cbbec9537ef310b050dcb90313018daf7b26"
+    },
+    {
+      "path": "REPORTING.md",
+      "sha256": "223e55ec2d5d8eb904ae8c76b10c4d7ce500b14820800fd73d872090f0086920"
+    },
+    {
+      "path": "acceptance/acceptance-matrix.json",
+      "sha256": "7fcd720bf1bfc6360c4b61541b67994f5ef85d148cf9a43413316a7a4c282bb9"
+    },
+    {
+      "path": "acceptance/required-commands.md",
+      "sha256": "42dcd18a254b90722c2766b26880e56ad7893d38b35592f02253414792c03387"
+    },
+    {
+      "path": "contracts/FOCUS_LINKAGE_CONTRACT.md",
+      "sha256": "e2cf76c7acee79b0b15dbd6949529c2e76121b545c340d91adb1db47866a7d61"
+    },
+    {
+      "path": "contracts/GROUNDING_ACTIVITY_CONTRACT.md",
+      "sha256": "ce8419fcff92f1c466ef24d24972d288f16aa0221e9640b3ade8e7aed1fbde6a"
+    },
+    {
+      "path": "contracts/MAP_INTERACTION_CONTRACT.md",
+      "sha256": "7b0fa10250445accc4306d1c11c6bacd6def65a571a93d58977e07a11618d261"
+    },
+    {
+      "path": "phases/S00_BASELINE_AND_GAP_LOCK.md",
+      "sha256": "ccdda1d0a141828f3106559b7665b441f31ac2546af065a46df427fea70639d7"
+    },
+    {
+      "path": "phases/S01_GROUNDING_ACTIVITY.md",
+      "sha256": "4b6215d38c9af2beb386424661da56789f189f4d595751aea4718f0d8d56037d"
+    },
+    {
+      "path": "phases/S02_WORLD_VIEW_LINKAGE.md",
+      "sha256": "c366d22aa637d4c5526c549dd6746217cecdbd5dbfa5ad65a85de58a94ac6b46"
+    },
+    {
+      "path": "phases/S03_REFERENCE_CLIENT_MAP.md",
+      "sha256": "0cf8be86cf6cf0fa2a00cbfccecdec479412ed6e16f29949e561abc8b8ecb310"
+    },
+    {
+      "path": "phases/S04_SELECTION_LOOP.md",
+      "sha256": "d42ad09be7e7a260c3f997084f01bcca4574d265795e50bffdba79c5dd415ecc"
+    },
+    {
+      "path": "phases/S05_MAP_REQUERY_LOOP.md",
+      "sha256": "8c400db10ce25e96dcba90baf7fd86c970533c3251aa1099edb8353028815a38"
+    },
+    {
+      "path": "phases/S06_RECOVERY_AND_CONCURRENCY.md",
+      "sha256": "17d49778139926dda38314f4732285d1f7f188856a23de40c2672629819994b9"
+    },
+    {
+      "path": "phases/S07_E2E_AND_REPORT.md",
+      "sha256": "5fbb07aca65f5f525444c38330c9617c9a838cc3e75da32177b760130b16173d"
+    }
+  ]
+}

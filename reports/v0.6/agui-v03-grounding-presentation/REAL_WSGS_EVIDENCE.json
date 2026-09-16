@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "sacs-agui-grounding-real/1.0",
+  "status": "NOT_RUN",
+  "cases": [
+    { "id": "R01", "status": "NOT_RUN", "evidence": [] },
+    { "id": "R02", "status": "NOT_RUN", "evidence": [] }
+  ],
+  "completionMarkers": [],
+  "note": "Prior site/deployment evidence does not verify the new Activity and interaction contract. No real task has been submitted in this round."
+}

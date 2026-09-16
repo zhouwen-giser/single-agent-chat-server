@@ -43,6 +43,8 @@ config/v0.6/task-package/
 dependencies/wsgs-v06/
 dependencies/wsgs-world-analysis-v1/public/
 config/v0.6/frozen-consumer-task/
+config/v0.6/SACS_AGUI_V03_GROUNDING_CODEX_GOAL/
+reports/v0.6/agui-v03-grounding-presentation/receipts/
 
 # Preserve deterministic verification receipts and historical acceptance evidence.
 # Keep source files, hand-written reports, and other JSON files under format checks.

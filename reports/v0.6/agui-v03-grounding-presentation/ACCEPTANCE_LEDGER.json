@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "sacs-agui-grounding-ledger/1.0",
+  "requirements": "config/v0.6/SACS_AGUI_V03_GROUNDING_CODEX_GOAL/acceptance/acceptance-matrix.json",
+  "cases": [
+    { "id": "G01", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G02", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G03", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G04", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G05", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G06", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G07", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G08", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G09", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G10", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G11", "status": "NOT_RUN", "evidence": [] },
+    { "id": "G12", "status": "NOT_RUN", "evidence": [] },
+    { "id": "R01", "status": "NOT_RUN", "evidence": [] },
+    { "id": "R02", "status": "NOT_RUN", "evidence": [] }
+  ]
+}

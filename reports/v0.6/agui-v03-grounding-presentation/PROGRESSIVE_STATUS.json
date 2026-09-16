@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "sacs-agui-grounding-progress/1.0",
+  "baselineSha": "4916a92bebbdb1d83dfe35c070cdedf711e54da2",
+  "phases": [
+    {
+      "id": "S00",
+      "status": "PASS",
+      "evidence": [
+        "receipts/baseline-0816cb1f-7b01-4c9e-a7e8-d5ac7918e1b0.json",
+        "GAP_MATRIX.md"
+      ]
+    },
+    { "id": "S01", "status": "NOT_RUN", "evidence": [] },
+    { "id": "S02", "status": "NOT_RUN", "evidence": [] },
+    { "id": "S03", "status": "NOT_RUN", "evidence": [] },
+    { "id": "S04", "status": "NOT_RUN", "evidence": [] },
+    { "id": "S05", "status": "NOT_RUN", "evidence": [] },
+    { "id": "S06", "status": "NOT_RUN", "evidence": [] },
+    { "id": "S07", "status": "NOT_RUN", "evidence": [] }
+  ],
+  "completionMarkers": []
+}

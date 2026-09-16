@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "sacs-agui-grounding-development/1.0",
+  "status": "NOT_RUN",
+  "reason": "New task acceptance has not run; existing baseline regression is separate evidence.",
+  "evidence": [],
+  "completionMarkers": []
+}

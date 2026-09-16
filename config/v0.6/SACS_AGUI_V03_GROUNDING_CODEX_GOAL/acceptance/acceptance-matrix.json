@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "sacs-agui-v03-grounding-acceptance/1.0",
+  "cases": [
+    {
+      "id": "G01",
+      "name": "normal_grounding",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "Grounding Activity + State + World View + final text + success terminal",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G02",
+      "name": "partial_result",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "PARTIAL preserves valid Findings and gaps",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G03",
+      "name": "data_gap",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "trajectory is not connected across DATA_GAP",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G04",
+      "name": "candidate_selection",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "local inspect then explicit resolution creates new Revision",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G05",
+      "name": "expired_candidate",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "readable but disabled; requery path available",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G06",
+      "name": "map_geometry_requery",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "draw is local; explicit submit creates new Revision/Grounding",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G07",
+      "name": "local_layer_visibility",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "TOGGLE_LAYER never mutates shared state",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G08",
+      "name": "revision_conflict",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "stale choice/delta cannot overwrite active Revision",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G09",
+      "name": "reconnect",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "disconnect does not cancel; full Snapshot restores view",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G10",
+      "name": "cancel_uncertainty",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "CANCEL_REQUESTED until authoritative CANCELLED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G11",
+      "name": "historical_action_candidate",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "no execution authorization",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G12",
+      "name": "no_fake_tool_calls",
+      "track": "DEVELOPMENT",
+      "required": true,
+      "acceptance": "no tool events without authoritative lifecycle",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R01",
+      "name": "real_wsgs_normal",
+      "track": "REAL_WSGS_INTEGRATION",
+      "required": true,
+      "acceptance": "real WSGS Grounding Job drives truthful Activity/State",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R02",
+      "name": "real_wsgs_selection",
+      "track": "REAL_WSGS_INTEGRATION",
+      "required": true,
+      "acceptance": "real ambiguity/selection if capability exists; otherwise valid BLOCKED_EXTERNAL",
+      "status": "NOT_RUN"
+    }
+  ]
+}
