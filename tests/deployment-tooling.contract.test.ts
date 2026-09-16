@@ -24,6 +24,7 @@ describe("development deployment tooling", () => {
     expect(compose).toContain("env_file: ${SACS_RUNTIME_ENV:?required}");
     expect(compose).toContain("env_file: ${SACS_PG_ENV:?required}");
     expect(compose).not.toContain("5432:");
+    expect(compose).toContain("- /tmp:size=64m,mode=1777");
   });
   it("preserves configuration on reinstall, isolates PG secrets and blocks incompatible rollback", () => {
     const output = execFileSync(
