@@ -29,7 +29,7 @@ bash sacs-development/deploy.sh install
 bash sacs-development/deploy.sh status
 ```
 
-Requirements: Linux, Python 3.11+, Docker with Compose v2, sufficient disk,
+Requirements: Linux, Python 3.10+, Docker with Compose v2 or newer, sufficient disk,
 and permission to operate Docker and `/mnt/data/sacs-live`. Port 18083 must
 be free. Default listener is `17.26.1.20:18083`, not all host interfaces.
 Options: `--root`, `--bind`, `--port`, `--model-container`. Do not change bind
