@@ -27,8 +27,11 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile
 
 FROM node:22.14.0-bookworm-slim AS runtime
+ARG APP_VERSION=0.6.0
+ARG SOURCE_REVISION=unknown
 LABEL org.opencontainers.image.title="single-agent-chat-server" \
-      org.opencontainers.image.version="0.5.0" \
+      org.opencontainers.image.version=$APP_VERSION \
+      org.opencontainers.image.revision=$SOURCE_REVISION \
       org.opencontainers.image.licenses="Apache-2.0"
 ENV NODE_ENV=production
 WORKDIR /app

@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: ${SACS_POSTGRES_IMAGE:?required}
+    env_file: ${SACS_PG_ENV:?required}
+    volumes:
+      - data:/var/lib/postgresql/data
+    networks: [backend]
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  server:
+    image: ${SACS_IMAGE:?required}
+    init: true
+    env_file: ${SACS_RUNTIME_ENV:?required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${SACS_BIND_IP:?required}:${SACS_PORT:-18083}:3000"
+    networks: [backend, outbound]
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    read_only: true
+    tmpfs: [/tmp:size=64m, mode=1777]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:3000/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 18
+      start_period: 30s
+volumes:
+  data:
+networks:
+  backend:
+    internal: true
+  outbound:

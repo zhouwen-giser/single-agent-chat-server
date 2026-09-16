@@ -86,11 +86,15 @@ export const registerAnalysisRoutes: FastifyPluginAsync<
   const service = options.service ?? createUnavailableAnalysisControlService();
   server.addHook(
     "preHandler",
-    createServiceKeyAuthenticator(options.config.agUiServiceKey),
+    createServiceKeyAuthenticator(
+      options.config.agUiServiceKey,
+      options.config.authMode,
+    ),
   );
   server.addHook(
     "preHandler",
     createOpenWebUiUserAuthenticator({
+      authMode: options.config.authMode,
       secret: options.config.openWebUiUserJwtSecret,
       now: options.now ?? Date.now,
     }),

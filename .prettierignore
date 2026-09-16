@@ -56,3 +56,9 @@ reports/v0.6/frozen-wsgs-consumer/C05.json
 reports/v0.6/frozen-wsgs-consumer/C06.json
 reports/v0.6/frozen-wsgs-consumer/FINAL_EVIDENCE_AUDIT.json
 reports/v0.6/wsgs-full-functional-integration/ACCEPTANCE_LEDGER.json
+
+# Immutable real integration receipts; handwritten reports remain checked.
+reports/v0.6/data-selected-retest-20260909/reference-probe/INTEGRATION_EVIDENCE.json
+reports/v0.6/history-fixed-retest-20260909/reference-probe/INTEGRATION_EVIDENCE.json
+reports/v0.6/real-integration-20260909/**/INTEGRATION_EVIDENCE.json
+reports/v0.6/reference-fixed-analysis-20260909/history/INTEGRATION_EVIDENCE.json

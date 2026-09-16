@@ -17,6 +17,7 @@ const validEnvironment = {
 describe("server configuration", () => {
   it("applies safe loopback and resource defaults", () => {
     expect(parseServerConfig(validEnvironment)).toEqual({
+      authMode: "authenticated",
       serviceKey: validKey,
       agUiServiceKey: validAgUiKey,
       openWebUiUserJwtSecret: validJwtSecret,
