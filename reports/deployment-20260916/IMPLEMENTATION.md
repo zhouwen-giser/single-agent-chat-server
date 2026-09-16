@@ -39,5 +39,23 @@ formats remain rejected; A2A binding, version, origin and authentication checks
 are unchanged. A2A contract regression: 12 PASS; typecheck PASS. No SDAR task
 was submitted. Package tamper/missing/extra/symlink rejection is also tested.
 
+First successful deployment: b08578d96bc2be5805cd9409be455ddd91bc5c98,
+archive SHA-256 21d2d55ad9c9634f9efdaa88ddf9eeb70adfbb9d0fb8037de24d6a06e8d23979.
+WSGS/SDAR discovery PASS; SACS and dedicated PG healthy; 20 migrations applied.
+Only 17.26.1.20:18083 is published; PG has no host port. All three private
+configuration files are 0600, dedicated DB configuration verified. 65 existing
+upstream/container identities, images and start times were unchanged.
+
+Anonymous health/models/AG-UI/analysis capabilities returned HTTP200; six
+advanced capabilities AVAILABLE, native analysis control remains explicitly
+deferred. One normal chat POST returned HTTP200 with nonempty response
+(21 characters), no device request. Historical business smoke is pending a
+current private input: the former /tmp use-case file no longer exists. It is
+not replaced with an invented task or stale reference lease.
+
+Added local installer state-machine tests for startup-failure marker retention,
+compatible application restoration, success marker switching and rollback;
+4 deployment tooling tests PASS. No real service outage was induced by tests.
+
 No claim of complete v0.6 advanced analysis, free time windows, production
 authentication, tenant isolation or physical-device execution is made.

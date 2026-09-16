@@ -61,8 +61,23 @@ clients do not need CORS. No Open WebUI frontend or public TLS is installed.
 
 Health: `/health`, `/ready`. OpenAI-compatible: `/v1/models`,
 `/v1/chat/completions`, `/v1/world-selections`. AG-UI: `/ag-ui` (explicit v0.3
-profile when requesting analysis). Analysis: `/api/v1/analysis-capabilities`
-and existing `/api/v1/analyses/:analysisId` control/snapshot routes.
+profile when requesting analysis), `/ag-ui/capabilities`. Analysis:
+`/api/v1/analysis-capabilities` and the following routes:
+
+| Method | Path suffix under `/api/v1/analyses/:analysisId` | Purpose |
+| --- | --- | --- |
+| GET | (none) | Analysis session |
+| GET | `/snapshot` | Durable AG-UI projection |
+| POST | `/proposals` | Revision proposal / grounding source query |
+| POST | `/cancel` | Explicit analysis cancellation |
+| POST | `/interventions/:interventionId:resolve` | Published Choice resolution |
+
+Control commands still require published revision identifiers, strict schemas
+and idempotency keys. Grounding sources accept source queries, not native Plan
+patches; `nativeReady=false` remains an explicit upstream capability boundary.
+SDAR creation/follow-up/cancellation use the existing Chat/AG-UI interaction
+contracts, not new direct management endpoints. Follow-ups still require the
+allowed `sdar_action` and published Task context; no device safety bypass is added.
 No request/response contract or upstream frozen bytes are changed.
 
 ```sh
@@ -77,6 +92,20 @@ curl -N http://17.26.1.20:18083/v1/chat/completions \
 ```
 
 Use new message IDs for new turns; do not reuse IDs for conflicting requests.
+For an operator-selected real task, replace the placeholder before making this
+single read-only history request; do not reuse expired reference leases:
+
+```sh
+curl -N http://17.26.1.20:18083/ag-ui \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: text/event-stream' \
+  -H 'X-SACS-AG-UI-Profile: sacs-ag-ui-v0.3' \
+  -d '{"threadId":"history-example-1","runId":"history-run-1","state":{},"messages":[{"id":"history-user-1","role":"user","content":"查询任务 <真实任务标识> 最近一次执行的历史轨迹，仅查询，不执行设备动作。"}],"tools":[],"context":[],"forwardedProps":{"mode":"START"}}'
+
+# Use analysis.session.analysisId from the returned STATE_SNAPSHOT.
+curl -fsS 'http://17.26.1.20:18083/api/v1/analyses/<analysisId>/snapshot'
+```
+
 Deployment preflight only inspects WSGS capabilities and SDAR Agent Card;
 it submits no business tasks. Business acceptance is separate and must not
 automatically repeat failed requests. PARTIAL/PROVISIONAL are not equivalent

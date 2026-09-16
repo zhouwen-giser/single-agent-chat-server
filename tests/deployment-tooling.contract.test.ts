@@ -98,4 +98,58 @@ print('PASS')
     );
     expect(output.trim()).toBe("PASS");
   });
+  it("retains the successful marker on startup failure and restores only schema-compatible application images", () => {
+    const output = execFileSync(
+      "python3",
+      [
+        "-B",
+        "-c",
+        `
+import importlib.util,tempfile,json,sys
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('deploy','deployment/deploy.py')
+d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)
+with tempfile.TemporaryDirectory() as folder:
+ root=Path(folder)/'live';root.mkdir();(root/'shared').mkdir()
+ incoming=Path(folder)/'incoming';incoming.mkdir()
+ old=root/'releases'/'old';old.mkdir(parents=True)
+ for p in [incoming,old]:
+  (p/'SHA256SUMS').write_text('manifest');(p/'images.tar').write_text('image')
+  (p/'runtime.defaults.json').write_text('{}')
+ (root/'current').symlink_to(old)
+ m={'image':'sacs:test','imageId':'image-id','postgresImage':'pg:test','postgresImageId':'image-id','migrations':{'0001.sql':'hash'},'sourceSha':'test'}
+ d.__file__=str(incoming/'deploy.py');d.verify=lambda p:m
+ d.private_configuration=lambda *a:None
+ def run(args,**kw):
+  if args[:3]==['docker','image','inspect']:return b'[{"Id":"image-id"}]'
+  if args[:2]==['docker','ps']:return b'owned-container'
+  return b''
+ d.run=run;calls=[];fail=True
+ def compose(package,*a):
+  def comp(*args,**kw):
+   calls.append((str(package),args))
+   if args[0]=='exec' and 'pg_dump' in args:return b'backup'
+   if args[0]=='up' and args[-1]=='server' and package!=old and fail:raise RuntimeError('startup failure')
+   return b''
+  return comp
+ d.compose=compose;d.db_versions=lambda comp:m['migrations'];d.ready=lambda comp:None
+ sys.argv=['deploy.py','install','--root',str(root)]
+ try:d.main();raise AssertionError('ignored startup failure')
+ except RuntimeError:pass
+ assert (root/'current').resolve()==old
+ assert any(p==str(old) and a[0]=='up' and a[-1]=='server' for p,a in calls)
+ assert not (root/'shared'/'deployment-receipt.json').exists()
+ assert any(a[-1]=='postgres' and a[0]=='up' for p,a in calls)
+ fail=False;d.main()
+ assert (root/'current').resolve()!=old and (root/'previous').resolve()==old
+ sys.argv=['deploy.py','rollback','--root',str(root)];d.main()
+ assert (root/'current').resolve()==old
+ assert all(not any(x in a for x in ['down','pg_restore']) for p,a in calls)
+print('PASS')
+`,
+      ],
+      { encoding: "utf8" },
+    );
+    expect(output.trim().endsWith("PASS")).toBe(true);
+  });
 });
