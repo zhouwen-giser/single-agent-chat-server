@@ -18,4 +18,8 @@ S02 passed at `f30420f`: stable typed public identity links now connect the froz
 
 S03 passed at `82e46be`: all 17 local map/draft actions, authoritative versus rendered scene separation, input validation and zero implicit transport. The phase gate passed 573 frozen tests plus 14 PostgreSQL and 2 HTTP/SSE tests. G07 is directly verified. S02 full remote CI (quality and container) also passed at `76d449c`; see `CI_S02.json`.
 
-Remaining: S04 explicit selection confirmation, S05 validated geometry requery, S06 recovery/concurrency hardening, S07 complete local and real-source acceptance. No final completion marker is emitted.
+S03 full CI exposed an old v0.5 E2E assertion expecting local pins in shared state. It was corrected to verify rendered pins and unchanged authoritative state, with all 8 older E2E tests passing. See `S03_CI_FOLLOWUP.md`; the scoped S03 receipt was not full CI evidence.
+
+S04 passed at `445a111`: explicit local candidate inspection/confirmation now closes through Analysis Control, a new Revision/Grounding, and authoritative Snapshot. G04 and G05 are directly verified. The gate passed 585 frozen tests, 14 PostgreSQL tests and 10 v0.5/v0.6 HTTP/SSE E2E tests. See `S04.md` for precise scope, validation failures encountered and observer-reconnect correction.
+
+Remaining: S05 validated geometry requery, S06 recovery/concurrency hardening, S07 complete local and real-source acceptance. No final completion marker is emitted.

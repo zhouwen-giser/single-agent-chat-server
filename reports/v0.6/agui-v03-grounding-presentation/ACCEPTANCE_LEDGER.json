@@ -5,8 +5,25 @@
     { "id": "G01", "status": "NOT_RUN", "evidence": [] },
     { "id": "G02", "status": "NOT_RUN", "evidence": [] },
     { "id": "G03", "status": "NOT_RUN", "evidence": [] },
-    { "id": "G04", "status": "NOT_RUN", "evidence": [] },
-    { "id": "G05", "status": "NOT_RUN", "evidence": [] },
+    {
+      "id": "G04",
+      "status": "PASS",
+      "sourceSha": "445a1116e6b342031659c0abc0b2bc1d213dec4d",
+      "evidence": [
+        "receipts/S04-86e4a0c7-6233-44e0-8287-c2e52c47b3e8.json",
+        "tests/v06-frozen-entry.integration.test.ts: G04 inspect -> explicit confirmation -> Control -> new Revision/Grounding -> authoritative Snapshot"
+      ]
+    },
+    {
+      "id": "G05",
+      "status": "PASS",
+      "sourceSha": "445a1116e6b342031659c0abc0b2bc1d213dec4d",
+      "evidence": [
+        "receipts/S04-86e4a0c7-6233-44e0-8287-c2e52c47b3e8.json",
+        "tests/v06-frozen-entry.integration.test.ts: G05 and AC-025",
+        "tests/v06-frozen-client.unit.test.ts: AC-025 AC-036 expiry and requery"
+      ]
+    },
     { "id": "G06", "status": "NOT_RUN", "evidence": [] },
     {
       "id": "G07",
