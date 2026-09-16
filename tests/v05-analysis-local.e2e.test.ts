@@ -75,6 +75,7 @@ interface AnalysisSummary {
 }
 
 interface AnalysisSnapshotResponse {
+  readonly map: import("../packages/analysis-contract/src/index.js").MapSharedState;
   readonly analysis: {
     readonly session: {
       readonly activeRevisionId: string;
@@ -235,8 +236,11 @@ describeWithPostgres("v0.5 local HTTP/AG-UI/PostgreSQL functional E2E", () => {
     const auditAfter = await controlAudit(run.analysisId);
 
     expect(
-      run.client.mapPresentation.shared?.pinnedFocusById[pinnedFocus.focusId],
+      run.client.mapPresentation.rendered?.pinnedFocusById[pinnedFocus.focusId],
     ).toEqual(pinnedFocus);
+    expect(before.map).toBeDefined();
+    expect(run.client.mapPresentation.shared).toEqual(before.map);
+    expect(after.map).toEqual(before.map);
     expect(after.analysis.activeRevisionId).toBe(
       before.analysis.activeRevisionId,
     );
