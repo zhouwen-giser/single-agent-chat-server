@@ -36,6 +36,7 @@ import {
   startFrozenScenarioPeer,
 } from "./helpers/memory-frozen-analysis.js";
 import { MemoryGrounding } from "./helpers/memory-grounding.js";
+import { verifyGroundingObservation } from "../scripts/lib/agui-grounding-observation.js";
 
 // These multi-turn cases repeatedly validate the complete public schema closure.
 // Allow bounded CPU contention without changing any production HTTP/TTL budget.
@@ -396,6 +397,30 @@ describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL
         const state = stateFrom(events);
         const view = interactionContext(state).view;
         const result = app.peer.results[0]!;
+        const wire = events
+          .map((event) => `data: ${JSON.stringify(event)}\n\n`)
+          .join("");
+        const verified = await verifyGroundingObservation(wire, result);
+        expect(verified.summary.sourceStatus).toBe(status);
+        await expect(
+          verifyGroundingObservation(wire, {
+            ...result,
+            resultHash: "sha256:" + "0".repeat(64),
+          }),
+        ).rejects.toThrow("SOURCE_RESULT_IDENTITY_MISMATCH");
+        const wrongText = events.map((event) =>
+          event["type"] === "TEXT_MESSAGE_CONTENT"
+            ? { ...event, delta: "changed" }
+            : event,
+        );
+        await expect(
+          verifyGroundingObservation(
+            wrongText
+              .map((event) => `data: ${JSON.stringify(event)}\n\n`)
+              .join(""),
+            result,
+          ),
+        ).rejects.toThrow("TEXT_PROJECTION_MISMATCH");
         expect(result.status).toBe(status);
         expect(result.worldAnalysisFindings.findings.length).toBeGreaterThan(0);
         expect(view.status).toBe(status);
