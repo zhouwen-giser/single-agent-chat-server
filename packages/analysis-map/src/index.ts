@@ -15,6 +15,7 @@ export interface LocalMapState {
   readonly hover?: Readonly<Record<string, unknown>>;
   readonly inspectionFocus?: FocusTarget;
   readonly layerVisibilityPreference: Readonly<Record<string, boolean>>;
+  readonly pinnedFocusOverrides?: Readonly<Record<string, FocusTarget | null>>;
   readonly unsubmittedEditDraft?: Readonly<Record<string, unknown>>;
   readonly playbackCursor?: string;
   readonly playbackRate?: number;
@@ -142,6 +143,19 @@ export function isLocalOnlyMapAction(action: string): boolean {
     "HEADING",
     "HOVER",
     "INSPECT",
+    "FOCUS",
+    "FOCUS_PIN",
+    "FOCUS_UNPIN",
+    "FIT_LAYER",
+    "FIT_FINDING",
+    "TOGGLE_LAYER",
+    "DRAW_POINT",
+    "DRAW_LINE",
+    "DRAW_POLYGON",
+    "DRAW_RADIUS",
+    "SET_QUERY_SCOPE",
+    "REPLACE_QUERY_SCOPE",
+    "CLEAR_QUERY_SCOPE",
     "VISIBILITY_PREFERENCE",
     "EDIT_DRAFT",
     "PLAYBACK_CURSOR",

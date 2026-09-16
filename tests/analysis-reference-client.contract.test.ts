@@ -377,7 +377,8 @@ describe("headless v0.5 analysis reference client", () => {
         hover: { featureId: "feature-1" },
         inspectionFocus: { focusId: "inspection-1" },
       },
-      shared: { pinnedFocusById: { "pinned-1": { focusId: "pinned-1" } } },
+      shared: { pinnedFocusById: {} },
+      rendered: { pinnedFocusById: { "pinned-1": { focusId: "pinned-1" } } },
     });
     expect(map.localMapActions.map(({ type }) => type)).toEqual([
       "PAN",

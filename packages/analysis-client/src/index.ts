@@ -9,7 +9,6 @@ import {
 import {
   parseAndVerifyAgUiSharedStateV03,
   type AgUiSharedStateV03,
-  type FocusTarget,
   type MapSharedState,
 } from "../../analysis-contract/src/index.js";
 import type {
@@ -17,11 +16,7 @@ import type {
   AnalysisInterventionResolutionCommand,
   AnalysisProposalCommand,
 } from "../../analysis-control-runtime/src/index.js";
-import {
-  reduceLocalMapState,
-  reduceMapSharedState,
-  type LocalMapState,
-} from "../../analysis-map/src/index.js";
+import { type LocalMapState } from "../../analysis-map/src/index.js";
 import { canonicalJson } from "../../world-explanation-contract/src/index.js";
 import {
   createFrozenChoiceResolution,
@@ -29,6 +24,13 @@ import {
   type FrozenSourceQueryCommand,
 } from "./frozen-world-analysis.js";
 export * from "./frozen-world-analysis.js";
+import {
+  localMapActionSchema,
+  reduceClientMapAction,
+  renderLocalMap,
+  type AnalysisClientMapAction,
+} from "./local-map.js";
+export type { AnalysisClientMapAction } from "./local-map.js";
 
 export type AnalysisClientEffect =
   "REQUEST_FULL_STATE_SNAPSHOT" | "REQUEST_FULL_ACTIVITY_SNAPSHOT";
@@ -244,23 +246,10 @@ export interface MapEngineAdapter {
   disconnect(): void | Promise<void>;
 }
 
-export type AnalysisClientMapAction =
-  | {
-      readonly type: "PAN";
-      readonly viewport: Readonly<Record<string, number>>;
-    }
-  | { readonly type: "ZOOM"; readonly zoom: number }
-  | {
-      readonly type: "HOVER";
-      readonly hover?: Readonly<Record<string, unknown>>;
-    }
-  | { readonly type: "INSPECT"; readonly focus?: FocusTarget }
-  | { readonly type: "FOCUS_PIN"; readonly focus: FocusTarget }
-  | { readonly type: "FOCUS_UNPIN"; readonly focusId: string };
-
 export interface AnalysisClientMapPresentation {
   readonly local: LocalMapState;
   readonly shared?: MapSharedState;
+  readonly rendered?: MapSharedState;
 }
 
 export class HeadlessMapEngineAdapter implements MapEngineAdapter {
@@ -295,7 +284,7 @@ export class HeadlessAnalysisReferenceClient {
   constructor(private readonly mapEngine: MapEngineAdapter) {}
 
   get state(): AnalysisReferenceClientState {
-    return this.current;
+    return structuredClone(this.current);
   }
 
   get mapPresentation(): AnalysisClientMapPresentation {
@@ -303,7 +292,10 @@ export class HeadlessAnalysisReferenceClient {
       local: structuredClone(this.localMap),
       ...(this.presentedMap === undefined
         ? {}
-        : { shared: structuredClone(this.presentedMap) }),
+        : {
+            shared: structuredClone(this.presentedMap),
+            rendered: renderLocalMap(this.presentedMap, this.localMap),
+          }),
     };
   }
 
@@ -334,7 +326,9 @@ export class HeadlessAnalysisReferenceClient {
   }
 
   async setInspectionFocus(focus: unknown): Promise<void> {
-    await this.mapEngine.setInspectionFocus(focus);
+    await this.dispatchMapAction(
+      localMapActionSchema.parse({ type: "INSPECT", focus }),
+    );
   }
 
   /**
@@ -343,48 +337,23 @@ export class HeadlessAnalysisReferenceClient {
    * cannot accidentally become backend analysis commands.
    */
   async dispatchMapAction(action: AnalysisClientMapAction): Promise<void> {
-    switch (action.type) {
-      case "PAN":
-        assertFiniteViewport(action.viewport);
-        this.localMap = reduceLocalMapState(this.localMap, {
-          viewport: { ...this.localMap.viewport, ...action.viewport },
-        });
-        break;
-      case "ZOOM":
-        if (!Number.isFinite(action.zoom)) {
-          throw new Error("ANALYSIS_CLIENT_MAP_ZOOM_INVALID");
-        }
-        this.localMap = reduceLocalMapState(this.localMap, {
-          viewport: { ...this.localMap.viewport, zoom: action.zoom },
-        });
-        break;
-      case "HOVER":
-        this.localMap = reduceLocalMapState(this.localMap, {
-          hover: action.hover,
-        });
-        break;
-      case "INSPECT":
-        this.localMap = reduceLocalMapState(this.localMap, {
-          inspectionFocus: action.focus,
-        });
-        await this.mapEngine.setInspectionFocus(action.focus);
-        break;
-      case "FOCUS_PIN":
-        this.presentedMap = reduceMapSharedState(this.requirePresentedMap(), {
-          type: "FOCUS_PIN",
-          focus: action.focus,
-        });
-        await this.mapEngine.replaceScene(this.presentedMap);
-        break;
-      case "FOCUS_UNPIN":
-        this.presentedMap = reduceMapSharedState(this.requirePresentedMap(), {
-          type: "FOCUS_UNPIN",
-          focusId: action.focusId,
-        });
-        await this.mapEngine.replaceScene(this.presentedMap);
-        break;
-    }
-    await this.mapEngine.applyLocalMapAction?.(action);
+    const parsed = localMapActionSchema.parse(action);
+    this.localMap = reduceClientMapAction(
+      this.localMap,
+      parsed,
+      this.presentedMap,
+      this.current.sharedState?.analysis.activeRevisionId,
+    );
+    if (parsed.type === "INSPECT" || parsed.type === "FOCUS")
+      await this.mapEngine.setInspectionFocus(structuredClone(parsed.focus));
+    if (
+      this.presentedMap &&
+      ["FOCUS_PIN", "FOCUS_UNPIN", "TOGGLE_LAYER"].includes(parsed.type)
+    )
+      await this.mapEngine.replaceScene(
+        renderLocalMap(this.presentedMap, this.localMap),
+      );
+    await this.mapEngine.applyLocalMapAction?.(structuredClone(parsed));
   }
 
   private async acceptEvents(
@@ -403,7 +372,9 @@ export class HeadlessAnalysisReferenceClient {
         if (scene !== undefined) {
           this.presentedMap = structuredClone(scene);
           try {
-            await this.mapEngine.replaceScene(scene);
+            await this.mapEngine.replaceScene(
+              renderLocalMap(scene, this.localMap),
+            );
           } catch {
             // Rendering is a local observer concern and cannot stop the
             // authoritative event reduction stream.
@@ -412,13 +383,6 @@ export class HeadlessAnalysisReferenceClient {
       }
     }
     return effects;
-  }
-
-  private requirePresentedMap(): MapSharedState {
-    if (this.presentedMap === undefined) {
-      throw new Error("ANALYSIS_CLIENT_MAP_SNAPSHOT_REQUIRED");
-    }
-    return this.presentedMap;
   }
 }
 
@@ -952,14 +916,6 @@ function assertRunStartLineage(
     event.parentRunId !== current.runId
   ) {
     throw new Error("AG_UI_INTERRUPT_RESUME_LINEAGE_INVALID");
-  }
-}
-
-function assertFiniteViewport(
-  viewport: Readonly<Record<string, number>>,
-): void {
-  if (Object.values(viewport).some((value) => !Number.isFinite(value))) {
-    throw new Error("ANALYSIS_CLIENT_MAP_VIEWPORT_INVALID");
   }
 }
 
