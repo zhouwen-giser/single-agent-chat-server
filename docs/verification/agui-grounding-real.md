@@ -24,6 +24,12 @@ pnpm build
 SACS_AGUI_REAL_ENV=/absolute/private/case.env node scripts/agui-grounding-real.mjs
 ```
 
+To check only the isolated database/migrations/server startup without any WSGS
+request, add `--local-startup-only`. Its evidence mode is LOCAL_STARTUP_CHECK,
+not REAL, and it cannot pass R01/R02. Readiness probes TCP rather than the image's
+temporary initialization Unix socket. Failures record stage and code locations,
+never error messages that could contain credentials or private data.
+
 The default output is a new UUID directory under the current goal's `real/`
 evidence area. `SACS_AGUI_REAL_OUTPUT` may specify a new directory; existing
 `EVIDENCE.json` is never overwritten. Request text, raw results, precise positions,

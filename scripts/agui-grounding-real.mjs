@@ -235,7 +235,19 @@ try {
     try {
       execFileSync(
         "docker",
-        ["exec", container, "pg_isready", "-U", "postgres"],
+        // The image's temporary init server accepts Unix sockets before the
+        // final TCP listener exists. Probe the same transport used by SACS.
+        [
+          "exec",
+          container,
+          "pg_isready",
+          "-h",
+          "127.0.0.1",
+          "-U",
+          "postgres",
+          "-d",
+          "sacs_agui_real",
+        ],
         { stdio: "pipe", timeout: 5000 },
       );
       break;
