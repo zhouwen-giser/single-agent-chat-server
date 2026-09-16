@@ -1,6 +1,6 @@
 # Grounding presentation closure — working report
 
-Status: **IN_PROGRESS**. Neither DEVELOPMENT nor REAL_WSGS completion is claimed.
+Status: **DEVELOPMENT PASS; REAL_WSGS positive/selection acceptance BLOCKED_EXTERNAL**. The complete thread goal remains unachieved.
 
 The baseline is the user-approved local fast-forward merge at `4916a92bebbdb1d83dfe35c070cdedf711e54da2`, on `codex/sacs-v0.6-wsgs-full-functional-integration`. The old deployment branch remains intact. This work does not deploy to the existing shared services.
 
@@ -30,4 +30,12 @@ S06 passed at `1c627ee`: stale State/Activity and disconnected observer guards, 
 
 S07 development closure at `6ec97bd` adds normal/PARTIAL source-to-view fidelity, historical action safety, gap preservation and a frozen 1.2 real local TCP/PostgreSQL choice + map-query + repository-reopen test. All nine local gates passed (626 frozen, 14 PostgreSQL, 11 HTTP/SSE E2E tests). G01–G12 now have direct development evidence. See `S07_DEVELOPMENT.md` for scope and corrected fixture assertions. S06 full CI is also successful (`CI_S06.json`).
 
-Remaining: full CI at the S07 source, final requirement audit and fresh real-source R01/R02 acceptance. A fresh read-only capabilities check showed exact 1.2 and six available capabilities, but no new real business request has been submitted. The prior temporary private context file `/tmp/sacs-v06-history-after-reference.env` is no longer present; its former contents/lease must not be assumed. No final completion marker is emitted.
+S07 local source full CI passed at `c7ecd4e` (`CI_S07_LOCAL.json`). A separate bounded live-runner and a tested shared observation oracle were added at `26eb1c8`, which also passed all nine local gates and full CI (`CI_S07_RUNNER.json`). Local-runner startup defects and their precise evidence/limits are preserved in `REAL_RUNNER_PREFLIGHT.md`; no production auth rule was relaxed and those unsuccessful startup attempts submitted zero upstream business requests.
+
+At `e6b76bb`, the strengthened local startup/authentication check passed, followed by exactly one real read-only WSGS request. Its result was UNRESOLVED with zero Findings and Choices. The complete normal AG-UI stream, source-observed Activity, source/result/projection identity and terminal persistence reopen passed assertions; reconnect made no upstream request. Local resources were cleaned up. R01 positive Finding and R02 real selection remain context-specifically BLOCKED_EXTERNAL; this is not a claim that all upstream data/selection is unavailable or a proven SACS feature defect. See `REAL_OBSERVATION.md` and the immutable receipt.
+
+Final current-source verification at `e6b76bb` passed 48 suites / 629 frozen tests, 14 PostgreSQL tests, 11 HTTP/SSE E2E tests and all nine local gates. Full quality/container CI passed in run 35118182072 (`CI_S07_FINAL_SOURCE.json`). `REQUIREMENT_AUDIT.md` maps every mandatory decision to direct assertions; package/frozen-byte integrity also reverified. The DEVELOPMENT marker is now justified:
+
+`SACS_AGUI_V03_GROUNDING_PRESENTATION_DEV_READY`
+
+Remaining: a current resolvable positive/ambiguity context for R01/R02. The prior temporary private context file `/tmp/sacs-v06-history-after-reference.env` is no longer present; historical reports and reference-acceptance metadata retain hashes rather than reusable concrete private inputs. A replacement file path was requested, and no business query was automatically retried. The REAL_WSGS completion marker is withheld. Deployment and device execution remain outside this goal.

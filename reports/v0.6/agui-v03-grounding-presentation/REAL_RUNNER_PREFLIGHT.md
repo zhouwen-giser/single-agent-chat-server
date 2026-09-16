@@ -1,0 +1,19 @@
+# Live-runner first attempt
+
+Source: `26eb1c8e0775f1fbb9588af6b2b128d6826916a5`.
+Command: `SACS_AGUI_REAL_ENV=/tmp/sacs-agui-real-h7o4oQ/case.env node scripts/agui-grounding-real.mjs`; exit 1.
+Immutable receipt: `real/edfae6bc-72ee-47fc-8150-353305af2d70/EVIDENCE.json`.
+
+Live public capabilities returned HTTP 200 in 9756 ms, exact frozen 1.2/profile negotiation, requiredCapabilitiesReady=true and six AVAILABLE capabilities. All 115 frozen artifacts were verified; lock hash is `sha256:45f027673834f3d9e654a889eea25eaf81522f594af8dddf6939b91a0dd4c41a`.
+
+The local acceptance harness then failed at its isolated-server startup. Inspection of `apps/server/src/config.ts` identified the existing rule that AG_UI_SERVICE_KEY must differ from CHAT_SERVER_SERVICE_KEY; the new runner incorrectly supplied its same generated random value for both. This is a confirmed runner configuration defect, not an upstream capability or SACS business failure. The first receipt retained only the broad startup stage, not an exact stack, so it does not prove whether that defect was the first exception actually reached. No business request was sent (businessSubmissions=0). The temporary PostgreSQL container was cleaned up. R01/R02 remain NOT_RUN for this attempt.
+
+The fix must generate distinct service keys and preserve the production validation rule. A later attempt must use a new evidence directory; this failed receipt must not be overwritten or relabeled PASS.
+
+Correction implemented at `1e1ceeb01adb119ee13ca18f61a9ccc850737d06`: the shared acceptance config factory generates an independent Chat key, retains normal authenticated mode/same-origin CORS and sets supported request/stream budgets to 120 seconds. `tests/v06-frozen-live-harness.unit.test.ts` passes both key/budget and unchanged production-validation assertions. Focused command `DOTENV_CONFIG_PATH=/dev/null NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/v06-frozen-live-harness.unit.test.ts` exited 0, followed by successful typecheck/build.
+
+The earlier runner source `26eb1c8` also completed the full nine-gate local regression on unchanged source (`receipts/S07-9a8f5354-20f0-43e7-95a4-5057bbf1334e.json`, exit 0; 626 frozen, 14 PostgreSQL and 11 HTTP/SSE E2E tests). That regression did not exercise live startup; the missing config regression is now explicitly added. A fresh live attempt is separate evidence.
+
+The `1e1ceeb` live attempt (`real/3af1aab8-2102-4d29-b365-f4164a888976/EVIDENCE.json`) still failed locally with zero business submissions. A new local-only startup diagnostic then passed (`real/a55b7da3-8e88-467f-8b01-7340ab91a814/EVIDENCE.json`). Inspection of the fixed image's `/usr/local/bin/docker-entrypoint.sh` lines 290–305 confirmed it runs a temporary Unix-socket-only PostgreSQL server before the final TCP server; the original socket readiness probe could succeed too early. The harness was hardened to probe TCP and the dedicated database at `7d30b31`. This explains a possible readiness race, not a retroactively proven stack for the earlier sparse failure receipt.
+
+The next local startup check passed (`real/8671060e-7a3d-4aa3-9dca-ae71abd2acaa/EVIDENCE.json`). Its live attempt (`real/c3454952-8317-4e5e-8dd6-cc9cf788f6ae/EVIDENCE.json`) reached INITIAL_OBSERVATION but failed the local HTTP-success assertion before any WSGS business submission. Inspection found the test JWT issued for now-1 through now+600, a 601-second interval beyond the existing 600-second maximum. `e6b76bb` now generates a single-clock 300-second JWT and validates it through the real AG-UI capabilities route in both unit and local-startup checks, retaining expired-token rejection. Typecheck/build and all 3 harness tests passed. The strengthened local-only check passed (`real/67672399-0b9b-4de1-8e03-73196ffdeb9f/EVIDENCE.json`) with zero upstream exchanges. No production auth rule was relaxed.

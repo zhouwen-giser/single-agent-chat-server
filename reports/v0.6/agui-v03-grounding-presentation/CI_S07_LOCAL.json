@@ -1,0 +1,24 @@
+{
+  "sourceSha": "c7ecd4e94320380c9dec0a9c87633afcbd0b1384",
+  "runId": 35115583287,
+  "url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/35115583287",
+  "status": "completed",
+  "conclusion": "success",
+  "inspectionCommand": "gh run view 35115583287 --json headSha,status,conclusion,jobs",
+  "inspectionExitCode": 0,
+  "jobs": [
+    {
+      "name": "quality",
+      "id": 104860044292,
+      "conclusion": "success",
+      "completedAt": "2026-09-16T15:34:24Z"
+    },
+    {
+      "name": "container",
+      "id": 104862298172,
+      "conclusion": "success",
+      "completedAt": "2026-09-16T15:35:45Z"
+    }
+  ],
+  "scope": "S07 local acceptance source full CI; live runner added subsequently is not covered by this run."
+}

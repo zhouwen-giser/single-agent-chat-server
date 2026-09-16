@@ -116,7 +116,25 @@
         "tests/v06-frozen-entry.integration.test.ts: normal and PARTIAL paths have no tool events or fabricated phases/progress"
       ]
     },
-    { "id": "R01", "status": "NOT_RUN", "evidence": [] },
-    { "id": "R02", "status": "NOT_RUN", "evidence": [] }
+    {
+      "id": "R01",
+      "status": "BLOCKED_EXTERNAL",
+      "sourceSha": "e6b76bbb942d54fe8ad6a6dbc37485903ec67475",
+      "reason": "Real lifecycle/presentation passed; no positive Finding from the authorized query.",
+      "evidence": [
+        "real/fb09aedd-9b2a-4b7e-aea4-c677174122c6/EVIDENCE.json",
+        "REAL_OBSERVATION.md"
+      ]
+    },
+    {
+      "id": "R02",
+      "status": "BLOCKED_EXTERNAL",
+      "sourceSha": "e6b76bbb942d54fe8ad6a6dbc37485903ec67475",
+      "reason": "The authorized query returned zero Choices; this does not prove global unavailability.",
+      "evidence": [
+        "real/fb09aedd-9b2a-4b7e-aea4-c677174122c6/EVIDENCE.json",
+        "REAL_OBSERVATION.md"
+      ]
+    }
   ]
 }

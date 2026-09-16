@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "sacs-agui-grounding-real-attempt/1.0",
+  "sourceSha": "1e1ceeb01adb119ee13ca18f61a9ccc850737d06",
+  "entrypointHash": "sha256:dc8eeae05a17bbbf76cc095306b9f324edca7d055dbf8f1b417cb03e46b02d24",
+  "startedAt": "2026-09-16T15:43:39.263Z",
+  "mode": "REAL",
+  "endpointOrigin": "http://17.26.1.20:18082",
+  "operationTimeoutMs": 120000,
+  "queryHash": "sha256:d7430ec3024189becba3524ec456c5f25464d282b0f29366074562028b18dd7f",
+  "exchanges": [
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:dfb8d7cb600c02156c9d36859dddbb520425070621354afdc7c14b7dfe228069",
+      "httpStatus": 200,
+      "elapsedMs": 10325,
+      "responseHash": "sha256:77f9c8f825bdb2916920e6e75af13892ae5f0d514cfd5a6f7d5548c343cc1bb3"
+    }
+  ],
+  "observations": [],
+  "cases": [
+    {
+      "id": "R01",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R02",
+      "status": "NOT_RUN"
+    }
+  ],
+  "status": "FAILED",
+  "nonClaims": [
+    "DEVICE_EXECUTION",
+    "PRODUCTION_READINESS",
+    "UPSTREAM_DATABASE_ACCESS",
+    "PROCESS_CRASH_RECOVERY"
+  ],
+  "stage": "ISOLATED_DATABASE",
+  "frozenFileCount": 115,
+  "frozenManifestHash": "sha256:45f027673834f3d9e654a889eea25eaf81522f594af8dddf6939b91a0dd4c41a",
+  "preflight": {
+    "httpStatus": 200,
+    "exactNegotiation": true,
+    "requiredCapabilitiesReady": true,
+    "capabilities": [
+      {
+        "capability": "HISTORICAL_TRACE",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "ROAD_ASSOCIATION",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "TEMPORAL_EVENT",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "CROSS",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "METRIC_RANKING",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "ACTION_TARGET_CANDIDATE",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      }
+    ]
+  },
+  "errorType": "Error",
+  "cleanup": "PASS",
+  "businessSubmissions": 0,
+  "exitCode": 1,
+  "updatedAt": "2026-09-16T15:43:57.454Z"
+}

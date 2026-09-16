@@ -66,14 +66,20 @@
     },
     {
       "id": "S07",
-      "status": "INCOMPLETE",
-      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
-      "reason": "Local development gates passed; full CI, final audit and real cases pending.",
+      "status": "BLOCKED_EXTERNAL",
+      "developmentStatus": "PASS",
+      "realWsgsStatus": "BLOCKED_EXTERNAL",
+      "sourceSha": "e6b76bbb942d54fe8ad6a6dbc37485903ec67475",
+      "reason": "Development assertions, final-source CI and audit passed. Real request truthfully returned UNRESOLVED without Findings/Choices; positive R01/R02 context required.",
       "evidence": [
+        "receipts/S07-b449eae8-f52b-4bbe-8243-e2645ff64c97.json",
         "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
-        "S07_DEVELOPMENT.md"
+        "S07_DEVELOPMENT.md",
+        "REQUIREMENT_AUDIT.md",
+        "REAL_OBSERVATION.md",
+        "CI_S07_FINAL_SOURCE.json"
       ]
     }
   ],
-  "completionMarkers": []
+  "completionMarkers": ["SACS_AGUI_V03_GROUNDING_PRESENTATION_DEV_READY"]
 }
