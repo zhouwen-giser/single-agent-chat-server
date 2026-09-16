@@ -374,6 +374,143 @@ function proposalUrl(state: ReturnType<typeof stateFrom>) {
 }
 
 describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL)", () => {
+  it.each([
+    ["G01 G11 G12", "action", "COMPLETED"],
+    ["G02 G12", "event-incomplete", "PARTIAL"],
+  ])(
+    "%s carries %s through Activity, durable State, headless views and final text",
+    async (_ids, example, status) => {
+      const app = await setup({ examples: [example!], async: true });
+      const client = new HeadlessAnalysisReferenceClient(
+        new HeadlessMapEngineAdapter(),
+        () => frozenNow().getTime(),
+      );
+      try {
+        const events = await app.agui(
+          aguiPayload("acceptance-" + example, "查询公开历史分析结果"),
+        );
+        await client.acceptSseChunk(
+          events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+        );
+        await client.finishStream();
+        const state = stateFrom(events);
+        const view = interactionContext(state).view;
+        const result = app.peer.results[0]!;
+        expect(result.status).toBe(status);
+        expect(result.worldAnalysisFindings.findings.length).toBeGreaterThan(0);
+        expect(view.status).toBe(status);
+        expect(view.findings).toEqual(result.worldAnalysisFindings.findings);
+        expect(view.typedGaps).toEqual(
+          expect.arrayContaining(result.worldAnalysisFindings.gaps),
+        );
+        expect(view.source.resultHash).toBe(result.resultHash);
+        expect(view.timeline.items.length).toBeGreaterThan(0);
+        expect(view.evidenceLinks?.length).toBeGreaterThan(0);
+        expect(client.state.sharedState).toEqual(state);
+        expect(client.mapPresentation.shared).toEqual(state.map);
+        expect(Object.values(client.state.textByMessageId).join("")).toBe(
+          view.summary.primaryText,
+        );
+        expect(client.state.stepsByName).toEqual({
+          "world-grounding": "FINISHED",
+        });
+        expect(client.state.toolCallsById).toEqual({});
+        expect(client.state.runStatus).toBe("FINISHED");
+        expect(events.at(-1)).toMatchObject({ type: "RUN_FINISHED" });
+        const activity = Object.values(client.state.activitiesByMessageId).at(
+          -1,
+        )!;
+        expect(activity.content).toMatchObject({
+          groundingId: result.groundingId,
+          analysisId: state.analysis.session.analysisId,
+          revisionId: state.analysis.activeRevisionId,
+          sourceStatus: status,
+          status,
+        });
+        expect(activity.activityType).toBe("grounding.job");
+        expect(activity.content["nodes"]).toBeUndefined();
+        const stored = await app.composition.source!.getProjection({
+          analysisId: state.analysis.session.analysisId,
+          principalId: userId,
+          threadId,
+        });
+        expect(stored?.state).toEqual(state);
+        if (status === "PARTIAL") {
+          expect(result.worldAnalysisFindings.gaps.length).toBeGreaterThan(0);
+          expect(
+            view.typedGaps.some((gap) => gap.gapKind === "ANALYSIS_INCOMPLETE"),
+          ).toBe(true);
+        } else {
+          expect(view.actionTargets.length).toBeGreaterThan(0);
+          for (const target of view.actionTargets)
+            expect(target).toMatchObject({
+              executionAuthorized: false,
+              requirements: {
+                currentValidationRequired: true,
+                routePlanningRequired: true,
+                executionConfirmationRequired: true,
+              },
+            });
+        }
+        expect(app.peer.requests).toHaveLength(1);
+        app.assertNoExecution();
+      } finally {
+        await app.close();
+      }
+    },
+  );
+
+  it("G03 preserves a source trajectory gap through HTTP, timeline and headless map without inventing a bridge", async () => {
+    const gap = {
+      period: {
+        start: "2026-09-05T10:03:00.000000001+08:00",
+        end: "2026-09-05T10:04:00.000000002+08:00",
+        bounds: "[)" as const,
+      },
+      kind: "SOURCE_GAP" as const,
+      reasonCodes: ["INCOMPLETE"],
+    };
+    const app = await setup({
+      examples: ["trace"],
+      transformResult(result) {
+        const finding = result.worldAnalysisFindings.findings[0]!;
+        if (finding.findingKind !== "HISTORICAL_TRACE")
+          throw Error("WRONG_FIXTURE");
+        finding.trajectoryGaps = [gap];
+      },
+    });
+    const client = new HeadlessAnalysisReferenceClient(
+      new HeadlessMapEngineAdapter(),
+    );
+    try {
+      const events = await app.agui(aguiPayload("gap", "查询有缺口的历史轨迹"));
+      await client.acceptSseChunk(
+        events.map((e) => `data: ${JSON.stringify(e)}\n\n`).join(""),
+      );
+      const state = stateFrom(events);
+      const view = interactionContext(state).view;
+      expect(view.findings).toEqual(
+        app.peer.results[0]!.worldAnalysisFindings.findings,
+      );
+      expect(view.timeline.items).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ kind: "DATA_GAP", ...gap.period }),
+        ]),
+      );
+      // This public trace publishes periods, not line geometry. Never synthesize one.
+      expect(view.map.layers).toEqual([]);
+      expect(client.mapPresentation.rendered?.layersById).toEqual({});
+      expect(client.state.sharedState?.timeline).toEqual(state.timeline);
+      expect(Object.values(client.state.textByMessageId).join("")).toContain(
+        "不跨 Gap 插值连线",
+      );
+      expect(app.peer.requests).toHaveLength(1);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
+
   it("G09 detaches a genuinely RUNNING observer, finishes independently and restores full State/Activity after composition restart", async () => {
     const app = await setup({
       async: true,

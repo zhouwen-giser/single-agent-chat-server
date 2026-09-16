@@ -31,6 +31,7 @@ import { hashCanonicalJson } from "../../packages/world-explanation-contract/src
 import type { WorldGroundingRuntimeOptions } from "../../packages/world-grounding-runtime/src/index.js";
 import {
   FrozenWorldAnalysisContract,
+  publicFindingSetHash,
   publicResultHash,
   type GroundingJob12,
   type GroundingRequest12,
@@ -925,6 +926,8 @@ export async function startFrozenScenarioPeer(
     async?: boolean;
     repeatedRunning?: number;
     rejectSecondPost?: 400 | 406 | 503;
+    /** Test-only public fixture shaping; always resealed and contract-validated. */
+    transformResult?: (result: GroundingResult12) => void;
   } = {},
 ) {
   const contract = new FrozenWorldAnalysisContract();
@@ -953,6 +956,10 @@ export async function startFrozenScenarioPeer(
         body,
       );
       result.groundingId = "wire-grounding-" + index;
+      input.transformResult?.(result);
+      result.worldAnalysisFindings.findingSetHash = publicFindingSetHash(
+        result.worldAnalysisFindings,
+      );
       result.resultHash = publicResultHash(result);
       contract.parse("result", result, body.executionPolicy.maxResultBytes);
       results.push(result);
