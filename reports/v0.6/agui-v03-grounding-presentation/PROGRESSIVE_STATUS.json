@@ -10,7 +10,15 @@
         "GAP_MATRIX.md"
       ]
     },
-    { "id": "S01", "status": "NOT_RUN", "evidence": [] },
+    {
+      "id": "S01",
+      "status": "PASS",
+      "sourceSha": "7a1a7a174c89910970d88aad64eb9d4bdabdec8d",
+      "evidence": [
+        "receipts/S01-7cba7a31-978b-4591-a0bd-064df166d038.json",
+        "S01.md"
+      ]
+    },
     { "id": "S02", "status": "NOT_RUN", "evidence": [] },
     { "id": "S03", "status": "NOT_RUN", "evidence": [] },
     { "id": "S04", "status": "NOT_RUN", "evidence": [] },
