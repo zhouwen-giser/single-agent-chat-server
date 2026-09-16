@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createHash, createHmac, randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -155,8 +155,11 @@ try {
   evidence.stage = "PREFLIGHT";
   const { FrozenWorldAnalysisContract, verifyFrozenWorldAnalysis } =
     await import("../dist/packages/wsgs-geospatial-consumer/src/frozen-world-analysis.js");
-  const { verifyGroundingObservation, createAcceptanceServerConfig } =
-    await import("../dist/scripts/lib/agui-grounding-observation.js");
+  const {
+    verifyGroundingObservation,
+    createAcceptanceServerConfig,
+    createAcceptanceHeaders,
+  } = await import("../dist/scripts/lib/agui-grounding-observation.js");
   const { setupPersistence } =
     await import("../dist/packages/persistence/src/index.js");
   const { createV06GroundingAnalysis } =
@@ -314,29 +317,15 @@ try {
     await server?.close();
     await persistence?.close();
   };
-  const headers = () => {
-    const encode = (v) => Buffer.from(JSON.stringify(v)).toString("base64url");
-    const token =
-      encode({ alg: "HS256", typ: "JWT" }) +
-      "." +
-      encode({
-        iss: "open-webui",
-        sub: "agui-real-acceptance",
-        role: "user",
-        iat: Math.floor(Date.now() / 1000) - 1,
-        exp: Math.floor(Date.now() / 1000) + 600,
-      });
-    return {
-      authorization: "Bearer " + secret,
-      "x-openwebui-user-jwt":
-        token +
-        "." +
-        createHmac("sha256", secret).update(token).digest("base64url"),
-      "content-type": "application/json",
-    };
-  };
+  const headers = () => createAcceptanceHeaders(secret);
   await open();
   evidence.database = { isolated: true, image, migrations: "PASS" };
+  const authCheck = await fetch(local + "/ag-ui/capabilities", {
+    headers: headers(),
+    signal: AbortSignal.timeout(10000),
+  });
+  evidence.localAuthenticationHttpStatus = authCheck.status;
+  assert.equal(authCheck.status, 200, "LOCAL_AUTH_CHECK_FAILED");
   if (localOnly) {
     evidence.status = "LOCAL_STARTUP_PASS";
     evidence.stage = "FINISHED";
@@ -372,12 +361,23 @@ try {
         }),
         signal: AbortSignal.timeout(270000),
       });
+      evidence.aguiHttpStatuses ??= [];
+      evidence.aguiHttpStatuses.push(response.status);
       assert.equal(response.status, 200, "AGUI_HTTP_FAILED");
       const wire = await response.text();
       const events = wire
         .split("\n")
         .filter((line) => line.startsWith("data: "))
         .map((line) => JSON.parse(line.slice(6)));
+      evidence.lastStream = {
+        wireHash: hash(wire),
+        eventTypes: [...new Set(events.map((e) => e.type))],
+        runErrorCodes: events
+          .filter((e) => e.type === "RUN_ERROR")
+          .map((e) =>
+            /^[A-Z0-9_]{1,100}$/u.test(e.code) ? e.code : "RUN_ERROR",
+          ),
+      };
       const state = events
         .filter((e) => e.type === "STATE_SNAPSHOT")
         .at(-1)?.snapshot;

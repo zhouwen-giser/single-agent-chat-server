@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, createHmac, randomBytes } from "node:crypto";
 import { parseServerConfig } from "../../apps/server/src/config.js";
 import {
   HeadlessAnalysisReferenceClient,
@@ -35,6 +35,30 @@ export function createAcceptanceServerConfig(agUiSecret: string) {
     CHAT_HTTP_STREAM_BUDGET_MS: "120000",
     LOG_LEVEL: "silent",
   });
+}
+
+export function createAcceptanceHeaders(secret: string, now = Date.now()) {
+  const encode = (value: unknown) =>
+    Buffer.from(JSON.stringify(value)).toString("base64url");
+  const seconds = Math.floor(now / 1000);
+  const token =
+    encode({ alg: "HS256", typ: "JWT" }) +
+    "." +
+    encode({
+      iss: "open-webui",
+      sub: "agui-real-acceptance",
+      role: "user",
+      iat: seconds - 1,
+      exp: seconds + 299,
+    });
+  return {
+    authorization: "Bearer " + secret,
+    "x-openwebui-user-jwt":
+      token +
+      "." +
+      createHmac("sha256", secret).update(token).digest("base64url"),
+    "content-type": "application/json",
+  };
 }
 
 /** Shared development/live oracle. No network or files; never returns raw content in summary. */
