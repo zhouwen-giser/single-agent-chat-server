@@ -13,3 +13,7 @@ See `GAP_MATRIX.md`, `PROGRESSIVE_STATUS.json` and `ACCEPTANCE_LEDGER.json` for 
 S01 passed at `7a1a7a1`: truthful revision-scoped Grounding Activity is implemented and durable, including pending cancellation and read compatibility. The regression now has 534 frozen tests, plus 14 PostgreSQL and 2 HTTP/SSE tests. See `S01.md` for the frozen schema hash and precise assertion scope. Full scenario acceptance and real WSGS validation remain pending.
 
 Draft PR: https://github.com/zhouwen-giser/single-agent-chat-server/pull/25, targeting the existing v0.5 integration line. GitHub recognized PR #24 as merged by ancestry after the user-authorized fast-forward was normally pushed; no PR merge command, main update or branch deletion was performed.
+
+S02 passed at `f30420f`: stable typed public identity links now connect the frozen view's findings, features, timeline, evidence, products and choices. Period/feature array order is no longer navigation identity; geometry and execution safety remain intact. The phase gate passed 541 frozen tests plus 14 PostgreSQL and 2 HTTP/SSE tests. See `S02.md` for exact scope and the tree-equivalent squash ancestry reconciliation needed to make the Draft PR mergeable.
+
+Remaining: S03 local map/draft behavior, S04 explicit selection confirmation, S05 validated geometry requery, S06 recovery/concurrency hardening, S07 complete local and real-source acceptance. No final completion marker is emitted.
