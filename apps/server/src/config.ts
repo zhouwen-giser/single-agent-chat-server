@@ -6,6 +6,10 @@ import { DEFAULT_CHAT_MODEL_ID } from "../../../packages/openai-api-contract/src
 import { parseCorsAllowedOrigins } from "./security/cors.js";
 
 const serverConfigSchema = z.object({
+  SACS_AUTH_MODE: z
+    .enum(["authenticated", "development-anonymous"])
+    .default("authenticated"),
+  SACS_ALLOW_INSECURE_ANONYMOUS: z.enum(["true", "false"]).default("false"),
   CHAT_SERVER_SERVICE_KEY: z.string().min(32).max(512),
   AG_UI_SERVICE_KEY: z.string().min(32).max(512),
   OPENWEBUI_USER_JWT_SECRET: z.string().min(32).max(512),
@@ -84,6 +88,7 @@ const analysisAdapterEnvironmentSchema = z
   .strict();
 
 export interface ServerConfig {
+  readonly authMode?: "authenticated" | "development-anonymous";
   readonly serviceKey: string;
   readonly agUiServiceKey: string;
   readonly openWebUiUserJwtSecret: string;
@@ -137,12 +142,21 @@ export function parseServerConfig(
   environment: NodeJS.ProcessEnv,
 ): ServerConfig {
   const parsed = serverConfigSchema.parse(environment);
+  if (
+    parsed.SACS_AUTH_MODE === "development-anonymous" &&
+    parsed.SACS_ALLOW_INSECURE_ANONYMOUS !== "true"
+  ) {
+    throw new Error(
+      "Anonymous development access requires SACS_ALLOW_INSECURE_ANONYMOUS=true",
+    );
+  }
   if (parsed.AG_UI_SERVICE_KEY === parsed.CHAT_SERVER_SERVICE_KEY) {
     throw new Error(
       "AG_UI_SERVICE_KEY must differ from CHAT_SERVER_SERVICE_KEY",
     );
   }
   return {
+    authMode: parsed.SACS_AUTH_MODE,
     serviceKey: parsed.CHAT_SERVER_SERVICE_KEY,
     agUiServiceKey: parsed.AG_UI_SERVICE_KEY,
     openWebUiUserJwtSecret: parsed.OPENWEBUI_USER_JWT_SECRET,

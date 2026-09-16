@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "sacs-agui-grounding-progress/1.0",
+  "baselineSha": "4916a92bebbdb1d83dfe35c070cdedf711e54da2",
+  "phases": [
+    {
+      "id": "S00",
+      "status": "PASS",
+      "evidence": [
+        "receipts/baseline-0816cb1f-7b01-4c9e-a7e8-d5ac7918e1b0.json",
+        "GAP_MATRIX.md"
+      ]
+    },
+    {
+      "id": "S01",
+      "status": "PASS",
+      "sourceSha": "7a1a7a174c89910970d88aad64eb9d4bdabdec8d",
+      "evidence": [
+        "receipts/S01-7cba7a31-978b-4591-a0bd-064df166d038.json",
+        "S01.md"
+      ]
+    },
+    {
+      "id": "S02",
+      "status": "PASS",
+      "sourceSha": "f30420f395c0c59e3607fd48012a54aacfef15f7",
+      "evidence": [
+        "receipts/S02-a15e10ba-f807-444d-a2e9-cdc38bb12dbc.json",
+        "S02.md"
+      ]
+    },
+    {
+      "id": "S03",
+      "status": "PASS",
+      "sourceSha": "82e46be97e8090862f3320ed706165ffdbe75d61",
+      "evidence": [
+        "receipts/S03-148a6909-1324-4b39-8dff-082ea7aca7e9.json",
+        "S03.md"
+      ]
+    },
+    {
+      "id": "S04",
+      "status": "PASS",
+      "sourceSha": "445a1116e6b342031659c0abc0b2bc1d213dec4d",
+      "evidence": [
+        "receipts/S04-86e4a0c7-6233-44e0-8287-c2e52c47b3e8.json",
+        "S04.md"
+      ]
+    },
+    {
+      "id": "S05",
+      "status": "PASS",
+      "sourceSha": "43b0785fca7264dc7b8be1c2e6d2a2fa5cd9cf05",
+      "evidence": [
+        "receipts/S05-71ed2f7f-a951-4f3c-a38f-663d18f67351.json",
+        "S05.md"
+      ]
+    },
+    {
+      "id": "S06",
+      "status": "PASS",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "evidence": [
+        "receipts/S06-f7350b6d-a42e-4875-b440-05c0ea6c9a6c.json",
+        "S06.md"
+      ]
+    },
+    {
+      "id": "S07",
+      "status": "BLOCKED_EXTERNAL",
+      "developmentStatus": "PASS",
+      "realWsgsStatus": "BLOCKED_EXTERNAL",
+      "sourceSha": "e6b76bbb942d54fe8ad6a6dbc37485903ec67475",
+      "reason": "Development assertions, final-source CI and audit passed. Real request truthfully returned UNRESOLVED without Findings/Choices; positive R01/R02 context required.",
+      "evidence": [
+        "receipts/S07-b449eae8-f52b-4bbe-8243-e2645ff64c97.json",
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "S07_DEVELOPMENT.md",
+        "REQUIREMENT_AUDIT.md",
+        "REAL_OBSERVATION.md",
+        "CI_S07_FINAL_SOURCE.json"
+      ]
+    }
+  ],
+  "completionMarkers": ["SACS_AGUI_V03_GROUNDING_PRESENTATION_DEV_READY"]
+}

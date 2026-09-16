@@ -1,4 +1,5 @@
 import type { Pool, PoolClient } from "pg";
+import { createGroundingJobActivity } from "../../analysis-contract/src/grounding-activity.js";
 import {
   analysisInterventionSchema,
   analysisRevisionSchema,
@@ -560,6 +561,7 @@ export class AnalysisRepository {
       const session = await lockAuthorizedSession(client, input.scope);
       if (session.active_revision_id !== input.revisionId) return undefined;
       const selected = await client.query<{
+        wsgs_grounding_id: string;
         last_source_status: AnalysisSourceStatus;
         last_observation_hash: string;
         grounding_result_hash: string | null;
@@ -567,7 +569,7 @@ export class AnalysisRepository {
         grounding_result_json?: unknown;
         contract_identity?: unknown;
       }>(
-        `SELECT g.last_source_status,g.last_observation_hash,g.grounding_result_hash,g.cancel_requested,g.grounding_result_json,g.analysis_intent_json->'contractIdentity' AS contract_identity FROM chat_service.grounding_execution g JOIN chat_service.analysis_run r ON r.run_id=g.analysis_run_id WHERE g.grounding_id=$1 AND g.principal_id=$2 AND g.thread_id=$3 AND g.analysis_id=$4 AND g.analysis_revision_id=$5 AND g.analysis_run_id=$6 AND NOT EXISTS(SELECT 1 FROM chat_service.analysis_run newer WHERE newer.revision_id=r.revision_id AND newer.attempt>r.attempt) FOR UPDATE OF g,r`,
+        `SELECT g.wsgs_grounding_id,g.last_source_status,g.last_observation_hash,g.grounding_result_hash,g.cancel_requested,g.grounding_result_json,g.analysis_intent_json->'contractIdentity' AS contract_identity FROM chat_service.grounding_execution g JOIN chat_service.analysis_run r ON r.run_id=g.analysis_run_id WHERE g.grounding_id=$1 AND g.principal_id=$2 AND g.thread_id=$3 AND g.analysis_id=$4 AND g.analysis_revision_id=$5 AND g.analysis_run_id=$6 AND NOT EXISTS(SELECT 1 FROM chat_service.analysis_run newer WHERE newer.revision_id=r.revision_id AND newer.attempt>r.attempt) FOR UPDATE OF g,r`,
         [
           input.groundingExecutionId,
           input.scope.principalId,
@@ -668,10 +670,14 @@ export class AnalysisRepository {
         sourceStatus: g.last_source_status,
         resultHash: g.grounding_result_hash,
       };
-      const activity = {
+      const activity = createGroundingJobActivity({
+        groundingId: g.wsgs_grounding_id,
+        analysisId: input.scope.analysisId,
+        revisionId: input.revisionId,
         sourceStatus: g.last_source_status,
-        transport: "GROUNDING_JOB",
-      };
+        cancelRequested: g.cancel_requested,
+        activityRevision: Number(current?.activityRevision ?? 0) + 1,
+      });
       const event: AnalysisEvent = {
         schemaVersion: "sacs-analysis-event/1.0",
         eventId,

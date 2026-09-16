@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import {
+  queryScopeSchema,
+  type QueryScope,
+} from "../../analysis-contract/src/query-scope.js";
+import {
   FrozenWorldAnalysisContract,
   publicCanonicalHash,
   type GroundingRequest12,
@@ -78,6 +82,7 @@ export function planFrozenGroundingRequest(input: {
   context?: FrozenSourceContext;
   contextMode?: "CONTINUE" | "REPLACE";
   selections?: readonly unknown[];
+  queryScope?: QueryScope;
   maxResultBytes?: number;
   now?: () => number;
 }): FrozenRequestPlan {
@@ -90,6 +95,10 @@ export function planFrozenGroundingRequest(input: {
     identifier.parse(id);
   const text = z.string().min(1).max(32768).parse(input.text);
   const createdAt = z.iso.datetime({ offset: true }).parse(input.createdAt);
+  const queryScope =
+    input.queryScope === undefined
+      ? undefined
+      : queryScopeSchema.parse(input.queryScope);
   const supplied = input.selections ?? [];
   if (!Array.isArray(supplied) || supplied.length > 8)
     throw new FrozenSelectionError("SELECTION_INVALID");
@@ -133,7 +142,11 @@ export function planFrozenGroundingRequest(input: {
     )
       throw new FrozenSelectionError("SELECTION_UNAVAILABLE");
   }
-  if (/^(展开卡片|聚焦地图)$/u.test(text.trim()) && selections.length === 0)
+  if (
+    !queryScope &&
+    /^(展开卡片|聚焦地图)$/u.test(text.trim()) &&
+    selections.length === 0
+  )
     return {
       kind: "PRESENTATION",
       action: text.trim() === "展开卡片" ? "EXPAND_CARD" : "FOCUS_MAP",
@@ -258,13 +271,28 @@ export function planFrozenGroundingRequest(input: {
               },
             ]
           : [],
-      mapSelections: [],
+      mapSelections: queryScope
+        ? [
+            {
+              selectionId: "map-scope-" + stableId,
+              kind:
+                queryScope.geometry.type === "Point"
+                  ? "POINT"
+                  : queryScope.geometry.type === "LineString"
+                    ? "LINE"
+                    : "AREA",
+              revision: 1,
+              geometry: queryScope.geometry,
+              geometryHash: publicCanonicalHash(queryScope.geometry),
+            },
+          ]
+        : [],
       externalCorrelationHints: [],
       externalPredicates: [],
     },
     executionPolicy: {
       readOnly: true,
-      deadlineMs: 30000,
+      deadlineMs: 120_000,
       maxQueryOperations: 16,
       maxCandidatesPerMention: 5,
       maxResultBytes: input.maxResultBytes ?? 1048576,

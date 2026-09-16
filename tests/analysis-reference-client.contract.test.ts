@@ -285,6 +285,50 @@ describe("headless v0.5 analysis reference client", () => {
     ).toEqual(state);
   });
 
+  it("only explicit reconnect accepts a new same-thread observer without a resume parent", () => {
+    const interrupted = {
+      ...createAnalysisReferenceClientState(),
+      runStatus: "INTERRUPTED" as const,
+      threadId: "thread-1",
+      runId: "run-1",
+    };
+    const observer = projectAnalysisRunStarted({
+      threadId: "thread-1",
+      runId: "observer-2",
+    });
+    expect(() => reduceAnalysisClientEvent(interrupted, observer)).toThrow(
+      "AG_UI_INTERRUPT_RESUME_LINEAGE_INVALID",
+    );
+    const reconnecting = {
+      ...interrupted,
+      awaitingReconnectRun: true,
+      needsFullStateSnapshot: true,
+      needsFullActivitySnapshot: true,
+    };
+    const next = reduceAnalysisClientEvent(reconnecting, observer).state;
+    expect(next).toMatchObject({
+      awaitingReconnectRun: false,
+      runId: "observer-2",
+      needsFullStateSnapshot: true,
+      needsFullActivitySnapshot: true,
+    });
+    for (const invalid of [
+      { threadId: "foreign-thread", runId: "observer-2" },
+      { threadId: "thread-1", runId: "run-1" },
+      {
+        threadId: "thread-1",
+        runId: "observer-2",
+        parentRunId: "wrong-parent",
+      },
+    ])
+      expect(() =>
+        reduceAnalysisClientEvent(
+          reconnecting,
+          projectAnalysisRunStarted(invalid),
+        ),
+      ).toThrow("AG_UI_INTERRUPT_RESUME_LINEAGE_INVALID");
+  });
+
   it("resets partial SSE on reconnect and isolates map rendering failures", async () => {
     const snapshot = projectAnalysisStateSnapshot({
       stateRevision: 1,
@@ -377,7 +421,8 @@ describe("headless v0.5 analysis reference client", () => {
         hover: { featureId: "feature-1" },
         inspectionFocus: { focusId: "inspection-1" },
       },
-      shared: { pinnedFocusById: { "pinned-1": { focusId: "pinned-1" } } },
+      shared: { pinnedFocusById: {} },
+      rendered: { pinnedFocusById: { "pinned-1": { focusId: "pinned-1" } } },
     });
     expect(map.localMapActions.map(({ type }) => type)).toEqual([
       "PAN",

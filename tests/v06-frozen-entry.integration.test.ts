@@ -14,6 +14,9 @@ import type { ServerConfig } from "../apps/server/src/config.js";
 import { SACS_AG_UI_V03_PROFILE_ID } from "../packages/ag-ui-api-contract/src/index.js";
 import { parseAndVerifyAgUiSharedStateV03 } from "../packages/analysis-contract/src/index.js";
 import {
+  AnalysisControlClient,
+  HeadlessAnalysisReferenceClient,
+  HeadlessMapEngineAdapter,
   createFrozenChoiceResolution,
   createFrozenSourceQuery,
 } from "../packages/analysis-client/src/index.js";
@@ -33,6 +36,7 @@ import {
   startFrozenScenarioPeer,
 } from "./helpers/memory-frozen-analysis.js";
 import { MemoryGrounding } from "./helpers/memory-grounding.js";
+import { verifyGroundingObservation } from "../scripts/lib/agui-grounding-observation.js";
 
 // These multi-turn cases repeatedly validate the complete public schema closure.
 // Allow bounded CPU contention without changing any production HTTP/TTL budget.
@@ -245,6 +249,20 @@ async function setup(
       .filter((line) => line.startsWith("data: "))
       .map((line) => JSON.parse(line.slice(6)) as Record<string, unknown>);
     expect(events.filter((event) => event["type"] === "RUN_ERROR")).toEqual([]);
+    for (const event of events.filter(
+      (event) => event["type"] === "ACTIVITY_SNAPSHOT",
+    )) {
+      expect(event["activityType"]).toBe("grounding.job");
+      expect(event["content"]).toMatchObject({
+        schemaVersion: "io.sacs/grounding-activity/v1",
+      });
+      const content = event["content"] as Record<string, unknown>;
+      expect(content["phase"]).toBeUndefined();
+      expect(content["progress"]).toBeUndefined();
+    }
+    expect(
+      events.some((event) => String(event["type"]).startsWith("TOOL_CALL")),
+    ).toBe(false);
     return events;
   };
   const chat = async (messageId: string, text: string) => {
@@ -341,6 +359,7 @@ function choiceCommand(
   const context = interactionContext(state);
   const choices = context.view.choices.filter((choice) => "selector" in choice);
   return createFrozenChoiceResolution({
+    confirmed: true,
     context,
     choices: [choices[1]!],
     commandId,
@@ -356,6 +375,619 @@ function proposalUrl(state: ReturnType<typeof stateFrom>) {
 }
 
 describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL)", () => {
+  it.each([
+    ["G01 G11 G12", "action", "COMPLETED"],
+    ["G02 G12", "event-incomplete", "PARTIAL"],
+  ])(
+    "%s carries %s through Activity, durable State, headless views and final text",
+    async (_ids, example, status) => {
+      const app = await setup({ examples: [example!], async: true });
+      const client = new HeadlessAnalysisReferenceClient(
+        new HeadlessMapEngineAdapter(),
+        () => frozenNow().getTime(),
+      );
+      try {
+        const events = await app.agui(
+          aguiPayload("acceptance-" + example, "查询公开历史分析结果"),
+        );
+        await client.acceptSseChunk(
+          events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+        );
+        await client.finishStream();
+        const state = stateFrom(events);
+        const view = interactionContext(state).view;
+        const result = app.peer.results[0]!;
+        const wire = events
+          .map((event) => `data: ${JSON.stringify(event)}\n\n`)
+          .join("");
+        const verified = await verifyGroundingObservation(wire, result);
+        expect(verified.summary.sourceStatus).toBe(status);
+        await expect(
+          verifyGroundingObservation(wire, {
+            ...result,
+            resultHash: "sha256:" + "0".repeat(64),
+          }),
+        ).rejects.toThrow("SOURCE_RESULT_IDENTITY_MISMATCH");
+        const wrongText = events.map((event) =>
+          event["type"] === "TEXT_MESSAGE_CONTENT"
+            ? { ...event, delta: "changed" }
+            : event,
+        );
+        await expect(
+          verifyGroundingObservation(
+            wrongText
+              .map((event) => `data: ${JSON.stringify(event)}\n\n`)
+              .join(""),
+            result,
+          ),
+        ).rejects.toThrow("TEXT_PROJECTION_MISMATCH");
+        expect(result.status).toBe(status);
+        expect(result.worldAnalysisFindings.findings.length).toBeGreaterThan(0);
+        expect(view.status).toBe(status);
+        expect(view.findings).toEqual(result.worldAnalysisFindings.findings);
+        expect(view.typedGaps).toEqual(
+          expect.arrayContaining(result.worldAnalysisFindings.gaps),
+        );
+        expect(view.source.resultHash).toBe(result.resultHash);
+        expect(view.timeline.items.length).toBeGreaterThan(0);
+        expect(view.evidenceLinks?.length).toBeGreaterThan(0);
+        expect(client.state.sharedState).toEqual(state);
+        expect(client.mapPresentation.shared).toEqual(state.map);
+        expect(Object.values(client.state.textByMessageId).join("")).toBe(
+          view.summary.primaryText,
+        );
+        expect(client.state.stepsByName).toEqual({
+          "world-grounding": "FINISHED",
+        });
+        expect(client.state.toolCallsById).toEqual({});
+        expect(client.state.runStatus).toBe("FINISHED");
+        expect(events.at(-1)).toMatchObject({ type: "RUN_FINISHED" });
+        const activity = Object.values(client.state.activitiesByMessageId).at(
+          -1,
+        )!;
+        expect(activity.content).toMatchObject({
+          groundingId: result.groundingId,
+          analysisId: state.analysis.session.analysisId,
+          revisionId: state.analysis.activeRevisionId,
+          sourceStatus: status,
+          status,
+        });
+        expect(activity.activityType).toBe("grounding.job");
+        expect(activity.content["nodes"]).toBeUndefined();
+        const stored = await app.composition.source!.getProjection({
+          analysisId: state.analysis.session.analysisId,
+          principalId: userId,
+          threadId,
+        });
+        expect(stored?.state).toEqual(state);
+        if (status === "PARTIAL") {
+          expect(result.worldAnalysisFindings.gaps.length).toBeGreaterThan(0);
+          expect(
+            view.typedGaps.some((gap) => gap.gapKind === "ANALYSIS_INCOMPLETE"),
+          ).toBe(true);
+        } else {
+          expect(view.actionTargets.length).toBeGreaterThan(0);
+          for (const target of view.actionTargets)
+            expect(target).toMatchObject({
+              executionAuthorized: false,
+              requirements: {
+                currentValidationRequired: true,
+                routePlanningRequired: true,
+                executionConfirmationRequired: true,
+              },
+            });
+        }
+        expect(app.peer.requests).toHaveLength(1);
+        app.assertNoExecution();
+      } finally {
+        await app.close();
+      }
+    },
+  );
+
+  it("G03 preserves a source trajectory gap through HTTP, timeline and headless map without inventing a bridge", async () => {
+    const gap = {
+      period: {
+        start: "2026-09-05T10:03:00.000000001+08:00",
+        end: "2026-09-05T10:04:00.000000002+08:00",
+        bounds: "[)" as const,
+      },
+      kind: "SOURCE_GAP" as const,
+      reasonCodes: ["INCOMPLETE"],
+    };
+    const app = await setup({
+      examples: ["trace"],
+      transformResult(result) {
+        const finding = result.worldAnalysisFindings.findings[0]!;
+        if (finding.findingKind !== "HISTORICAL_TRACE")
+          throw Error("WRONG_FIXTURE");
+        finding.trajectoryGaps = [gap];
+      },
+    });
+    const client = new HeadlessAnalysisReferenceClient(
+      new HeadlessMapEngineAdapter(),
+    );
+    try {
+      const events = await app.agui(aguiPayload("gap", "查询有缺口的历史轨迹"));
+      await client.acceptSseChunk(
+        events.map((e) => `data: ${JSON.stringify(e)}\n\n`).join(""),
+      );
+      const state = stateFrom(events);
+      const view = interactionContext(state).view;
+      expect(view.findings).toEqual(
+        app.peer.results[0]!.worldAnalysisFindings.findings,
+      );
+      expect(view.timeline.items).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ kind: "DATA_GAP", ...gap.period }),
+        ]),
+      );
+      // This public trace publishes periods, not line geometry. Never synthesize one.
+      expect(view.map.layers).toEqual([]);
+      expect(client.mapPresentation.rendered?.layersById).toEqual({});
+      expect(client.state.sharedState?.timeline).toEqual(state.timeline);
+      expect(Object.values(client.state.textByMessageId).join("")).toContain(
+        "不跨 Gap 插值连线",
+      );
+      expect(app.peer.requests).toHaveLength(1);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("G09 detaches a genuinely RUNNING observer, finishes independently and restores full State/Activity after composition restart", async () => {
+    const app = await setup({
+      async: true,
+      repeatedRunning: 1000,
+      examples: ["action"],
+    });
+    const detached = new AbortController();
+    const client = new HeadlessAnalysisReferenceClient(
+      new HeadlessMapEngineAdapter(),
+      () => frozenNow().getTime(),
+    );
+    const iterator = app.composition.runAgUiV03!({
+      input: aguiPayload("before-disconnect", "查询历史候选"),
+      principalId: userId,
+      internalThreadId: threadId,
+      signal: detached.signal,
+      profile: SACS_AG_UI_V03_PROFILE_ID,
+    })[Symbol.asyncIterator]();
+    try {
+      let running = false;
+      for (let index = 0; index < 20; index++) {
+        const next = await iterator.next();
+        if (next.done) break;
+        await client.acceptSseChunk(`data: ${JSON.stringify(next.value)}\n\n`);
+        if (
+          next.value.type === "ACTIVITY_SNAPSHOT" &&
+          next.value.content["status"] === "RUNNING"
+        ) {
+          running = true;
+          break;
+        }
+      }
+      expect(running).toBe(true); // Do not substitute a terminal job for disconnect coverage.
+      const first = client.state.sharedState!;
+      const scope = {
+        analysisId: first.analysis.session.analysisId,
+        principalId: userId,
+        threadId,
+      };
+      detached.abort();
+      await iterator.return?.();
+      await client.disconnect();
+      expect(app.composition.source!.pump.status(scope)?.state).toBe("RUNNING");
+      expect(
+        app.peer.captured.filter((r) => r.path.endsWith(":cancel")),
+      ).toHaveLength(0);
+      for (const row of app.peer.jobs.values()) row.polls = 1001; // Release only the local fixture's terminal response.
+      await app.composition.source!.pump.settle();
+      const saved = await app.composition.source!.getProjection(scope);
+      expect(saved?.activity["status"]).toBe("COMPLETED");
+      const calls = app.peer.captured.length;
+      await app.rebuild();
+      client.reconnect();
+      const replay = await app.agui(
+        aguiPayload("after-disconnect", "", {
+          mode: "RECONNECT",
+          analysisId: scope.analysisId,
+        }),
+      );
+      await client.acceptSseChunk(
+        replay.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+        client.observationGeneration,
+      );
+      const restored = stateFrom(replay);
+      expect(client.state.sharedState).toEqual(restored);
+      expect(restored).toEqual(parseAndVerifyAgUiSharedStateV03(saved!.state));
+      expect(restored.analysis.activeRevisionId).toBe(
+        first.analysis.activeRevisionId,
+      );
+      expect(
+        Object.values(client.state.activitiesByMessageId).at(-1)?.content,
+      ).toEqual(saved!.activity);
+      expect(client.mapPresentation.shared).toEqual(restored.map);
+      expect(client.state).toMatchObject({
+        needsFullStateSnapshot: false,
+        needsFullActivitySnapshot: false,
+        runStatus: "FINISHED",
+      });
+      expect(app.peer.requests).toHaveLength(1);
+      expect(app.peer.captured).toHaveLength(calls);
+      app.assertNoExecution();
+    } finally {
+      detached.abort();
+      await iterator.return?.();
+      await app.close();
+    }
+  });
+  it.each(["CONTINUE", "REPLACE"] as const)(
+    "G06 local draw -> explicit %s -> source query -> new Revision and Grounding",
+    async (contextMode) => {
+      const app = await setup({ examples: ["action", "empty"] });
+      try {
+        const client = new HeadlessAnalysisReferenceClient(
+          new HeadlessMapEngineAdapter(),
+          () => frozenNow().getTime(),
+        );
+        const events = await app.agui(aguiPayload("map-first", "查看历史结果"));
+        await client.acceptSseChunk(
+          events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+        );
+        const first = stateFrom(events);
+        const scope = {
+          geometry: {
+            type: "Polygon" as const,
+            coordinates: [
+              [
+                [120, 30],
+                [121, 30],
+                [121, 31],
+                [120, 30],
+              ] as [number, number][],
+            ],
+          },
+        };
+        await client.dispatchMapAction({
+          type: "DRAW_POLYGON",
+          coordinates: scope.geometry.coordinates,
+        });
+        expect(client.state.sharedState).toEqual(first);
+        expect(app.peer.requests).toHaveLength(1);
+        const send = jest.fn(
+          async (
+            request: Parameters<
+              ConstructorParameters<typeof AnalysisControlClient>[0]["send"]
+            >[0],
+          ) => {
+            const response = await app.server.inject({
+              method: request.method,
+              url: request.path,
+              headers: headers(),
+              ...(request.body
+                ? { payload: JSON.stringify(request.body) }
+                : {}),
+            });
+            return {
+              status: response.statusCode,
+              body: response.json() as unknown,
+            };
+          },
+        );
+        const control = new AnalysisControlClient({ send });
+        const command = {
+          confirmed: true,
+          expectedDraftRevision: 1,
+          commandId: "map-submit",
+          idempotencyKey: "map-submit",
+          originalText: "查询此范围内的历史位置",
+          contextMode,
+        };
+        await expect(
+          client.submitNewQuery(control, { ...command, confirmed: false }),
+        ).rejects.toThrow("QUERY_CONFIRMATION_REQUIRED");
+        await expect(
+          client.submitNewQuery(control, {
+            ...command,
+            expectedDraftRevision: 0,
+          }),
+        ).rejects.toThrow("QUERY_DRAFT_CONFLICT");
+        expect(send).not.toHaveBeenCalled();
+        await client.submitNewQuery(control, command);
+        expect(send).toHaveBeenCalledTimes(1);
+        expect(send.mock.calls[0]![0]).toMatchObject({
+          path: proposalUrl(first),
+          body: {
+            kind: "GROUNDING_SOURCE_QUERY",
+            queryScope: scope,
+            contextMode,
+          },
+        });
+        expect(app.peer.requests).toHaveLength(2);
+        const request = app.peer.requests[1]!;
+        expect(request.contextCapsule.mapSelections).toEqual([
+          {
+            selectionId: expect.stringMatching(/^map-scope-/u),
+            kind: "AREA",
+            revision: 1,
+            geometry: scope.geometry,
+            geometryHash: publicCanonicalHash(scope.geometry),
+          },
+        ]);
+        expect(request.contextCapsule.priorGroundings).toHaveLength(
+          contextMode === "CONTINUE" ? 1 : 0,
+        );
+        expect(request.analysisSelections).toBeUndefined();
+        expect(request.executionPolicy).toMatchObject({
+          readOnly: true,
+          allowApproximation: false,
+          deadlineMs: 120_000,
+        });
+        expect(client.state.sharedState).toEqual(first);
+        expect(
+          client.mapPresentation.local.unsubmittedEditDraft?.["scope"],
+        ).toEqual(scope);
+        // Explicit replay is permitted; the application never automatically retries it.
+        await client.submitNewQuery(control, command);
+        expect(app.peer.requests).toHaveLength(2);
+        const conflict = await app.server.inject({
+          method: "POST",
+          url: proposalUrl(first),
+          headers: headers(),
+          payload: {
+            ...(send.mock.calls[0]![0].body as object),
+            queryScope: { geometry: { type: "Point", coordinates: [120, 30] } },
+          },
+        });
+        expect(conflict.statusCode).toBe(409);
+        await client.disconnect();
+        client.reconnect();
+        const updated = await app.agui(
+          aguiPayload("map-reconnect", "", {
+            mode: "RECONNECT",
+            analysisId: first.analysis.session.analysisId,
+          }),
+        );
+        await client.acceptSseChunk(
+          updated.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+        );
+        const second = stateFrom(updated);
+        expect(client.state.sharedState).toEqual(second);
+        expect(second.analysis.activeRevisionId).not.toBe(
+          first.analysis.activeRevisionId,
+        );
+        expect(second.analysis.session.latestRevisionNumber).toBe(
+          first.analysis.session.latestRevisionNumber + 1,
+        );
+        expect(interactionContext(second).view.groundingId).not.toBe(
+          interactionContext(first).view.groundingId,
+        );
+        await expect(
+          client.submitNewQuery(control, {
+            ...command,
+            commandId: "old-draft",
+          }),
+        ).rejects.toThrow("ANALYSIS_REVISION_CONFLICT");
+        expect(send).toHaveBeenCalledTimes(2);
+        expect(app.peer.requests).toHaveLength(2);
+        app.assertNoExecution();
+      } finally {
+        await app.close();
+      }
+    },
+  );
+
+  it("S05 malformed and oversized scope fails at the public Control route before WSGS submission", async () => {
+    const app = await setup({ examples: ["action"] });
+    try {
+      const first = stateFrom(
+        await app.agui(aguiPayload("invalid-scope", "查看历史结果")),
+      );
+      const command = createFrozenSourceQuery({
+        ...interactionContext(first),
+        context: interactionContext(first),
+        commandId: "invalid-map",
+        idempotencyKey: "invalid-map",
+        originalText: "查询此范围",
+        contextMode: "REPLACE",
+      });
+      for (const queryScope of [
+        { geometry: { type: "Point", coordinates: [181, 30] } },
+        { geometry: { type: "LineString", coordinates: [[120, 30]] } },
+        {
+          geometry: {
+            type: "Polygon",
+            coordinates: [
+              [
+                [120, 30],
+                [121, 30],
+                [121, 31],
+                [120, 31],
+              ],
+            ],
+          },
+        },
+        { geometry: { type: "Circle", center: [120, 30], radiusMeters: -1 } },
+        {
+          geometry: {
+            type: "LineString",
+            coordinates: Array.from({ length: 257 }, () => [120, 30]),
+          },
+        },
+        {
+          geometry: { type: "Point", coordinates: [120, 30] },
+          provider: "forbidden",
+        },
+      ]) {
+        const response = await app.server.inject({
+          method: "POST",
+          url: proposalUrl(first),
+          headers: headers(),
+          payload: { ...command, queryScope },
+        });
+        expect(response.statusCode).toBe(400);
+      }
+      expect(app.peer.requests).toHaveLength(1);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
+  it("G04 inspect -> explicit confirmation -> Control -> new Revision/Grounding -> authoritative Snapshot", async () => {
+    const app = await setup({ examples: ["ranking", "action"] });
+    try {
+      const client = new HeadlessAnalysisReferenceClient(
+        new HeadlessMapEngineAdapter(),
+        () => frozenNow().getTime(),
+      );
+      const events = await app.agui(
+        aguiPayload("inspect-choice", "查询两个最强位置"),
+      );
+      await client.acceptSseChunk(
+        events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+      );
+      const first = stateFrom(events);
+      expect(
+        Object.values(client.state.activitiesByMessageId).at(-1)?.content[
+          "status"
+        ],
+      ).toBe("WAITING_SELECTION");
+      const before = client.state;
+      const choice = interactionContext(first).view.choices.filter(
+        (item) => "selector" in item,
+      )[1]!;
+      const presentation = await client.inspectFrozenChoice(
+        choice.choiceId,
+        choice.candidateId,
+      );
+      expect(presentation.enabled).toBe(true);
+      expect(client.state).toEqual(before);
+      expect(app.peer.requests).toHaveLength(1);
+      const send = jest.fn(
+        async (
+          request: Parameters<
+            ConstructorParameters<typeof AnalysisControlClient>[0]["send"]
+          >[0],
+        ) => {
+          const response = await app.server.inject({
+            method: request.method,
+            url: request.path,
+            headers: headers(),
+            ...(request.body ? { payload: JSON.stringify(request.body) } : {}),
+          });
+          return {
+            status: response.statusCode,
+            body: response.json() as unknown,
+          };
+        },
+      );
+      const control = new AnalysisControlClient({ send });
+      const command = {
+        confirmed: true,
+        commandId: "explicit-confirm",
+        idempotencyKey: "explicit-confirm",
+        originalText: "采用所选历史候选",
+      };
+      await expect(
+        client.resolveSelection(control, { ...command, confirmed: false }),
+      ).rejects.toThrow("SELECTION_CONFIRMATION_REQUIRED");
+      expect(send).not.toHaveBeenCalled();
+      await client.resolveSelection(control, command);
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(send.mock.calls[0]![0].path).toBe(interventionUrl(first));
+      expect(app.peer.requests).toHaveLength(2);
+      expect(app.peer.requests[1]!.analysisSelections).toEqual([
+        choice.selector,
+      ]);
+      expect(client.state.sharedState).toEqual(first); // HTTP acknowledgement is not a State snapshot.
+      await client.disconnect();
+      client.reconnect();
+      const updated = await app.agui(
+        aguiPayload("choice-reconnect", "", {
+          mode: "RECONNECT",
+          analysisId: first.analysis.session.analysisId,
+        }),
+      );
+      await client.acceptSseChunk(
+        updated.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+      );
+      const second = stateFrom(updated);
+      expect(client.state.sharedState).toEqual(second);
+      expect(second.analysis.activeRevisionId).not.toBe(
+        first.analysis.activeRevisionId,
+      );
+      expect(second.analysis.session.latestRevisionNumber).toBe(
+        first.analysis.session.latestRevisionNumber + 1,
+      );
+      expect(interactionContext(second).view.groundingId).not.toBe(
+        interactionContext(first).view.groundingId,
+      );
+      expect(second.pendingIntervention).toBeUndefined();
+      await expect(
+        client.resolveSelection(control, {
+          ...command,
+          commandId: "stale-choice",
+        }),
+      ).rejects.toThrow("ANALYSIS_REVISION_CONFLICT");
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(app.peer.requests).toHaveLength(2);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("G05 local candidate remains readable after expiry, confirmation rechecks TTL without submitting", async () => {
+    let timestamp = frozenNow().getTime();
+    const app = await setup(
+      { examples: ["ranking"] },
+      () => new Date(timestamp),
+    );
+    try {
+      const client = new HeadlessAnalysisReferenceClient(
+        new HeadlessMapEngineAdapter(),
+        () => timestamp,
+      );
+      const events = await app.agui(
+        aguiPayload("expiring-choice", "查询两个最强位置"),
+      );
+      await client.acceptSseChunk(
+        events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+      );
+      const choice = interactionContext(stateFrom(events)).view.choices.filter(
+        (item) => "selector" in item,
+      )[0]!;
+      await client.inspectFrozenChoice(choice.choiceId, choice.candidateId);
+      const before = client.state.sharedState;
+      timestamp = Date.parse(choice.validUntil);
+      expect(
+        await client.inspectFrozenChoice(choice.choiceId, choice.candidateId),
+      ).toMatchObject({
+        choice,
+        enabled: false,
+        disabledReason: "SELECTION_EXPIRED",
+        refreshAction: "SUBMIT_NEW_QUERY",
+      });
+      const send = jest.fn(async () => ({ status: 200, body: {} }));
+      await expect(
+        client.resolveSelection(new AnalysisControlClient({ send }), {
+          confirmed: true,
+          commandId: "expired",
+          idempotencyKey: "expired",
+          originalText: "确认",
+        }),
+      ).rejects.toThrow("SELECTION_EXPIRED");
+      expect(send).not.toHaveBeenCalled();
+      expect(client.state.sharedState).toEqual(before);
+      expect(client.selectedChoice?.choice).toEqual(choice);
+      expect(app.peer.requests).toHaveLength(1);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
   it.each([false, true])(
     "AC-007 AC-008 saves and projects %s async source once through normal AG-UI",
     async (asynchronous) => {
@@ -596,6 +1228,7 @@ describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL
         );
       expect(new Set(choices.map((choice) => choice.choiceKind)).size).toBe(5);
       const command = createFrozenChoiceResolution({
+        confirmed: true,
         context,
         choices,
         commandId: "five-choices",

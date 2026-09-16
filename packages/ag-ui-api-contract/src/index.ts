@@ -11,6 +11,11 @@ import {
 } from "@ag-ui/core";
 import { EventEncoder } from "@ag-ui/encoder";
 import { z } from "zod";
+import {
+  GROUNDING_ACTIVITY_TYPE,
+  groundingJobActivityV1Schema,
+  groundingActivityMessageId,
+} from "../../analysis-contract/src/grounding-activity.js";
 
 export const AG_UI_ROUTE = "/ag-ui";
 export const AG_UI_CAPABILITIES_ROUTE = "/ag-ui/capabilities";
@@ -234,6 +239,11 @@ function assertV03EventSafety(event: AGUIEvent): void {
   }
   if (event.type === EventType.ACTIVITY_SNAPSHOT) {
     const content = event.content;
+    if (event.activityType === GROUNDING_ACTIVITY_TYPE) {
+      const activity = groundingJobActivityV1Schema.parse(content);
+      if (event.messageId !== groundingActivityMessageId(activity))
+        throw Error("GROUNDING_ACTIVITY_MESSAGE_ID_MISMATCH");
+    }
     if (
       !isRecord(content) ||
       !isRecord(content["meta"]) ||

@@ -9,7 +9,6 @@ import {
 import {
   parseAndVerifyAgUiSharedStateV03,
   type AgUiSharedStateV03,
-  type FocusTarget,
   type MapSharedState,
 } from "../../analysis-contract/src/index.js";
 import type {
@@ -17,18 +16,35 @@ import type {
   AnalysisInterventionResolutionCommand,
   AnalysisProposalCommand,
 } from "../../analysis-control-runtime/src/index.js";
-import {
-  reduceLocalMapState,
-  reduceMapSharedState,
-  type LocalMapState,
-} from "../../analysis-map/src/index.js";
+import { type LocalMapState } from "../../analysis-map/src/index.js";
 import { canonicalJson } from "../../world-explanation-contract/src/index.js";
+import { queryScopeSchema } from "../../analysis-contract/src/query-scope.js";
+import {
+  GROUNDING_ACTIVITY_TYPE,
+  groundingActivityMessageId,
+} from "../../analysis-contract/src/grounding-activity.js";
+import {
+  acceptsStateTransition,
+  acceptsGroundingActivity,
+} from "./recovery-guards.js";
 import {
   createFrozenChoiceResolution,
   createFrozenSourceQuery,
+  presentFrozenChoice,
+  type FrozenAnalysisInteractionContext,
+  type FrozenChoicePresentation,
   type FrozenSourceQueryCommand,
 } from "./frozen-world-analysis.js";
 export * from "./frozen-world-analysis.js";
+import type { FrozenChoiceView } from "../../world-explanation-runtime/src/frozen-analysis-view.js";
+import type { WorldAnalysisViewModel } from "../../world-explanation-runtime/src/analysis-view.js";
+import {
+  localMapActionSchema,
+  reduceClientMapAction,
+  renderLocalMap,
+  type AnalysisClientMapAction,
+} from "./local-map.js";
+export type { AnalysisClientMapAction } from "./local-map.js";
 
 export type AnalysisClientEffect =
   "REQUEST_FULL_STATE_SNAPSHOT" | "REQUEST_FULL_ACTIVITY_SNAPSHOT";
@@ -49,6 +65,8 @@ export interface AnalysisClientActivity {
 
 export interface AnalysisReferenceClientState {
   readonly connected: boolean;
+  readonly awaitingReconnectRun: boolean;
+  readonly recentRunIds: readonly string[];
   readonly runStatus: "IDLE" | "RUNNING" | "INTERRUPTED" | "FINISHED" | "ERROR";
   readonly threadId?: string;
   readonly runId?: string;
@@ -76,6 +94,8 @@ export interface AnalysisClientReduction {
 export function createAnalysisReferenceClientState(): AnalysisReferenceClientState {
   return {
     connected: true,
+    awaitingReconnectRun: false,
+    recentRunIds: [],
     runStatus: "IDLE",
     pendingInterrupts: [],
     currentRunHasStateSnapshot: false,
@@ -96,10 +116,15 @@ export function reduceAnalysisClientEvent(
   const event = assertSacsAgUiEvent(input, SACS_AG_UI_V03_PROFILE_ID);
   switch (event.type) {
     case EventType.RUN_STARTED:
+      if (current.recentRunIds.includes(event.runId)) return noEffect(current);
+      if (current.runStatus === "RUNNING" && !current.awaitingReconnectRun)
+        throw Error("AG_UI_RUN_ALREADY_ACTIVE");
       assertRunStartLineage(current, event);
       return noEffect({
         ...current,
         runStatus: "RUNNING",
+        awaitingReconnectRun: false,
+        recentRunIds: [...current.recentRunIds, event.runId].slice(-256),
         threadId: event.threadId,
         runId: event.runId,
         ...(event.parentRunId === undefined
@@ -122,7 +147,9 @@ export function reduceAnalysisClientEvent(
       if (
         event.outcome?.type === "interrupt" &&
         (!current.currentRunHasStateSnapshot ||
-          !current.currentRunHasActivitySnapshot)
+          !current.currentRunHasActivitySnapshot ||
+          current.needsFullStateSnapshot ||
+          current.needsFullActivitySnapshot)
       ) {
         throw new Error("AG_UI_INTERRUPT_SNAPSHOTS_REQUIRED");
       }
@@ -244,23 +271,10 @@ export interface MapEngineAdapter {
   disconnect(): void | Promise<void>;
 }
 
-export type AnalysisClientMapAction =
-  | {
-      readonly type: "PAN";
-      readonly viewport: Readonly<Record<string, number>>;
-    }
-  | { readonly type: "ZOOM"; readonly zoom: number }
-  | {
-      readonly type: "HOVER";
-      readonly hover?: Readonly<Record<string, unknown>>;
-    }
-  | { readonly type: "INSPECT"; readonly focus?: FocusTarget }
-  | { readonly type: "FOCUS_PIN"; readonly focus: FocusTarget }
-  | { readonly type: "FOCUS_UNPIN"; readonly focusId: string };
-
 export interface AnalysisClientMapPresentation {
   readonly local: LocalMapState;
   readonly shared?: MapSharedState;
+  readonly rendered?: MapSharedState;
 }
 
 export class HeadlessMapEngineAdapter implements MapEngineAdapter {
@@ -291,11 +305,136 @@ export class HeadlessAnalysisReferenceClient {
   private current = createAnalysisReferenceClientState();
   private localMap: LocalMapState = { layerVisibilityPreference: {} };
   private presentedMap: MapSharedState | undefined;
+  private generation = 0;
+  private choiceDraft:
+    | { analysisId: string; revisionId: string; choice: FrozenChoiceView }
+    | undefined;
 
-  constructor(private readonly mapEngine: MapEngineAdapter) {}
+  constructor(
+    private readonly mapEngine: MapEngineAdapter,
+    private readonly now: () => number = Date.now,
+  ) {}
+
+  get selectedChoice() {
+    return this.choiceDraft ? structuredClone(this.choiceDraft) : undefined;
+  }
+
+  /** Capture once for each HTTP/SSE observer; delayed callbacks must carry it. */
+  get observationGeneration(): number {
+    return this.generation;
+  }
+
+  /** A card/map click only changes local inspection; no Control client is held here. */
+  async inspectFrozenChoice(
+    choiceId: string,
+    candidateId: string,
+  ): Promise<FrozenChoicePresentation> {
+    const context = this.frozenContext();
+    const choices = context.view.choices.filter(
+      (choice): choice is FrozenChoiceView =>
+        "selector" in choice &&
+        choice.choiceId === choiceId &&
+        choice.candidateId === candidateId,
+    );
+    if (choices.length !== 1) throw Error("SELECTION_UNAVAILABLE");
+    const choice = choices[0];
+    if (!choice) throw Error("SELECTION_UNAVAILABLE");
+    this.choiceDraft = structuredClone({
+      analysisId: context.view.analysisId,
+      revisionId: context.view.revisionId,
+      choice,
+    });
+    const links = context.view.linkage?.choices.filter(
+      (c) => c.choiceId === choiceId && c.candidateId === candidateId,
+    );
+    const targets = links?.length === 1 ? links[0]?.focusTargets : undefined;
+    // Multiple or absent relationships never authorize guessing a target.
+    await this.dispatchMapAction({
+      type: "INSPECT",
+      ...(targets?.length === 1 ? { focus: targets[0] } : {}),
+    });
+    return presentFrozenChoice(context, choice);
+  }
+
+  /** The sole selection mutation path requires explicit confirmation and fresh state. */
+  async resolveSelection(
+    control: AnalysisControlClient,
+    input: {
+      confirmed: boolean;
+      commandId: string;
+      idempotencyKey: string;
+      originalText: string;
+    },
+  ): Promise<unknown> {
+    if (input.confirmed !== true)
+      throw Error("SELECTION_CONFIRMATION_REQUIRED");
+    const context = this.frozenContext();
+    const draft = this.choiceDraft;
+    if (!draft) throw Error("SELECTION_UNAVAILABLE");
+    if (
+      draft.analysisId !== context.view.analysisId ||
+      draft.revisionId !== context.activeRevisionId
+    )
+      throw Error("ANALYSIS_REVISION_CONFLICT");
+    return control.resolveFrozenChoice({
+      ...input,
+      context,
+      choices: [draft.choice],
+    });
+  }
+
+  /** Drawing is local. Only this explicit gesture submits its exact validated scope. */
+  async submitNewQuery(
+    control: AnalysisControlClient,
+    input: {
+      confirmed: boolean;
+      expectedDraftRevision: number;
+      commandId: string;
+      idempotencyKey: string;
+      originalText: string;
+      contextMode: "CONTINUE" | "REPLACE";
+    },
+  ): Promise<unknown> {
+    if (input.confirmed !== true) throw Error("QUERY_CONFIRMATION_REQUIRED");
+    const context = this.frozenContext();
+    const draft = this.localMap.unsubmittedEditDraft;
+    if (!draft) throw Error("QUERY_SCOPE_REQUIRED");
+    if (draft["basedOnRevisionId"] !== context.activeRevisionId)
+      throw Error("ANALYSIS_REVISION_CONFLICT");
+    if (
+      !Number.isSafeInteger(input.expectedDraftRevision) ||
+      input.expectedDraftRevision !== draft["draftRevision"]
+    )
+      throw Error("QUERY_DRAFT_CONFLICT");
+    const queryScope = queryScopeSchema.parse(draft["scope"]);
+    // Preserve the local draft and shared scene until authoritative State arrives.
+    // No optimistic geometry layer and no automatic retry on an uncertain reply.
+    return control.queryFrozenAnalysis({ ...input, context, queryScope });
+  }
+
+  private frozenContext(): FrozenAnalysisInteractionContext {
+    const state = this.current.sharedState;
+    if (!state?.worldExplanation || this.current.needsFullStateSnapshot)
+      throw Error("SELECTION_UNAVAILABLE");
+    const view = state.worldExplanation as unknown as WorldAnalysisViewModel;
+    if (view.analysisId !== state.analysis.session.analysisId)
+      throw Error("SELECTION_UNAVAILABLE");
+    const intervention = state.pendingIntervention;
+    return {
+      view,
+      activeRevisionId: state.analysis.activeRevisionId,
+      activeRevisionNumber: state.analysis.session.latestRevisionNumber,
+      ...(intervention?.status === "OPEN" &&
+      intervention.analysisId === view.analysisId &&
+      intervention.revisionId === state.analysis.activeRevisionId
+        ? { interventionId: intervention.interventionId }
+        : {}),
+      now: this.now,
+    };
+  }
 
   get state(): AnalysisReferenceClientState {
-    return this.current;
+    return structuredClone(this.current);
   }
 
   get mapPresentation(): AnalysisClientMapPresentation {
@@ -303,30 +442,41 @@ export class HeadlessAnalysisReferenceClient {
       local: structuredClone(this.localMap),
       ...(this.presentedMap === undefined
         ? {}
-        : { shared: structuredClone(this.presentedMap) }),
+        : {
+            shared: structuredClone(this.presentedMap),
+            rendered: renderLocalMap(this.presentedMap, this.localMap),
+          }),
     };
   }
 
   async acceptSseChunk(
     chunk: string | Uint8Array,
+    generation = this.generation,
   ): Promise<readonly AnalysisClientEffect[]> {
-    return this.acceptEvents(this.decoder.push(chunk));
+    if (generation !== this.generation || !this.current.connected) return [];
+    return this.acceptEvents(this.decoder.push(chunk), generation);
   }
 
-  async finishStream(): Promise<readonly AnalysisClientEffect[]> {
-    return this.acceptEvents(this.decoder.finish());
+  async finishStream(
+    generation = this.generation,
+  ): Promise<readonly AnalysisClientEffect[]> {
+    if (generation !== this.generation || !this.current.connected) return [];
+    return this.acceptEvents(this.decoder.finish(), generation);
   }
 
   async disconnect(): Promise<void> {
+    this.generation += 1;
     this.current = { ...this.current, connected: false };
     await this.mapEngine.disconnect();
   }
 
   reconnect(): readonly AnalysisClientEffect[] {
+    this.generation += 1;
     this.decoder.reset();
     this.current = {
       ...this.current,
       connected: true,
+      awaitingReconnectRun: true,
       needsFullStateSnapshot: true,
       needsFullActivitySnapshot: true,
     };
@@ -334,7 +484,9 @@ export class HeadlessAnalysisReferenceClient {
   }
 
   async setInspectionFocus(focus: unknown): Promise<void> {
-    await this.mapEngine.setInspectionFocus(focus);
+    await this.dispatchMapAction(
+      localMapActionSchema.parse({ type: "INSPECT", focus }),
+    );
   }
 
   /**
@@ -343,55 +495,32 @@ export class HeadlessAnalysisReferenceClient {
    * cannot accidentally become backend analysis commands.
    */
   async dispatchMapAction(action: AnalysisClientMapAction): Promise<void> {
-    switch (action.type) {
-      case "PAN":
-        assertFiniteViewport(action.viewport);
-        this.localMap = reduceLocalMapState(this.localMap, {
-          viewport: { ...this.localMap.viewport, ...action.viewport },
-        });
-        break;
-      case "ZOOM":
-        if (!Number.isFinite(action.zoom)) {
-          throw new Error("ANALYSIS_CLIENT_MAP_ZOOM_INVALID");
-        }
-        this.localMap = reduceLocalMapState(this.localMap, {
-          viewport: { ...this.localMap.viewport, zoom: action.zoom },
-        });
-        break;
-      case "HOVER":
-        this.localMap = reduceLocalMapState(this.localMap, {
-          hover: action.hover,
-        });
-        break;
-      case "INSPECT":
-        this.localMap = reduceLocalMapState(this.localMap, {
-          inspectionFocus: action.focus,
-        });
-        await this.mapEngine.setInspectionFocus(action.focus);
-        break;
-      case "FOCUS_PIN":
-        this.presentedMap = reduceMapSharedState(this.requirePresentedMap(), {
-          type: "FOCUS_PIN",
-          focus: action.focus,
-        });
-        await this.mapEngine.replaceScene(this.presentedMap);
-        break;
-      case "FOCUS_UNPIN":
-        this.presentedMap = reduceMapSharedState(this.requirePresentedMap(), {
-          type: "FOCUS_UNPIN",
-          focusId: action.focusId,
-        });
-        await this.mapEngine.replaceScene(this.presentedMap);
-        break;
-    }
-    await this.mapEngine.applyLocalMapAction?.(action);
+    const parsed = localMapActionSchema.parse(action);
+    this.localMap = reduceClientMapAction(
+      this.localMap,
+      parsed,
+      this.presentedMap,
+      this.current.sharedState?.analysis.activeRevisionId,
+    );
+    if (parsed.type === "INSPECT" || parsed.type === "FOCUS")
+      await this.mapEngine.setInspectionFocus(structuredClone(parsed.focus));
+    if (
+      this.presentedMap &&
+      ["FOCUS_PIN", "FOCUS_UNPIN", "TOGGLE_LAYER"].includes(parsed.type)
+    )
+      await this.mapEngine.replaceScene(
+        renderLocalMap(this.presentedMap, this.localMap),
+      );
+    await this.mapEngine.applyLocalMapAction?.(structuredClone(parsed));
   }
 
   private async acceptEvents(
     events: readonly AGUIEvent[],
+    generation: number,
   ): Promise<readonly AnalysisClientEffect[]> {
     const effects: AnalysisClientEffect[] = [];
     for (const event of events) {
+      if (generation !== this.generation || !this.current.connected) break;
       const reduction = reduceAnalysisClientEvent(this.current, event);
       this.current = reduction.state;
       effects.push(...reduction.effects);
@@ -403,7 +532,9 @@ export class HeadlessAnalysisReferenceClient {
         if (scene !== undefined) {
           this.presentedMap = structuredClone(scene);
           try {
-            await this.mapEngine.replaceScene(scene);
+            await this.mapEngine.replaceScene(
+              renderLocalMap(scene, this.localMap),
+            );
           } catch {
             // Rendering is a local observer concern and cannot stop the
             // authoritative event reduction stream.
@@ -412,13 +543,6 @@ export class HeadlessAnalysisReferenceClient {
       }
     }
     return effects;
-  }
-
-  private requirePresentedMap(): MapSharedState {
-    if (this.presentedMap === undefined) {
-      throw new Error("ANALYSIS_CLIENT_MAP_SNAPSHOT_REQUIRED");
-    }
-    return this.presentedMap;
   }
 }
 
@@ -548,12 +672,15 @@ function reduceStateSnapshot(
   snapshot: unknown,
 ): AnalysisClientReduction {
   const state = parseAndVerifyAgUiSharedStateV03(snapshot);
+  if (!acceptsStateTransition(current.sharedState, state))
+    return requireStateSnapshot(current);
   return noEffect({
     ...current,
     sharedState: structuredClone(state),
     stateRevision: state.meta.stateRevision,
     needsFullStateSnapshot: false,
     currentRunHasStateSnapshot: true,
+    ...stateActivityFence(current, state),
   });
 }
 
@@ -581,7 +708,10 @@ function reduceStateDelta(
       applyJsonPatch(current.sharedState, delta),
     );
     const nextRevision = next.meta.stateRevision;
-    if (nextRevision !== current.stateRevision + 1) {
+    if (
+      nextRevision !== current.stateRevision + 1 ||
+      !acceptsStateTransition(current.sharedState, next)
+    ) {
       return requireStateSnapshot(current);
     }
     return noEffect({
@@ -589,10 +719,32 @@ function reduceStateDelta(
       sharedState: next,
       stateRevision: nextRevision,
       needsFullStateSnapshot: false,
+      ...stateActivityFence(current, next),
     });
   } catch {
     return requireStateSnapshot(current);
   }
+}
+
+function stateActivityFence(
+  current: AnalysisReferenceClientState,
+  next: AgUiSharedStateV03,
+): Partial<AnalysisReferenceClientState> {
+  const revision = next.analysis.revisionsById[next.analysis.activeRevisionId];
+  if (
+    revision?.source?.kind !== "WSGS_GROUNDING_JOB" ||
+    !current.currentRunHasActivitySnapshot
+  )
+    return {};
+  const id = groundingActivityMessageId({
+    analysisId: next.analysis.session.analysisId,
+    revisionId: revision.revisionId,
+  });
+  const activity = current.activitiesByMessageId[id];
+  return activity?.activityType === GROUNDING_ACTIVITY_TYPE &&
+    acceptsGroundingActivity(next, id, activity.content)
+    ? {}
+    : { needsFullActivitySnapshot: true, currentRunHasActivitySnapshot: false };
 }
 
 function reduceActivitySnapshot(
@@ -606,6 +758,25 @@ function reduceActivitySnapshot(
   if (!Number.isSafeInteger(revision) || (revision as number) < 0) {
     throw new Error("AG_UI_ACTIVITY_SNAPSHOT_REVISION_INVALID");
   }
+  const previous = current.activitiesByMessageId[event.messageId];
+  if (
+    previous &&
+    (previous.activityType !== event.activityType ||
+      (revision as number) < previous.activityRevision ||
+      (revision === previous.activityRevision &&
+        !sameJson(JSON.parse(JSON.stringify(previous.content)), event.content)))
+  )
+    return requireActivitySnapshot(current);
+  if (
+    event.activityType === GROUNDING_ACTIVITY_TYPE &&
+    !acceptsGroundingActivity(
+      current.sharedState,
+      event.messageId,
+      event.content,
+      previous?.content,
+    )
+  )
+    return requireActivitySnapshot(current);
   return noEffect({
     ...current,
     needsFullActivitySnapshot: false,
@@ -650,6 +821,16 @@ function reduceActivityDelta(
     if (nextRevision !== activity.activityRevision + 1) {
       throw new Error("ACTIVITY_REVISION_NOT_NEXT");
     }
+    if (
+      event.activityType === GROUNDING_ACTIVITY_TYPE &&
+      !acceptsGroundingActivity(
+        current.sharedState,
+        event.messageId,
+        content,
+        activity.content,
+      )
+    )
+      throw Error("GROUNDING_ACTIVITY_PATCH_INVALID");
     return noEffect({
       ...current,
       needsFullActivitySnapshot: false,
@@ -946,20 +1127,21 @@ function assertRunStartLineage(
   event: Extract<AGUIEvent, { type: EventType.RUN_STARTED }>,
 ): void {
   if (current.runStatus !== "INTERRUPTED") return;
+  // A new observer connection is not an interrupt resume. It must hydrate full
+  // snapshots, but the server does not invent a parent Run for that observer.
+  if (
+    current.awaitingReconnectRun &&
+    event.threadId === current.threadId &&
+    event.runId !== current.runId &&
+    event.parentRunId === undefined
+  )
+    return;
   if (
     event.threadId !== current.threadId ||
     event.runId === current.runId ||
     event.parentRunId !== current.runId
   ) {
     throw new Error("AG_UI_INTERRUPT_RESUME_LINEAGE_INVALID");
-  }
-}
-
-function assertFiniteViewport(
-  viewport: Readonly<Record<string, number>>,
-): void {
-  if (Object.values(viewport).some((value) => !Number.isFinite(value))) {
-    throw new Error("ANALYSIS_CLIENT_MAP_VIEWPORT_INVALID");
   }
 }
 

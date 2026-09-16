@@ -44,9 +44,21 @@ async function startMock(
     readonly taskState?: string;
     readonly securityRequired?: boolean;
     readonly skillSecurityRequired?: boolean;
+    readonly outputModes?: readonly string[];
   } = {},
 ) {
   const seen: SeenRequest[] = [];
+  const task = (
+    state: string,
+    metadata: Record<string, unknown>,
+    withArtifact = false,
+  ) =>
+    taskJson(
+      state,
+      metadata,
+      withArtifact,
+      options.outputModes?.join() === "application/json",
+    );
   const server = createServer(async (request, response) => {
     const body = await readJsonBody(request);
     seen.push({
@@ -72,6 +84,7 @@ async function startMock(
             version: options.protocolVersion ?? "1.0",
             securityRequired: options.securityRequired ?? false,
             skillSecurityRequired: options.skillSecurityRequired ?? false,
+            outputModes: options.outputModes,
           }),
         );
       }
@@ -82,7 +95,7 @@ async function startMock(
       const event =
         "data: " +
         JSON.stringify({
-          task: taskJson(options.taskState ?? "TASK_STATE_WORKING", {
+          task: task(options.taskState ?? "TASK_STATE_WORKING", {
             internalPhase: "executing",
             phaseMessage: "working",
             publishedStructuredPlan: {
@@ -102,7 +115,7 @@ async function startMock(
     }
     if (request.url === "/a2a/message:send") {
       json(response, {
-        task: taskJson(options.taskState ?? "TASK_STATE_INPUT_REQUIRED", {
+        task: task(options.taskState ?? "TASK_STATE_INPUT_REQUIRED", {
           internalPhase: "awaiting_user_input",
           inputRequestId: "request-1",
           input_request_id: "request-1",
@@ -113,7 +126,7 @@ async function startMock(
     if (request.url === "/a2a/tasks/task-1?historyLength=0") {
       json(
         response,
-        taskJson(
+        task(
           options.taskState ?? "TASK_STATE_COMPLETED",
           {
             internalPhase: "completed",
@@ -126,7 +139,7 @@ async function startMock(
     if (request.url === "/a2a/tasks/task-1:cancel") {
       json(
         response,
-        taskJson(options.taskState ?? "TASK_STATE_CANCELED", {
+        task(options.taskState ?? "TASK_STATE_CANCELED", {
           internalPhase: "canceled",
         }),
       );
@@ -159,6 +172,37 @@ async function connectedClient(): Promise<{
   };
 }
 describe("official SDAR A2A adapter HTTP+JSON contract", () => {
+  it("negotiates JSON-only output without changing binding, authorization or Part validation", async () => {
+    const mock = await startMock({ outputModes: ["application/json"] });
+    const client = await createSdarA2aClient({
+      baseUrl: mock.baseUrl,
+      endpointOverride: mock.endpoint,
+    });
+    const events = [];
+    for await (const event of client.submitTaskStream({
+      messageId: "json-mode-test",
+      text: "fixture only",
+    }))
+      events.push(event);
+    expect(events.length).toBe(1);
+    const result = await client.getTask("task-1", { historyLength: 0 });
+    expect(result.artifacts[0]?.parts).toEqual([
+      { kind: "data", mediaType: "application/json", data: { value: 42 } },
+    ]);
+    expect(client.protocolVersion).toBe("1.0");
+    expect(
+      mock.seen.find((r) => r.url === "/a2a/message:stream")?.body,
+    ).toMatchObject({
+      configuration: { acceptedOutputModes: ["application/json"] },
+    });
+    const unsupported = await startMock({ outputModes: ["image/png"] });
+    await expect(
+      createSdarA2aClient({
+        baseUrl: unsupported.baseUrl,
+        endpointOverride: unsupported.endpoint,
+      }),
+    ).rejects.toThrow("required output modes");
+  });
   it("parses explicit endpoint configuration without implicit rewrites", () => {
     expect(parseSdarA2aConfig({})).toEqual({
       baseUrl: "http://127.0.0.1:9999",
@@ -483,6 +527,7 @@ describe("official SDAR A2A adapter HTTP+JSON contract", () => {
   });
 });
 function agentCard(input: {
+  readonly outputModes?: readonly string[];
   readonly endpoint: string;
   readonly binding: string;
   readonly version: string;
@@ -516,7 +561,7 @@ function agentCard(input: {
       ? [{ schemes: { bearer: { list: [] } } }]
       : [],
     defaultInputModes: ["text/plain"],
-    defaultOutputModes: ["text/plain", "application/json"],
+    defaultOutputModes: input.outputModes ?? ["text/plain", "application/json"],
     skills: [
       {
         id: "mock-workflow",
@@ -538,6 +583,7 @@ function taskJson(
   state: string,
   metadata: Record<string, unknown>,
   withArtifact = false,
+  jsonOnly = false,
 ) {
   return {
     id: "task-1",
@@ -549,7 +595,9 @@ function taskJson(
         contextId: "context-1",
         taskId: "task-1",
         role: "ROLE_AGENT",
-        parts: [{ text: "published status", mediaType: "text/plain" }],
+        parts: jsonOnly
+          ? [{ data: { status: "published" }, mediaType: "application/json" }]
+          : [{ text: "published status", mediaType: "text/plain" }],
       },
       timestamp: "2026-07-18T12:00:00Z",
     },
@@ -560,7 +608,7 @@ function taskJson(
             artifactId: "result",
             name: "result",
             parts: [
-              { text: "done", mediaType: "text/plain" },
+              ...(jsonOnly ? [] : [{ text: "done", mediaType: "text/plain" }]),
               { data: { value: 42 }, mediaType: "application/json" },
             ],
           },

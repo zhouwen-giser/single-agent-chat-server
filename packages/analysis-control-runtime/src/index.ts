@@ -29,6 +29,7 @@ export interface GroundingSourceProposalCommand {
   readonly originalText: string;
   readonly contextMode: "CONTINUE" | "REPLACE";
   readonly analysisSelections?: readonly unknown[];
+  readonly queryScope?: import("../../analysis-contract/src/query-scope.js").QueryScope;
 }
 
 export interface AnalysisCancelCommand {

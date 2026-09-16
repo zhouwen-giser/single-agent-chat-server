@@ -58,6 +58,11 @@ import { installGracefulShutdown } from "./shutdown.js";
 let persistence: PersistenceRuntime | undefined;
 try {
   const config = loadServerConfig();
+  if (config.authMode === "development-anonymous") {
+    process.stderr.write(
+      "WARNING: shared anonymous development identity; all reachable clients can operate SDAR tasks. Not for public or multi-tenant deployment.\n",
+    );
+  }
   const telemetry = new SecureTelemetry();
   persistence = await setupPersistence(
     parsePersistenceConfig(process.env),

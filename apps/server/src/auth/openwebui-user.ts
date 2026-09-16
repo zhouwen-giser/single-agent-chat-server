@@ -40,6 +40,7 @@ declare module "fastify" {
 }
 
 export function createOpenWebUiUserAuthenticator(input: {
+  readonly authMode?: "authenticated" | "development-anonymous";
   readonly secret: string;
   readonly now?: () => number;
   readonly maximumLifetimeSeconds?: number;
@@ -52,6 +53,16 @@ export function createOpenWebUiUserAuthenticator(input: {
     request: FastifyRequest,
     reply: FastifyReply,
   ): Promise<void> => {
+    if (input.authMode === "development-anonymous") {
+      const nowSeconds = Math.floor(now() / 1000);
+      request.openWebUiIdentity = {
+        userId: "sacs-development-shared",
+        role: "user",
+        issuedAt: nowSeconds,
+        expiresAt: nowSeconds + maximumLifetimeSeconds,
+      };
+      return;
+    }
     const token = request.headers["x-openwebui-user-jwt"];
     const identity =
       typeof token === "string"

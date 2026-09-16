@@ -1,5 +1,11 @@
 import { mapLayerDescriptorSchema } from "../../analysis-contract/src/index.js";
 import {
+  buildFrozenViewLinkage,
+  type FrozenViewLinkage,
+  type PublishedFeatureRelation,
+  type PublishedTimelineRelation,
+} from "./frozen-focus-links.js";
+import {
   parseGroundingContractIdentity,
   sourceStatusMapping,
   type AnalysisSourceSnapshot,
@@ -36,6 +42,7 @@ export interface FrozenChoiceView {
   enabled: boolean;
   selector: AnalysisSelection;
   sourceFindingId?: string;
+  sourceEventId?: string;
 }
 export interface FrozenTimelineItem extends WorldAnalysisTimelineItem {
   findingId: string;
@@ -49,6 +56,7 @@ export interface FrozenAnalysisView extends Omit<
   WorldAnalysisViewModel,
   "choices" | "actionTargets"
 > {
+  linkage: FrozenViewLinkage;
   choices: FrozenChoiceView[];
   actionTargets: Action[];
   evidenceLinks: {
@@ -114,6 +122,14 @@ export function normalizeFrozenAnalysis(input: {
     actionTargets: [],
     evidenceItemIds: [],
     evidenceLinks: [],
+    linkage: {
+      features: [],
+      findings: [],
+      timeline: [],
+      choices: [],
+      evidence: [],
+      sourceProducts: [],
+    },
     typedGaps: [],
     warnings: snapshot.observationReasonCode
       ? [snapshot.observationReasonCode]
@@ -150,43 +166,62 @@ export function normalizeFrozenAnalysis(input: {
   view.typedGaps = world.gaps.map(json);
   view.warnings.push(...result.warnings);
   view.evidenceItemIds = result.evidenceItems.map((e) => e.evidenceProductId);
+  const featureRelations: PublishedFeatureRelation[] = [];
+  const timelineRelations: PublishedTimelineRelation[] = [];
   const layer = (
     f: { findingId: string; semanticConcept: string },
     suffix: string,
     position: Point | JsonObject,
     title?: string,
+    relationKey: string = suffix,
+    relationKind: PublishedFeatureRelation["relationKind"] = "FINDING",
   ) => {
     if (view.map.layers.length >= limits.maxMapLayers) {
       limited("MAP_LAYER_LIMIT");
       return;
     }
-    view.map.layers.push(
-      mapLayerDescriptorSchema.parse({
-        schemaVersion: "sacs-map-layer/1.0",
-        layerId:
-          "layer-" +
-          publicCanonicalHash({
-            groundingId: result.groundingId,
-            findingId: f.findingId,
-            suffix,
-          }).slice(7, 39),
-        title: title ?? f.semanticConcept,
-        role: "FINAL_FINDING",
-        representation: "INLINE_GEOJSON",
-        access: { kind: "INLINE_GEOJSON", data: json(position) },
-        sourceAuthority: "WSGS",
-        visibleByDefault: true,
-        selectable: true,
-        editable: false,
-        analysisId: input.analysisId,
-        revisionId: input.revisionId,
-        findingIds: [f.findingId],
-        loadStatus: "READY",
-        relevanceStatus: "ACTIVE",
-        currentness: "UNKNOWN",
-        styleToken: "finding.primary",
-      }),
-    );
+    const descriptor = mapLayerDescriptorSchema.parse({
+      schemaVersion: "sacs-map-layer/1.0",
+      layerId:
+        "layer-" +
+        publicCanonicalHash({
+          groundingId: result.groundingId,
+          findingId: f.findingId,
+          suffix,
+          relationKind,
+        }).slice(7, 39),
+      title: title ?? f.semanticConcept,
+      role: "FINAL_FINDING",
+      representation: "INLINE_GEOJSON",
+      access: { kind: "INLINE_GEOJSON", data: json(position) },
+      sourceAuthority: "WSGS",
+      visibleByDefault: true,
+      selectable: true,
+      editable: false,
+      analysisId: input.analysisId,
+      revisionId: input.revisionId,
+      findingIds: [f.findingId],
+      loadStatus: "READY",
+      relevanceStatus: "ACTIVE",
+      currentness: "UNKNOWN",
+      styleToken: "finding.primary",
+    });
+    if (view.map.layers.some((l) => l.layerId === descriptor.layerId)) return;
+    view.map.layers.push(descriptor);
+    featureRelations.push({
+      findingId: f.findingId,
+      layerId: descriptor.layerId,
+      featureId:
+        "feature-" +
+        publicCanonicalHash({
+          groundingId: result.groundingId,
+          findingId: f.findingId,
+          suffix,
+          relationKind,
+        }).slice(7),
+      relationKey,
+      relationKind,
+    });
   };
   const limited = (code: string) => {
     if (!view.typedGaps.some((g) => g["messageCode"] === code))
@@ -210,7 +245,10 @@ export function normalizeFrozenAnalysis(input: {
     const item: FrozenTimelineItem = {
       itemId:
         "time-" +
-        publicCanonicalHash({ findingId: f.findingId, suffix }).slice(7, 39),
+        publicCanonicalHash({ findingId: f.findingId, kind, suffix }).slice(
+          7,
+          39,
+        ),
       kind,
       sourceId: "wsgs",
       ...range,
@@ -219,7 +257,21 @@ export function normalizeFrozenAnalysis(input: {
       resultHash: result.resultHash,
       ...extra,
     };
+    if (view.timeline.items.some((t) => t.itemId === item.itemId)) return;
     view.timeline.items.push(item);
+    timelineRelations.push({
+      itemId: item.itemId,
+      findingId: f.findingId,
+      relationKey: suffix,
+      relationKind:
+        kind === "ROAD_VISIT" || kind === "OFF_NETWORK"
+          ? kind
+          : kind === "INSTANT_EVENT" || kind === "INTERVAL_EVENT"
+            ? "TEMPORAL_EVENT"
+            : kind === "METRIC_OBSERVATION"
+              ? "METRIC_CANDIDATE"
+              : "PERIOD",
+    });
   };
   for (const f of world.findings) {
     view.warnings.push(...f.warnings, ...f.unknowns);
@@ -258,16 +310,24 @@ export function normalizeFrozenAnalysis(input: {
           ["paused", "PAUSED_EXCLUDED", f.pausedPeriods],
           ["defined", "TRAJECTORY_DEFINED", f.definedPeriods],
         ] as const)
-          ranges.forEach((range, i) =>
-            timeline(f, kind, range, `${role}-${i}`, { periodRole: role }),
+          ranges.forEach((range) =>
+            timeline(f, kind, range, `${role}-${publicCanonicalHash(range)}`, {
+              periodRole: role,
+            }),
           );
-        f.excludedPeriods.forEach((p, i) =>
-          timeline(f, "PAUSED_EXCLUDED", p.period, `excluded-${i}`, {
-            periodRole: "excluded",
-          }),
+        f.excludedPeriods.forEach((p) =>
+          timeline(
+            f,
+            "PAUSED_EXCLUDED",
+            p.period,
+            `excluded-${publicCanonicalHash(p)}`,
+            {
+              periodRole: "excluded",
+            },
+          ),
         );
-        f.trajectoryGaps.forEach((p, i) =>
-          timeline(f, "DATA_GAP", p.period, `gap-${i}`),
+        f.trajectoryGaps.forEach((p) =>
+          timeline(f, "DATA_GAP", p.period, `gap-${publicCanonicalHash(p)}`),
         );
         qualifiers.push(
           `${f.findingId}：封存状态 ${f.coverage.finalizationState ?? "未知"} 不代表全部历史数据完整；不跨 Gap 插值连线。`,
@@ -284,32 +344,60 @@ export function normalizeFrozenAnalysis(input: {
           );
           timeline(f, "ROAD_VISIT", visit.period, visit.visitId);
           if (visit.entryPosition)
-            layer(f, visit.visitId + "-entry", visit.entryPosition);
+            layer(
+              f,
+              visit.visitId + "-entry",
+              visit.entryPosition,
+              undefined,
+              visit.visitId,
+              "ROAD_VISIT",
+            );
           if (visit.exitPosition)
-            layer(f, visit.visitId + "-exit", visit.exitPosition);
+            layer(
+              f,
+              visit.visitId + "-exit",
+              visit.exitPosition,
+              undefined,
+              visit.visitId,
+              "ROAD_VISIT",
+            );
         }
         for (const segment of f.offNetworkSegments) {
           timeline(f, "OFF_NETWORK", segment.period, segment.segmentId);
           facts.push(
             `${f.findingId}：离网解释 ${segment.interpretationHint}。`,
           );
-          segment.pathPreview?.forEach((p, i) =>
+          if (segment.pathPreview?.length)
             layer(
               f,
-              `${segment.segmentId}-preview-${i}`,
-              p,
+              `${segment.segmentId}-preview`,
+              {
+                type: "MultiPoint",
+                coordinates: segment.pathPreview.map((p) => p.coordinates),
+              },
               "稀疏历史预览（非导航路线）",
-            ),
-          );
+              segment.segmentId,
+              "OFF_NETWORK",
+            );
         }
         f.ambiguousSegments.forEach((s) =>
           timeline(f, "AMBIGUITY", s.period, s.segmentId),
         );
-        f.networkDataIssues.forEach((p, i) =>
-          timeline(f, "QUALITY_BREAK", p.period, `quality-${i}`),
+        f.networkDataIssues.forEach((p) =>
+          timeline(
+            f,
+            "QUALITY_BREAK",
+            p.period,
+            `quality-${publicCanonicalHash(p)}`,
+          ),
         );
-        f.blockingPeriods.forEach((p, i) =>
-          timeline(f, "DATA_GAP", p.period, `blocking-${i}`),
+        f.blockingPeriods.forEach((p) =>
+          timeline(
+            f,
+            "DATA_GAP",
+            p.period,
+            `blocking-${publicCanonicalHash(p)}`,
+          ),
         );
         if (f.lastConfirmedRoad)
           facts.push(
@@ -335,17 +423,35 @@ export function normalizeFrozenAnalysis(input: {
           facts.push(
             `${f.findingId} / ${event.eventId}：${event.eventType}，${range.start} 至 ${range.end} ${range.bounds}；${event.certainty}。`,
           );
-          if (event.position) layer(f, event.eventId, event.position);
+          if (event.position)
+            layer(
+              f,
+              event.eventId,
+              event.position,
+              undefined,
+              event.eventId,
+              "TEMPORAL_EVENT",
+            );
         }
         if (f.selection)
           facts.push(
             `${f.findingId}：${f.selection.kind} confirmed=${f.selection.confirmed}；${f.selection.confirmationScope}；${f.selection.reasonCode}。`,
           );
-        f.blockingPeriods.forEach((p, i) =>
-          timeline(f, "DATA_GAP", p.period, `blocking-${i}`),
+        f.blockingPeriods.forEach((p) =>
+          timeline(
+            f,
+            "DATA_GAP",
+            p.period,
+            `blocking-${publicCanonicalHash(p)}`,
+          ),
         );
-        f.selection?.blockingPeriods.forEach((p, i) =>
-          timeline(f, "DATA_GAP", p.period, `selection-blocking-${i}`),
+        f.selection?.blockingPeriods.forEach((p) =>
+          timeline(
+            f,
+            "DATA_GAP",
+            p.period,
+            `selection-blocking-${publicCanonicalHash(p)}`,
+          ),
         );
         break;
       }
@@ -361,6 +467,8 @@ export function normalizeFrozenAnalysis(input: {
             candidate.candidateId,
             candidate.representativeVisitedPosition,
             `历史访问样本：排名 ${candidate.rank}`,
+            candidate.candidateId,
+            "METRIC_CANDIDATE",
           );
           timeline(
             f,
@@ -372,11 +480,16 @@ export function normalizeFrozenAnalysis(input: {
         qualifiers.push(
           `${f.findingId}：仅历史已观察位置；metricTemporalCompletenessKnown=false，不代表最佳可达位置或完整时段。`,
         );
-        f.coverage.trajectoryGaps.forEach((p, i) =>
-          timeline(f, "DATA_GAP", p.period, `gap-${i}`),
+        f.coverage.trajectoryGaps.forEach((p) =>
+          timeline(f, "DATA_GAP", p.period, `gap-${publicCanonicalHash(p)}`),
         );
-        f.coverage.excludedPeriods.forEach((p, i) =>
-          timeline(f, "PAUSED_EXCLUDED", p.period, `excluded-${i}`),
+        f.coverage.excludedPeriods.forEach((p) =>
+          timeline(
+            f,
+            "PAUSED_EXCLUDED",
+            p.period,
+            `excluded-${publicCanonicalHash(p)}`,
+          ),
         );
         break;
       }
@@ -406,9 +519,12 @@ export function normalizeFrozenAnalysis(input: {
         displayName: candidate.displayName,
         validUntil: choice.validUntil,
         enabled: (input.now?.() ?? Date.now()) < Date.parse(choice.validUntil),
-        ...(choice.sourceFindingId
-          ? { sourceFindingId: choice.sourceFindingId }
-          : {}),
+        ...("findingId" in candidate
+          ? { sourceFindingId: candidate.findingId }
+          : choice.sourceFindingId
+            ? { sourceFindingId: choice.sourceFindingId }
+            : {}),
+        ...("eventId" in candidate ? { sourceEventId: candidate.eventId } : {}),
         ...("referenceProductId" in candidate
           ? { productId: candidate.referenceProductId }
           : {}),
@@ -437,13 +553,15 @@ export function normalizeFrozenAnalysis(input: {
         layer(f, "published-point", json(f.point));
       }
       if (f.findingKind === "SPATIAL_FEATURE_COLLECTION")
-        for (const [i, feature] of f.features.entries())
+        for (const feature of f.features)
           if (feature.geometry)
             layer(
               f,
-              `feature-${i}`,
+              `feature-${feature.featureId}`,
               json(feature.geometry),
               "已发布空间预览（非导航路线）",
+              feature.featureId,
+              "SPATIAL_FEATURE",
             );
     }
   }
@@ -478,7 +596,15 @@ export function normalizeFrozenAnalysis(input: {
     .slice(0, 16000);
   // View budget is independent of wire validation. Full authoritative result remains in storage.
   const budget = Math.max(16384, limits.maxSafePayloadBytes);
-  while (Buffer.byteLength(JSON.stringify(view), "utf8") > budget) {
+  const measureView = () => {
+    view.linkage = buildFrozenViewLinkage(
+      view,
+      featureRelations,
+      timelineRelations,
+    );
+    return Buffer.byteLength(JSON.stringify(view), "utf8");
+  };
+  while (measureView() > budget) {
     limited("VIEW_BYTE_LIMIT");
     if (view.findings.length) {
       view.findings.pop();

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "sacs-agui-grounding-baseline/1.0",
+  "branch": "codex/sacs-v0.6-wsgs-full-functional-integration",
+  "sourceSha": "4916a92bebbdb1d83dfe35c070cdedf711e54da2",
+  "localMerge": "Fast-forward of codex/sacs-development-deployment; both branches at the same commit; no history rewritten or branches deleted.",
+  "packageDirectory": "config/v0.6/SACS_AGUI_V03_GROUNDING_CODEX_GOAL",
+  "packageZipSha256": "c67ee138394cb72bad3445c6c09fc99ac04b776eeeff40ba6fb4fe0f8c815ac1",
+  "frozenWsgsContract": "sacs-wsgs-grounding/1.2",
+  "businessBudgetMs": 120000,
+  "verification": "PASS",
+  "receipt": "receipts/baseline-0816cb1f-7b01-4c9e-a7e8-d5ac7918e1b0.json",
+  "verifiedCounts": {
+    "frozenRegression": 522,
+    "postgres": 14,
+    "httpSseE2e": 2,
+    "migrations": 20,
+    "lintErrors": 0
+  },
+  "previousAttempt": {
+    "typecheck": "PASS",
+    "frozenRegression": "42 suites / 522 tests PASS",
+    "postgres": "FAILED: postgres:17-alpine absent; Docker pull exceeded harness startup timeout before tests ran",
+    "remainingCommands": "NOT_RUN",
+    "recovery": "Use supported SACS_V05_POSTGRES_IMAGE override with existing postgres:17.10-alpine3.23 in fresh isolated containers; no shared database access"
+  },
+  "nonGoals": [
+    "No shared deployment changes",
+    "No upstream repositories or databases",
+    "No device execution",
+    "No main merge, force push, tags or release",
+    "No promotion of historical acceptance ledgers"
+  ]
+}
