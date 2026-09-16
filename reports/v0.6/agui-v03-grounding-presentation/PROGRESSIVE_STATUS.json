@@ -55,7 +55,15 @@
         "S05.md"
       ]
     },
-    { "id": "S06", "status": "NOT_RUN", "evidence": [] },
+    {
+      "id": "S06",
+      "status": "PASS",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "evidence": [
+        "receipts/S06-f7350b6d-a42e-4875-b440-05c0ea6c9a6c.json",
+        "S06.md"
+      ]
+    },
     { "id": "S07", "status": "NOT_RUN", "evidence": [] }
   ],
   "completionMarkers": []

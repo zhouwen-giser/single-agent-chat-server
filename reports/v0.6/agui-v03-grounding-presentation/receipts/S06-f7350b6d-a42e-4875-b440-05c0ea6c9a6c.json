@@ -1,0 +1,93 @@
+{
+  "kind": "phase-development-regression",
+  "phase": "S06",
+  "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+  "sourceUnchanged": true,
+  "postgresImage": "postgres:17.10-alpine3.23",
+  "requiredCommands": [
+    "pnpm typecheck",
+    "pnpm test:v06:frozen-wsgs",
+    "pnpm test:v06:postgres",
+    "pnpm test:v06:local-e2e",
+    "pnpm test:v05:local-e2e",
+    "pnpm verify:migrations",
+    "pnpm verify:architecture",
+    "pnpm lint",
+    "pnpm build"
+  ],
+  "status": "PASS",
+  "commands": [
+    {
+      "command": "pnpm typecheck",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "startedAt": "2026-09-16T15:10:04.228Z",
+      "finishedAt": "2026-09-16T15:10:12.989Z",
+      "exitCode": 0,
+      "outputSha256": "38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "command": "pnpm test:v06:frozen-wsgs",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "startedAt": "2026-09-16T15:10:12.989Z",
+      "finishedAt": "2026-09-16T15:12:44.904Z",
+      "exitCode": 0,
+      "outputSha256": "0f7fe235e3969c621e125453353c849aea9cbfcbe0bbd52c4e1c5cb4cb95f4a6"
+    },
+    {
+      "command": "pnpm test:v06:postgres",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "startedAt": "2026-09-16T15:12:44.904Z",
+      "finishedAt": "2026-09-16T15:12:53.957Z",
+      "exitCode": 0,
+      "outputSha256": "64ed88edf4e1b746cfa40bb199372f525824cf96726d5e1c30a223a1c192729d"
+    },
+    {
+      "command": "pnpm test:v06:local-e2e",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "startedAt": "2026-09-16T15:12:53.957Z",
+      "finishedAt": "2026-09-16T15:12:58.807Z",
+      "exitCode": 0,
+      "outputSha256": "5da670444ae0da015106718abe4037f607e9ea3256ae4df3cd67b5bef9ff8731"
+    },
+    {
+      "command": "pnpm test:v05:local-e2e",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "startedAt": "2026-09-16T15:12:58.807Z",
+      "finishedAt": "2026-09-16T15:13:03.955Z",
+      "exitCode": 0,
+      "outputSha256": "4258ecb7ae023a3e55590a3f85bfb65e3b74d9a066cf826af6d9dbe0a91c22f6"
+    },
+    {
+      "command": "pnpm verify:migrations",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "startedAt": "2026-09-16T15:13:03.955Z",
+      "finishedAt": "2026-09-16T15:13:04.491Z",
+      "exitCode": 0,
+      "outputSha256": "4b002fccc37372319f567929e88c0532fa6eee3674e049135bd3a0970f212589"
+    },
+    {
+      "command": "pnpm verify:architecture",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "startedAt": "2026-09-16T15:13:04.491Z",
+      "finishedAt": "2026-09-16T15:13:05.067Z",
+      "exitCode": 0,
+      "outputSha256": "5fb6c1c25d557fa374d0fc2fded0fead67c4c6d8be9a38a5d0191f1dd40c627b"
+    },
+    {
+      "command": "pnpm lint",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "startedAt": "2026-09-16T15:13:05.067Z",
+      "finishedAt": "2026-09-16T15:13:12.593Z",
+      "exitCode": 0,
+      "outputSha256": "611779bb8835bd18577d93af00157b219f23e7ffbce334dd0d80c73829394ab3"
+    },
+    {
+      "command": "pnpm build",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "startedAt": "2026-09-16T15:13:12.593Z",
+      "finishedAt": "2026-09-16T15:13:22.306Z",
+      "exitCode": 0,
+      "outputSha256": "9ac32db1b695c5626225d4375b635275f33903c7d128a1aa3ee611cef8d8e9fb"
+    }
+  ]
+}

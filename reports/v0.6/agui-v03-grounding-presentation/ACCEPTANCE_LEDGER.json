@@ -43,9 +43,36 @@
         "tests/v06-frozen-local-map.unit.test.ts: local action matrix and snapshot visibility tests"
       ]
     },
-    { "id": "G08", "status": "NOT_RUN", "evidence": [] },
-    { "id": "G09", "status": "NOT_RUN", "evidence": [] },
-    { "id": "G10", "status": "NOT_RUN", "evidence": [] },
+    {
+      "id": "G08",
+      "status": "PASS",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "evidence": [
+        "receipts/S06-f7350b6d-a42e-4875-b440-05c0ea6c9a6c.json",
+        "tests/v06-frozen-recovery.unit.test.ts: stale Revision, State and Activity rejection",
+        "tests/v06-frozen-entry.integration.test.ts: G04 stale selection rejection"
+      ]
+    },
+    {
+      "id": "G09",
+      "status": "PASS",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "evidence": [
+        "receipts/S06-f7350b6d-a42e-4875-b440-05c0ea6c9a6c.json",
+        "tests/v06-frozen-entry.integration.test.ts: G09 nonterminal disconnect and composition reconnect",
+        "tests/v06-frozen-recovery.unit.test.ts: G09 stale transport generation"
+      ]
+    },
+    {
+      "id": "G10",
+      "status": "PASS",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "evidence": [
+        "receipts/S06-f7350b6d-a42e-4875-b440-05c0ea6c9a6c.json",
+        "tests/v06-grounding-lifecycle.postgres.int.test.ts: cancellation uncertainty then authoritative CANCELLED",
+        "tests/v06-frozen-recovery.unit.test.ts: G10 pending cancellation and terminal guard"
+      ]
+    },
     { "id": "G11", "status": "NOT_RUN", "evidence": [] },
     { "id": "G12", "status": "NOT_RUN", "evidence": [] },
     { "id": "R01", "status": "NOT_RUN", "evidence": [] },

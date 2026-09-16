@@ -26,4 +26,6 @@ S03 CI correction and S04 full CI are confirmed successful, including quality an
 
 S05 passed at `43b0785`: validated local query scopes now submit explicitly through normal Source Query/Control into a new Revision/Grounding, with exact public MapSelection geometry/hash, CONTINUE/REPLACE, generation/Revision fences and idempotency conflict checks. G06 is directly verified. The phase gate passed 602 frozen tests, 14 PostgreSQL tests and 10 HTTP/SSE E2E tests. See `S05.md` and the reference-client API guide; schema acceptance of opaque geometry is not a claim of live spatial operation support.
 
-Remaining: S06 recovery/concurrency hardening, S07 complete local and real-source acceptance. A fresh read-only capabilities check showed exact 1.2 and six available capabilities, but no new real business request has been submitted. No final completion marker is emitted.
+S06 passed at `1c627ee`: stale State/Activity and disconnected observer guards, explicit full-snapshot recovery, duplicate suppression and authoritative cancellation. G08–G10 are directly verified at the development scope described in `S06.md`. Nine gates passed with 623 frozen tests, 14 PostgreSQL tests and 10 older HTTP/SSE E2E tests. S05 full remote CI also passed; see `CI_S05.json`.
+
+Remaining: S07 complete local and real-source acceptance. A fresh read-only capabilities check showed exact 1.2 and six available capabilities, but no new real business request has been submitted. No final completion marker is emitted.
