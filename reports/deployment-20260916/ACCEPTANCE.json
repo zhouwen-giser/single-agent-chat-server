@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-16T08:36:15.516Z",
+  "package": {
+    "sourceSha": "0642f2cdf706726915d84101f2dd1583a012a629",
+    "image": "single-agent-chat-server:0.6.0-0642f2cdf706",
+    "imageId": "sha256:059bd0f5b74832ad415273fdb1e4d0b61d97737cbdc1a042a7e065365b1fb25e",
+    "postgresImage": "postgres:16.9-alpine",
+    "postgresImageId": "sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7",
+    "archiveSha256": "ad897c9ee85bea03c528c4d19ce1fad716cda3ff180469c6c605dcadd50bf070",
+    "checksumGate": "PASS",
+    "privateFilesAbsent": true
+  },
+  "deployment": {
+    "endpoint": "http://17.26.1.20:18083",
+    "status": "READY",
+    "release": "/mnt/data/sacs-live/releases/e54c1c0b06a4cf56",
+    "containers": [
+      {
+        "name": "sacs-dev-server-1",
+        "id": "0f54e43adae614f6ea77bd65e9b14106bb52b6914f6b54d747b5c395c7ebf515",
+        "image": "sha256:059bd0f5b74832ad415273fdb1e4d0b61d97737cbdc1a042a7e065365b1fb25e",
+        "startedAt": "2026-09-16T08:34:35.053238124Z",
+        "state": "running",
+        "health": "healthy",
+        "ports": {
+          "3000/tcp": [
+            {
+              "HostIp": "17.26.1.20",
+              "HostPort": "18083"
+            }
+          ]
+        },
+        "networks": ["sacs-dev_backend", "sacs-dev_outbound"]
+      },
+      {
+        "name": "sacs-dev-postgres-1",
+        "id": "219ca64b65f589ea890646e6e73c8600cb402a31c7af512efd5e16e256687e63",
+        "image": "sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7",
+        "startedAt": "2026-09-16T08:19:33.536881684Z",
+        "state": "running",
+        "health": "healthy",
+        "ports": {
+          "5432/tcp": null
+        },
+        "networks": ["sacs-dev_backend"]
+      }
+    ],
+    "configuration": {
+      "SACS_AUTH_MODE": "development-anonymous",
+      "SACS_ALLOW_INSECURE_ANONYMOUS": "true",
+      "CONVERSATION_MODEL_NAME": "kimi-k3",
+      "CONVERSATION_MODEL_TIMEOUT_MS": "120000",
+      "WSGS_BASE_URL": "http://17.26.1.20:18082",
+      "WSGS_OPERATION_TIMEOUT_MS": "120000",
+      "SACS_WSGS_ANALYSIS_ENABLED": "true",
+      "SACS_WSGS_ANALYSIS_MAX_WAIT_MS": "120000",
+      "SDAR_A2A_BASE_URL": "http://17.26.1.20:10999",
+      "CHAT_SERVER_REQUEST_TIMEOUT_MS": "120000",
+      "databaseDedicated": true
+    },
+    "privateModes": [
+      {
+        "file": "runtime.json",
+        "mode": "0o600",
+        "unchanged": true
+      },
+      {
+        "file": "runtime.env",
+        "mode": "0o600",
+        "unchanged": true
+      },
+      {
+        "file": "postgres.env",
+        "mode": "0o600",
+        "unchanged": true
+      }
+    ],
+    "sharedContainerCount": 65,
+    "sharedChanged": []
+  },
+  "database": {
+    "counts": {
+      "schema_migrations": 20,
+      "conversation_message": 3,
+      "conversation_task_binding": 0,
+      "analysis_session": 1,
+      "analysis_projection": 1,
+      "grounding_execution": 1
+    },
+    "migrationSetHash": "b38cd92bc4a47f03e567364a7cba24afad788b2b435bc09bd1f89a8f512b4e3e",
+    "conversationHash": "150f706061d9451cc0f4febcb60e1c6a0398e57a6be1ed815104d80093aa4eae",
+    "backupCount": 3,
+    "backupsNonempty": true
+  },
+  "acceptance": {
+    "chat": {
+      "mode": "chat",
+      "startedAt": "2026-09-16T08:20:15.830Z",
+      "businessPostCount": 1,
+      "httpStatus": 200,
+      "responseHash": "sha256:24874d205bb594610201fc2a3e8e67c429a56a0304272bc8fe6b968db4dec4c1",
+      "textLength": 21,
+      "status": "PASS",
+      "finishedAt": "2026-09-16T08:20:26.634Z"
+    },
+    "history": {
+      "mode": "history",
+      "startedAt": "2026-09-16T08:30:52.209Z",
+      "businessPostCount": 1,
+      "inputMode": "public-context-discovery-no-invented-identifiers",
+      "inputHash": "sha256:c30fa9db6699f2e2d760da74ea37f37c9c4d21c8eaeecf0fb30ff92fa3946e47",
+      "httpStatus": 200,
+      "wireHash": "sha256:f9c2f3fc510e1f1bcd2ceddcda37e4ae58af2684f338c5b8f022dc3feb591195",
+      "eventTypes": [
+        "RUN_STARTED",
+        "STEP_STARTED",
+        "STATE_SNAPSHOT",
+        "ACTIVITY_SNAPSHOT",
+        "STEP_FINISHED",
+        "TEXT_MESSAGE_START",
+        "TEXT_MESSAGE_CONTENT",
+        "TEXT_MESSAGE_END",
+        "RUN_FINISHED"
+      ],
+      "runErrorCodes": [],
+      "projectionHash": "sha256:dbd1a247563680568d83a58c0968929c3eb4636e7d6a95749eed94bb84619f9f",
+      "businessStatus": "UNRESOLVED",
+      "analysisIdHash": "sha256:9d7cc8b07db1916fcc93b4a8c258a55ad218afc4446c4804205886e96eab94e4",
+      "worldExplanationKeys": [
+        "map",
+        "runId",
+        "source",
+        "status",
+        "choices",
+        "summary",
+        "findings",
+        "timeline",
+        "warnings",
+        "typedGaps",
+        "analysisId",
+        "revisionId",
+        "currentness",
+        "groundingId",
+        "actionTargets",
+        "evidenceLinks",
+        "schemaVersion",
+        "sourceProducts",
+        "evidenceItemIds"
+      ],
+      "mapLayerCount": 0,
+      "timelineKeys": ["schemaVersion", "items", "sources"],
+      "findingCount": 0,
+      "findingKinds": [],
+      "findingStatuses": [],
+      "gapKinds": ["TASK_CONTEXT_REQUIRED"],
+      "timelineCount": 0,
+      "resultHash": "sha256:3f6d6bfd39dee3776e483fa33cc7a2e6fd6cd868815b0f152ce5a96a11866115",
+      "sourceHttpStatus": 200,
+      "sourceStatus": "UNRESOLVED",
+      "sourceGroundingIdHash": "sha256:a0b2e91a0e3567ac01eddab004366df3ac2cfb2276eaf9ccb2feda0089560d65",
+      "sourceResultHash": "sha256:3f6d6bfd39dee3776e483fa33cc7a2e6fd6cd868815b0f152ce5a96a11866115",
+      "sourceFindingCount": 0,
+      "sourceMatchesProjection": true,
+      "mapFindingLinksValid": true,
+      "timelineFindingLinksValid": true,
+      "summaryPresent": true,
+      "status": "OBSERVED",
+      "finishedAt": "2026-09-16T08:31:55.502Z"
+    },
+    "snapshot": {
+      "mode": "snapshot",
+      "startedAt": "2026-09-16T08:32:43.735Z",
+      "businessPostCount": 0,
+      "httpStatus": 200,
+      "responseHash": "sha256:958259043540d4a85b0c36df564f82019701d7e31787c44ba7bbc86d4a93b796",
+      "projectionHash": "sha256:dbd1a247563680568d83a58c0968929c3eb4636e7d6a95749eed94bb84619f9f",
+      "topLevelKeys": [
+        "schemaVersion",
+        "meta",
+        "conversation",
+        "analysis",
+        "map",
+        "timeline",
+        "proposalsById",
+        "worldExplanation"
+      ],
+      "status": "PASS",
+      "finishedAt": "2026-09-16T08:32:43.828Z"
+    },
+    "restored": {
+      "mode": "restored",
+      "startedAt": "2026-09-16T08:33:00.284Z",
+      "businessPostCount": 0,
+      "httpStatus": 200,
+      "responseHash": "sha256:958259043540d4a85b0c36df564f82019701d7e31787c44ba7bbc86d4a93b796",
+      "projectionHash": "sha256:dbd1a247563680568d83a58c0968929c3eb4636e7d6a95749eed94bb84619f9f",
+      "topLevelKeys": [
+        "schemaVersion",
+        "meta",
+        "conversation",
+        "analysis",
+        "map",
+        "timeline",
+        "proposalsById",
+        "worldExplanation"
+      ],
+      "status": "PASS",
+      "finishedAt": "2026-09-16T08:33:00.372Z"
+    },
+    "snapshot-final": {
+      "mode": "snapshot-final",
+      "startedAt": "2026-09-16T08:35:32.426Z",
+      "businessPostCount": 0,
+      "httpStatus": 200,
+      "responseHash": "sha256:958259043540d4a85b0c36df564f82019701d7e31787c44ba7bbc86d4a93b796",
+      "projectionHash": "sha256:dbd1a247563680568d83a58c0968929c3eb4636e7d6a95749eed94bb84619f9f",
+      "topLevelKeys": [
+        "schemaVersion",
+        "meta",
+        "conversation",
+        "analysis",
+        "map",
+        "timeline",
+        "proposalsById",
+        "worldExplanation"
+      ],
+      "status": "PASS",
+      "finishedAt": "2026-09-16T08:35:32.488Z"
+    }
+  },
+  "assertions": {
+    "migrationAndConversationHashesPreserved": true,
+    "tableCountsPreservedAcrossRestartRollbackAndReinstall": true,
+    "snapshotHashesIdentical": true,
+    "noSdarTaskBinding": true,
+    "historyPositiveAcceptance": "BLOCKED_TASK_CONTEXT_REQUIRED",
+    "emptyMapAndTimelineNotPositiveAcceptance": true
+  },
+  "operations": {
+    "firstInstall": "PASS",
+    "updates": "PASS",
+    "samePackageReinstall": "PASS",
+    "applicationRollbackAndRestore": "PASS",
+    "databaseDowngrade": false,
+    "upstreamServiceMutations": false,
+    "businessPostCount": 2,
+    "automaticBusinessRetryCount": 0,
+    "deviceExecution": "NOT_RUN",
+    "completeV06Acceptance": "NOT_CLAIMED"
+  },
+  "checks": {
+    "localFullCiExitCode": 0,
+    "installerRegressionTests": 5,
+    "applicationSourceCiRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/35072942873",
+    "applicationSourceCi": "PASS",
+    "finalPackageSourceCi": "PASS",
+    "finalPackageSourceCiRun": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/35073918656"
+  },
+  "commands": [
+    {
+      "command": "pnpm package:development",
+      "exitCode": 0
+    },
+    {
+      "command": "sha256sum -c sacs-development.tar.gz.sha256",
+      "exitCode": 0
+    },
+    {
+      "command": "bash sacs-development/deploy.sh install",
+      "exitCode": 0
+    },
+    {
+      "command": "bash sacs-development/deploy.sh rollback (twice, restore final)",
+      "exitCode": 0
+    },
+    {
+      "command": "docker restart sacs-dev-server-1",
+      "exitCode": 0
+    },
+    {
+      "command": "node .tmp/run-deployment-ci.mjs .tmp/deployment-ci-final.log",
+      "exitCode": 0
+    }
+  ]
+}
