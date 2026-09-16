@@ -1,4 +1,5 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
+import { parseServerConfig } from "../../apps/server/src/config.js";
 import {
   HeadlessAnalysisReferenceClient,
   HeadlessMapEngineAdapter,
@@ -23,6 +24,18 @@ const equal = (left: unknown, right: unknown) =>
   publicCanonicalHash(JSON.parse(JSON.stringify(right)));
 const hash = (value: string) =>
   "sha256:" + createHash("sha256").update(value).digest("hex");
+
+/** Isolated authenticated test service; keep the normal cross-protocol key rule. */
+export function createAcceptanceServerConfig(agUiSecret: string) {
+  return parseServerConfig({
+    CHAT_SERVER_SERVICE_KEY: randomBytes(32).toString("hex"),
+    AG_UI_SERVICE_KEY: agUiSecret,
+    OPENWEBUI_USER_JWT_SECRET: agUiSecret,
+    CHAT_SERVER_REQUEST_TIMEOUT_MS: "120000",
+    CHAT_HTTP_STREAM_BUDGET_MS: "120000",
+    LOG_LEVEL: "silent",
+  });
+}
 
 /** Shared development/live oracle. No network or files; never returns raw content in summary. */
 export async function verifyGroundingObservation(

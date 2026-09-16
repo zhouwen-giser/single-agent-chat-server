@@ -154,7 +154,7 @@ try {
   evidence.stage = "PREFLIGHT";
   const { FrozenWorldAnalysisContract, verifyFrozenWorldAnalysis } =
     await import("../dist/packages/wsgs-geospatial-consumer/src/frozen-world-analysis.js");
-  const { verifyGroundingObservation } =
+  const { verifyGroundingObservation, createAcceptanceServerConfig } =
     await import("../dist/scripts/lib/agui-grounding-observation.js");
   const { setupPersistence } =
     await import("../dist/packages/persistence/src/index.js");
@@ -163,8 +163,6 @@ try {
   const { parseGroundingAnalysisConfig } =
     await import("../dist/packages/wsgs-analysis-adapter/src/config.js");
   const { buildServer } = await import("../dist/apps/server/src/bootstrap.js");
-  const { parseServerConfig } =
-    await import("../dist/apps/server/src/config.js");
   const { SACS_AG_UI_V03_PROFILE_ID } =
     await import("../dist/packages/ag-ui-api-contract/src/index.js");
   const { AnalysisControlClient } =
@@ -271,12 +269,7 @@ try {
       ),
     });
     server = buildServer({
-      config: parseServerConfig({
-        CHAT_SERVER_SERVICE_KEY: secret,
-        AG_UI_SERVICE_KEY: secret,
-        OPENWEBUI_USER_JWT_SECRET: secret,
-        LOG_LEVEL: "silent",
-      }),
+      config: createAcceptanceServerConfig(secret),
       readinessCheck: () => persistence.readiness(),
       resolveChatThread: (input) =>
         persistence.repository.getOrCreateThread(input),
