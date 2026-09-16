@@ -48,6 +48,7 @@ with tempfile.TemporaryDirectory() as folder:
  for placeholder in ['CHAT_ID','MESSAGE_ID','USER_MESSAGE_ID','USER_MESSAGE_PARENT_ID','TASK']:
   assert '{{'+placeholder+'}}' in environment
  assert "WEBUI_AUTH='false'" in environment
+ assert "CORS_ALLOW_ORIGIN='http://17.26.1.20:18084'" in environment
  assert "OPENAI_API_BASE_URLS='http://17.26.1.20:18083/v1'" in environment
  assert "AIOHTTP_CLIENT_TIMEOUT='180'" in environment
  assert "ENABLE_TITLE_GENERATION='false'" in environment

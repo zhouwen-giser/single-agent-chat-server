@@ -72,6 +72,7 @@ def main():
             'WEBUI_AUTH': 'false', 'ENABLE_SIGNUP': 'false',
             'WEBUI_SECRET_KEY': settings['secret'],
             'WEBUI_URL': 'http://17.26.1.20:18084',
+            'CORS_ALLOW_ORIGIN': 'http://17.26.1.20:18084',
             'ENABLE_OLLAMA_API': 'false', 'ENABLE_OPENAI_API': 'true',
             'OPENAI_API_BASE_URLS': 'http://17.26.1.20:18083/v1',
             'OPENAI_API_KEYS': 'sacs-development-anonymous',

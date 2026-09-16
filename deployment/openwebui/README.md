@@ -9,6 +9,7 @@ immutable digest on first installation. This does not change Open WebUI source,
 SACS, WSGS, SDAR, or upstream databases. The independent Compose project is
 `openwebui-sacs`; only `17.26.1.20:18084` is published. Its persistent data volume
 is `openwebui-sacs_data`. No Docker socket, devices or upstream data are mounted.
+Browser CORS is limited to the published UI origin, not wildcard access.
 
 On sz-gowm, copy these files to `/mnt/data/openwebui-sacs-live/deployment/`, then:
 

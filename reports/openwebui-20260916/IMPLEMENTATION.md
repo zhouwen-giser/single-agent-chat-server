@@ -15,6 +15,7 @@ official v0.11.3-slim, resolved to an immutable digest at first install.
 
 Independent openwebui-sacs Compose project, persistent UI-only data volume,
 0600 runtime secret/config files and explicit anonymous acknowledgement.
+Browser CORS is explicitly restricted to the UI's published origin.
 OpenAI connection points only to SACS /v1 and includes all five existing
 Chat/Message/parent/utility headers. Background generation and unrelated web,
 code/image features are disabled. SACS's 120-second budget is unchanged;
