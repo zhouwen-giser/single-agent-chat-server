@@ -2,9 +2,34 @@
   "schemaVersion": "sacs-agui-grounding-ledger/1.0",
   "requirements": "config/v0.6/SACS_AGUI_V03_GROUNDING_CODEX_GOAL/acceptance/acceptance-matrix.json",
   "cases": [
-    { "id": "G01", "status": "NOT_RUN", "evidence": [] },
-    { "id": "G02", "status": "NOT_RUN", "evidence": [] },
-    { "id": "G03", "status": "NOT_RUN", "evidence": [] },
+    {
+      "id": "G01",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: G01 G11 G12 normal result fidelity"
+      ]
+    },
+    {
+      "id": "G02",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: G02 G12 PARTIAL Finding and gap preservation"
+      ]
+    },
+    {
+      "id": "G03",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: G03 source gap HTTP and headless projection",
+        "tests/v06-frozen-view.unit.test.ts: AC-013 no gap lines; AC-014 sparse preview"
+      ]
+    },
     {
       "id": "G04",
       "status": "PASS",
@@ -73,8 +98,24 @@
         "tests/v06-frozen-recovery.unit.test.ts: G10 pending cancellation and terminal guard"
       ]
     },
-    { "id": "G11", "status": "NOT_RUN", "evidence": [] },
-    { "id": "G12", "status": "NOT_RUN", "evidence": [] },
+    {
+      "id": "G11",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: G01 G11 G12 historical action safety and AC-038 execution interception"
+      ]
+    },
+    {
+      "id": "G12",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: normal and PARTIAL paths have no tool events or fabricated phases/progress"
+      ]
+    },
     { "id": "R01", "status": "NOT_RUN", "evidence": [] },
     { "id": "R02", "status": "NOT_RUN", "evidence": [] }
   ]

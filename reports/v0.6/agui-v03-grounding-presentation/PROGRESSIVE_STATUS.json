@@ -64,7 +64,16 @@
         "S06.md"
       ]
     },
-    { "id": "S07", "status": "NOT_RUN", "evidence": [] }
+    {
+      "id": "S07",
+      "status": "INCOMPLETE",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "reason": "Local development gates passed; full CI, final audit and real cases pending.",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "S07_DEVELOPMENT.md"
+      ]
+    }
   ],
   "completionMarkers": []
 }
