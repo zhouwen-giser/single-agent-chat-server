@@ -92,3 +92,31 @@ Transport errors do not trigger automatic command retries. Explicit identical
 replay may use the same command/idempotency identity; a genuinely different query
 requires a new identity. Stale or expired selection/draft errors require a fresh
 authoritative view and another explicit user decision.
+
+## Recovery fences
+
+Use one reference-client instance per analysis. Snapshots and deltas cannot
+replace its known analysis/principal/thread, move backwards in State/Revision/Run
+attempt, rebind a Grounding ID or regress a terminal attempt. On conflict the
+client retains the last view and requests a full snapshot. Grounding Activity
+updates must match the active Revision and source, carry monotonic counters, and
+remain schema-valid after patching. An older activity cannot satisfy a new
+Revision's interrupt snapshot requirement.
+
+Capture the local observation generation once per HTTP connection; pass it to
+every callback, including completion. Disconnect/reconnect invalidates it, so
+late chunks cannot reset the new observer or enter its SSE decoder:
+
+```ts
+client.reconnect();
+const generation = client.observationGeneration;
+// For each chunk from this connection:
+await client.acceptSseChunk(chunk, generation);
+// On this connection's completion:
+await client.finishStream(generation);
+```
+
+The generation is a local transport fence, not an upstream event cursor or Task
+resubscription token. Recovery still uses full authoritative snapshots. A cancel
+acknowledgement is not terminal cancellation; `CANCEL_REQUESTED` remains pending
+until the observed source actually terminates.

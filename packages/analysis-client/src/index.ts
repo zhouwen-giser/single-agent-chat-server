@@ -20,6 +20,14 @@ import { type LocalMapState } from "../../analysis-map/src/index.js";
 import { canonicalJson } from "../../world-explanation-contract/src/index.js";
 import { queryScopeSchema } from "../../analysis-contract/src/query-scope.js";
 import {
+  GROUNDING_ACTIVITY_TYPE,
+  groundingActivityMessageId,
+} from "../../analysis-contract/src/grounding-activity.js";
+import {
+  acceptsStateTransition,
+  acceptsGroundingActivity,
+} from "./recovery-guards.js";
+import {
   createFrozenChoiceResolution,
   createFrozenSourceQuery,
   presentFrozenChoice,
@@ -58,6 +66,7 @@ export interface AnalysisClientActivity {
 export interface AnalysisReferenceClientState {
   readonly connected: boolean;
   readonly awaitingReconnectRun: boolean;
+  readonly recentRunIds: readonly string[];
   readonly runStatus: "IDLE" | "RUNNING" | "INTERRUPTED" | "FINISHED" | "ERROR";
   readonly threadId?: string;
   readonly runId?: string;
@@ -86,6 +95,7 @@ export function createAnalysisReferenceClientState(): AnalysisReferenceClientSta
   return {
     connected: true,
     awaitingReconnectRun: false,
+    recentRunIds: [],
     runStatus: "IDLE",
     pendingInterrupts: [],
     currentRunHasStateSnapshot: false,
@@ -106,11 +116,15 @@ export function reduceAnalysisClientEvent(
   const event = assertSacsAgUiEvent(input, SACS_AG_UI_V03_PROFILE_ID);
   switch (event.type) {
     case EventType.RUN_STARTED:
+      if (current.recentRunIds.includes(event.runId)) return noEffect(current);
+      if (current.runStatus === "RUNNING" && !current.awaitingReconnectRun)
+        throw Error("AG_UI_RUN_ALREADY_ACTIVE");
       assertRunStartLineage(current, event);
       return noEffect({
         ...current,
         runStatus: "RUNNING",
         awaitingReconnectRun: false,
+        recentRunIds: [...current.recentRunIds, event.runId].slice(-256),
         threadId: event.threadId,
         runId: event.runId,
         ...(event.parentRunId === undefined
@@ -133,7 +147,9 @@ export function reduceAnalysisClientEvent(
       if (
         event.outcome?.type === "interrupt" &&
         (!current.currentRunHasStateSnapshot ||
-          !current.currentRunHasActivitySnapshot)
+          !current.currentRunHasActivitySnapshot ||
+          current.needsFullStateSnapshot ||
+          current.needsFullActivitySnapshot)
       ) {
         throw new Error("AG_UI_INTERRUPT_SNAPSHOTS_REQUIRED");
       }
@@ -289,6 +305,7 @@ export class HeadlessAnalysisReferenceClient {
   private current = createAnalysisReferenceClientState();
   private localMap: LocalMapState = { layerVisibilityPreference: {} };
   private presentedMap: MapSharedState | undefined;
+  private generation = 0;
   private choiceDraft:
     | { analysisId: string; revisionId: string; choice: FrozenChoiceView }
     | undefined;
@@ -300,6 +317,11 @@ export class HeadlessAnalysisReferenceClient {
 
   get selectedChoice() {
     return this.choiceDraft ? structuredClone(this.choiceDraft) : undefined;
+  }
+
+  /** Capture once for each HTTP/SSE observer; delayed callbacks must carry it. */
+  get observationGeneration(): number {
+    return this.generation;
   }
 
   /** A card/map click only changes local inspection; no Control client is held here. */
@@ -429,20 +451,27 @@ export class HeadlessAnalysisReferenceClient {
 
   async acceptSseChunk(
     chunk: string | Uint8Array,
+    generation = this.generation,
   ): Promise<readonly AnalysisClientEffect[]> {
-    return this.acceptEvents(this.decoder.push(chunk));
+    if (generation !== this.generation || !this.current.connected) return [];
+    return this.acceptEvents(this.decoder.push(chunk), generation);
   }
 
-  async finishStream(): Promise<readonly AnalysisClientEffect[]> {
-    return this.acceptEvents(this.decoder.finish());
+  async finishStream(
+    generation = this.generation,
+  ): Promise<readonly AnalysisClientEffect[]> {
+    if (generation !== this.generation || !this.current.connected) return [];
+    return this.acceptEvents(this.decoder.finish(), generation);
   }
 
   async disconnect(): Promise<void> {
+    this.generation += 1;
     this.current = { ...this.current, connected: false };
     await this.mapEngine.disconnect();
   }
 
   reconnect(): readonly AnalysisClientEffect[] {
+    this.generation += 1;
     this.decoder.reset();
     this.current = {
       ...this.current,
@@ -487,9 +516,11 @@ export class HeadlessAnalysisReferenceClient {
 
   private async acceptEvents(
     events: readonly AGUIEvent[],
+    generation: number,
   ): Promise<readonly AnalysisClientEffect[]> {
     const effects: AnalysisClientEffect[] = [];
     for (const event of events) {
+      if (generation !== this.generation || !this.current.connected) break;
       const reduction = reduceAnalysisClientEvent(this.current, event);
       this.current = reduction.state;
       effects.push(...reduction.effects);
@@ -641,12 +672,15 @@ function reduceStateSnapshot(
   snapshot: unknown,
 ): AnalysisClientReduction {
   const state = parseAndVerifyAgUiSharedStateV03(snapshot);
+  if (!acceptsStateTransition(current.sharedState, state))
+    return requireStateSnapshot(current);
   return noEffect({
     ...current,
     sharedState: structuredClone(state),
     stateRevision: state.meta.stateRevision,
     needsFullStateSnapshot: false,
     currentRunHasStateSnapshot: true,
+    ...stateActivityFence(current, state),
   });
 }
 
@@ -674,7 +708,10 @@ function reduceStateDelta(
       applyJsonPatch(current.sharedState, delta),
     );
     const nextRevision = next.meta.stateRevision;
-    if (nextRevision !== current.stateRevision + 1) {
+    if (
+      nextRevision !== current.stateRevision + 1 ||
+      !acceptsStateTransition(current.sharedState, next)
+    ) {
       return requireStateSnapshot(current);
     }
     return noEffect({
@@ -682,10 +719,32 @@ function reduceStateDelta(
       sharedState: next,
       stateRevision: nextRevision,
       needsFullStateSnapshot: false,
+      ...stateActivityFence(current, next),
     });
   } catch {
     return requireStateSnapshot(current);
   }
+}
+
+function stateActivityFence(
+  current: AnalysisReferenceClientState,
+  next: AgUiSharedStateV03,
+): Partial<AnalysisReferenceClientState> {
+  const revision = next.analysis.revisionsById[next.analysis.activeRevisionId];
+  if (
+    revision?.source?.kind !== "WSGS_GROUNDING_JOB" ||
+    !current.currentRunHasActivitySnapshot
+  )
+    return {};
+  const id = groundingActivityMessageId({
+    analysisId: next.analysis.session.analysisId,
+    revisionId: revision.revisionId,
+  });
+  const activity = current.activitiesByMessageId[id];
+  return activity?.activityType === GROUNDING_ACTIVITY_TYPE &&
+    acceptsGroundingActivity(next, id, activity.content)
+    ? {}
+    : { needsFullActivitySnapshot: true, currentRunHasActivitySnapshot: false };
 }
 
 function reduceActivitySnapshot(
@@ -699,6 +758,25 @@ function reduceActivitySnapshot(
   if (!Number.isSafeInteger(revision) || (revision as number) < 0) {
     throw new Error("AG_UI_ACTIVITY_SNAPSHOT_REVISION_INVALID");
   }
+  const previous = current.activitiesByMessageId[event.messageId];
+  if (
+    previous &&
+    (previous.activityType !== event.activityType ||
+      (revision as number) < previous.activityRevision ||
+      (revision === previous.activityRevision &&
+        !sameJson(JSON.parse(JSON.stringify(previous.content)), event.content)))
+  )
+    return requireActivitySnapshot(current);
+  if (
+    event.activityType === GROUNDING_ACTIVITY_TYPE &&
+    !acceptsGroundingActivity(
+      current.sharedState,
+      event.messageId,
+      event.content,
+      previous?.content,
+    )
+  )
+    return requireActivitySnapshot(current);
   return noEffect({
     ...current,
     needsFullActivitySnapshot: false,
@@ -743,6 +821,16 @@ function reduceActivityDelta(
     if (nextRevision !== activity.activityRevision + 1) {
       throw new Error("ACTIVITY_REVISION_NOT_NEXT");
     }
+    if (
+      event.activityType === GROUNDING_ACTIVITY_TYPE &&
+      !acceptsGroundingActivity(
+        current.sharedState,
+        event.messageId,
+        content,
+        activity.content,
+      )
+    )
+      throw Error("GROUNDING_ACTIVITY_PATCH_INVALID");
     return noEffect({
       ...current,
       needsFullActivitySnapshot: false,

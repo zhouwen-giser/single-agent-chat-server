@@ -745,7 +745,7 @@ export function createV06GroundingAnalysis(input: {
       yield projectAnalysisActivitySnapshot({
         messageId: groundingActivityMessageId({
           analysisId,
-          revisionId: observation.snapshot.analysis.activeRevisionId!,
+          revisionId: observation.snapshot.analysis.activeRevisionId,
         }),
         activityType: GROUNDING_ACTIVITY_TYPE,
         activityRevision: latest.activityRevision,
@@ -759,9 +759,9 @@ export function createV06GroundingAnalysis(input: {
     if (context.signal.aborted) return;
     if (!latest) throw Error("ANALYSIS_NOT_FOUND");
     const state = parseAndVerifyAgUiSharedStateV03(latest.state);
-    const run = Object.values(state.analysis.runsById).find(
-      (value) => value.revisionId === state.analysis.activeRevisionId,
-    );
+    const run = Object.values(state.analysis.runsById)
+      .filter((value) => value.revisionId === state.analysis.activeRevisionId)
+      .sort((a, b) => b.attempt - a.attempt)[0];
     if (
       !run ||
       ![
@@ -794,7 +794,7 @@ export function createV06GroundingAnalysis(input: {
         state: latest.state,
         activityMessageId: groundingActivityMessageId({
           analysisId,
-          revisionId: state.analysis.activeRevisionId!,
+          revisionId: state.analysis.activeRevisionId,
         }),
         activityType: GROUNDING_ACTIVITY_TYPE,
         activityRevision: latest.activityRevision,

@@ -374,6 +374,93 @@ function proposalUrl(state: ReturnType<typeof stateFrom>) {
 }
 
 describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL)", () => {
+  it("G09 detaches a genuinely RUNNING observer, finishes independently and restores full State/Activity after composition restart", async () => {
+    const app = await setup({
+      async: true,
+      repeatedRunning: 1000,
+      examples: ["action"],
+    });
+    const detached = new AbortController();
+    const client = new HeadlessAnalysisReferenceClient(
+      new HeadlessMapEngineAdapter(),
+      () => frozenNow().getTime(),
+    );
+    const iterator = app.composition.runAgUiV03!({
+      input: aguiPayload("before-disconnect", "查询历史候选"),
+      principalId: userId,
+      internalThreadId: threadId,
+      signal: detached.signal,
+      profile: SACS_AG_UI_V03_PROFILE_ID,
+    })[Symbol.asyncIterator]();
+    try {
+      let running = false;
+      for (let index = 0; index < 20; index++) {
+        const next = await iterator.next();
+        if (next.done) break;
+        await client.acceptSseChunk(`data: ${JSON.stringify(next.value)}\n\n`);
+        if (
+          next.value.type === "ACTIVITY_SNAPSHOT" &&
+          next.value.content["status"] === "RUNNING"
+        ) {
+          running = true;
+          break;
+        }
+      }
+      expect(running).toBe(true); // Do not substitute a terminal job for disconnect coverage.
+      const first = client.state.sharedState!;
+      const scope = {
+        analysisId: first.analysis.session.analysisId,
+        principalId: userId,
+        threadId,
+      };
+      detached.abort();
+      await iterator.return?.();
+      await client.disconnect();
+      expect(app.composition.source!.pump.status(scope)?.state).toBe("RUNNING");
+      expect(
+        app.peer.captured.filter((r) => r.path.endsWith(":cancel")),
+      ).toHaveLength(0);
+      for (const row of app.peer.jobs.values()) row.polls = 1001; // Release only the local fixture's terminal response.
+      await app.composition.source!.pump.settle();
+      const saved = await app.composition.source!.getProjection(scope);
+      expect(saved?.activity["status"]).toBe("COMPLETED");
+      const calls = app.peer.captured.length;
+      await app.rebuild();
+      client.reconnect();
+      const replay = await app.agui(
+        aguiPayload("after-disconnect", "", {
+          mode: "RECONNECT",
+          analysisId: scope.analysisId,
+        }),
+      );
+      await client.acceptSseChunk(
+        replay.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+        client.observationGeneration,
+      );
+      const restored = stateFrom(replay);
+      expect(client.state.sharedState).toEqual(restored);
+      expect(restored).toEqual(parseAndVerifyAgUiSharedStateV03(saved!.state));
+      expect(restored.analysis.activeRevisionId).toBe(
+        first.analysis.activeRevisionId,
+      );
+      expect(
+        Object.values(client.state.activitiesByMessageId).at(-1)?.content,
+      ).toEqual(saved!.activity);
+      expect(client.mapPresentation.shared).toEqual(restored.map);
+      expect(client.state).toMatchObject({
+        needsFullStateSnapshot: false,
+        needsFullActivitySnapshot: false,
+        runStatus: "FINISHED",
+      });
+      expect(app.peer.requests).toHaveLength(1);
+      expect(app.peer.captured).toHaveLength(calls);
+      app.assertNoExecution();
+    } finally {
+      detached.abort();
+      await iterator.return?.();
+      await app.close();
+    }
+  });
   it.each(["CONTINUE", "REPLACE"] as const)(
     "G06 local draw -> explicit %s -> source query -> new Revision and Grounding",
     async (contextMode) => {

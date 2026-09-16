@@ -323,6 +323,19 @@ suite("v06 durable Grounding lifecycle", () => {
     await expect(world.completeWorldGrounding(input)).rejects.toThrow(
       "WSGS_CANCELLED",
     );
+    await source.pump.settle();
+    const confirmed = await new AnalysisRepository(pool).getProjection({
+      analysisId: input.analysisId,
+      principalId: input.principalId,
+      threadId: input.threadId,
+    });
+    expect(confirmed?.activity).toMatchObject({
+      status: "CANCELLED",
+      sourceStatus: "CANCELLED",
+      groundingId: job(input).groundingId,
+      revisionId: input.revisionId,
+    });
+    expect(cancels).toBe(1);
   });
   it("persists exact intent before network, returns ACCEPTED and replays without resubmission", async () => {
     const input = await seed();
