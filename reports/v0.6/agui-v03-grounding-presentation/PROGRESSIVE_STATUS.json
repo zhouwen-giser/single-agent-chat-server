@@ -28,7 +28,15 @@
         "S02.md"
       ]
     },
-    { "id": "S03", "status": "NOT_RUN", "evidence": [] },
+    {
+      "id": "S03",
+      "status": "PASS",
+      "sourceSha": "82e46be97e8090862f3320ed706165ffdbe75d61",
+      "evidence": [
+        "receipts/S03-148a6909-1324-4b39-8dff-082ea7aca7e9.json",
+        "S03.md"
+      ]
+    },
     { "id": "S04", "status": "NOT_RUN", "evidence": [] },
     { "id": "S05", "status": "NOT_RUN", "evidence": [] },
     { "id": "S06", "status": "NOT_RUN", "evidence": [] },

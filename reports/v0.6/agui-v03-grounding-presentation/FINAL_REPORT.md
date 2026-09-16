@@ -16,4 +16,6 @@ Draft PR: https://github.com/zhouwen-giser/single-agent-chat-server/pull/25, tar
 
 S02 passed at `f30420f`: stable typed public identity links now connect the frozen view's findings, features, timeline, evidence, products and choices. Period/feature array order is no longer navigation identity; geometry and execution safety remain intact. The phase gate passed 541 frozen tests plus 14 PostgreSQL and 2 HTTP/SSE tests. See `S02.md` for exact scope and the tree-equivalent squash ancestry reconciliation needed to make the Draft PR mergeable.
 
-Remaining: S03 local map/draft behavior, S04 explicit selection confirmation, S05 validated geometry requery, S06 recovery/concurrency hardening, S07 complete local and real-source acceptance. No final completion marker is emitted.
+S03 passed at `82e46be`: all 17 local map/draft actions, authoritative versus rendered scene separation, input validation and zero implicit transport. The phase gate passed 573 frozen tests plus 14 PostgreSQL and 2 HTTP/SSE tests. G07 is directly verified. S02 full remote CI (quality and container) also passed at `76d449c`; see `CI_S02.json`.
+
+Remaining: S04 explicit selection confirmation, S05 validated geometry requery, S06 recovery/concurrency hardening, S07 complete local and real-source acceptance. No final completion marker is emitted.

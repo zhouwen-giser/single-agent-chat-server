@@ -1,0 +1,9 @@
+{
+  "sourceSha": "76d449c54dac09115916741a2c27b9362864398b",
+  "runId": 35107682346,
+  "url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/35107682346",
+  "status": "completed",
+  "conclusion": "success",
+  "jobs": { "quality": "success", "container": "success" },
+  "scope": "Full repository CI at S02 report commit; not evidence of S03 or later source."
+}

@@ -8,7 +8,15 @@
     { "id": "G04", "status": "NOT_RUN", "evidence": [] },
     { "id": "G05", "status": "NOT_RUN", "evidence": [] },
     { "id": "G06", "status": "NOT_RUN", "evidence": [] },
-    { "id": "G07", "status": "NOT_RUN", "evidence": [] },
+    {
+      "id": "G07",
+      "status": "PASS",
+      "sourceSha": "82e46be97e8090862f3320ed706165ffdbe75d61",
+      "evidence": [
+        "receipts/S03-148a6909-1324-4b39-8dff-082ea7aca7e9.json",
+        "tests/v06-frozen-local-map.unit.test.ts: local action matrix and snapshot visibility tests"
+      ]
+    },
     { "id": "G08", "status": "NOT_RUN", "evidence": [] },
     { "id": "G09", "status": "NOT_RUN", "evidence": [] },
     { "id": "G10", "status": "NOT_RUN", "evidence": [] },
