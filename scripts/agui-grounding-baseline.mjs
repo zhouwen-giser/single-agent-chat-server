@@ -32,6 +32,7 @@ const scripts = [
   "test:v06:frozen-wsgs",
   "test:v06:postgres",
   "test:v06:local-e2e",
+  "test:v05:local-e2e",
   "verify:migrations",
   "verify:architecture",
   "lint",

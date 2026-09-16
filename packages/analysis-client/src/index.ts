@@ -21,9 +21,14 @@ import { canonicalJson } from "../../world-explanation-contract/src/index.js";
 import {
   createFrozenChoiceResolution,
   createFrozenSourceQuery,
+  presentFrozenChoice,
+  type FrozenAnalysisInteractionContext,
+  type FrozenChoicePresentation,
   type FrozenSourceQueryCommand,
 } from "./frozen-world-analysis.js";
 export * from "./frozen-world-analysis.js";
+import type { FrozenChoiceView } from "../../world-explanation-runtime/src/frozen-analysis-view.js";
+import type { WorldAnalysisViewModel } from "../../world-explanation-runtime/src/analysis-view.js";
 import {
   localMapActionSchema,
   reduceClientMapAction,
@@ -51,6 +56,7 @@ export interface AnalysisClientActivity {
 
 export interface AnalysisReferenceClientState {
   readonly connected: boolean;
+  readonly awaitingReconnectRun: boolean;
   readonly runStatus: "IDLE" | "RUNNING" | "INTERRUPTED" | "FINISHED" | "ERROR";
   readonly threadId?: string;
   readonly runId?: string;
@@ -78,6 +84,7 @@ export interface AnalysisClientReduction {
 export function createAnalysisReferenceClientState(): AnalysisReferenceClientState {
   return {
     connected: true,
+    awaitingReconnectRun: false,
     runStatus: "IDLE",
     pendingInterrupts: [],
     currentRunHasStateSnapshot: false,
@@ -102,6 +109,7 @@ export function reduceAnalysisClientEvent(
       return noEffect({
         ...current,
         runStatus: "RUNNING",
+        awaitingReconnectRun: false,
         threadId: event.threadId,
         runId: event.runId,
         ...(event.parentRunId === undefined
@@ -280,8 +288,98 @@ export class HeadlessAnalysisReferenceClient {
   private current = createAnalysisReferenceClientState();
   private localMap: LocalMapState = { layerVisibilityPreference: {} };
   private presentedMap: MapSharedState | undefined;
+  private choiceDraft:
+    | { analysisId: string; revisionId: string; choice: FrozenChoiceView }
+    | undefined;
 
-  constructor(private readonly mapEngine: MapEngineAdapter) {}
+  constructor(
+    private readonly mapEngine: MapEngineAdapter,
+    private readonly now: () => number = Date.now,
+  ) {}
+
+  get selectedChoice() {
+    return this.choiceDraft ? structuredClone(this.choiceDraft) : undefined;
+  }
+
+  /** A card/map click only changes local inspection; no Control client is held here. */
+  async inspectFrozenChoice(
+    choiceId: string,
+    candidateId: string,
+  ): Promise<FrozenChoicePresentation> {
+    const context = this.frozenContext();
+    const choices = context.view.choices.filter(
+      (choice): choice is FrozenChoiceView =>
+        "selector" in choice &&
+        choice.choiceId === choiceId &&
+        choice.candidateId === candidateId,
+    );
+    if (choices.length !== 1) throw Error("SELECTION_UNAVAILABLE");
+    const choice = choices[0];
+    if (!choice) throw Error("SELECTION_UNAVAILABLE");
+    this.choiceDraft = structuredClone({
+      analysisId: context.view.analysisId,
+      revisionId: context.view.revisionId,
+      choice,
+    });
+    const links = context.view.linkage?.choices.filter(
+      (c) => c.choiceId === choiceId && c.candidateId === candidateId,
+    );
+    const targets = links?.length === 1 ? links[0]?.focusTargets : undefined;
+    // Multiple or absent relationships never authorize guessing a target.
+    await this.dispatchMapAction({
+      type: "INSPECT",
+      ...(targets?.length === 1 ? { focus: targets[0] } : {}),
+    });
+    return presentFrozenChoice(context, choice);
+  }
+
+  /** The sole selection mutation path requires explicit confirmation and fresh state. */
+  async resolveSelection(
+    control: AnalysisControlClient,
+    input: {
+      confirmed: boolean;
+      commandId: string;
+      idempotencyKey: string;
+      originalText: string;
+    },
+  ): Promise<unknown> {
+    if (input.confirmed !== true)
+      throw Error("SELECTION_CONFIRMATION_REQUIRED");
+    const context = this.frozenContext();
+    const draft = this.choiceDraft;
+    if (!draft) throw Error("SELECTION_UNAVAILABLE");
+    if (
+      draft.analysisId !== context.view.analysisId ||
+      draft.revisionId !== context.activeRevisionId
+    )
+      throw Error("ANALYSIS_REVISION_CONFLICT");
+    return control.resolveFrozenChoice({
+      ...input,
+      context,
+      choices: [draft.choice],
+    });
+  }
+
+  private frozenContext(): FrozenAnalysisInteractionContext {
+    const state = this.current.sharedState;
+    if (!state?.worldExplanation || this.current.needsFullStateSnapshot)
+      throw Error("SELECTION_UNAVAILABLE");
+    const view = state.worldExplanation as unknown as WorldAnalysisViewModel;
+    if (view.analysisId !== state.analysis.session.analysisId)
+      throw Error("SELECTION_UNAVAILABLE");
+    const intervention = state.pendingIntervention;
+    return {
+      view,
+      activeRevisionId: state.analysis.activeRevisionId,
+      activeRevisionNumber: state.analysis.session.latestRevisionNumber,
+      ...(intervention?.status === "OPEN" &&
+      intervention.analysisId === view.analysisId &&
+      intervention.revisionId === state.analysis.activeRevisionId
+        ? { interventionId: intervention.interventionId }
+        : {}),
+      now: this.now,
+    };
+  }
 
   get state(): AnalysisReferenceClientState {
     return structuredClone(this.current);
@@ -319,6 +417,7 @@ export class HeadlessAnalysisReferenceClient {
     this.current = {
       ...this.current,
       connected: true,
+      awaitingReconnectRun: true,
       needsFullStateSnapshot: true,
       needsFullActivitySnapshot: true,
     };
@@ -910,6 +1009,15 @@ function assertRunStartLineage(
   event: Extract<AGUIEvent, { type: EventType.RUN_STARTED }>,
 ): void {
   if (current.runStatus !== "INTERRUPTED") return;
+  // A new observer connection is not an interrupt resume. It must hydrate full
+  // snapshots, but the server does not invent a parent Run for that observer.
+  if (
+    current.awaitingReconnectRun &&
+    event.threadId === current.threadId &&
+    event.runId !== current.runId &&
+    event.parentRunId === undefined
+  )
+    return;
   if (
     event.threadId !== current.threadId ||
     event.runId === current.runId ||

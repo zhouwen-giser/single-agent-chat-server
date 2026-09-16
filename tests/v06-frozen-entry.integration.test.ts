@@ -14,6 +14,9 @@ import type { ServerConfig } from "../apps/server/src/config.js";
 import { SACS_AG_UI_V03_PROFILE_ID } from "../packages/ag-ui-api-contract/src/index.js";
 import { parseAndVerifyAgUiSharedStateV03 } from "../packages/analysis-contract/src/index.js";
 import {
+  AnalysisControlClient,
+  HeadlessAnalysisReferenceClient,
+  HeadlessMapEngineAdapter,
   createFrozenChoiceResolution,
   createFrozenSourceQuery,
 } from "../packages/analysis-client/src/index.js";
@@ -355,6 +358,7 @@ function choiceCommand(
   const context = interactionContext(state);
   const choices = context.view.choices.filter((choice) => "selector" in choice);
   return createFrozenChoiceResolution({
+    confirmed: true,
     context,
     choices: [choices[1]!],
     commandId,
@@ -370,6 +374,159 @@ function proposalUrl(state: ReturnType<typeof stateFrom>) {
 }
 
 describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL)", () => {
+  it("G04 inspect -> explicit confirmation -> Control -> new Revision/Grounding -> authoritative Snapshot", async () => {
+    const app = await setup({ examples: ["ranking", "action"] });
+    try {
+      const client = new HeadlessAnalysisReferenceClient(
+        new HeadlessMapEngineAdapter(),
+        () => frozenNow().getTime(),
+      );
+      const events = await app.agui(
+        aguiPayload("inspect-choice", "查询两个最强位置"),
+      );
+      await client.acceptSseChunk(
+        events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+      );
+      const first = stateFrom(events);
+      expect(
+        Object.values(client.state.activitiesByMessageId).at(-1)?.content[
+          "status"
+        ],
+      ).toBe("WAITING_SELECTION");
+      const before = client.state;
+      const choice = interactionContext(first).view.choices.filter(
+        (item) => "selector" in item,
+      )[1]!;
+      const presentation = await client.inspectFrozenChoice(
+        choice.choiceId,
+        choice.candidateId,
+      );
+      expect(presentation.enabled).toBe(true);
+      expect(client.state).toEqual(before);
+      expect(app.peer.requests).toHaveLength(1);
+      const send = jest.fn(
+        async (
+          request: Parameters<
+            ConstructorParameters<typeof AnalysisControlClient>[0]["send"]
+          >[0],
+        ) => {
+          const response = await app.server.inject({
+            method: request.method,
+            url: request.path,
+            headers: headers(),
+            ...(request.body ? { payload: JSON.stringify(request.body) } : {}),
+          });
+          return {
+            status: response.statusCode,
+            body: response.json() as unknown,
+          };
+        },
+      );
+      const control = new AnalysisControlClient({ send });
+      const command = {
+        confirmed: true,
+        commandId: "explicit-confirm",
+        idempotencyKey: "explicit-confirm",
+        originalText: "采用所选历史候选",
+      };
+      await expect(
+        client.resolveSelection(control, { ...command, confirmed: false }),
+      ).rejects.toThrow("SELECTION_CONFIRMATION_REQUIRED");
+      expect(send).not.toHaveBeenCalled();
+      await client.resolveSelection(control, command);
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(send.mock.calls[0]![0].path).toBe(interventionUrl(first));
+      expect(app.peer.requests).toHaveLength(2);
+      expect(app.peer.requests[1]!.analysisSelections).toEqual([
+        choice.selector,
+      ]);
+      expect(client.state.sharedState).toEqual(first); // HTTP acknowledgement is not a State snapshot.
+      await client.disconnect();
+      client.reconnect();
+      const updated = await app.agui(
+        aguiPayload("choice-reconnect", "", {
+          mode: "RECONNECT",
+          analysisId: first.analysis.session.analysisId,
+        }),
+      );
+      await client.acceptSseChunk(
+        updated.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+      );
+      const second = stateFrom(updated);
+      expect(client.state.sharedState).toEqual(second);
+      expect(second.analysis.activeRevisionId).not.toBe(
+        first.analysis.activeRevisionId,
+      );
+      expect(second.analysis.session.latestRevisionNumber).toBe(
+        first.analysis.session.latestRevisionNumber + 1,
+      );
+      expect(interactionContext(second).view.groundingId).not.toBe(
+        interactionContext(first).view.groundingId,
+      );
+      expect(second.pendingIntervention).toBeUndefined();
+      await expect(
+        client.resolveSelection(control, {
+          ...command,
+          commandId: "stale-choice",
+        }),
+      ).rejects.toThrow("ANALYSIS_REVISION_CONFLICT");
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(app.peer.requests).toHaveLength(2);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("G05 local candidate remains readable after expiry, confirmation rechecks TTL without submitting", async () => {
+    let timestamp = frozenNow().getTime();
+    const app = await setup(
+      { examples: ["ranking"] },
+      () => new Date(timestamp),
+    );
+    try {
+      const client = new HeadlessAnalysisReferenceClient(
+        new HeadlessMapEngineAdapter(),
+        () => timestamp,
+      );
+      const events = await app.agui(
+        aguiPayload("expiring-choice", "查询两个最强位置"),
+      );
+      await client.acceptSseChunk(
+        events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+      );
+      const choice = interactionContext(stateFrom(events)).view.choices.filter(
+        (item) => "selector" in item,
+      )[0]!;
+      await client.inspectFrozenChoice(choice.choiceId, choice.candidateId);
+      const before = client.state.sharedState;
+      timestamp = Date.parse(choice.validUntil);
+      expect(
+        await client.inspectFrozenChoice(choice.choiceId, choice.candidateId),
+      ).toMatchObject({
+        choice,
+        enabled: false,
+        disabledReason: "SELECTION_EXPIRED",
+        refreshAction: "SUBMIT_NEW_QUERY",
+      });
+      const send = jest.fn(async () => ({ status: 200, body: {} }));
+      await expect(
+        client.resolveSelection(new AnalysisControlClient({ send }), {
+          confirmed: true,
+          commandId: "expired",
+          idempotencyKey: "expired",
+          originalText: "确认",
+        }),
+      ).rejects.toThrow("SELECTION_EXPIRED");
+      expect(send).not.toHaveBeenCalled();
+      expect(client.state.sharedState).toEqual(before);
+      expect(client.selectedChoice?.choice).toEqual(choice);
+      expect(app.peer.requests).toHaveLength(1);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
   it.each([false, true])(
     "AC-007 AC-008 saves and projects %s async source once through normal AG-UI",
     async (asynchronous) => {
@@ -610,6 +767,7 @@ describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL
         );
       expect(new Set(choices.map((choice) => choice.choiceKind)).size).toBe(5);
       const command = createFrozenChoiceResolution({
+        confirmed: true,
         context,
         choices,
         commandId: "five-choices",

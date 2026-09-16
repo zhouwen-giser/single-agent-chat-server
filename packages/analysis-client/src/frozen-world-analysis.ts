@@ -104,12 +104,16 @@ export function presentFrozenAnalysis(
 
 /** Carries identities, never coordinates, rank, provider objects or a clipped list index. */
 export function createFrozenChoiceResolution(input: {
+  /** An explicit confirmation gesture, not candidate hover/click/inspection. */
+  readonly confirmed: boolean;
   readonly context: FrozenAnalysisInteractionContext;
   readonly choices: readonly FrozenChoiceView[];
   readonly commandId: string;
   readonly idempotencyKey: string;
   readonly originalText: string;
 }): AnalysisInterventionResolutionCommand {
+  if (input.confirmed !== true)
+    throw new Error("SELECTION_CONFIRMATION_REQUIRED");
   assertRevisionNumber(input.context.activeRevisionNumber);
   if (input.choices.length < 1 || input.choices.length > 8)
     throw new Error("SELECTION_INVALID");
