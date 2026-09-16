@@ -424,6 +424,18 @@ describe("frozen world consumer existing headless interaction C04", () => {
     expect(view.summary.primaryText).toContain("不跨 Gap 插值连线");
     expect(view.source.resultHash).toBe(source.resultHash);
     expect(JSON.stringify(source)).toBe(original);
+    const beforeIds = view.linkage?.features
+      .map((f) => [f.relationKey, f.layerId, f.featureId])
+      .sort();
+    geo.findings[0]?.findingKind === "SPATIAL_FEATURE_COLLECTION" &&
+      geo.findings[0].features.reverse();
+    geo.findingSetHash = publicCanonicalHash(geo.findings);
+    source.resultHash = publicResultHash(source);
+    expect(
+      viewOf(source)
+        .linkage?.features.map((f) => [f.relationKey, f.layerId, f.featureId])
+        .sort(),
+    ).toEqual(beforeIds);
   });
 
   it("AC-036 view byte clipping removes dependent action/geometry/timeline when finding closure is gone", () => {

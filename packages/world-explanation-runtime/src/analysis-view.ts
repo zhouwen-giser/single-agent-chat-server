@@ -185,6 +185,7 @@ export interface WorldAnalysisViewModel {
     | FrozenAnalysisView["actionTargets"][number]
   )[];
   evidenceLinks?: FrozenAnalysisView["evidenceLinks"];
+  linkage?: FrozenAnalysisView["linkage"];
   evidenceItemIds: string[];
   typedGaps: JsonObject[];
   warnings: string[];
