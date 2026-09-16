@@ -35,6 +35,17 @@ const output = resolve(".tmp/deployment", id);
 const root = join(output, "sacs-development");
 mkdirSync(output, { recursive: true });
 mkdirSync(root); // Fail rather than overwrite an earlier package.
+// Build and copy from immutable Git bytes even if another task edits the checkout.
+const snapshot = join(output, "source");
+mkdirSync(snapshot);
+run("git", [
+  "archive",
+  "--format=tar",
+  "--output",
+  join(output, "source.tar"),
+  sourceSha,
+]);
+run("tar", ["-xf", join(output, "source.tar"), "-C", snapshot]);
 run("docker", [
   "build",
   "--target",
@@ -45,7 +56,7 @@ run("docker", [
   `SOURCE_REVISION=${sourceSha}`,
   "-t",
   image,
-  ".",
+  snapshot,
 ]);
 run("docker", ["pull", pg]);
 run("docker", ["save", "-o", join(root, "images.tar"), image, pg]);
@@ -56,14 +67,15 @@ for (const file of [
   "preflight.mjs",
   "README.md",
 ])
-  cpSync(join("deployment", file), join(root, file));
-cpSync(".env.example", join(root, ".env.example"));
+  cpSync(join(snapshot, "deployment", file), join(root, file));
+cpSync(join(snapshot, ".env.example"), join(root, ".env.example"));
 const defaults = Object.fromEntries(
-  Object.entries(parseEnv(readFileSync(".env.example", "utf8"))).filter(
-    ([key]) =>
-      /^(CHAT_|AG_UI_|OPENWEBUI_|DATABASE_|IDEMPOTENCY_|SDAR_A2A_|SDAR_POLLING_|SACS_AUTH_|SACS_ALLOW_|SACS_WSGS_ANALYSIS_|SACS_ANALYSIS_ADAPTER_MODE$|WSGS_|CONVERSATION_|LOG_LEVEL$|NODE_ENV$)/u.test(
-        key,
-      ),
+  Object.entries(
+    parseEnv(readFileSync(join(snapshot, ".env.example"), "utf8")),
+  ).filter(([key]) =>
+    /^(CHAT_|AG_UI_|OPENWEBUI_|DATABASE_|IDEMPOTENCY_|SDAR_A2A_|SDAR_POLLING_|SACS_AUTH_|SACS_ALLOW_|SACS_WSGS_ANALYSIS_|SACS_ANALYSIS_ADAPTER_MODE$|WSGS_|CONVERSATION_|LOG_LEVEL$|NODE_ENV$)/u.test(
+      key,
+    ),
   ),
 );
 writeFileSync(
@@ -71,10 +83,10 @@ writeFileSync(
   JSON.stringify(defaults, null, 2) + "\n",
 );
 const migrations = Object.fromEntries(
-  readdirSync("migrations")
+  readdirSync(join(snapshot, "migrations"))
     .filter((f) => /^\d{4}_.*\.sql$/u.test(f))
     .sort()
-    .map((f) => [f, sha(readFileSync(join("migrations", f)))]),
+    .map((f) => [f, sha(readFileSync(join(snapshot, "migrations", f)))]),
 );
 const imageId = (name) =>
   JSON.parse(run("docker", ["image", "inspect", name], true))[0].Id;
