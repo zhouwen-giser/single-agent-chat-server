@@ -18,6 +18,7 @@ assert.equal(
   "Private config must not be group/world accessible",
 );
 const config = parseEnv(await readFile(path, "utf8"));
+const localOnly = process.argv.includes("--local-startup-only");
 assert.equal(config.ALLOW_REAL_WSGS, "YES");
 assert.ok(
   config.SACS_AGUI_QUERY_TEXT?.length > 0 &&
@@ -60,7 +61,7 @@ const evidence = {
   sourceSha: git("rev-parse", "HEAD"),
   entrypointHash: hash(await readFile(new URL(import.meta.url))),
   startedAt: new Date().toISOString(),
-  mode: "REAL",
+  mode: localOnly ? "LOCAL_STARTUP_CHECK" : "REAL",
   endpointOrigin: endpoint.origin,
   operationTimeoutMs: 120000,
   queryHash: hash(config.SACS_AGUI_QUERY_TEXT),
@@ -174,30 +175,32 @@ try {
     ),
   );
   const contract = new FrozenWorldAnalysisContract();
-  const ready = await realFetch(new URL("/v1/capabilities", endpoint), {
-    headers: negotiated,
-    signal: AbortSignal.timeout(120000),
-  });
-  assert.equal(ready.status, 200, "Capabilities unavailable");
-  const caps = contract.parse("capabilities", await ready.json());
-  evidence.preflight = {
-    httpStatus: ready.status,
-    exactNegotiation: true,
-    requiredCapabilitiesReady: caps.requiredCapabilitiesReady,
-    capabilities: caps.worldAnalysis.capabilities.map(
-      ({ capability, available, reasonCodes }) => ({
-        capability,
-        available,
-        reasonCodes,
-      }),
-    ),
-  };
-  assert.equal(
-    caps.requiredCapabilitiesReady,
-    true,
-    "Required capability readiness unavailable",
-  );
-  await save();
+  if (!localOnly) {
+    const ready = await realFetch(new URL("/v1/capabilities", endpoint), {
+      headers: negotiated,
+      signal: AbortSignal.timeout(120000),
+    });
+    assert.equal(ready.status, 200, "Capabilities unavailable");
+    const caps = contract.parse("capabilities", await ready.json());
+    evidence.preflight = {
+      httpStatus: ready.status,
+      exactNegotiation: true,
+      requiredCapabilitiesReady: caps.requiredCapabilitiesReady,
+      capabilities: caps.worldAnalysis.capabilities.map(
+        ({ capability, available, reasonCodes }) => ({
+          capability,
+          available,
+          reasonCodes,
+        }),
+      ),
+    };
+    assert.equal(
+      caps.requiredCapabilitiesReady,
+      true,
+      "Required capability readiness unavailable",
+    );
+    await save();
+  }
 
   container = "sacs-agui-real-" + randomUUID();
   evidence.stage = "ISOLATED_DATABASE";
@@ -245,6 +248,7 @@ try {
   const secret = randomBytes(32).toString("hex");
   let local;
   const open = async () => {
+    evidence.stage = "DATABASE_MIGRATIONS";
     persistence = await setupPersistence({
       connectionString: databaseUrl,
       poolMax: 12,
@@ -252,6 +256,7 @@ try {
       idempotencyLeaseMs: 180000,
       maxActiveTasksPerChat: 8,
     });
+    evidence.stage = "SACS_COMPOSITION";
     composition = createV06GroundingAnalysis({
       persistence,
       config: parseGroundingAnalysisConfig({
@@ -268,6 +273,7 @@ try {
         "dependencies/sdar-grounding-extension-compatibility-lock.json",
       ),
     });
+    evidence.stage = "SACS_LISTENER";
     server = buildServer({
       config: createAcceptanceServerConfig(secret),
       readinessCheck: () => persistence.readiness(),
@@ -319,182 +325,196 @@ try {
   };
   await open();
   evidence.database = { isolated: true, image, migrations: "PASS" };
-  const threadId = randomUUID();
-  const observe = async (analysisId) => {
-    const response = await fetch(local + "/ag-ui", {
-      method: "POST",
-      headers: {
-        ...headers(),
-        accept: "text/event-stream",
-        "x-sacs-ag-ui-profile": SACS_AG_UI_V03_PROFILE_ID,
-      },
-      body: JSON.stringify({
-        threadId,
-        runId: randomUUID(),
-        state: {},
-        messages: analysisId
-          ? []
-          : [
-              {
-                id: randomUUID(),
-                role: "user",
-                content: config.SACS_AGUI_QUERY_TEXT,
-              },
-            ],
-        tools: [],
-        context: [],
-        forwardedProps: analysisId
-          ? { mode: "RECONNECT", analysisId }
-          : { mode: "START" },
-      }),
-      signal: AbortSignal.timeout(270000),
-    });
-    assert.equal(response.status, 200, "AGUI_HTTP_FAILED");
-    const wire = await response.text();
-    const events = wire
-      .split("\n")
-      .filter((line) => line.startsWith("data: "))
-      .map((line) => JSON.parse(line.slice(6)));
-    const state = events
-      .filter((e) => e.type === "STATE_SNAPSHOT")
-      .at(-1)?.snapshot;
-    const result = sourceResults.get(state?.worldExplanation?.groundingId);
-    assert.ok(result, "No captured public source result");
-    contract.parse("result", result);
-    const verified = await verifyGroundingObservation(wire, result);
-    for (const event of events.filter((e) => e.type === "ACTIVITY_SNAPSHOT"))
-      assert.ok(
-        sourceStatuses
-          .get(event.content.groundingId)
-          ?.has(event.content.sourceStatus),
-        "Activity status was not observed from WSGS",
-      );
-    evidence.observations.push(verified.summary);
-    await save();
-    return verified;
-  };
-  const control = new AnalysisControlClient({
-    send: async (request) => {
-      const response = await fetch(local + request.path, {
-        method: request.method,
-        headers: headers(),
-        ...(request.body ? { body: JSON.stringify(request.body) } : {}),
+  if (localOnly) {
+    evidence.status = "LOCAL_STARTUP_PASS";
+    evidence.stage = "FINISHED";
+    process.exitCode = 0;
+  } else {
+    const threadId = randomUUID();
+    const observe = async (analysisId) => {
+      const response = await fetch(local + "/ag-ui", {
+        method: "POST",
+        headers: {
+          ...headers(),
+          accept: "text/event-stream",
+          "x-sacs-ag-ui-profile": SACS_AG_UI_V03_PROFILE_ID,
+        },
+        body: JSON.stringify({
+          threadId,
+          runId: randomUUID(),
+          state: {},
+          messages: analysisId
+            ? []
+            : [
+                {
+                  id: randomUUID(),
+                  role: "user",
+                  content: config.SACS_AGUI_QUERY_TEXT,
+                },
+              ],
+          tools: [],
+          context: [],
+          forwardedProps: analysisId
+            ? { mode: "RECONNECT", analysisId }
+            : { mode: "START" },
+        }),
         signal: AbortSignal.timeout(270000),
       });
-      evidence.controlHttpStatuses ??= [];
-      evidence.controlHttpStatuses.push(response.status);
-      return { status: response.status, body: await response.json() };
-    },
-  });
-  evidence.stage = "INITIAL_OBSERVATION";
-  let current = await observe();
-  const analysisId = current.state.analysis.session.analysisId;
-  const acceptNormal = (observation) =>
-    ["COMPLETED", "PARTIAL"].includes(observation.summary.sourceStatus) &&
-    observation.summary.findingCount > 0;
-  evidence.cases[0] = {
-    id: "R01",
-    status: acceptNormal(current) ? "PASS" : "BLOCKED_EXTERNAL",
-    reason: acceptNormal(current)
-      ? "SOURCE_AND_PRESENTATION_VERIFIED"
-      : "NO_POSITIVE_FINDING_YET",
-    observation: 0,
-  };
-  const choice = current.state.worldExplanation.choices.find(
-    (c) => c.selector && Date.parse(c.validUntil) > Date.now(),
-  );
-  if (choice && current.state.pendingIntervention) {
-    evidence.stage = "EXPLICIT_SELECTION";
-    assert.equal(
-      config.ALLOW_REAL_SELECTION,
-      "YES",
-      "Real selection requires explicit configuration",
-    );
-    const previous = current;
-    const count = postCount;
-    await current.client.inspectFrozenChoice(
-      choice.choiceId,
-      choice.candidateId,
-    );
-    assert.equal(postCount, count, "Inspection created work");
-    postLimit = 2;
-    await current.client.resolveSelection(control, {
-      confirmed: true,
-      commandId: randomUUID(),
-      idempotencyKey: randomUUID(),
-      originalText: "采用所选候选继续只读历史分析，不执行设备动作。",
-    });
-    assert.equal(postCount, count + 1);
-    assert.deepEqual(submittedRequests.at(-1).analysisSelections, [
-      choice.selector,
-    ]);
-    current = await observe(analysisId);
-    assert.equal(
-      current.state.analysis.session.latestRevisionNumber,
-      previous.state.analysis.session.latestRevisionNumber + 1,
-    );
-    assert.notEqual(
-      current.state.analysis.activeRevisionId,
-      previous.state.analysis.activeRevisionId,
-    );
-    assert.notEqual(
-      current.state.worldExplanation.groundingId,
-      previous.state.worldExplanation.groundingId,
-    );
-    evidence.cases[1] = {
-      id: "R02",
-      status: "PASS",
-      reason: "REAL_CHOICE_CONTROL_NEW_REVISION_GROUNDING_SNAPSHOT",
-      selectorHash: hash(JSON.stringify(choice.selector)),
-      observation: evidence.observations.length - 1,
+      assert.equal(response.status, 200, "AGUI_HTTP_FAILED");
+      const wire = await response.text();
+      const events = wire
+        .split("\n")
+        .filter((line) => line.startsWith("data: "))
+        .map((line) => JSON.parse(line.slice(6)));
+      const state = events
+        .filter((e) => e.type === "STATE_SNAPSHOT")
+        .at(-1)?.snapshot;
+      const result = sourceResults.get(state?.worldExplanation?.groundingId);
+      assert.ok(result, "No captured public source result");
+      contract.parse("result", result);
+      const verified = await verifyGroundingObservation(wire, result);
+      for (const event of events.filter((e) => e.type === "ACTIVITY_SNAPSHOT"))
+        assert.ok(
+          sourceStatuses
+            .get(event.content.groundingId)
+            ?.has(event.content.sourceStatus),
+          "Activity status was not observed from WSGS",
+        );
+      evidence.observations.push(verified.summary);
+      await save();
+      return verified;
     };
-    if (acceptNormal(current))
-      evidence.cases[0] = {
-        id: "R01",
+    const control = new AnalysisControlClient({
+      send: async (request) => {
+        const response = await fetch(local + request.path, {
+          method: request.method,
+          headers: headers(),
+          ...(request.body ? { body: JSON.stringify(request.body) } : {}),
+          signal: AbortSignal.timeout(270000),
+        });
+        evidence.controlHttpStatuses ??= [];
+        evidence.controlHttpStatuses.push(response.status);
+        return { status: response.status, body: await response.json() };
+      },
+    });
+    evidence.stage = "INITIAL_OBSERVATION";
+    let current = await observe();
+    const analysisId = current.state.analysis.session.analysisId;
+    const acceptNormal = (observation) =>
+      ["COMPLETED", "PARTIAL"].includes(observation.summary.sourceStatus) &&
+      observation.summary.findingCount > 0;
+    evidence.cases[0] = {
+      id: "R01",
+      status: acceptNormal(current) ? "PASS" : "BLOCKED_EXTERNAL",
+      reason: acceptNormal(current)
+        ? "SOURCE_AND_PRESENTATION_VERIFIED"
+        : "NO_POSITIVE_FINDING_YET",
+      observation: 0,
+    };
+    const choice = current.state.worldExplanation.choices.find(
+      (c) => c.selector && Date.parse(c.validUntil) > Date.now(),
+    );
+    if (choice && current.state.pendingIntervention) {
+      evidence.stage = "EXPLICIT_SELECTION";
+      assert.equal(
+        config.ALLOW_REAL_SELECTION,
+        "YES",
+        "Real selection requires explicit configuration",
+      );
+      const previous = current;
+      const count = postCount;
+      await current.client.inspectFrozenChoice(
+        choice.choiceId,
+        choice.candidateId,
+      );
+      assert.equal(postCount, count, "Inspection created work");
+      postLimit = 2;
+      await current.client.resolveSelection(control, {
+        confirmed: true,
+        commandId: randomUUID(),
+        idempotencyKey: randomUUID(),
+        originalText: "采用所选候选继续只读历史分析，不执行设备动作。",
+      });
+      assert.equal(postCount, count + 1);
+      assert.deepEqual(submittedRequests.at(-1).analysisSelections, [
+        choice.selector,
+      ]);
+      current = await observe(analysisId);
+      assert.equal(
+        current.state.analysis.session.latestRevisionNumber,
+        previous.state.analysis.session.latestRevisionNumber + 1,
+      );
+      assert.notEqual(
+        current.state.analysis.activeRevisionId,
+        previous.state.analysis.activeRevisionId,
+      );
+      assert.notEqual(
+        current.state.worldExplanation.groundingId,
+        previous.state.worldExplanation.groundingId,
+      );
+      evidence.cases[1] = {
+        id: "R02",
         status: "PASS",
-        reason: "SOURCE_AND_PRESENTATION_VERIFIED",
+        reason: "REAL_CHOICE_CONTROL_NEW_REVISION_GROUNDING_SNAPSHOT",
+        selectorHash: hash(JSON.stringify(choice.selector)),
         observation: evidence.observations.length - 1,
       };
-  } else
-    evidence.cases[1] = {
-      id: "R02",
-      status: "BLOCKED_EXTERNAL",
-      reason: "NO_UNEXPIRED_PUBLIC_CHOICE_IN_THIS_AUTHORIZED_QUERY",
-      choiceCount: current.summary.choiceCount,
-      scope:
-        "This request only; not a claim that WSGS selection is globally unavailable.",
+      if (acceptNormal(current))
+        evidence.cases[0] = {
+          id: "R01",
+          status: "PASS",
+          reason: "SOURCE_AND_PRESENTATION_VERIFIED",
+          observation: evidence.observations.length - 1,
+        };
+    } else
+      evidence.cases[1] = {
+        id: "R02",
+        status: "BLOCKED_EXTERNAL",
+        reason: "NO_UNEXPIRED_PUBLIC_CHOICE_IN_THIS_AUTHORIZED_QUERY",
+        choiceCount: current.summary.choiceCount,
+        scope:
+          "This request only; not a claim that WSGS selection is globally unavailable.",
+      };
+    const before = JSON.stringify(current.state);
+    evidence.stage = "PERSISTENCE_REOPEN";
+    const calls = evidence.exchanges.length;
+    await close();
+    await open();
+    const restored = await observe(analysisId);
+    assert.equal(
+      JSON.stringify(restored.state),
+      before,
+      "Persistent projection changed on reopen",
+    );
+    assert.equal(
+      evidence.exchanges.length,
+      calls,
+      "Reconnect issued upstream requests",
+    );
+    evidence.recovery = {
+      status: "PASS",
+      kind: "repository-composition-reopen",
+      sameRevision: true,
+      sameGrounding: true,
+      additionalUpstreamRequests: 0,
     };
-  const before = JSON.stringify(current.state);
-  evidence.stage = "PERSISTENCE_REOPEN";
-  const calls = evidence.exchanges.length;
-  await close();
-  await open();
-  const restored = await observe(analysisId);
-  assert.equal(
-    JSON.stringify(restored.state),
-    before,
-    "Persistent projection changed on reopen",
-  );
-  assert.equal(
-    evidence.exchanges.length,
-    calls,
-    "Reconnect issued upstream requests",
-  );
-  evidence.recovery = {
-    status: "PASS",
-    kind: "repository-composition-reopen",
-    sameRevision: true,
-    sameGrounding: true,
-    additionalUpstreamRequests: 0,
-  };
-  evidence.stage = "FINISHED";
-  evidence.status = evidence.cases.every((c) => c.status === "PASS")
-    ? "PASS"
-    : "INCOMPLETE";
-  process.exitCode = evidence.status === "PASS" ? 0 : 2;
+    evidence.stage = "FINISHED";
+    evidence.status = evidence.cases.every((c) => c.status === "PASS")
+      ? "PASS"
+      : "INCOMPLETE";
+    process.exitCode = evidence.status === "PASS" ? 0 : 2;
+  }
 } catch (error) {
   evidence.status = "FAILED";
   evidence.errorType = error.name;
+  evidence.errorCode = /^[A-Z0-9_]{1,80}$/u.test(error.code)
+    ? error.code
+    : undefined;
+  evidence.errorFrames = String(error.stack ?? "")
+    .split("\n")
+    .slice(1, 6)
+    .map((line) => line.match(/[A-Za-z0-9_./-]+\.(?:mjs|js|ts):\d+:\d+/u)?.[0])
+    .filter(Boolean);
   // Never serialize error messages, query text, task IDs, geometries or credentials.
   evidence.assertionCode = /^[A-Z][A-Z0-9_]{1,100}$/u.test(error.message)
     ? error.message
