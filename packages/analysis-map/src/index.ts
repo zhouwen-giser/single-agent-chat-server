@@ -17,6 +17,8 @@ export interface LocalMapState {
   readonly layerVisibilityPreference: Readonly<Record<string, boolean>>;
   readonly pinnedFocusOverrides?: Readonly<Record<string, FocusTarget | null>>;
   readonly unsubmittedEditDraft?: Readonly<Record<string, unknown>>;
+  /** Monotonic local generation, including clear, to fence stale submit gestures. */
+  readonly queryDraftRevision?: number;
   readonly playbackCursor?: string;
   readonly playbackRate?: number;
   readonly panelLayout?: string;

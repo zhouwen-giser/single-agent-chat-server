@@ -108,6 +108,46 @@ async function feedChoiceState(
 }
 
 describe("frozen world consumer existing headless interaction C04", () => {
+  it("S05 draft generation survives clear/redraw and HTTP failure does not mutate shared state or retry", async () => {
+    const client = new HeadlessAnalysisReferenceClient(
+      new HeadlessMapEngineAdapter(),
+      now,
+    );
+    await feedChoiceState(client, choiceState());
+    const send = jest.fn(async () => {
+      throw Error("TRANSPORT_UNCERTAIN");
+    });
+    const control = new AnalysisControlClient({ send });
+    const query = {
+      ...command,
+      expectedDraftRevision: 1,
+      contextMode: "REPLACE" as const,
+    };
+    await expect(client.submitNewQuery(control, query)).rejects.toThrow(
+      "QUERY_SCOPE_REQUIRED",
+    );
+    await client.dispatchMapAction({
+      type: "DRAW_POINT",
+      coordinates: [120, 30],
+    });
+    await client.dispatchMapAction({ type: "CLEAR_QUERY_SCOPE" });
+    await client.dispatchMapAction({
+      type: "DRAW_POINT",
+      coordinates: [121, 31],
+    });
+    await expect(client.submitNewQuery(control, query)).rejects.toThrow(
+      "QUERY_DRAFT_CONFLICT",
+    );
+    expect(send).not.toHaveBeenCalled();
+    const before = client.state,
+      map = client.mapPresentation;
+    await expect(
+      client.submitNewQuery(control, { ...query, expectedDraftRevision: 3 }),
+    ).rejects.toThrow("TRANSPORT_UNCERTAIN");
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(client.state).toEqual(before);
+    expect(client.mapPresentation).toEqual(map);
+  });
   it.each([
     "analysis",
     "revision",

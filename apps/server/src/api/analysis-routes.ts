@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
+import { queryScopeSchema } from "../../../../packages/analysis-contract/src/query-scope.js";
 
 import {
   AnalysisServiceError,
@@ -50,6 +51,7 @@ const proposalCommandSchema = z.union([
       originalText: z.string().min(1).max(32768),
       contextMode: z.enum(["CONTINUE", "REPLACE"]),
       analysisSelections: z.array(z.unknown()).max(8).optional(),
+      queryScope: queryScopeSchema.optional(),
     })
     .strict(),
 ]);

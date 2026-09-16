@@ -172,7 +172,11 @@ export function reduceClientMapAction(
       };
     }
     case "CLEAR_QUERY_SCOPE":
-      return { ...local, unsubmittedEditDraft: undefined };
+      return {
+        ...local,
+        queryDraftRevision: (local.queryDraftRevision ?? 0) + 1,
+        unsubmittedEditDraft: undefined,
+      };
     default: {
       const geometry =
         action.type === "SET_QUERY_SCOPE" ||
@@ -194,10 +198,10 @@ export function reduceClientMapAction(
                 coordinates: action.coordinates,
               };
       const scope = { geometry: queryGeometrySchema.parse(geometry) };
-      const draftRevision =
-        Number(local.unsubmittedEditDraft?.["draftRevision"] ?? 0) + 1;
+      const draftRevision = (local.queryDraftRevision ?? 0) + 1;
       return {
         ...local,
+        queryDraftRevision: draftRevision,
         unsubmittedEditDraft: {
           scope,
           draftRevision,

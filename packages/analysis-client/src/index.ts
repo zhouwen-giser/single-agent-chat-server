@@ -18,6 +18,7 @@ import type {
 } from "../../analysis-control-runtime/src/index.js";
 import { type LocalMapState } from "../../analysis-map/src/index.js";
 import { canonicalJson } from "../../world-explanation-contract/src/index.js";
+import { queryScopeSchema } from "../../analysis-contract/src/query-scope.js";
 import {
   createFrozenChoiceResolution,
   createFrozenSourceQuery,
@@ -358,6 +359,35 @@ export class HeadlessAnalysisReferenceClient {
       context,
       choices: [draft.choice],
     });
+  }
+
+  /** Drawing is local. Only this explicit gesture submits its exact validated scope. */
+  async submitNewQuery(
+    control: AnalysisControlClient,
+    input: {
+      confirmed: boolean;
+      expectedDraftRevision: number;
+      commandId: string;
+      idempotencyKey: string;
+      originalText: string;
+      contextMode: "CONTINUE" | "REPLACE";
+    },
+  ): Promise<unknown> {
+    if (input.confirmed !== true) throw Error("QUERY_CONFIRMATION_REQUIRED");
+    const context = this.frozenContext();
+    const draft = this.localMap.unsubmittedEditDraft;
+    if (!draft) throw Error("QUERY_SCOPE_REQUIRED");
+    if (draft["basedOnRevisionId"] !== context.activeRevisionId)
+      throw Error("ANALYSIS_REVISION_CONFLICT");
+    if (
+      !Number.isSafeInteger(input.expectedDraftRevision) ||
+      input.expectedDraftRevision !== draft["draftRevision"]
+    )
+      throw Error("QUERY_DRAFT_CONFLICT");
+    const queryScope = queryScopeSchema.parse(draft["scope"]);
+    // Preserve the local draft and shared scene until authoritative State arrives.
+    // No optimistic geometry layer and no automatic retry on an uncertain reply.
+    return control.queryFrozenAnalysis({ ...input, context, queryScope });
   }
 
   private frozenContext(): FrozenAnalysisInteractionContext {

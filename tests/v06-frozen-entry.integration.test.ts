@@ -374,6 +374,218 @@ function proposalUrl(state: ReturnType<typeof stateFrom>) {
 }
 
 describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL)", () => {
+  it.each(["CONTINUE", "REPLACE"] as const)(
+    "G06 local draw -> explicit %s -> source query -> new Revision and Grounding",
+    async (contextMode) => {
+      const app = await setup({ examples: ["action", "empty"] });
+      try {
+        const client = new HeadlessAnalysisReferenceClient(
+          new HeadlessMapEngineAdapter(),
+          () => frozenNow().getTime(),
+        );
+        const events = await app.agui(aguiPayload("map-first", "查看历史结果"));
+        await client.acceptSseChunk(
+          events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+        );
+        const first = stateFrom(events);
+        const scope = {
+          geometry: {
+            type: "Polygon" as const,
+            coordinates: [
+              [
+                [120, 30],
+                [121, 30],
+                [121, 31],
+                [120, 30],
+              ] as [number, number][],
+            ],
+          },
+        };
+        await client.dispatchMapAction({
+          type: "DRAW_POLYGON",
+          coordinates: scope.geometry.coordinates,
+        });
+        expect(client.state.sharedState).toEqual(first);
+        expect(app.peer.requests).toHaveLength(1);
+        const send = jest.fn(
+          async (
+            request: Parameters<
+              ConstructorParameters<typeof AnalysisControlClient>[0]["send"]
+            >[0],
+          ) => {
+            const response = await app.server.inject({
+              method: request.method,
+              url: request.path,
+              headers: headers(),
+              ...(request.body
+                ? { payload: JSON.stringify(request.body) }
+                : {}),
+            });
+            return {
+              status: response.statusCode,
+              body: response.json() as unknown,
+            };
+          },
+        );
+        const control = new AnalysisControlClient({ send });
+        const command = {
+          confirmed: true,
+          expectedDraftRevision: 1,
+          commandId: "map-submit",
+          idempotencyKey: "map-submit",
+          originalText: "查询此范围内的历史位置",
+          contextMode,
+        };
+        await expect(
+          client.submitNewQuery(control, { ...command, confirmed: false }),
+        ).rejects.toThrow("QUERY_CONFIRMATION_REQUIRED");
+        await expect(
+          client.submitNewQuery(control, {
+            ...command,
+            expectedDraftRevision: 0,
+          }),
+        ).rejects.toThrow("QUERY_DRAFT_CONFLICT");
+        expect(send).not.toHaveBeenCalled();
+        await client.submitNewQuery(control, command);
+        expect(send).toHaveBeenCalledTimes(1);
+        expect(send.mock.calls[0]![0]).toMatchObject({
+          path: proposalUrl(first),
+          body: {
+            kind: "GROUNDING_SOURCE_QUERY",
+            queryScope: scope,
+            contextMode,
+          },
+        });
+        expect(app.peer.requests).toHaveLength(2);
+        const request = app.peer.requests[1]!;
+        expect(request.contextCapsule.mapSelections).toEqual([
+          {
+            selectionId: expect.stringMatching(/^map-scope-/u),
+            kind: "AREA",
+            revision: 1,
+            geometry: scope.geometry,
+            geometryHash: publicCanonicalHash(scope.geometry),
+          },
+        ]);
+        expect(request.contextCapsule.priorGroundings).toHaveLength(
+          contextMode === "CONTINUE" ? 1 : 0,
+        );
+        expect(request.analysisSelections).toBeUndefined();
+        expect(request.executionPolicy).toMatchObject({
+          readOnly: true,
+          allowApproximation: false,
+          deadlineMs: 120_000,
+        });
+        expect(client.state.sharedState).toEqual(first);
+        expect(
+          client.mapPresentation.local.unsubmittedEditDraft?.["scope"],
+        ).toEqual(scope);
+        // Explicit replay is permitted; the application never automatically retries it.
+        await client.submitNewQuery(control, command);
+        expect(app.peer.requests).toHaveLength(2);
+        const conflict = await app.server.inject({
+          method: "POST",
+          url: proposalUrl(first),
+          headers: headers(),
+          payload: {
+            ...(send.mock.calls[0]![0].body as object),
+            queryScope: { geometry: { type: "Point", coordinates: [120, 30] } },
+          },
+        });
+        expect(conflict.statusCode).toBe(409);
+        await client.disconnect();
+        client.reconnect();
+        const updated = await app.agui(
+          aguiPayload("map-reconnect", "", {
+            mode: "RECONNECT",
+            analysisId: first.analysis.session.analysisId,
+          }),
+        );
+        await client.acceptSseChunk(
+          updated.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+        );
+        const second = stateFrom(updated);
+        expect(client.state.sharedState).toEqual(second);
+        expect(second.analysis.activeRevisionId).not.toBe(
+          first.analysis.activeRevisionId,
+        );
+        expect(second.analysis.session.latestRevisionNumber).toBe(
+          first.analysis.session.latestRevisionNumber + 1,
+        );
+        expect(interactionContext(second).view.groundingId).not.toBe(
+          interactionContext(first).view.groundingId,
+        );
+        await expect(
+          client.submitNewQuery(control, {
+            ...command,
+            commandId: "old-draft",
+          }),
+        ).rejects.toThrow("ANALYSIS_REVISION_CONFLICT");
+        expect(send).toHaveBeenCalledTimes(2);
+        expect(app.peer.requests).toHaveLength(2);
+        app.assertNoExecution();
+      } finally {
+        await app.close();
+      }
+    },
+  );
+
+  it("S05 malformed and oversized scope fails at the public Control route before WSGS submission", async () => {
+    const app = await setup({ examples: ["action"] });
+    try {
+      const first = stateFrom(
+        await app.agui(aguiPayload("invalid-scope", "查看历史结果")),
+      );
+      const command = createFrozenSourceQuery({
+        ...interactionContext(first),
+        context: interactionContext(first),
+        commandId: "invalid-map",
+        idempotencyKey: "invalid-map",
+        originalText: "查询此范围",
+        contextMode: "REPLACE",
+      });
+      for (const queryScope of [
+        { geometry: { type: "Point", coordinates: [181, 30] } },
+        { geometry: { type: "LineString", coordinates: [[120, 30]] } },
+        {
+          geometry: {
+            type: "Polygon",
+            coordinates: [
+              [
+                [120, 30],
+                [121, 30],
+                [121, 31],
+                [120, 31],
+              ],
+            ],
+          },
+        },
+        { geometry: { type: "Circle", center: [120, 30], radiusMeters: -1 } },
+        {
+          geometry: {
+            type: "LineString",
+            coordinates: Array.from({ length: 257 }, () => [120, 30]),
+          },
+        },
+        {
+          geometry: { type: "Point", coordinates: [120, 30] },
+          provider: "forbidden",
+        },
+      ]) {
+        const response = await app.server.inject({
+          method: "POST",
+          url: proposalUrl(first),
+          headers: headers(),
+          payload: { ...command, queryScope },
+        });
+        expect(response.statusCode).toBe(400);
+      }
+      expect(app.peer.requests).toHaveLength(1);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
   it("G04 inspect -> explicit confirmation -> Control -> new Revision/Grounding -> authoritative Snapshot", async () => {
     const app = await setup({ examples: ["ranking", "action"] });
     try {

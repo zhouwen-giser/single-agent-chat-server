@@ -4,6 +4,10 @@ import type {
 } from "../../analysis-control-runtime/src/index.js";
 import type { WorldAnalysisViewModel } from "../../world-explanation-runtime/src/analysis-view.js";
 import type { FrozenChoiceView } from "../../world-explanation-runtime/src/frozen-analysis-view.js";
+import {
+  queryScopeSchema,
+  type QueryScope,
+} from "../../analysis-contract/src/query-scope.js";
 
 export interface FrozenAnalysisInteractionContext {
   readonly view: WorldAnalysisViewModel;
@@ -151,6 +155,7 @@ export function createFrozenSourceQuery(input: {
   readonly idempotencyKey: string;
   readonly originalText: string;
   readonly contextMode: "CONTINUE" | "REPLACE";
+  readonly queryScope?: QueryScope;
 }): FrozenSourceQueryCommand {
   assertFrozenView(input.context.view);
   assertRevisionNumber(input.context.activeRevisionNumber);
@@ -164,6 +169,9 @@ export function createFrozenSourceQuery(input: {
     expectedRevisionNumber: input.context.activeRevisionNumber,
     originalText: input.originalText,
     contextMode: input.contextMode,
+    ...(input.queryScope === undefined
+      ? {}
+      : { queryScope: queryScopeSchema.parse(input.queryScope) }),
   };
 }
 
