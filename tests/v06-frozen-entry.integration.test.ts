@@ -245,6 +245,20 @@ async function setup(
       .filter((line) => line.startsWith("data: "))
       .map((line) => JSON.parse(line.slice(6)) as Record<string, unknown>);
     expect(events.filter((event) => event["type"] === "RUN_ERROR")).toEqual([]);
+    for (const event of events.filter(
+      (event) => event["type"] === "ACTIVITY_SNAPSHOT",
+    )) {
+      expect(event["activityType"]).toBe("grounding.job");
+      expect(event["content"]).toMatchObject({
+        schemaVersion: "io.sacs/grounding-activity/v1",
+      });
+      const content = event["content"] as Record<string, unknown>;
+      expect(content["phase"]).toBeUndefined();
+      expect(content["progress"]).toBeUndefined();
+    }
+    expect(
+      events.some((event) => String(event["type"]).startsWith("TOOL_CALL")),
+    ).toBe(false);
     return events;
   };
   const chat = async (messageId: string, text: string) => {

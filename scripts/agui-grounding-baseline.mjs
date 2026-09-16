@@ -4,6 +4,29 @@ import { mkdir, writeFile } from "node:fs/promises";
 import process from "node:process";
 
 // Read-only baseline gates: never promote the historical v0.5/v0.6 ledgers.
+const phase = process.argv[2] ?? "S00";
+if (!/^S0[0-7]$/u.test(phase))
+  throw Error("Unknown Grounding presentation phase");
+const sourceStatus = () =>
+  execFileSync(
+    "git",
+    [
+      "status",
+      "--porcelain",
+      "--",
+      "apps",
+      "packages",
+      "src",
+      "tests",
+      "scripts",
+      "contracts",
+      "package.json",
+      "pnpm-lock.yaml",
+    ],
+    { encoding: "utf8" },
+  ).trim();
+if (sourceStatus() !== "")
+  throw Error("Commit source and tests before recording phase evidence");
 const scripts = [
   "typecheck",
   "test:v06:frozen-wsgs",
@@ -55,22 +78,27 @@ for (const script of scripts) {
   if (exitCode !== 0) break;
 }
 const sourceUnchanged =
+  sourceStatus() === "" &&
   sourceSha ===
-  execFileSync("git", ["rev-parse", "HEAD"], {
-    encoding: "utf8",
-  }).trim();
+    execFileSync("git", ["rev-parse", "HEAD"], {
+      encoding: "utf8",
+    }).trim();
 const passed =
   sourceUnchanged &&
   commands.length === scripts.length &&
   commands.every((c) => c.exitCode === 0);
 const directory = "reports/v0.6/agui-v03-grounding-presentation/receipts";
 await mkdir(directory, { recursive: true });
-const path = `${directory}/baseline-${randomUUID()}.json`;
+const path = `${directory}/${phase}-${randomUUID()}.json`;
 await writeFile(
   path,
   JSON.stringify(
     {
-      kind: "pre-change-development-baseline",
+      kind:
+        phase === "S00"
+          ? "pre-change-development-baseline"
+          : "phase-development-regression",
+      phase,
       sourceSha,
       sourceUnchanged,
       postgresImage: env.SACS_V05_POSTGRES_IMAGE ?? "postgres:17-alpine",

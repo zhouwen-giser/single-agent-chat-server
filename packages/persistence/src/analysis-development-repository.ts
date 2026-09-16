@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { groundingActivityForState } from "../../analysis-contract/src/grounding-activity.js";
 
 import type { Pool, PoolClient } from "pg";
 
@@ -3166,13 +3167,31 @@ async function mutateProjection(
 ): Promise<AnalysisProjection> {
   const current = await findProjectionForUpdate(client, analysisId);
   const state = cloneState(current.state);
-  const activity = cloneObject(current.activity);
+  let activity = cloneObject(current.activity);
   mutation(state, activity);
+  const revisionId = state.analysis.activeRevisionId;
+  if (
+    revisionId &&
+    state.analysis.revisionsById[revisionId]?.source?.kind ===
+      "WSGS_GROUNDING_JOB"
+  ) {
+    activity = groundingActivityForState(
+      state,
+      activity,
+      current.activityRevision,
+    );
+  }
   state.meta.stateRevision = current.stateRevision + 1;
   state.meta.snapshotHash = calculateAgUiStateSnapshotHash(state);
   const parsed = agUiSharedStateV03Schema.parse(state);
   const activityChanged =
     canonicalJson(activity) !== canonicalJson(current.activity);
+  if (
+    activityChanged &&
+    activity["schemaVersion"] === "io.sacs/grounding-activity/v1"
+  ) {
+    activity["meta"] = { activityRevision: current.activityRevision + 1 };
+  }
   return upsertProjection(client, {
     ...current,
     stateRevision: current.stateRevision + 1,

@@ -1,4 +1,9 @@
 import { createHash, randomUUID } from "node:crypto";
+import {
+  GROUNDING_ACTIVITY_TYPE,
+  groundingActivityMessageId,
+  groundingActivityForState,
+} from "../../../packages/analysis-contract/src/grounding-activity.js";
 import { z } from "zod";
 import {
   createWsgsHttpClient,
@@ -738,9 +743,17 @@ export function createV06GroundingAnalysis(input: {
         state: latest.state,
       });
       yield projectAnalysisActivitySnapshot({
-        messageId: "activity-" + analysisId,
+        messageId: groundingActivityMessageId({
+          analysisId,
+          revisionId: observation.snapshot.analysis.activeRevisionId!,
+        }),
+        activityType: GROUNDING_ACTIVITY_TYPE,
         activityRevision: latest.activityRevision,
-        content: latest.activity,
+        content: groundingActivityForState(
+          observation.snapshot,
+          latest.activity,
+          latest.activityRevision,
+        ),
       });
     }
     if (context.signal.aborted) return;
@@ -779,9 +792,17 @@ export function createV06GroundingAnalysis(input: {
         identity,
         stateRevision: latest.stateRevision,
         state: latest.state,
-        activityMessageId: "activity-" + analysisId,
+        activityMessageId: groundingActivityMessageId({
+          analysisId,
+          revisionId: state.analysis.activeRevisionId!,
+        }),
+        activityType: GROUNDING_ACTIVITY_TYPE,
         activityRevision: latest.activityRevision,
-        activity: latest.activity,
+        activity: groundingActivityForState(
+          state,
+          latest.activity,
+          latest.activityRevision,
+        ),
         interrupts: [
           {
             id: state.pendingIntervention.interruptId,
