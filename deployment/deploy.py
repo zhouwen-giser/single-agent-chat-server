@@ -123,6 +123,12 @@ def db_versions(comp):
     return dict(line.split('|', 1) for line in raw.decode().splitlines())
 
 
+def ready(comp):
+    # /ready performs a real model probe. Do it once, not every health interval.
+    check = "const r=await fetch('http://127.0.0.1:3000/ready',{signal:AbortSignal.timeout(150000)});if(!r.ok)process.exit(1);console.log('readiness PASS');"
+    comp('exec', '-T', 'server', 'node', '--input-type=module', '-e', check, timeout=180)
+
+
 def assert_rollback_compatible(current, target, applied):
     # No down migration: only an exact schema set is allowed for automatic rollback.
     if current['migrations'] != target['migrations'] or applied != target['migrations']:
@@ -179,6 +185,7 @@ def main():
             assert_rollback_compatible(manifest, target_manifest, db_versions(comp))
             old_comp = compose(target, shared, target_manifest, args)
             old_comp('up', '-d', '--no-deps', '--wait', '--wait-timeout', '240', 'server')
+            ready(old_comp)
             point(previous, package)
             point(current, target)
             print('Application rollback complete; database unchanged.')
@@ -221,6 +228,7 @@ def main():
         comp('run', '--rm', '--no-deps', 'server', 'node', '--input-type=module', '-e', migrate)
         try:
             comp('up', '-d', '--no-deps', '--wait', '--wait-timeout', '240', 'server', timeout=300)
+            ready(comp)
         except Exception:
             if old:
                 old_manifest = verify(old)
