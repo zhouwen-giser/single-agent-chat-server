@@ -57,5 +57,11 @@ Added local installer state-machine tests for startup-failure marker retention,
 compatible application restoration, success marker switching and rollback;
 4 deployment tooling tests PASS. No real service outage was induced by tests.
 
+Additional update hardening: an existing SACS container on a different port
+does not bypass the target-port conflict check. Rollback writes a receipt for
+the restored image instead of leaving the newer release's receipt. Deployment
+tooling suite now has 5 passing tests. GitHub run 35072942873 passed both
+quality and container jobs, including SBOM; subsequent commits rerun CI.
+
 No claim of complete v0.6 advanced analysis, free time windows, production
 authentication, tenant isolation or physical-device execution is made.

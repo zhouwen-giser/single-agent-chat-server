@@ -124,7 +124,7 @@ with tempfile.TemporaryDirectory() as folder:
   if args[:3]==['docker','image','inspect']:return b'[{"Id":"image-id"}]'
   if args[:2]==['docker','ps']:return b'owned-container'
   return b''
- d.run=run;calls=[];fail=True
+ d.run=run;d.check_port=lambda *a:None;calls=[];fail=True
  def compose(package,*a):
   def comp(*args,**kw):
    calls.append((str(package),args))
@@ -151,5 +151,32 @@ print('PASS')
       { encoding: "utf8" },
     );
     expect(output.trim().endsWith("PASS")).toBe(true);
+  });
+  it("rejects occupied targets even when SACS already exists on another port", () => {
+    const output = execFileSync(
+      "python3",
+      [
+        "-B",
+        "-c",
+        `
+import importlib.util,socket,json
+spec=importlib.util.spec_from_file_location('deploy','deployment/deploy.py')
+d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)
+with socket.socket() as server:
+ server.bind(('127.0.0.1',0));port=server.getsockname()[1]
+ mapped=port+1
+ def run(args,**kw):
+  if args[:2]==['docker','ps']:return b'owned-container'
+  return json.dumps([{'NetworkSettings':{'Ports':{'3000/tcp':[{'HostIp':'127.0.0.1','HostPort':str(mapped)}]}}}]).encode()
+ d.run=run
+ try:d.check_port('127.0.0.1',port);raise AssertionError('accepted foreign port owner')
+ except OSError:pass
+ mapped=port;d.check_port('127.0.0.1',port)
+print('PASS')
+`,
+      ],
+      { encoding: "utf8" },
+    );
+    expect(output.trim()).toBe("PASS");
   });
 });

@@ -143,6 +143,27 @@ def point(link, destination):
     temp.replace(link)
 
 
+def check_port(bind, port):
+    existing = run(['docker', 'ps', '-q', '--filter', 'label=com.docker.compose.project=sacs-dev', '--filter', 'label=com.docker.compose.service=server']).decode().split()
+    if existing:
+        inspected = json.loads(run(['docker', 'inspect', *existing]))
+        for container in inspected:
+            ports = container.get('NetworkSettings', {}).get('Ports', {}).get('3000/tcp') or []
+            if any(p['HostIp'] == bind and p['HostPort'] == str(port) for p in ports):
+                return
+    # An existing SACS on another port is not proof that this target is free.
+    with socket.socket() as probe:
+        probe.bind((bind, port))
+
+
+def receipt(shared, manifest, release, args):
+    write_private(shared / 'deployment-receipt.json', json.dumps({
+        'status': 'READY', 'sourceSha': manifest['sourceSha'], 'imageId': manifest['imageId'],
+        'release': str(release), 'endpoint': f'http://{args.bind}:{args.port}',
+        'businessAcceptance': 'NOT_RUN', 'timestamp': time.time(),
+    }, indent=2) + '\n')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=['preflight', 'install', 'status', 'rollback'])
@@ -188,13 +209,11 @@ def main():
             ready(old_comp)
             point(previous, package)
             point(current, target)
+            receipt(shared, target_manifest, target, args)
             print('Application rollback complete; database unchanged.')
             return
         # Refuse a foreign port owner before touching any containers.
-        existing = run(['docker', 'ps', '-q', '--filter', 'label=com.docker.compose.project=sacs-dev', '--filter', 'label=com.docker.compose.service=server']).strip()
-        if not existing:
-            with socket.socket() as probe:
-                probe.bind((args.bind, args.port))
+        check_port(args.bind, args.port)
         if shutil.disk_usage(root).free < (package / 'images.tar').stat().st_size * 2 + 1024**3:
             raise RuntimeError('Insufficient free disk space')
         private_configuration(shared, json.loads((package / 'runtime.defaults.json').read_text()), args.model_container)
@@ -238,11 +257,7 @@ def main():
         if old and old != release:
             point(root / 'previous', old)
         point(current, release)
-        write_private(shared / 'deployment-receipt.json', json.dumps({
-            'status': 'READY', 'sourceSha': manifest['sourceSha'], 'imageId': manifest['imageId'],
-            'release': str(release), 'endpoint': f'http://{args.bind}:{args.port}',
-            'businessAcceptance': 'NOT_RUN', 'timestamp': time.time(),
-        }, indent=2) + '\n')
+        receipt(shared, manifest, release, args)
         print(f'SACS READY: http://{args.bind}:{args.port}; shared anonymous development access.')
 
 
