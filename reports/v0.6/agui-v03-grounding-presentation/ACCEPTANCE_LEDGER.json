@@ -24,7 +24,16 @@
         "tests/v06-frozen-client.unit.test.ts: AC-025 AC-036 expiry and requery"
       ]
     },
-    { "id": "G06", "status": "NOT_RUN", "evidence": [] },
+    {
+      "id": "G06",
+      "status": "PASS",
+      "sourceSha": "43b0785fca7264dc7b8be1c2e6d2a2fa5cd9cf05",
+      "evidence": [
+        "receipts/S05-71ed2f7f-a951-4f3c-a38f-663d18f67351.json",
+        "tests/v06-frozen-entry.integration.test.ts: G06 CONTINUE/REPLACE and S05 malformed scope",
+        "tests/v06-frozen-map-query.unit.test.ts"
+      ]
+    },
     {
       "id": "G07",
       "status": "PASS",

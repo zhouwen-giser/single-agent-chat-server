@@ -22,4 +22,8 @@ S03 full CI exposed an old v0.5 E2E assertion expecting local pins in shared sta
 
 S04 passed at `445a111`: explicit local candidate inspection/confirmation now closes through Analysis Control, a new Revision/Grounding, and authoritative Snapshot. G04 and G05 are directly verified. The gate passed 585 frozen tests, 14 PostgreSQL tests and 10 v0.5/v0.6 HTTP/SSE E2E tests. See `S04.md` for precise scope, validation failures encountered and observer-reconnect correction.
 
-Remaining: S05 validated geometry requery, S06 recovery/concurrency hardening, S07 complete local and real-source acceptance. No final completion marker is emitted.
+S03 CI correction and S04 full CI are confirmed successful, including quality and container jobs; see `CI_S03_FOLLOWUP.json` and `CI_S04.json` for exact commits and runs.
+
+S05 passed at `43b0785`: validated local query scopes now submit explicitly through normal Source Query/Control into a new Revision/Grounding, with exact public MapSelection geometry/hash, CONTINUE/REPLACE, generation/Revision fences and idempotency conflict checks. G06 is directly verified. The phase gate passed 602 frozen tests, 14 PostgreSQL tests and 10 HTTP/SSE E2E tests. See `S05.md` and the reference-client API guide; schema acceptance of opaque geometry is not a claim of live spatial operation support.
+
+Remaining: S06 recovery/concurrency hardening, S07 complete local and real-source acceptance. A fresh read-only capabilities check showed exact 1.2 and six available capabilities, but no new real business request has been submitted. No final completion marker is emitted.

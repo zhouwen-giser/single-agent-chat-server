@@ -6,5 +6,31 @@
     { "id": "R02", "status": "NOT_RUN", "evidence": [] }
   ],
   "completionMarkers": [],
+  "latestReadOnlyPreflight": {
+    "observedAt": "2026-09-16T14:55:03.408Z",
+    "request": "GET http://17.26.1.20:18082/v1/capabilities",
+    "requestHeaders": {
+      "wsgs-contract-version": "sacs-wsgs-grounding/1.2",
+      "wsgs-result-profile": "wsgs-world-analysis-findings/1.0"
+    },
+    "timeoutMs": 120000,
+    "redirectPolicy": "error",
+    "commandExitCode": 0,
+    "httpStatus": 200,
+    "elapsedMs": 11655,
+    "exactContractNegotiation": true,
+    "requiredCapabilitiesReady": true,
+    "availableCapabilities": [
+      "HISTORICAL_TRACE",
+      "ROAD_ASSOCIATION",
+      "TEMPORAL_EVENT",
+      "CROSS",
+      "METRIC_RANKING",
+      "ACTION_TARGET_CANDIDATE"
+    ],
+    "responseHash": "sha256:58ee9c33b7fe169a0af6a92102eb86c3273d5fc6d8ca8c41fa2a8210430fa9b0",
+    "businessRequestsSubmitted": 0,
+    "acceptanceClaim": false
+  },
   "note": "Prior site/deployment evidence does not verify the new Activity and interaction contract. No real task has been submitted in this round."
 }
