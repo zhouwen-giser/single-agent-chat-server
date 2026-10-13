@@ -1,0 +1,221 @@
+{
+  "schemaVersion": "sacs-functional-gate/1.0",
+  "mode": "development",
+  "sourceSha": "b118b193b0715f81c9851a9ec974c3c838c07fa3",
+  "sourceManifestSha256": "sha256:61905dd3158c56256e495fa3a45f3a141caf256434f0518ace5a88232b5892e9",
+  "status": "DEVELOPMENT_CHECKS_PASS",
+  "checks": [
+    {
+      "id": "format",
+      "command": [
+        "corepack",
+        "pnpm",
+        "format:check"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 13565,
+      "log": ".tmp/v06-functional-gate/format.txt",
+      "outputSha256": "sha256:09711dd0b8bf4fe5d492ddab225ef424be4e0848d33a9eeda9684f4da3e0a16f"
+    },
+    {
+      "id": "lint",
+      "command": [
+        "corepack",
+        "pnpm",
+        "lint"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 9534,
+      "log": ".tmp/v06-functional-gate/lint.txt",
+      "outputSha256": "sha256:789a205bfc328c3e8560c87828653e2d8fcdabd304168de5a81b8c4c5d10d141"
+    },
+    {
+      "id": "types",
+      "command": [
+        "corepack",
+        "pnpm",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 10743,
+      "log": ".tmp/v06-functional-gate/types.txt",
+      "outputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "id": "architecture",
+      "command": [
+        "corepack",
+        "pnpm",
+        "verify:architecture"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 578,
+      "log": ".tmp/v06-functional-gate/architecture.txt",
+      "outputSha256": "sha256:bd9ebca699e5e15a94c6cd00c81a85a86a2478b73c36c917cdfe52736e23c994"
+    },
+    {
+      "id": "migrations",
+      "command": [
+        "corepack",
+        "pnpm",
+        "verify:migrations"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 499,
+      "log": ".tmp/v06-functional-gate/migrations.txt",
+      "outputSha256": "sha256:15cbf7fc21b48526482cf7ebe9f82cd071adbadbb769e88ab7544faf37d5689c"
+    },
+    {
+      "id": "licenses",
+      "command": [
+        "corepack",
+        "pnpm",
+        "verify:licenses"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1101,
+      "log": ".tmp/v06-functional-gate/licenses.txt",
+      "outputSha256": "sha256:7eef6b9e0c6624755ee90f82c8f5e684a85b8cc72aed9db136fc4a3bdfa1211f"
+    },
+    {
+      "id": "secrets",
+      "command": [
+        "corepack",
+        "pnpm",
+        "verify:secrets"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 912,
+      "log": ".tmp/v06-functional-gate/secrets.txt",
+      "outputSha256": "sha256:19411203ff3aeba2fc9ce2d39335e4b5fce1c1c8bb60f6f8942513afa7820bbb"
+    },
+    {
+      "id": "build",
+      "command": [
+        "corepack",
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 11997,
+      "log": ".tmp/v06-functional-gate/build.txt",
+      "outputSha256": "sha256:55a0526da187f8e3ba26a6ac340487a3cb6ace5a6a51ffd76c8d516d29deb709"
+    },
+    {
+      "id": "frozen",
+      "command": [
+        "node",
+        "scripts/v06-frozen-tests.mjs",
+        "all"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 183192,
+      "log": ".tmp/v06-functional-gate/frozen.txt",
+      "outputSha256": "sha256:025feb296c50b7f5500324db2ab045a518bed107ceab6a9e08e63ca614af214b"
+    },
+    {
+      "id": "browser",
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:browser"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 13593,
+      "log": ".tmp/v06-functional-gate/browser.txt",
+      "outputSha256": "sha256:0ae5071703ebcd8c48632506932ab1661f8d40b23f4b02dfec795782d5e333a5"
+    },
+    {
+      "id": "browser-postgres",
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:browser:postgres"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 37190,
+      "log": ".tmp/v06-functional-gate/browser-postgres.txt",
+      "outputSha256": "sha256:538329ab45782947ba4f629603e6c13d85588f85baf5ab5f403d987698adec3d"
+    },
+    {
+      "id": "process",
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:process"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 210590,
+      "log": ".tmp/v06-functional-gate/process.txt",
+      "outputSha256": "sha256:37f1840e845473b1325432b3f33c0c707dbf5e0dc0de7d199f9a207d857bbf74"
+    },
+    {
+      "id": "checkpoint",
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:checkpoint"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 3712,
+      "log": ".tmp/v06-functional-gate/checkpoint.txt",
+      "outputSha256": "sha256:adadb05737dcdadbd45656d08dc93fd1ff41e3ad7572c290d08f178ba86d4126"
+    },
+    {
+      "id": "postgres",
+      "command": [
+        "node",
+        "scripts/v05-postgres-test-harness.mjs",
+        "tests/v06-source-persistence.postgres.int.test.ts",
+        "tests/v06-grounding-lifecycle.postgres.int.test.ts",
+        "tests/v06-analysis-local.e2e.test.ts",
+        "tests/persistence.postgres.int.test.ts",
+        "tests/analysis-development-persistence.postgres.int.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 13980,
+      "log": ".tmp/v06-functional-gate/postgres.txt",
+      "outputSha256": "sha256:c71d518bc29e9d60bd88ad53303e9c2ae009b706600f3ead4ce3532d8dcf5f10"
+    },
+    {
+      "id": "real-input-contract",
+      "command": [
+        "node",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "tests/v06-functional-real-cases.unit.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1014,
+      "log": ".tmp/v06-functional-gate/real-input-contract.txt",
+      "outputSha256": "sha256:1ae705c3c298170c5f3216004d4e27995dbbbfe47127cff5d133f14bba448d01"
+    }
+  ],
+  "requiredRows": [
+    "FC-01",
+    "FC-02",
+    "FC-03",
+    "FC-04",
+    "FC-05",
+    "FC-06",
+    "FC-07",
+    "FC-08",
+    "FC-09",
+    "FC-10",
+    "FC-11",
+    "FC-12",
+    "FC-13",
+    "FC-14",
+    "FC-15",
+    "FC-16",
+    "FC-17",
+    "FC-18",
+    "FC-19",
+    "FC-20",
+    "FC-21",
+    "FC-22",
+    "FC-32",
+    "FC-33"
+  ]
+}

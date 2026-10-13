@@ -41,16 +41,17 @@ with 12 browser/identity checks, 71 API/security tests and four PostgreSQL tests
 R04 adds explicit choice/query/cancel/recovery controls with four Chromium/PostgreSQL
 scenarios and 79 impacted client regressions. R05 fixes checkpoint-pool crashes on database restart and proves eight subprocess
 fault cases with the production 180-second lease / 30-second recovery tick.
-R07 adds actual development/integration/release gates, a source-bound full
-local qualification and a dedicated hosted functional job. The 684 frozen tests
-and browser/database/process checks pass. The first hosted quality job exposed
-a missing browser-build prerequisite in the generic integration command; that
-entry is repaired and the new candidate CI is pending. Twenty-three development
-rows PASS, one development row awaits current CI, and nine real WSGS, one release
-and four conditional extension rows are BLOCKED_EXTERNAL in the
+R07 adds actual development/integration/release gates and source-bound delivery
+proof. Candidate e4a26ec passed hosted quality, functional-v06 and container CI;
+the downloaded fifteen-step functional evidence matches the local source hash.
+All 24 development rows PASS with the marker
+`SACS_V06_FUNCTIONAL_DEVELOPMENT_READY`. Nine real WSGS, one release and four
+conditional extension rows remain BLOCKED_EXTERNAL in the
 [acceptance matrix](config/v0.6/functional-closure/acceptance-matrix.json).
-Native Analysis and SDAR grounding extensions have separate authoritative
-contract prerequisites. See the [current run guide](reports/v0.6/functional-closure/SOURCE_RUN.md). See [Project status](PROJECT_STATUS.md)
+Advanced real runner extensions/execution await current authorized material.
+Native Analysis and SDAR grounding extensions require authoritative public
+contracts. See the [repair report](reports/v0.6/functional-closure/FINAL_REPORT.md)
+and [run guide](reports/v0.6/functional-closure/SOURCE_RUN.md). See [Project status](PROJECT_STATUS.md)
 for the current decision and the historical scope of older reports.
 
 The Grounding Job consumer uses the exact `sacs-wsgs-grounding/1.2` and

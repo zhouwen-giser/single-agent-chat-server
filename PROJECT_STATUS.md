@@ -24,16 +24,21 @@ subprocess fault cases, checkpoint channel restoration and 32 PostgreSQL
 regressions. Its five rows PASS with the actual 180-second lease / 30-second tick.
 R06 validates fresh authorized case material but has no current case file, so
 nine real rows and four conditional extension rows are `BLOCKED_EXTERNAL`, with
-zero real business submissions. R07 has source-bound full local qualification,
-actual development/integration/release entrypoints, a candidate image/SBOM and a
-[run guide](reports/v0.6/functional-closure/SOURCE_RUN.md). The hosted functional-v06
-job passed for 4166089; quality exposed the generic integration command missing
-the browser-build prerequisite. That entry is fixed, with four current browser
-controls checks passing, and a new complete CI run is required. In the
-[new matrix](config/v0.6/functional-closure/acceptance-matrix.json), 23 development
-rows PASS and FC-33 awaits current CI; nine real WSGS rows, FC-34 release and four
-conditional extension rows remain BLOCKED_EXTERNAL. No full functional or release
-completion marker is asserted.
+zero real business submissions. R07 completes development qualification with
+actual development/integration/release entrypoints, a source-bound candidate
+image/SBOM and a [run guide](reports/v0.6/functional-closure/SOURCE_RUN.md).
+Candidate e4a26ec passed all three hosted jobs: quality, functional-v06 and
+container. Its downloaded fifteen-check evidence matches the current runnable
+source manifest, including every output hash. The generic integration command
+now prepares browser assets before its tests.
+
+Current decision: `SACS_V06_FUNCTIONAL_DEVELOPMENT_READY`. All 24 development
+rows PASS in the [new matrix](config/v0.6/functional-closure/acceptance-matrix.json).
+Nine real WSGS rows, FC-34 release and four conditional extension rows remain
+BLOCKED_EXTERNAL. Advanced real runner extensions/execution await current
+authorized material; Native/SDAR adapters await authoritative public contracts.
+Overall main-track functional and release completion remain pending. See the
+[current repair report](reports/v0.6/functional-closure/FINAL_REPORT.md).
 
 The v0.5 and earlier decisions below retain their historical scope; they are
 not the current v0.6 production-composition decision.

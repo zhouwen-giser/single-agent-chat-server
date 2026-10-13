@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "sacs-functional-hosted-ci/1.0",
+  "headSha": "e4a26ec3d268b5cc055a9a33b4393c3fecac0f86",
+  "checkoutMergeSha": "b118b193b0715f81c9851a9ec974c3c838c07fa3",
+  "sourceManifestSha256": "sha256:61905dd3158c56256e495fa3a45f3a141caf256434f0518ace5a88232b5892e9",
+  "sourceManifestMatchesLocalCandidate": true,
+  "runId": 38439667536,
+  "url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/38439667536",
+  "status": "PASS",
+  "jobs": [
+    {
+      "id": 115442645827,
+      "name": "functional-v06",
+      "head_sha": "e4a26ec3d268b5cc055a9a33b4393c3fecac0f86",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-13T17:33:54Z",
+      "completed_at": "2026-10-13T17:43:16Z",
+      "html_url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/38439667536/job/115442645827"
+    },
+    {
+      "id": 115442646103,
+      "name": "quality",
+      "head_sha": "e4a26ec3d268b5cc055a9a33b4393c3fecac0f86",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-13T17:33:54Z",
+      "completed_at": "2026-10-13T17:41:48Z",
+      "html_url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/38439667536/job/115442646103"
+    },
+    {
+      "id": 115446302744,
+      "name": "container",
+      "head_sha": "e4a26ec3d268b5cc055a9a33b4393c3fecac0f86",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-13T17:41:50Z",
+      "completed_at": "2026-10-13T17:43:14Z",
+      "html_url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/38439667536/job/115446302744"
+    }
+  ],
+  "developmentEvidence": {
+    "rawReport": "DEVELOPMENT.txt",
+    "rawReportSha256": "sha256:833a10c9f390b0cf0184fff5dd232f8de3d0e49e8dbe1d289ed3f057114797ef",
+    "checks": 15,
+    "allExitCodesZero": true,
+    "allDownloadedLogHashesVerified": true
+  },
+  "artifact": {
+    "id": 11834378695,
+    "zipSha256": "sha256:3ac5c8f6987fd326ba4390b03aa450ca1732cf51184194f18a657f28113fc289",
+    "zipPath": "/home/sz/code/single-agent-chat-server/.tmp/r07-hosted-development-e4a26ec.zip"
+  },
+  "logs": [
+    "format.txt",
+    "lint.txt",
+    "types.txt",
+    "architecture.txt",
+    "migrations.txt",
+    "licenses.txt",
+    "secrets.txt",
+    "build.txt",
+    "frozen.txt",
+    "browser.txt",
+    "browser-postgres.txt",
+    "process.txt",
+    "checkpoint.txt",
+    "postgres.txt",
+    "real-input-contract.txt"
+  ],
+  "hostedSbom": {
+    "artifactId": 11834453081,
+    "zipSha256": "sha256:c6fc46c390928f5b8d5ebc4a00cbe8ea1f2040331bc745e515f31b7dc20b4214",
+    "sbomSha256": "sha256:920432268dec41e23d4d685f45b2dbe33f376efdb3ce5c7cf1c43bef36ca54a0",
+    "components": 3720,
+    "path": "/home/sz/code/single-agent-chat-server/.tmp/r07-hosted-e4a26ec-sbom.cdx.json"
+  }
+}

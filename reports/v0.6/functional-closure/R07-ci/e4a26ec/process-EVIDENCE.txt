@@ -1,0 +1,217 @@
+{
+  "status": "PASS",
+  "leaseMs": 180000,
+  "recoveryTickMs": 30000,
+  "cases": [
+    {
+      "name": "prepare",
+      "status": "PASS",
+      "canonicalRequestSha256": "sha256:048157eb48d85720d388df1cc15e8c1020716886829dae70dca6c2d40564c4f1",
+      "postAttempts": 1,
+      "logicalJobs": 1,
+      "getCalls": 1,
+      "cancelPosts": 0,
+      "sourceStatus": "COMPLETED",
+      "recoveredAtMs": 203572
+    },
+    {
+      "name": "bind",
+      "status": "PASS",
+      "canonicalRequestSha256": "sha256:2a4e01b736656cdfb60f85505650760e88a951b989a4868b40715d1c66675771",
+      "postAttempts": 1,
+      "logicalJobs": 1,
+      "getCalls": 1,
+      "cancelPosts": 0,
+      "sourceStatus": "COMPLETED",
+      "recoveredAtMs": 204317
+    },
+    {
+      "name": "running",
+      "status": "PASS",
+      "canonicalRequestSha256": "sha256:576c41a52f3f292e077265d3523026f5d6ac573334aac34f5341fa7e7ccf1cfd",
+      "postAttempts": 1,
+      "logicalJobs": 1,
+      "getCalls": 2,
+      "cancelPosts": 0,
+      "sourceStatus": "COMPLETED",
+      "recoveredAtMs": 205281
+    },
+    {
+      "name": "terminal",
+      "status": "PASS",
+      "canonicalRequestSha256": "sha256:979248651a5d7fe3819a32e4774dbe568114f8b28fabb87b55507de826e6407c",
+      "postAttempts": 1,
+      "logicalJobs": 1,
+      "getCalls": 1,
+      "cancelPosts": 0,
+      "sourceStatus": "COMPLETED",
+      "recoveredAtMs": 205289
+    },
+    {
+      "name": "late",
+      "status": "PASS",
+      "canonicalRequestSha256": "sha256:7a0226e1f3c53e02fc61222cc742ab9c0d266678d61cd6bc29e4168f50ff5e03",
+      "postAttempts": 1,
+      "logicalJobs": 1,
+      "getCalls": 2,
+      "cancelPosts": 0,
+      "sourceStatus": "COMPLETED",
+      "recoveredAtMs": 206307
+    },
+    {
+      "name": "unsure",
+      "status": "PASS",
+      "canonicalRequestSha256": "sha256:f8d49654bc83089f501a758d1572f7cd44b1e51653ee653ecf4c7f98b7829cf8",
+      "postAttempts": 2,
+      "logicalJobs": 1,
+      "getCalls": 1,
+      "cancelPosts": 0,
+      "sourceStatus": "COMPLETED",
+      "recoveredAtMs": 207175
+    },
+    {
+      "name": "cancel",
+      "status": "PASS",
+      "canonicalRequestSha256": "sha256:bd5a52b202f5c6d9e110e5c03684e7b7f544343868ad5a1acfab1ccdc4f76937",
+      "postAttempts": 1,
+      "logicalJobs": 1,
+      "getCalls": 3,
+      "cancelPosts": 2,
+      "sourceStatus": "CANCELLED",
+      "recoveredAtMs": 207184
+    },
+    {
+      "name": "outage",
+      "status": "PASS",
+      "canonicalRequestSha256": "sha256:d10dcfc2dd55ead59556be0497ae83875ccf85fbca87e6d9c6d5249812ff6f76",
+      "postAttempts": 1,
+      "logicalJobs": 1,
+      "getCalls": 3,
+      "cancelPosts": 0,
+      "sourceStatus": "COMPLETED",
+      "recoveredAtMs": 207299
+    }
+  ],
+  "lifecycle": [
+    {
+      "event": "start",
+      "pid": 4978,
+      "atMs": 3026
+    },
+    {
+      "event": "exit",
+      "pid": 4978,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 3570
+    },
+    {
+      "event": "start",
+      "pid": 5003,
+      "atMs": 5476
+    },
+    {
+      "event": "exit",
+      "pid": 5003,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 6098
+    },
+    {
+      "event": "start",
+      "pid": 5017,
+      "atMs": 8111
+    },
+    {
+      "event": "exit",
+      "pid": 5017,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 9034
+    },
+    {
+      "event": "start",
+      "pid": 5037,
+      "atMs": 10947
+    },
+    {
+      "event": "exit",
+      "pid": 5037,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 11868
+    },
+    {
+      "event": "start",
+      "pid": 5052,
+      "atMs": 13779
+    },
+    {
+      "event": "exit",
+      "pid": 5052,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 14708
+    },
+    {
+      "event": "start",
+      "pid": 5068,
+      "atMs": 16717
+    },
+    {
+      "event": "exit",
+      "pid": 5068,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 17244
+    },
+    {
+      "event": "start",
+      "pid": 5082,
+      "atMs": 19253
+    },
+    {
+      "event": "exit",
+      "pid": 5082,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 20511
+    },
+    {
+      "event": "start",
+      "pid": 5097,
+      "atMs": 22423
+    },
+    {
+      "event": "database-restart-begin",
+      "pid": 5097,
+      "atMs": 23352
+    },
+    {
+      "event": "database-reopen",
+      "pid": 5097,
+      "atMs": 23781
+    },
+    {
+      "event": "start",
+      "pid": 5274,
+      "atMs": 25790
+    },
+    {
+      "event": "exit",
+      "pid": 5097,
+      "code": 0,
+      "signal": null,
+      "atMs": 207333
+    },
+    {
+      "event": "exit",
+      "pid": 5274,
+      "code": 0,
+      "signal": null,
+      "atMs": 207354
+    }
+  ],
+  "cleanup": "PASS",
+  "elapsedMs": 207406
+}
