@@ -1,0 +1,112 @@
+{
+  "status": "FAILED",
+  "leaseMs": 180000,
+  "recoveryTickMs": 30000,
+  "cases": [],
+  "lifecycle": [
+    {
+      "event": "start",
+      "pid": 3761863,
+      "atMs": 4293
+    },
+    {
+      "event": "exit",
+      "pid": 3761863,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 5170
+    },
+    {
+      "event": "start",
+      "pid": 3762895,
+      "atMs": 7985
+    },
+    {
+      "event": "exit",
+      "pid": 3762895,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 8932
+    },
+    {
+      "event": "start",
+      "pid": 3763898,
+      "atMs": 11642
+    },
+    {
+      "event": "exit",
+      "pid": 3763898,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 13284
+    },
+    {
+      "event": "start",
+      "pid": 3765002,
+      "atMs": 16096
+    },
+    {
+      "event": "exit",
+      "pid": 3765002,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 17442
+    },
+    {
+      "event": "start",
+      "pid": 3766023,
+      "atMs": 20254
+    },
+    {
+      "event": "exit",
+      "pid": 3766023,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 21795
+    },
+    {
+      "event": "start",
+      "pid": 3767003,
+      "atMs": 24607
+    },
+    {
+      "event": "exit",
+      "pid": 3767003,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 25553
+    },
+    {
+      "event": "start",
+      "pid": 3767811,
+      "atMs": 28262
+    },
+    {
+      "event": "exit",
+      "pid": 3767811,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 30156
+    },
+    {
+      "event": "start",
+      "pid": 3768979,
+      "atMs": 32868
+    },
+    {
+      "event": "database-restart-begin",
+      "pid": 3768979,
+      "atMs": 34292
+    },
+    {
+      "event": "exit",
+      "pid": 3768979,
+      "code": 1,
+      "signal": null,
+      "atMs": 34440
+    }
+  ],
+  "failure": "expect(received).toBeUndefined()\n\nReceived: {\"code\": 1, \"signal\": null}",
+  "cleanup": "PASS",
+  "elapsedMs": 36307
+}

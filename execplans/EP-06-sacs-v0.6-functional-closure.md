@@ -141,7 +141,7 @@ HTTP 200、RUN_FINISHED、capability advertising 和空结果不等于正向验�
 
 新增本计划自己的 development/integration/release 检查入口，命令名称和实际执行在对应阶段提交时一起交付。现有 `verify:v05:integration`、`verify:v05:release` 保留历史范围说明，不能改成无条件成功，也不能让它们冒充 v0.6 验收。
 
-DEVELOPMENT 要求 FC-01–FC-22、FC-32/33 和当前源码的必要回归通过；REAL_WSGS 要求 FC-23–FC-31 逐项通过；发布候选再要求 FC-34 及适用的部署/网络/负载资格。R01–R04 的 FC-01–FC-17 已有直接 PASS 证据，其余新行仍为 `NOT_RUN`。任一真实必需项外部阻塞时，开发报告可单独完成，但整体真实集成保持待完成。
+DEVELOPMENT 要求 FC-01–FC-22、FC-32/33 和当前源码的必要回归通过；REAL_WSGS 要求 FC-23–FC-31 逐项通过；发布候选再要求 FC-34 及适用的部署/网络/负载资格。R01–R05 的 FC-01–FC-22 已有直接 PASS 证据，其余新行仍为 `NOT_RUN`。任一真实必需项外部阻塞时，开发报告可单独完成，但整体真实集成保持待完成。
 
 最终稳定代码执行一次冻结回归、相关 PostgreSQL/本地 E2E、浏览器回归、安全/架构/迁移/许可检查和 build；候选提交运行 CI 质量与容器 Gate。新改动、失败或未解决疑点才扩大或重复检查。R00 仅为方案文档，检查格式、链接、矩阵、基线一致性；不为文档改动重复执行此前已通过的 629 项业务测试。
 
@@ -172,7 +172,8 @@ EXT-03 的离线验证/组合工作可在合同到位后完成；EXT-04 的真�
 - R02：FC-07–FC-09 PASS，105 项定向及 13 项隔离 PostgreSQL 测试通过，五项隔离容器场景通过，见 [R02 报告](../reports/v0.6/functional-closure/R02.md)。
 - R03：FC-10–FC-13 PASS，12 项浏览器/身份检查、71 项安全/API 回归和 4 项 PostgreSQL 检查通过，见 [R03 报告](../reports/v0.6/functional-closure/R03.md)。
 - R04：FC-14–FC-17 PASS，12 项浏览器回归、4 项 Chromium/PostgreSQL 控制场景及 79 项 client/entry/link 回归通过，见 [R04 报告](../reports/v0.6/functional-closure/R04.md)。
-- R05–R07：尚未完成，对应验收行为 `NOT_RUN`。
+- R05：FC-18–FC-22 PASS，八个实际进程故障场景约 224 秒通过，checkpoint 断库读回及 32 项 PostgreSQL 回归通过，见 [R05 报告](../reports/v0.6/functional-closure/R05.md)。
+- R06/R07：尚未完成，对应验收行为 `NOT_RUN`。
 - N01/E01：条件扩展，合同与真实可用性待后续预检；不宣称功能完成。
 
-下一步为 R05 进程 SIGKILL、数据库中断与并发恢复。
+下一步为 R06 当前授权真实源材料预检及逐项真实验收，同时准备 R07 当前源码验证。

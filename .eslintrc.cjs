@@ -19,6 +19,7 @@ module.exports = {
         "scripts/v06-functional-compose.mjs",
         "scripts/build-analysis-web.mjs",
         "scripts/v06-browser-tests.mjs",
+        "scripts/v06-process-tests.mjs",
       ],
       parserOptions: { project: null },
       env: { node: true, es2022: true },

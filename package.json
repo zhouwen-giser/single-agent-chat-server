@@ -163,7 +163,9 @@
     "verify": "pnpm verify:phase13",
     "build:analysis-web": "node scripts/build-analysis-web.mjs",
     "test:v06:browser": "node scripts/v06-browser-tests.mjs",
-    "test:v06:browser:postgres": "node scripts/v06-browser-tests.mjs --postgres"
+    "test:v06:browser:postgres": "node scripts/v06-browser-tests.mjs --postgres",
+    "test:v06:process": "node scripts/v06-process-tests.mjs",
+    "test:v06:checkpoint": "node scripts/v06-process-tests.mjs --checkpoint"
   },
   "dependencies": {
     "@a2a-js/sdk": "1.0.0-beta.0",

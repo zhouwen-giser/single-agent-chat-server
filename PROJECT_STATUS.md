@@ -19,8 +19,11 @@ timeline, evidence and candidate presentation; its four rows PASS with 12
 browser/identity checks, 71 security/API regressions and four PostgreSQL tests.
 R04 completes explicit browser controls and bounded observer recovery; its four
 rows PASS with four Chromium/PostgreSQL scenarios and 79 impacted regressions.
+R05 fixes an actual checkpoint-pool crash on DB restart and passes eight
+subprocess fault cases, checkpoint channel restoration and 32 PostgreSQL
+regressions. Its five rows PASS with the actual 180-second lease / 30-second tick.
 The remaining
-17 required and four conditional extension rows are `NOT_RUN` in the
+12 required and four conditional extension rows are `NOT_RUN` in the
 [new matrix](config/v0.6/functional-closure/acceptance-matrix.json).
 The development marker does not assert those newly audited requirements pass.
 

@@ -65,7 +65,11 @@
         "R02",
         "R04"
       ],
-      "status": "NOT_RUN"
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R05.md",
+        "reports/v0.6/functional-closure/R05-validation.json"
+      ]
     },
     {
       "id": "R06",
@@ -401,8 +405,12 @@
       "title": "发送边界与绑定故障恢复",
       "acceptance": "独立进程在发送前、接受/响应丢失、pre-bind 点终止；相同 canonical bytes/key 恢复一个逻辑 Grounding。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R05.md",
+        "reports/v0.6/functional-closure/R05-validation.json"
+      ],
+      "testedBusinessSourceManifestSha256": "sha256:69755f1634ee72282fb6f8641a530c027e0e61654ea263e96d39197ab27799f3"
     },
     {
       "id": "FC-19",
@@ -411,8 +419,12 @@
       "title": "运行中 SIGKILL 和断库",
       "acceptance": "RUNNING 时 OS 终止、隔离数据库短时不可用后恢复身份/hash；故障和恢复计时有真实进程/DB 证据。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R05.md",
+        "reports/v0.6/functional-closure/R05-validation.json"
+      ],
+      "testedBusinessSourceManifestSha256": "sha256:69755f1634ee72282fb6f8641a530c027e0e61654ea263e96d39197ab27799f3"
     },
     {
       "id": "FC-20",
@@ -421,8 +433,12 @@
       "title": "双实例 claim 和租约围栏",
       "acceptance": "两个真实 SACS 进程竞争同源及命令；唯一约束/claim fencing 生效，符合已记录租约和恢复预算。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R05.md",
+        "reports/v0.6/functional-closure/R05-validation.json"
+      ],
+      "testedBusinessSourceManifestSha256": "sha256:69755f1634ee72282fb6f8641a530c027e0e61654ea263e96d39197ab27799f3"
     },
     {
       "id": "FC-21",
@@ -431,8 +447,12 @@
       "title": "取消恢复与权威终态",
       "acceptance": "取消意图先持久化，回执丢失后重启仍保留不确定状态；仅公开 CANCELLED 才记已取消。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R05.md",
+        "reports/v0.6/functional-closure/R05-validation.json"
+      ],
+      "testedBusinessSourceManifestSha256": "sha256:69755f1634ee72282fb6f8641a530c027e0e61654ea263e96d39197ab27799f3"
     },
     {
       "id": "FC-22",
@@ -441,8 +461,12 @@
       "title": "终态投影和历史来源恢复",
       "acceptance": "终态投影写入故障可恢复，旧来源迟到仅进入历史；完整 Snapshot 恢复且不重复业务。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R05.md",
+        "reports/v0.6/functional-closure/R05-validation.json"
+      ],
+      "testedBusinessSourceManifestSha256": "sha256:69755f1634ee72282fb6f8641a530c027e0e61654ea263e96d39197ab27799f3"
     },
     {
       "id": "FC-23",

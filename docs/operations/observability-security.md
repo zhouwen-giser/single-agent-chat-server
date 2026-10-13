@@ -87,3 +87,17 @@ chat-operation failure, not a reason to withdraw HTTP readiness.
 
 SIGINT and SIGTERM use the idempotent shutdown path introduced in Phase 8;
 Fastify stops accepting work and its close hook drains both PostgreSQL pools.
+
+The SACS persistence pool and LangGraph checkpoint pool both discard dead idle
+connections without letting an unhandled `error` terminate the process. Active
+queries still fail normally, and checkpoint operations share the configured
+connection/query timeout and pool ceiling. Readiness reports database failure;
+it does not silently substitute memory state. The next operation reconnects.
+
+The isolated v0.6 process harness keeps the actual 180-second source lease and
+30-second recovery tick. Recovery bounds also include startup and poll latency;
+restart is not instantaneous. Check `last_source_status`, `cancel_requested`,
+source identity/hash, recovery errors and projection lineage before treating an
+observation as settled. A stored cancellation intent remains pending until a
+public terminal status confirms it. See the R05 functional-closure report for
+actual PID/DB restart evidence; that test is not PostgreSQL HA qualification.

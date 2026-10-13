@@ -1,0 +1,95 @@
+{
+  "status": "FAILED",
+  "leaseMs": 180000,
+  "recoveryTickMs": 30000,
+  "cases": [],
+  "lifecycle": [
+    {
+      "event": "start",
+      "pid": 3664981,
+      "atMs": 4492
+    },
+    {
+      "event": "exit",
+      "pid": 3664981,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 5363
+    },
+    {
+      "event": "start",
+      "pid": 3666130,
+      "atMs": 8276
+    },
+    {
+      "event": "exit",
+      "pid": 3666130,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 9315
+    },
+    {
+      "event": "start",
+      "pid": 3667155,
+      "atMs": 12227
+    },
+    {
+      "event": "exit",
+      "pid": 3667155,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 13782
+    },
+    {
+      "event": "start",
+      "pid": 3668162,
+      "atMs": 16594
+    },
+    {
+      "event": "exit",
+      "pid": 3668162,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 18058
+    },
+    {
+      "event": "start",
+      "pid": 3668970,
+      "atMs": 20871
+    },
+    {
+      "event": "exit",
+      "pid": 3668970,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 22409
+    },
+    {
+      "event": "start",
+      "pid": 3670071,
+      "atMs": 25223
+    },
+    {
+      "event": "exit",
+      "pid": 3670071,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 26164
+    },
+    {
+      "event": "start",
+      "pid": 3671026,
+      "atMs": 28877
+    },
+    {
+      "event": "exit",
+      "pid": 3671026,
+      "code": 0,
+      "signal": null,
+      "atMs": 31178
+    }
+  ],
+  "failure": "expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false",
+  "elapsedMs": 31979,
+  "cleanup": "PASS"
+}

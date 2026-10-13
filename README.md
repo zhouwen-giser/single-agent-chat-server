@@ -39,7 +39,9 @@ their nine acceptance rows: routing has 677 full frozen regressions; deployment
 has 105 focused tests, 13 isolated PostgreSQL tests and five container cases. R03 adds an authenticated same-origin [browser reference client](docs/deployment/analysis-browser.md)
 with 12 browser/identity checks, 71 API/security tests and four PostgreSQL tests.
 R04 adds explicit choice/query/cancel/recovery controls with four Chromium/PostgreSQL
-scenarios and 79 impacted client regressions. Seventeen rows now PASS; the other 21
+scenarios and 79 impacted client regressions. R05 fixes checkpoint-pool crashes on database restart and proves eight subprocess
+fault cases with the production 180-second lease / 30-second recovery tick.
+Twenty-two rows now PASS; the other 16
 [acceptance rows](config/v0.6/functional-closure/acceptance-matrix.json) remain
 `NOT_RUN`. Native Analysis and SDAR grounding extensions have separate
 authoritative-contract prerequisites. See [Project status](PROJECT_STATUS.md)
