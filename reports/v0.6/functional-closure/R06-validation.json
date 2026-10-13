@@ -1,0 +1,52 @@
+{
+  "phase": "R06",
+  "sourceParentSha": "dc6edf59f76db410297acbcfe0b64d64f33ba7db",
+  "status": "BLOCKED_EXTERNAL",
+  "checks": [
+    {
+      "command": [
+        "node",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "tests/v06-functional-real-cases.unit.test.ts"
+      ],
+      "exitCode": 0,
+      "passedTests": 9,
+      "totalTests": 9
+    },
+    {
+      "command": ["corepack", "pnpm", "typecheck"],
+      "exitCode": 0
+    },
+    {
+      "command": ["corepack", "pnpm", "build"],
+      "exitCode": 0
+    },
+    {
+      "command": ["node", "scripts/v06-functional-real-preflight.mjs"],
+      "exitCode": 2,
+      "expectedStatus": "BLOCKED_EXTERNAL",
+      "businessSubmissions": 0,
+      "evidence": "reports/v0.6/functional-closure/R06-preflight/PREFLIGHT.json"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "eslint",
+        "scripts/lib/v06-real-cases.ts",
+        "scripts/v06-functional-real-preflight.mjs",
+        "tests/v06-functional-real-cases.unit.test.ts"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "missingInputs": [
+    "Current explicitly authorized real case file",
+    "Current authoritative Native consumer bundle",
+    "Current SDAR grounding extension public schema/media/AgentCard/consumer evidence"
+  ],
+  "realIntegrationClaim": false
+}

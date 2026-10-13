@@ -81,7 +81,11 @@
         "R04",
         "R05"
       ],
-      "status": "NOT_RUN"
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ]
     },
     {
       "id": "R07",
@@ -100,13 +104,21 @@
       "id": "N01",
       "title": "Native Analysis 条件接入",
       "dependsOn": [],
-      "status": "NOT_RUN"
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ]
     },
     {
       "id": "E01",
       "title": "SDAR grounding 条件接入",
       "dependsOn": [],
-      "status": "NOT_RUN"
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ]
     }
   ],
   "decisionRules": {
@@ -475,8 +487,12 @@
       "title": "真实正向 Finding",
       "acceptance": "当前公开接口至少返回一个合法 Finding；正常/PARTIAL 状态与各视图、哈希、终态持久化一致。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "FC-24",
@@ -485,8 +501,12 @@
       "title": "真实 Choice 确认",
       "acceptance": "真实有效 Choice 到显式 Control、新 Revision/Grounding、Snapshot 的完整链路通过。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "FC-25",
@@ -495,8 +515,12 @@
       "title": "真实 HISTORICAL_TRACE",
       "acceptance": "主体/时间/PROVISIONAL/Gap/公开几何与实际 Finding 同源，不以旧报告代替当前源验收。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "FC-26",
@@ -505,8 +529,12 @@
       "title": "真实 ROAD_ASSOCIATION",
       "acceptance": "实际道路关系/公开几何与缺口正确消费，不补造道路位置或导航语义。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "FC-27",
@@ -515,8 +543,12 @@
       "title": "真实 TEMPORAL_EVENT",
       "acceptance": "实际公开事件及其时间/限定正确消费，要求的停车/穿越子类型逐项报告。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "FC-28",
@@ -525,8 +557,12 @@
       "title": "真实 METRIC_RANKING",
       "acceptance": "实际排名、单位、数值/缺口和候选权威保留；展示裁剪不改变源哈希或选择依据。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "FC-29",
@@ -535,8 +571,12 @@
       "title": "真实 ACTION_TARGET_CANDIDATE",
       "acceptance": "实际历史候选保留当前验证/规划/确认要求和 executionAuthorized=false；零 SDAR 执行。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "FC-30",
@@ -545,8 +585,12 @@
       "title": "真实范围再查询",
       "acceptance": "公开可用空间语义的显式 geometry/hash 引发新来源；源结果与新投影一致，unsupported 不能记 PASS。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "FC-31",
@@ -555,8 +599,12 @@
       "title": "真实进程恢复与取消",
       "acceptance": "本次专有真实 Job 的恢复与取消两个子检查均有独立证据，权威状态/逻辑幂等正确。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "FC-32",
@@ -595,9 +643,13 @@
       "title": "Native 权威合同预检",
       "acceptance": "八项公开权威 artifacts、来源/哈希、端点及顺序/幂等/恢复语义完整，实际能力可用。",
       "required": false,
-      "status": "NOT_RUN",
-      "evidence": [],
-      "activationCondition": "Authoritative public contract and available implementation accepted for N01"
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "activationCondition": "Authoritative public contract and available implementation accepted for N01",
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "EXT-02",
@@ -606,9 +658,13 @@
       "title": "Native 生产适配与真实消费",
       "acceptance": "隔离 HTTP adapter 消费真实 Plan/Event/Revision/Intervention/Cancel；正常 AG-UI 与恢复通过，Grounding Job 兼容。",
       "required": false,
-      "status": "NOT_RUN",
-      "evidence": [],
-      "activationCondition": "Authoritative public contract and available implementation accepted for N01"
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "activationCondition": "Authoritative public contract and available implementation accepted for N01",
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "EXT-03",
@@ -617,9 +673,13 @@
       "title": "SDAR 扩展合同与严格组合",
       "acceptance": "公开 schema/media type/Agent Card/handler/validator 可用；有效引用和授权通过 adapter 组合，无文本降级。",
       "required": false,
-      "status": "NOT_RUN",
-      "evidence": [],
-      "activationCondition": "Authoritative public contract and available implementation accepted for E01"
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "activationCondition": "Authoritative public contract and available implementation accepted for E01",
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     },
     {
       "id": "EXT-04",
@@ -628,9 +688,13 @@
       "title": "SDAR 扩展真实消费",
       "acceptance": "专有安全授权请求通过官方 A2A；历史候选本身仍不执行，拒绝/缺失合同明确失败。",
       "required": false,
-      "status": "NOT_RUN",
-      "evidence": [],
-      "activationCondition": "Authoritative public contract and available implementation accepted for E01"
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R06.md",
+        "reports/v0.6/functional-closure/R06-validation.json"
+      ],
+      "activationCondition": "Authoritative public contract and available implementation accepted for E01",
+      "reason": "CURRENT_AUTHORIZED_CASE_OR_AUTHORITATIVE_PUBLIC_CONTRACT_REQUIRED"
     }
   ]
 }

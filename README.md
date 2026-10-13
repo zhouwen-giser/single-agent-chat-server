@@ -41,9 +41,9 @@ with 12 browser/identity checks, 71 API/security tests and four PostgreSQL tests
 R04 adds explicit choice/query/cancel/recovery controls with four Chromium/PostgreSQL
 scenarios and 79 impacted client regressions. R05 fixes checkpoint-pool crashes on database restart and proves eight subprocess
 fault cases with the production 180-second lease / 30-second recovery tick.
-Twenty-two rows now PASS; the other 16
-[acceptance rows](config/v0.6/functional-closure/acceptance-matrix.json) remain
-`NOT_RUN`. Native Analysis and SDAR grounding extensions have separate
+Twenty-two rows now PASS; nine real WSGS and four conditional extension rows
+are BLOCKED_EXTERNAL, and the three R07 rows remain NOT_RUN in the
+[acceptance matrix](config/v0.6/functional-closure/acceptance-matrix.json). Native Analysis and SDAR grounding extensions have separate
 authoritative-contract prerequisites. See [Project status](PROJECT_STATUS.md)
 for the current decision and the historical scope of older reports.
 

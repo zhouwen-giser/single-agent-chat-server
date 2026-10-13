@@ -173,7 +173,8 @@ EXT-03 的离线验证/组合工作可在合同到位后完成；EXT-04 的真�
 - R03：FC-10–FC-13 PASS，12 项浏览器/身份检查、71 项安全/API 回归和 4 项 PostgreSQL 检查通过，见 [R03 报告](../reports/v0.6/functional-closure/R03.md)。
 - R04：FC-14–FC-17 PASS，12 项浏览器回归、4 项 Chromium/PostgreSQL 控制场景及 79 项 client/entry/link 回归通过，见 [R04 报告](../reports/v0.6/functional-closure/R04.md)。
 - R05：FC-18–FC-22 PASS，八个实际进程故障场景约 224 秒通过，checkpoint 断库读回及 32 项 PostgreSQL 回归通过，见 [R05 报告](../reports/v0.6/functional-closure/R05.md)。
-- R06/R07：尚未完成，对应验收行为 `NOT_RUN`。
+- R06：九项真实用例及 N01/E01 条件扩展为 `BLOCKED_EXTERNAL`，缺当前授权材料/公开合同，未提交真实业务请求；输入门禁和九项检查已交付，见 [R06 报告](../reports/v0.6/functional-closure/R06.md)。
+- R07：当前源码与交付验证继续推进。
 - N01/E01：条件扩展，合同与真实可用性待后续预检；不宣称功能完成。
 
-下一步为 R06 当前授权真实源材料预检及逐项真实验收，同时准备 R07 当前源码验证。
+下一步为 R07 当前源码、CI、SBOM 与独立资格入口；真实集成等待当前授权材料。

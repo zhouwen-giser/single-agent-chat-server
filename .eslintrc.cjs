@@ -20,6 +20,7 @@ module.exports = {
         "scripts/build-analysis-web.mjs",
         "scripts/v06-browser-tests.mjs",
         "scripts/v06-process-tests.mjs",
+        "scripts/v06-functional-real-preflight.mjs",
       ],
       parserOptions: { project: null },
       env: { node: true, es2022: true },
