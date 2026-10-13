@@ -13,4 +13,12 @@ module.exports = {
     "prettier",
   ],
   ignorePatterns: ["dist", "node_modules", ".tmp"],
+  overrides: [
+    {
+      files: ["scripts/v06-functional-compose.mjs"],
+      parserOptions: { project: null },
+      env: { node: true, es2022: true },
+      globals: { fetch: "readonly" },
+    },
+  ],
 };

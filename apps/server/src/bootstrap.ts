@@ -18,7 +18,10 @@ import {
   registerAnalysisRoutes,
   type AnalysisRoutesOptions,
 } from "./api/analysis-routes.js";
-import { registerHealthRoutes } from "./api/health-routes.js";
+import {
+  registerHealthRoutes,
+  type HealthRoutesOptions,
+} from "./api/health-routes.js";
 import {
   registerOpenAiRoutes,
   type OpenAiRoutesOptions,
@@ -48,6 +51,7 @@ export interface BuildServerOptions
   readonly logger?: FastifyServerOptions["logger"];
   readonly readinessCheck?: () => Promise<boolean>;
   readonly conversationModelReadinessCheck?: () => Promise<boolean>;
+  readonly analysisReadinessCheck?: HealthRoutesOptions["analysisReadinessCheck"];
   readonly telemetry?: SecureTelemetry;
   readonly resolveAgUiThread?: ResolveAgUiThread;
   readonly runAgUi?: AgUiRunHandler;
@@ -145,6 +149,9 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     ...(options.now === undefined ? {} : { now: options.now }),
   });
   void server.register(registerHealthRoutes, {
+    ...(options.analysisReadinessCheck
+      ? { analysisReadinessCheck: options.analysisReadinessCheck }
+      : {}),
     ...(options.readinessCheck === undefined
       ? {}
       : { readinessCheck: options.readinessCheck }),

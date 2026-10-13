@@ -53,6 +53,17 @@ error codes, never raw exception text.
 
 ## Limits and dependency health
 
+Grounding Job readiness is reported separately in `/ready` as
+`checks.wsgsGrounding`. The value distinguishes disabled analysis, a valid
+ready public contract and an unavailable/invalid dependency. Readiness GETs
+only WSGS capabilities with a default 1500 ms limit and 10000 ms shared cache;
+failed checks can recover after the cache expires. `/health` remains liveness.
+Optional operations are reported by `/api/v1/analysis-capabilities`; support
+advertising alone is not availability. Cancellation uncertainty remains in
+published source Activity/State, and deferred source recovery emits only the
+stable `ANALYSIS_SOURCE_RECOVERY_FAILED` warning code. None of these checks
+submits a WSGS Grounding or SDAR Task.
+
 Authenticated `/v1/*` requests use a bounded per-user fixed window. Request
 body, message count, message content, HTTP timeout, A2A operation timeout,
 stream duration, polling duration, and published Artifact rendering are all

@@ -201,6 +201,7 @@ export function createV06GroundingAnalysis(input: {
       source: undefined,
       analysisControl: undefined,
       runAgUiV03: undefined,
+      readiness: async (): Promise<"disabled"> => "disabled",
       capabilities: async () => ({
         enabled: false,
         transport: "GROUNDING_JOB",
@@ -241,9 +242,9 @@ export function createV06GroundingAnalysis(input: {
     maxConsecutiveFailures: config.maxConsecutivePollFailures,
   });
   let lastCapabilityCheck: string | undefined;
-  const capabilities = async () => {
+  const capabilities = async (signal?: AbortSignal) => {
     try {
-      const value = await adapter.capabilities();
+      const value = await adapter.capabilities(signal);
       lastCapabilityCheck = new Date().toISOString();
       return {
         enabled: true,
@@ -267,6 +268,34 @@ export function createV06GroundingAnalysis(input: {
           : {}),
       };
     }
+  };
+  let cachedReadiness:
+    { checkedAt: number; status: "ready" | "unavailable" } | undefined;
+  let checkingReadiness: Promise<"ready" | "unavailable"> | undefined;
+  const readiness = async (): Promise<"ready" | "unavailable"> => {
+    const age = cachedReadiness
+      ? now().getTime() - cachedReadiness.checkedAt
+      : -1;
+    if (cachedReadiness && age >= 0 && age < config.readinessCacheMs)
+      return cachedReadiness.status;
+    if (!checkingReadiness)
+      checkingReadiness = (async () => {
+        const value = await capabilities(
+          AbortSignal.timeout(config.readinessTimeoutMs),
+        );
+        const status =
+          value.groundingContractReady &&
+          value.resultProfileReady &&
+          "requiredReady" in value &&
+          value.requiredReady
+            ? ("ready" as const)
+            : ("unavailable" as const);
+        cachedReadiness = { checkedAt: now().getTime(), status };
+        return status;
+      })().finally(() => {
+        checkingReadiness = undefined;
+      });
+    return checkingReadiness;
   };
   type FrozenTurn = WorldGroundingControlTurn & {
     analysisId?: string;
@@ -822,5 +851,6 @@ export function createV06GroundingAnalysis(input: {
     analysisControl,
     runAgUiV03: createGroundingAnalysisAgUiV03RunHandler(handler),
     capabilities,
+    readiness,
   };
 }

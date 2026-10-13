@@ -9,6 +9,8 @@ describe("v06 fail-closed production configuration", () => {
       pollIntervalMs: 250,
       maxWaitMs: 120000,
       maxMapLayers: 128,
+      readinessTimeoutMs: 1500,
+      readinessCacheMs: 10000,
     });
   });
   it.each(["yes", "1", "TRUE"])(
@@ -41,6 +43,8 @@ describe("v06 fail-closed production configuration", () => {
       SACS_WSGS_ANALYSIS_MAX_TIMELINE_ITEMS: "1001",
       SACS_WSGS_ANALYSIS_MAX_MAP_LAYERS: "129",
       SACS_WSGS_ANALYSIS_MAX_SAFE_PAYLOAD_BYTES: "999999",
+      SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS: "5001",
+      SACS_WSGS_ANALYSIS_READINESS_CACHE_MS: "30001",
     }))
       expect(() => parseGroundingAnalysisConfig({ [key]: value })).toThrow();
   });

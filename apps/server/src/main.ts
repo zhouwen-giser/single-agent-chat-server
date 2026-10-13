@@ -232,6 +232,7 @@ try {
     logger: createSecureLoggerOptions(config.logLevel),
     telemetry,
     readinessCheck: () => activePersistence.readiness(),
+    analysisReadinessCheck: analysisIntegration.readiness,
     conversationModelReadinessCheck: () =>
       rawConversationModel?.readiness() ?? Promise.resolve(false),
     resolveChatThread: (input) =>

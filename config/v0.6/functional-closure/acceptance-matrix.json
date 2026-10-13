@@ -28,7 +28,11 @@
       "dependsOn": [
         "R01"
       ],
-      "status": "NOT_RUN"
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R02.md",
+        "reports/v0.6/functional-closure/R02-validation.json"
+      ]
     },
     {
       "id": "R03",
@@ -235,8 +239,12 @@
       "title": "两种 Compose 入口传入配置",
       "acceptance": "使用隔离虚拟环境解析；启用开关、WSGS 地址、合同/profile、预算及限制实际传入容器。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R02.md",
+        "reports/v0.6/functional-closure/R02-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:4865ea7141fba82e6532313be489a7b45850e3aaa494acd4d95d8a5f6066daef"
     },
     {
       "id": "FC-08",
@@ -245,8 +253,12 @@
       "title": "实际进程启动与能力门禁",
       "acceptance": "隔离容器开启/关闭、错误协商和 unavailable capability 的结果可观察且正确；不开启共享部署。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R02.md",
+        "reports/v0.6/functional-closure/R02-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:4865ea7141fba82e6532313be489a7b45850e3aaa494acd4d95d8a5f6066daef"
     },
     {
       "id": "FC-09",
@@ -255,8 +267,12 @@
       "title": "运行状态与运维信号",
       "acceptance": "健康/能力检查有界且不提交业务，状态文档准确，故障/取消/恢复信号不泄露敏感数据。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R02.md",
+        "reports/v0.6/functional-closure/R02-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:4865ea7141fba82e6532313be489a7b45850e3aaa494acd4d95d8a5f6066daef"
     },
     {
       "id": "FC-10",
