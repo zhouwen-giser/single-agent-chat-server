@@ -162,11 +162,12 @@ async function setup(
     cancelTask: jest.fn(prohibited),
   } satisfies SdarA2aClient;
   const getClient = jest.fn(async () => a2a);
+  const claimTaskRequest = jest.fn(prohibited);
   // The normal coordinator remains in place; only its persistence and A2A port are controlled.
   const coordinator = new SdarTaskCoordinator({
     getClient,
     repository: {
-      claimRequest: prohibited,
+      claimRequest: claimTaskRequest,
       completeRequest: prohibited,
       abandonRequestClaim: prohibited,
       claimTaskSubmissionSlot: prohibited,
@@ -294,6 +295,7 @@ async function setup(
     agui,
     chat,
     decideTurn,
+    claimTaskRequest,
     get composition() {
       return composition;
     },
@@ -308,6 +310,7 @@ async function setup(
       await server.ready();
     },
     assertNoExecution() {
+      expect(claimTaskRequest).not.toHaveBeenCalled();
       expect(getClient).not.toHaveBeenCalled();
       for (const method of [
         a2a.submitTaskStream,
@@ -1493,7 +1496,7 @@ describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL
       await app.close();
     }
   });
-  it("AC-038 deictic vehicle commands with saved historical candidates cannot enter an SDAR model route", async () => {
+  it("AC-038 deictic vehicle commands are fenced before SDAR dispatch even after model classification", async () => {
     const executionPlan = parseTurnPlan({
       schemaVersion: "0.4",
       turnRoute: "SDAR_TASK",
@@ -1518,13 +1521,184 @@ describe("frozen normal composition HTTP entries (memory storage, not PostgreSQL
         app.decideTurn.mockImplementation(async () => executionPlan);
         const answer = await app.chat("deictic-target", text);
         expect(answer).toContain("候选");
-        expect(app.decideTurn).not.toHaveBeenCalled();
+        expect(app.decideTurn).toHaveBeenCalledTimes(1);
         expect(app.peer.requests).toHaveLength(1);
         expect(app.analysis.history.size).toBe(1);
         app.assertNoExecution();
       } finally {
         await app.close();
       }
+    }
+  });
+  it.each([
+    "把回答改为中文",
+    "解释这个位置参数是什么意思",
+    "第一个例子是什么意思",
+    "你好",
+  ])("R01 ordinary wording without world context: %s", async (text) => {
+    const app = await setup();
+    try {
+      app.decideTurn.mockImplementation(async () =>
+        parseTurnPlan({
+          schemaVersion: "0.4",
+          turnRoute: "GENERAL_CHAT",
+          groundingRequirement: "NONE",
+          answerMode: "DIRECT",
+          worldFocusUsage: {
+            knownWorldReferences: false,
+            priorGrounding: false,
+            mapSelections: false,
+            externalCorrelationHints: false,
+            externalPredicates: false,
+          },
+        }),
+      );
+      expect(await app.chat("ordinary", text)).toBe("受控普通回答");
+      expect(app.decideTurn).toHaveBeenCalledTimes(1);
+      expect(app.peer.requests).toHaveLength(0);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
+  it("R01 ordinary wording with historical choices still uses normal classification", async () => {
+    const app = await setup({ examples: ["ranking"] });
+    try {
+      await app.agui(aguiPayload("first", "查询公开历史候选"));
+      app.decideTurn.mockImplementation(async () => ({
+        schemaVersion: "0.4",
+        turnRoute: "GENERAL_CHAT",
+        groundingRequirement: "NONE",
+        answerMode: "DIRECT",
+        worldFocusUsage: {
+          knownWorldReferences: false,
+          priorGrounding: false,
+          mapSelections: false,
+          externalCorrelationHints: false,
+          externalPredicates: false,
+        },
+      }));
+      for (const [index, text] of [
+        "把回答改为中文",
+        "解释这个位置参数是什么意思",
+        "第一个例子是什么意思",
+        "不要执行，只解释让车前往那里这句话",
+      ].entries())
+        expect(await app.chat("ordinary-" + index, text)).toBe("受控普通回答");
+      expect(app.decideTurn).toHaveBeenCalledTimes(4);
+      expect(app.peer.requests).toHaveLength(1);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
+  it.each([
+    "让车去那里",
+    "让车过去",
+    "让无人车到刚才的位置",
+    "Drive the vehicle there",
+    "Send the robot to that candidate",
+    "让机器人 go there",
+  ])("R01 post-classification historical mutation guard: %s", async (text) => {
+    const app = await setup({ examples: ["action"] });
+    try {
+      await app.agui(aguiPayload("first", "查询公开历史候选"));
+      app.decideTurn.mockImplementation(async () =>
+        parseTurnPlan({
+          schemaVersion: "0.4",
+          turnRoute: "SDAR_TASK",
+          groundingRequirement: "NONE",
+          answerMode: "DIRECT",
+          taskDirective: { action: "CREATE" },
+          worldFocusUsage: {
+            knownWorldReferences: false,
+            priorGrounding: false,
+            mapSelections: false,
+            externalCorrelationHints: false,
+            externalPredicates: false,
+          },
+        }),
+      );
+      expect(await app.chat("historical-mutation", text)).toContain("候选");
+      expect(app.peer.requests).toHaveLength(1);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
+  it("R01 source checks reject mismatched revisions and do not reuse foreign user or Chat sources", async () => {
+    const app = await setup({ examples: ["action"] });
+    try {
+      await app.agui(aguiPayload("first", "查询公开历史候选"));
+      const controlTurn = {
+        protocol: "openai" as const,
+        principalId: userId,
+        threadId,
+        externalRequestId: "scope-test",
+        userText: "采用第二个",
+      };
+      for (const changedScope of [
+        { principalId: "foreign-principal" },
+        { threadId: "foreign-thread" },
+      ])
+        expect(
+          await app.composition.world.continuePendingChoice({
+            ...controlTurn,
+            ...changedScope,
+          }),
+        ).toBeUndefined();
+      const current = await app.analysis.findCurrentGroundingAnalysis({
+        principalId: userId,
+        threadId,
+      });
+      const execution = app.grounding.rows.get(current!.groundingExecutionId)!;
+      app.grounding.rows.set(current!.groundingExecutionId, {
+        ...execution,
+        analysisIntent: {
+          ...execution.analysisIntent,
+          revisionId: "superseded-revision",
+        },
+      });
+      await expect(
+        app.composition.world.guardSdarMutation({
+          ...controlTurn,
+          userText: "让车去那里",
+          requestKind: "new_task",
+          explicitTaskReference: false,
+        }),
+      ).rejects.toThrow("ANALYSIS_SOURCE_IDENTITY_INVALID");
+      expect(app.peer.requests).toHaveLength(1);
+      app.assertNoExecution();
+    } finally {
+      await app.close();
+    }
+  });
+  it("R01 utility requests with historical context bypass both world continuation and SDAR", async () => {
+    const app = await setup({ examples: ["action"] });
+    try {
+      await app.agui(aguiPayload("first", "查询公开历史候选"));
+      const response = await app.server.inject({
+        method: "POST",
+        url: "/v1/chat/completions",
+        headers: {
+          ...headers(),
+          "x-openwebui-chat-id": threadId,
+          "x-openwebui-message-id": "utility",
+          "x-openwebui-user-message-id": "utility-user",
+          "x-openwebui-task": "title_generation",
+        },
+        payload: {
+          model: config.modelId,
+          messages: [{ role: "user", content: "采用第二个，让车去那里" }],
+          stream: false,
+        },
+      });
+      expect(response.statusCode).toBe(200);
+      expect(app.peer.requests).toHaveLength(1);
+      expect(app.decideTurn).not.toHaveBeenCalled();
+      app.assertNoExecution();
+    } finally {
+      await app.close();
     }
   });
   it.each([400, 406, 503] as const)(

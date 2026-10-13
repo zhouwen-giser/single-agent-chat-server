@@ -21,7 +21,10 @@ import type { StructuredChatModel } from "../../../../src/agent/model.js";
 import type { TurnPlan } from "../../../../packages/world-grounding-contract/src/index.js";
 import type { MapSelection } from "../../../../packages/wsgs-http-adapter/src/index.js";
 import type { WorldExplanationV1 } from "../../../../packages/world-explanation-contract/src/index.js";
-import type { HybridAuthoritySeparatedResult } from "../../../../packages/world-grounding-runtime/src/index.js";
+import type {
+  HybridAuthoritySeparatedResult,
+  WorldGroundingMutationTurn,
+} from "../../../../packages/world-grounding-runtime/src/index.js";
 
 export interface ConversationApplicationRepository {
   listActiveTasksForChat(input: {
@@ -82,6 +85,9 @@ export interface ConversationApplicationServiceOptions {
 }
 
 export interface WorldGroundingApplication {
+  guardSdarMutation?(
+    input: WorldGroundingMutationTurn,
+  ): Promise<string | undefined>;
   continuePendingChoice?(
     input: Omit<WorldGroundingTurn, "turnPlan">,
   ): Promise<string | undefined>;
@@ -146,6 +152,37 @@ export class ConversationApplicationService {
       },
       { configurable: { thread_id: turn.threadId } },
     );
+    if (
+      !turn.utilityRequest &&
+      (result.requestKind === "new_task" ||
+        result.requestKind === "grounded_task" ||
+        result.requestKind === "follow_up" ||
+        result.requestKind === "cancel")
+    ) {
+      const task = [
+        ...conversationContext.activeTasks,
+        ...conversationContext.recentTerminalTasks,
+      ].find((candidate) => candidate.taskId === result.targetTaskId);
+      const explicitTaskReference =
+        task !== undefined &&
+        [task.taskId, task.shortId].some(
+          (id) =>
+            id.length >= 4 &&
+            new RegExp(
+              "(?:^|[^A-Za-z0-9._:-])" +
+                id.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&") +
+                "(?:$|[^A-Za-z0-9._:-])",
+              "u",
+            ).test(turn.userText),
+        );
+      const blocked = await this.options.worldGrounding?.guardSdarMutation?.({
+        ...toWorldGroundingControlTurn(turn),
+        requestKind: result.requestKind,
+        ...(result.taskText === undefined ? {} : { taskText: result.taskText }),
+        explicitTaskReference,
+      });
+      if (blocked !== undefined) return blocked;
+    }
     if (result.requestKind === "world_answer") {
       if (
         this.options.worldGrounding === undefined ||

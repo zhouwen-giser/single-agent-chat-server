@@ -10,9 +10,167 @@ import type { StructuredChatModel } from "../src/agent/model.js";
 import { assembleWorldExplanation } from "../packages/world-explanation-runtime/src/index.js";
 import type { HybridAuthoritySeparatedResult } from "../packages/world-grounding-runtime/src/index.js";
 import { hybridWorldExplanationFixture } from "./fixtures/hybrid-world-explanation.js";
+import { isIndependentSdarMutation } from "../apps/server/src/chat/frozen-source-policy.js";
 import { assemblyInput } from "./world-explanation-fixtures.js";
 
 describe("SACS v0.4 world grounding application routing", () => {
+  it.each([
+    ["new_task", { kind: "new_task", taskText: "让车去那里" }],
+    ["grounded_task", operationalPlan()],
+    [
+      "follow_up",
+      {
+        kind: "task_follow_up",
+        selector: { taskId: "task-owned" },
+        action: "patch_goal",
+        text: "让车去那里",
+      },
+    ],
+    ["cancel", { kind: "task_cancel", selector: { taskId: "task-owned" } }],
+  ])(
+    "checks world-source provenance before mutable dispatch %s",
+    async (kind, decision) => {
+      const submit = jest.fn(async function* () {
+        yield "must not execute";
+      });
+      const followUp = jest.fn(submit);
+      const cancel = jest.fn(submit);
+      const submitOperational = jest.fn(async () => "must not execute");
+      const guardSdarMutation = jest.fn(
+        async () => "historical candidate is read-only",
+      );
+      const application = new ConversationApplicationService({
+        repository: repository([binding("task-owned", "owned001")]),
+        coordinator: {
+          submit,
+          followUp,
+          cancel,
+        } as unknown as SdarTaskCoordinator,
+        model: {
+          decideTurn: async () => decision,
+          answer: async () => "unused",
+        },
+        worldGrounding: {
+          guardSdarMutation,
+          answerWorld: async () => "unused",
+          compareHybrid: async () => "unused",
+          submitOperational,
+        },
+      });
+      expect(
+        await application.execute({
+          ...turn(),
+          userText: "让车去那里",
+          principalId: "internal-principal",
+        }),
+      ).toBe("historical candidate is read-only");
+      expect(guardSdarMutation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requestKind: kind,
+          principalId: "internal-principal",
+          explicitTaskReference: false,
+          userText: "让车去那里",
+        }),
+      );
+      for (const operation of [submit, followUp, cancel, submitOperational])
+        expect(operation).not.toHaveBeenCalled();
+    },
+  );
+  it("derives explicit Task provenance from the authorized directory and whole identifiers", async () => {
+    const followUp = jest.fn(async function* () {
+      yield "allowed";
+    });
+    const guardSdarMutation = jest.fn(async () => undefined);
+    const application = new ConversationApplicationService({
+      repository: repository([binding("task.owned", "owned001")]),
+      coordinator: { followUp } as unknown as SdarTaskCoordinator,
+      model: {
+        decideTurn: async () => ({
+          kind: "task_follow_up",
+          selector: { taskId: "task.owned" },
+          action: "resume",
+          text: "继续任务",
+        }),
+        answer: async () => "unused",
+      },
+      worldGrounding: {
+        guardSdarMutation,
+        answerWorld: async () => "unused",
+        compareHybrid: async () => "unused",
+        submitOperational: async () => "unused",
+      },
+    });
+    for (const [userText, expected] of [
+      ["继续 task.owned", true],
+      ["继续 owned001", true],
+      ["继续 owned001-suffix", false],
+      ["继续 taskXowned", false],
+    ] as const) {
+      await application.execute({ ...turn(), userText });
+      expect(guardSdarMutation).toHaveBeenLastCalledWith(
+        expect.objectContaining({ explicitTaskReference: expected }),
+      );
+    }
+    expect(followUp).toHaveBeenCalledTimes(4);
+  });
+  it("allows a positively independent new Task through the actual provenance policy", async () => {
+    const submit = jest.fn(async function* () {
+      yield "independent task accepted";
+    });
+    const application = createApplication(
+      {
+        decideTurn: async () => ({ kind: "new_task", taskText: "巡检仓库" }),
+        answer: async () => "unused",
+      },
+      {
+        guardSdarMutation: async (input) =>
+          isIndependentSdarMutation(input) ? undefined : "blocked",
+        answerWorld: async () => "unused",
+        compareHybrid: async () => "unused",
+        submitOperational: async () => "unused",
+      },
+      submit,
+    );
+    const result = await application.execute({
+      ...turn(),
+      userText: "创建独立任务：巡检仓库",
+    });
+    if (typeof result === "string" || !(Symbol.asyncIterator in result))
+      throw Error("Expected independent Task stream");
+    const fragments = [];
+    for await (const fragment of result) fragments.push(fragment);
+    expect(fragments).toEqual(["independent task accepted"]);
+    expect(submit).toHaveBeenCalledWith(
+      expect.objectContaining({ userText: "巡检仓库", userId: "principal-1" }),
+      undefined,
+    );
+  });
+  it("does not invoke the world-source guard for utility or read-only status requests", async () => {
+    const guardSdarMutation = jest.fn(async () => "must not be used");
+    const statusForTask = jest.fn(async function* () {
+      yield "published status";
+    });
+    const decideTurn = jest.fn(async () => ({
+      kind: "task_status",
+      selector: { taskId: "task-owned" },
+    }));
+    const application = new ConversationApplicationService({
+      repository: repository([binding("task-owned", "owned001")]),
+      coordinator: { statusForTask } as unknown as SdarTaskCoordinator,
+      model: { decideTurn, answer: async () => "unused" },
+      worldGrounding: {
+        guardSdarMutation,
+        answerWorld: async () => "unused",
+        compareHybrid: async () => "unused",
+        submitOperational: async () => "unused",
+      },
+    });
+    await application.execute({ ...turn(), utilityRequest: true });
+    expect(decideTurn).not.toHaveBeenCalled();
+    await application.execute(turn());
+    expect(statusForTask).toHaveBeenCalledTimes(1);
+    expect(guardSdarMutation).not.toHaveBeenCalled();
+  });
   it("uses the resolved principal for world and conversation storage without changing external task ownership", async () => {
     const importHistory = jest.fn(async () => ({
       insertedUsers: 1,

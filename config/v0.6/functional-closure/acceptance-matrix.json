@@ -2,7 +2,7 @@
   "schemaVersion": "sacs-v06-functional-closure-plan/1.0",
   "plan": "execplans/EP-06-sacs-v0.6-functional-closure.md",
   "businessSourceBaseline": "30dd9814de93acf7e3e24311b8b477cdbcac16c2",
-  "mode": "PLAN_ONLY",
+  "mode": "EXECUTION",
   "phases": [
     {
       "id": "R00",
@@ -16,7 +16,11 @@
       "dependsOn": [
         "R00"
       ],
-      "status": "NOT_RUN"
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R01.md",
+        "reports/v0.6/functional-closure/R01-validation.json"
+      ]
     },
     {
       "id": "R02",
@@ -147,8 +151,12 @@
       "title": "无世界上下文的普通对话",
       "acceptance": "改为中文、解释这个位置参数、第一个例子走正常分类；零 Grounding 创建。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R01.md",
+        "reports/v0.6/functional-closure/R01-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:def7f4a00cd4257988c15f68f2de6a4ce88600c6bdb7e86e9652b609602f68bd"
     },
     {
       "id": "FC-02",
@@ -157,8 +165,12 @@
       "title": "有上下文时的续聊与普通对话",
       "acceptance": "只有当前来源绑定的窄命令进入续聊；普通聊天、Task 状态查询和独立新任务保持正常。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R01.md",
+        "reports/v0.6/functional-closure/R01-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:def7f4a00cd4257988c15f68f2de6a4ce88600c6bdb7e86e9652b609602f68bd"
     },
     {
       "id": "FC-03",
@@ -167,8 +179,12 @@
       "title": "历史目标执行保底检查",
       "acceptance": "中英文及混合改写在受控模型判 SDAR_TASK 时仍不触发任务创建 claim、A2A factory 或 mutation。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R01.md",
+        "reports/v0.6/functional-closure/R01-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:def7f4a00cd4257988c15f68f2de6a4ce88600c6bdb7e86e9652b609602f68bd"
     },
     {
       "id": "FC-04",
@@ -177,8 +193,12 @@
       "title": "既有任务与 A2A 兼容",
       "acceptance": "独立 SDAR 新任务、允许的 Follow-up、顶层 cancel 和 published status 维持现有协议与授权。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R01.md",
+        "reports/v0.6/functional-closure/R01-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:def7f4a00cd4257988c15f68f2de6a4ce88600c6bdb7e86e9652b609602f68bd"
     },
     {
       "id": "FC-05",
@@ -187,8 +207,12 @@
       "title": "权限与旧来源隔离",
       "acceptance": "跨 principal/Chat、旧 Revision、过期候选与陈旧 intervention 无法提供当前引用或执行授权。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R01.md",
+        "reports/v0.6/functional-closure/R01-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:def7f4a00cd4257988c15f68f2de6a4ce88600c6bdb7e86e9652b609602f68bd"
     },
     {
       "id": "FC-06",
@@ -197,8 +221,12 @@
       "title": "utility 与背景请求",
       "acceptance": "标题/摘要等 utility 路径不创建或修改 WSGS Grounding/SDAR Task。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R01.md",
+        "reports/v0.6/functional-closure/R01-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:def7f4a00cd4257988c15f68f2de6a4ce88600c6bdb7e86e9652b609602f68bd"
     },
     {
       "id": "FC-07",

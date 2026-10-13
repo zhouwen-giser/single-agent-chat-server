@@ -93,6 +93,20 @@ replay may use the same command/idempotency identity; a genuinely different quer
 requires a new identity. Stale or expired selection/draft errors require a fresh
 authoritative view and another explicit user decision.
 
+## Chat continuation and independent Tasks
+
+Normal Chat only bypasses model classification for a narrow display/selection
+command bound to that principal and Chat's current frozen Source. Ordinary words
+such as “改为中文”, “这个位置参数” or “第一个例子” are classified normally.
+
+SDAR mutations undergo a separate source check after classification. A read-only
+world Source cannot authorize execution of its historical candidates. To refer to
+an existing authorized Task, give its exact Task or short ID; to start a separate
+task, use `创建独立任务：巡检仓库` or
+`start an independent task: inspect the warehouse`. Historical/deictic targets
+and model-authored target substitutions still require clarification. Read-only
+status, ordinary conversation and utility requests keep their existing paths.
+
 ## Recovery fences
 
 Use one reference-client instance per analysis. Snapshots and deltas cannot

@@ -1,0 +1,96 @@
+{
+  "phase": "R01",
+  "sourceParentSha": "f7e57a69e35e2c091cba5f25f163f2e38b7744e1",
+  "testedSourceManifestSha256": "sha256:def7f4a00cd4257988c15f68f2de6a4ce88600c6bdb7e86e9652b609602f68bd",
+  "status": "PASS",
+  "checks": [
+    {
+      "command": ["node", "scripts/v06-frozen-tests.mjs", "all"],
+      "exitCode": 0,
+      "elapsedMs": 278281,
+      "log": "reports/v0.6/functional-closure/R01-frozen.txt",
+      "outputSha256": "sha256:99d09a1990be06cd72282419e5106dc6abaf3b440e0d47b50daaa1d3592cb87d",
+      "passedTests": 677,
+      "totalTests": 677
+    },
+    {
+      "command": ["corepack", "pnpm", "typecheck"],
+      "exitCode": 0,
+      "elapsedMs": 12553,
+      "log": "reports/v0.6/functional-closure/R01-types.txt",
+      "outputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "command": ["node", "scripts/verify-architecture.mjs"],
+      "exitCode": 0,
+      "elapsedMs": 133,
+      "log": "reports/v0.6/functional-closure/R01-architecture.txt",
+      "outputSha256": "sha256:8a2a71b3aa2d50c6ed5153a27c52487aeaf1362fdf288af0fbd522d992f35022"
+    },
+    {
+      "command": ["corepack", "pnpm", "build"],
+      "exitCode": 0,
+      "elapsedMs": 13985,
+      "log": "reports/v0.6/functional-closure/R01-build.txt",
+      "outputSha256": "sha256:9ac32db1b695c5626225d4375b635275f33903c7d128a1aa3ee611cef8d8e9fb"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "eslint",
+        "apps/server/src/chat/frozen-source-policy.ts",
+        "apps/server/src/chat/conversation-application-service.ts",
+        "apps/server/src/v06-grounding-analysis.ts",
+        "packages/world-grounding-runtime/src/index.ts",
+        "tests/v06-frozen-entry.integration.test.ts",
+        "tests/v06-frozen-routing-policy.unit.test.ts",
+        "tests/world-grounding-application.unit.test.ts"
+      ],
+      "exitCode": 0,
+      "log": "reports/v0.6/functional-closure/R01-lint.txt",
+      "outputSha256": "sha256:7fc0412de8d3245cfffaedfbdce584483b7048fa0871eee104803a6115965450"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        "apps/server/src/chat/frozen-source-policy.ts",
+        "apps/server/src/chat/conversation-application-service.ts",
+        "apps/server/src/v06-grounding-analysis.ts",
+        "packages/world-grounding-runtime/src/index.ts",
+        "tests/v06-frozen-entry.integration.test.ts",
+        "tests/v06-frozen-routing-policy.unit.test.ts",
+        "tests/world-grounding-application.unit.test.ts",
+        "README.md",
+        "PROJECT_STATUS.md",
+        "docs/api/ag-ui-grounding-v03.md",
+        "execplans/EP-06-sacs-v0.6-functional-closure.md",
+        "config/v0.6/functional-closure/acceptance-matrix.json",
+        "reports/v0.6/functional-closure/R01.md",
+        "reports/v0.6/functional-closure/R01-validation.json"
+      ],
+      "exitCode": 0,
+      "log": "reports/v0.6/functional-closure/R01-format.txt",
+      "outputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "command": ["git", "diff", "--check"],
+      "exitCode": 0,
+      "log": "reports/v0.6/functional-closure/R01-diff.txt",
+      "outputSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "precedingRedCheck": {
+    "command": "Jest v06-frozen-entry.integration.test.ts --testNamePattern=R01",
+    "exitCode": 1,
+    "focusedTests": 11,
+    "failed": 10,
+    "passed": 1,
+    "scope": "before runtime repair; intentionally failing permanent regressions"
+  }
+}

@@ -24,6 +24,11 @@ import { GroundingJobAnalysisSourceAdapter } from "../../../packages/wsgs-analys
 import { createGroundingClientSelector } from "../../../packages/wsgs-analysis-adapter/src/contract-identity.js";
 import type { GroundingAnalysisConfig } from "../../../packages/wsgs-analysis-adapter/src/config.js";
 import type { AnalysisRepository } from "../../../packages/persistence/src/index.js";
+import {
+  isFrozenSourceContinuation,
+  isIndependentSdarMutation,
+  HISTORICAL_SOURCE_MUTATION_CLARIFICATION,
+} from "./chat/frozen-source-policy.js";
 import { planFrozenGroundingRequest } from "../../../packages/grounding-request-planner/src/frozen-request.js";
 import { FrozenWorldAnalysisContract } from "../../../packages/wsgs-geospatial-consumer/src/frozen-world-analysis.js";
 import {
@@ -129,69 +134,67 @@ export function createV06GroundingAnalysis(input: {
                 continueFrozenWorld: async (
                   turn: WorldGroundingControlTurn,
                 ) => {
-                  // Explicit references to published candidates must not fall through to SDAR routing.
                   if (
-                    /(?:第(?:[一二三四五六七八九十]|[1-9][0-9]?)个|展开卡片|聚焦地图|排除暂停|改查|改为|重新查询|重查|历史.*(?:目标|返回)|(?:这个|该|此)(?:候选|位置|目标))/u.test(
-                      turn.userText,
-                    )
+                    isFrozenSourceContinuation(turn.userText) &&
+                    (await hasAuthorizedFrozenSource(turn))
                   )
                     return answerFrozenTurn(turn);
-                  if (
-                    /(?:让|叫|请)?(?:无人车|车辆|车|机器人).*(?:返回|前往|驶向|开往|导航)|(?:返回|前往|驶向|开往|导航到)(?:那里|该处|此处)/u.test(
-                      turn.userText,
-                    )
-                  ) {
-                    const scope = {
-                      principalId: turn.principalId,
-                      threadId: turn.threadId,
-                    };
-                    const current =
-                      await persistence.analysisRepository.findCurrentGroundingAnalysis(
-                        scope,
-                      );
-                    if (
-                      current?.revision.source?.kind === "WSGS_GROUNDING_JOB" &&
-                      current.revision.source.contractIdentity
-                        ?.contractVersion === "sacs-wsgs-grounding/1.2"
-                    ) {
-                      const execution =
-                        await persistence.groundingRepository.get({
-                          ...scope,
-                          groundingId: current.groundingExecutionId,
-                        });
-                      if (
-                        execution?.groundingResult &&
-                        execution.analysisIntent?.["revisionId"] ===
-                          current.revision.revisionId
-                      ) {
-                        const result = new FrozenWorldAnalysisContract().parse(
-                          "result",
-                          execution.groundingResult,
-                        );
-                        if (
-                          result.groundingId !==
-                            current.revision.source.sourceId ||
-                          result.resultHash !== execution.groundingResultHash
-                        )
-                          throw Error("ANALYSIS_SOURCE_IDENTITY_INVALID");
-                        if (
-                          result.worldAnalysisFindings.choices.length > 0 ||
-                          result.worldAnalysisFindings.findings.some(
-                            (finding) =>
-                              finding.findingKind === "ACTION_TARGET_CANDIDATE",
-                          )
-                        )
-                          return "当前显示的是历史分析候选，不能直接用于车辆执行。请明确候选；这里只能继续只读分析，实际执行仍需当前验证、路线规划和执行确认。";
-                      }
-                    }
-                  }
                   return undefined;
                 },
+                guardFrozenSdarMutation: async (turn) =>
+                  (await hasAuthorizedFrozenSource(turn)) &&
+                  !isIndependentSdarMutation(turn)
+                    ? HISTORICAL_SOURCE_MUTATION_CLARIFICATION
+                    : undefined,
               }
             : {}),
         }
       : {}),
   });
+  async function hasAuthorizedFrozenSource(
+    turn: WorldGroundingControlTurn,
+  ): Promise<boolean> {
+    const scope = { principalId: turn.principalId, threadId: turn.threadId };
+    const current =
+      await persistence.analysisRepository.findCurrentGroundingAnalysis(scope);
+    if (
+      !current ||
+      current.revision.source?.kind !== "WSGS_GROUNDING_JOB" ||
+      current.revision.source.contractIdentity?.contractVersion !==
+        "sacs-wsgs-grounding/1.2"
+    )
+      return false;
+    const execution = await persistence.groundingRepository.get({
+      ...scope,
+      groundingId: current.groundingExecutionId,
+    });
+    if (
+      !execution ||
+      current.session.principalId !== turn.principalId ||
+      current.session.threadId !== turn.threadId ||
+      execution.principalId !== turn.principalId ||
+      execution.threadId !== turn.threadId ||
+      execution.analysisIntent?.["analysisId"] !== current.session.analysisId ||
+      execution.analysisIntent["revisionId"] !== current.revision.revisionId ||
+      execution.wsgsGroundingId !== current.revision.source.sourceId ||
+      parseGroundingContractIdentity(
+        execution.analysisIntent["contractIdentity"],
+      ).contractVersion !== "sacs-wsgs-grounding/1.2"
+    )
+      throw Error("ANALYSIS_SOURCE_IDENTITY_INVALID");
+    if (execution.groundingResult) {
+      const result = new FrozenWorldAnalysisContract().parse(
+        "result",
+        execution.groundingResult,
+      );
+      if (
+        result.groundingId !== current.revision.source.sourceId ||
+        result.resultHash !== execution.groundingResultHash
+      )
+        throw Error("ANALYSIS_SOURCE_IDENTITY_INVALID");
+    }
+    return true;
+  }
   if (!config.enabled)
     return {
       world,

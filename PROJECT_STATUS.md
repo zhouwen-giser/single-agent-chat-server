@@ -10,9 +10,10 @@ result and selection cases R01/R02 remain `BLOCKED_EXTERNAL`; see the
 The current
 [functional repair and acceptance plan](execplans/EP-06-sacs-v0.6-functional-closure.md)
 records three reproduced routing/deployment defects and the remaining browser,
-recovery and real-integration work. R00 delivers the plan; R01–R07 business
-implementation has not started. All 34 required new acceptance rows and four
-conditional extension rows are `NOT_RUN` in the
+recovery and real-integration work. R00 delivered the plan; R01 repaired source-bound continuation and enforced
+provenance before mutable SDAR dispatch. Its six required rows PASS, with 677
+full frozen regressions, typecheck, architecture and build passing. The remaining
+28 required and four conditional extension rows are `NOT_RUN` in the
 [new matrix](config/v0.6/functional-closure/acceptance-matrix.json).
 The development marker does not assert those newly audited requirements pass.
 
