@@ -166,7 +166,11 @@
     "test:v06:browser:postgres": "node scripts/v06-browser-tests.mjs --postgres",
     "test:v06:process": "node scripts/v06-process-tests.mjs",
     "test:v06:checkpoint": "node scripts/v06-process-tests.mjs --checkpoint",
-    "check:v06:real-inputs": "node scripts/v06-functional-real-preflight.mjs"
+    "check:v06:real-inputs": "node scripts/v06-functional-real-preflight.mjs",
+    "verify:v06:development": "node scripts/verify-v06-functional.mjs development",
+    "verify:v06:integration": "node scripts/verify-v06-functional.mjs integration",
+    "verify:v06:release": "node scripts/verify-v06-functional.mjs release",
+    "check:v06:status": "node scripts/verify-v06-functional.mjs status"
   },
   "dependencies": {
     "@a2a-js/sdk": "1.0.0-beta.0",

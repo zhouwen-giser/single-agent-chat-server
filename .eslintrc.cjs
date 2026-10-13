@@ -21,6 +21,7 @@ module.exports = {
         "scripts/v06-browser-tests.mjs",
         "scripts/v06-process-tests.mjs",
         "scripts/v06-functional-real-preflight.mjs",
+        "scripts/verify-v06-functional.mjs",
       ],
       parserOptions: { project: null },
       env: { node: true, es2022: true },

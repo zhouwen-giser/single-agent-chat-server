@@ -98,7 +98,11 @@
         "R05",
         "R06"
       ],
-      "status": "NOT_RUN"
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R07.md",
+        "reports/v0.6/functional-closure/R07-development/DEVELOPMENT.json"
+      ]
     },
     {
       "id": "N01",
@@ -613,8 +617,11 @@
       "title": "当前检查入口执行真实断言",
       "acceptance": "v0.6 专用 development/integration/release 入口执行实际检查，缺配置/失败不无条件返回成功。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R07.md",
+        "reports/v0.6/functional-closure/R07-development/DEVELOPMENT.json"
+      ]
     },
     {
       "id": "FC-33",
@@ -624,7 +631,11 @@
       "acceptance": "当前源回归/浏览器/安全/架构/迁移/许可/build、CI 与报告一致，依赖和许可锁定，旧证据保持不可变。",
       "required": true,
       "status": "NOT_RUN",
-      "evidence": []
+      "evidence": [
+        "reports/v0.6/functional-closure/R07.md",
+        "reports/v0.6/functional-closure/R07-development/DEVELOPMENT.json"
+      ],
+      "reason": "LOCAL_SOURCE_CHECKS_PASS_CURRENT_CANDIDATE_CI_PENDING"
     },
     {
       "id": "FC-34",
@@ -633,8 +644,12 @@
       "title": "当前候选发布资格",
       "acceptance": "当前候选的真实模型意图、隔离部署/网络、预声明容量/恢复目标、SBOM/运行指南逐项通过；不自动部署或合并。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        "reports/v0.6/functional-closure/R07.md",
+        "reports/v0.6/functional-closure/R07-development/RELEASE.json"
+      ],
+      "reason": "CURRENT_REAL_MODEL_CAPACITY_AND_REAL_WSGS_QUALIFICATION_REQUIRED"
     },
     {
       "id": "EXT-01",

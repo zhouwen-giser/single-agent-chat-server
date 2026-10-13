@@ -1,0 +1,2 @@
+Migration gate passed: 20 contiguous append-only files with checksum, lock, and transaction enforcement.
+$ node scripts/verify-migrations.mjs

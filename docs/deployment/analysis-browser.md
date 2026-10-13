@@ -51,3 +51,17 @@ corepack pnpm test:v06:browser:postgres
 ```
 
 The launcher always rebuilds the browser bundle, excludes real credentials/database settings, creates its own temporary database container, and cleans it up. Ordinary test screenshots go to `.tmp/v06-browser`; phase validation supplies a separate evidence directory, preserving historical receipts. The database fixture uses the allowed 1-second recovery tick for bounded browser tests; the process recovery qualification separately uses the production 30-second tick and 180-second lease.
+
+## Current functional qualification
+
+Use `pnpm verify:v06:development` for the complete local consumer qualification.
+It runs real browser/database/process checks and preserves source/exit/output
+identity. The full process portion takes several minutes under the production
+lease/tick budget. Inspect `node scripts/verify-v06-functional.mjs development
+--list` before running if needed. GitHub CI has a dedicated functional-v06 job.
+
+`pnpm verify:v06:integration` and `pnpm verify:v06:release` fail closed when
+current private/real evidence is absent. A Source development PASS does not
+qualify real WSGS, model quality, capacity, or conditional Native/SDAR extensions.
+Current phase evidence is in reports/v0.6/functional-closure. The page remains
+opt-in and authenticated in production; no automatic shared deployment occurs.

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "sacs-functional-gate/1.0",
+  "mode": "status",
+  "sourceSha": "fa5e26ac664d43564cc3d612edfb9d0ed90190fd",
+  "sourceManifestSha256": "sha256:2147868cc101568e0758bd13df44dbc43a4b6126ef5b33d47313858e029ffac4",
+  "status": "PARTIAL",
+  "checks": [],
+  "requiredRows": [
+    "FC-34"
+  ],
+  "pending": [
+    {
+      "id": "FC-23",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-24",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-25",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-26",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-27",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-28",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-29",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-30",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-31",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-32",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "FC-33",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "FC-34",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EXT-01",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "EXT-02",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "EXT-03",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "EXT-04",
+      "status": "BLOCKED_EXTERNAL"
+    }
+  ]
+}
