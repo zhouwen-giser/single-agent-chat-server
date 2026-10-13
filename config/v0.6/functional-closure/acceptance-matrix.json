@@ -1,0 +1,528 @@
+{
+  "schemaVersion": "sacs-v06-functional-closure-plan/1.0",
+  "plan": "execplans/EP-06-sacs-v0.6-functional-closure.md",
+  "businessSourceBaseline": "30dd9814de93acf7e3e24311b8b477cdbcac16c2",
+  "mode": "PLAN_ONLY",
+  "phases": [
+    {
+      "id": "R00",
+      "title": "固定方案与审查基线",
+      "dependsOn": [],
+      "status": "PLAN_DELIVERED"
+    },
+    {
+      "id": "R01",
+      "title": "会话路由与执行入口修复",
+      "dependsOn": [
+        "R00"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R02",
+      "title": "默认部署与运行状态",
+      "dependsOn": [
+        "R01"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R03",
+      "title": "浏览器世界分析展示",
+      "dependsOn": [
+        "R02"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R04",
+      "title": "显式交互与界面恢复",
+      "dependsOn": [
+        "R03"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R05",
+      "title": "进程级恢复与并发隔离",
+      "dependsOn": [
+        "R02",
+        "R04"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R06",
+      "title": "真实公开接口与高级历史验收",
+      "dependsOn": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R07",
+      "title": "最终验证与交付",
+      "dependsOn": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "N01",
+      "title": "Native Analysis 条件接入",
+      "dependsOn": [],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "E01",
+      "title": "SDAR grounding 条件接入",
+      "dependsOn": [],
+      "status": "NOT_RUN"
+    }
+  ],
+  "decisionRules": {
+    "developmentRequired": [
+      "FC-01",
+      "FC-02",
+      "FC-03",
+      "FC-04",
+      "FC-05",
+      "FC-06",
+      "FC-07",
+      "FC-08",
+      "FC-09",
+      "FC-10",
+      "FC-11",
+      "FC-12",
+      "FC-13",
+      "FC-14",
+      "FC-15",
+      "FC-16",
+      "FC-17",
+      "FC-18",
+      "FC-19",
+      "FC-20",
+      "FC-21",
+      "FC-22",
+      "FC-32",
+      "FC-33"
+    ],
+    "realWsgsRequired": [
+      "FC-23",
+      "FC-24",
+      "FC-25",
+      "FC-26",
+      "FC-27",
+      "FC-28",
+      "FC-29",
+      "FC-30",
+      "FC-31"
+    ],
+    "releaseRequired": [
+      "FC-34"
+    ],
+    "conditionalExtensions": [
+      "EXT-01",
+      "EXT-02",
+      "EXT-03",
+      "EXT-04"
+    ],
+    "passRequires": "Direct executed assertions, command exit code, current candidate source identity and bounded evidence. Planned work is NOT_RUN.",
+    "overallClosure": "All required development, real WSGS and release cases must PASS for a complete main-track claim. Conditional extension status is always reported separately."
+  },
+  "cases": [
+    {
+      "id": "FC-01",
+      "phase": "R01",
+      "track": "DEVELOPMENT",
+      "title": "无世界上下文的普通对话",
+      "acceptance": "改为中文、解释这个位置参数、第一个例子走正常分类；零 Grounding 创建。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-02",
+      "phase": "R01",
+      "track": "DEVELOPMENT",
+      "title": "有上下文时的续聊与普通对话",
+      "acceptance": "只有当前来源绑定的窄命令进入续聊；普通聊天、Task 状态查询和独立新任务保持正常。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-03",
+      "phase": "R01",
+      "track": "DEVELOPMENT",
+      "title": "历史目标执行保底检查",
+      "acceptance": "中英文及混合改写在受控模型判 SDAR_TASK 时仍不触发任务创建 claim、A2A factory 或 mutation。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-04",
+      "phase": "R01",
+      "track": "DEVELOPMENT",
+      "title": "既有任务与 A2A 兼容",
+      "acceptance": "独立 SDAR 新任务、允许的 Follow-up、顶层 cancel 和 published status 维持现有协议与授权。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-05",
+      "phase": "R01",
+      "track": "DEVELOPMENT",
+      "title": "权限与旧来源隔离",
+      "acceptance": "跨 principal/Chat、旧 Revision、过期候选与陈旧 intervention 无法提供当前引用或执行授权。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-06",
+      "phase": "R01",
+      "track": "DEVELOPMENT",
+      "title": "utility 与背景请求",
+      "acceptance": "标题/摘要等 utility 路径不创建或修改 WSGS Grounding/SDAR Task。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-07",
+      "phase": "R02",
+      "track": "DEVELOPMENT",
+      "title": "两种 Compose 入口传入配置",
+      "acceptance": "使用隔离虚拟环境解析；启用开关、WSGS 地址、合同/profile、预算及限制实际传入容器。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-08",
+      "phase": "R02",
+      "track": "DEVELOPMENT",
+      "title": "实际进程启动与能力门禁",
+      "acceptance": "隔离容器开启/关闭、错误协商和 unavailable capability 的结果可观察且正确；不开启共享部署。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-09",
+      "phase": "R02",
+      "track": "DEVELOPMENT",
+      "title": "运行状态与运维信号",
+      "acceptance": "健康/能力检查有界且不提交业务，状态文档准确，故障/取消/恢复信号不泄露敏感数据。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-10",
+      "phase": "R03",
+      "track": "DEVELOPMENT",
+      "title": "浏览器身份与密钥隔离",
+      "acceptance": "可信短期身份、授权 Analysis 目录及同源会话可用；服务密钥不进入浏览器，跨用户与过期身份被拒绝。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-11",
+      "phase": "R03",
+      "track": "DEVELOPMENT",
+      "title": "真实浏览器地图与时间轴",
+      "acceptance": "实际浏览器绘制公开几何/Gap/时间限定；平移缩放 fit 和图层开关保持零后台 mutation。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-12",
+      "phase": "R03",
+      "track": "DEVELOPMENT",
+      "title": "证据和候选稳定关联",
+      "acceptance": "文字、feature、timeline、evidence、product 和 choice 保持公开稳定身份；裁剪无悬空导航，候选无执行授权。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-13",
+      "phase": "R03",
+      "track": "DEVELOPMENT",
+      "title": "渲染故障与展示安全",
+      "acceptance": "来源不足/未知几何/状态/无数据如实可读；文字注入和任意外部资源被限制；页面可独立构建。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-14",
+      "phase": "R04",
+      "track": "DEVELOPMENT",
+      "title": "浏览器候选确认闭环",
+      "acceptance": "检查零提交，显式确认精确 selector 后生成新 Revision/Grounding，只有权威 Snapshot 更新视图。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-15",
+      "phase": "R04",
+      "track": "DEVELOPMENT",
+      "title": "浏览器范围草稿与提交",
+      "acceptance": "绘制/重绘/清除不提交；显式 CONTINUE/REPLACE 保留几何/hash，旧草稿 generation 无法提交。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-16",
+      "phase": "R04",
+      "track": "DEVELOPMENT",
+      "title": "过期与重复操作",
+      "acceptance": "过期 Choice 保持可读且禁用，显式重查可用；双击/同键重放不重复工作，冲突不覆盖新 Revision。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-17",
+      "phase": "R04",
+      "track": "DEVELOPMENT",
+      "title": "浏览器重连与取消",
+      "acceptance": "断线不 cancel，重连不 START；完整 State/Activity 恢复，CANCEL_REQUESTED 等到权威终态。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-18",
+      "phase": "R05",
+      "track": "DEVELOPMENT",
+      "title": "发送边界与绑定故障恢复",
+      "acceptance": "独立进程在发送前、接受/响应丢失、pre-bind 点终止；相同 canonical bytes/key 恢复一个逻辑 Grounding。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-19",
+      "phase": "R05",
+      "track": "DEVELOPMENT",
+      "title": "运行中 SIGKILL 和断库",
+      "acceptance": "RUNNING 时 OS 终止、隔离数据库短时不可用后恢复身份/hash；故障和恢复计时有真实进程/DB 证据。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-20",
+      "phase": "R05",
+      "track": "DEVELOPMENT",
+      "title": "双实例 claim 和租约围栏",
+      "acceptance": "两个真实 SACS 进程竞争同源及命令；唯一约束/claim fencing 生效，符合已记录租约和恢复预算。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-21",
+      "phase": "R05",
+      "track": "DEVELOPMENT",
+      "title": "取消恢复与权威终态",
+      "acceptance": "取消意图先持久化，回执丢失后重启仍保留不确定状态；仅公开 CANCELLED 才记已取消。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-22",
+      "phase": "R05",
+      "track": "DEVELOPMENT",
+      "title": "终态投影和历史来源恢复",
+      "acceptance": "终态投影写入故障可恢复，旧来源迟到仅进入历史；完整 Snapshot 恢复且不重复业务。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-23",
+      "phase": "R06",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "真实正向 Finding",
+      "acceptance": "当前公开接口至少返回一个合法 Finding；正常/PARTIAL 状态与各视图、哈希、终态持久化一致。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-24",
+      "phase": "R06",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "真实 Choice 确认",
+      "acceptance": "真实有效 Choice 到显式 Control、新 Revision/Grounding、Snapshot 的完整链路通过。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-25",
+      "phase": "R06",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "真实 HISTORICAL_TRACE",
+      "acceptance": "主体/时间/PROVISIONAL/Gap/公开几何与实际 Finding 同源，不以旧报告代替当前源验收。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-26",
+      "phase": "R06",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "真实 ROAD_ASSOCIATION",
+      "acceptance": "实际道路关系/公开几何与缺口正确消费，不补造道路位置或导航语义。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-27",
+      "phase": "R06",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "真实 TEMPORAL_EVENT",
+      "acceptance": "实际公开事件及其时间/限定正确消费，要求的停车/穿越子类型逐项报告。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-28",
+      "phase": "R06",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "真实 METRIC_RANKING",
+      "acceptance": "实际排名、单位、数值/缺口和候选权威保留；展示裁剪不改变源哈希或选择依据。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-29",
+      "phase": "R06",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "真实 ACTION_TARGET_CANDIDATE",
+      "acceptance": "实际历史候选保留当前验证/规划/确认要求和 executionAuthorized=false；零 SDAR 执行。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-30",
+      "phase": "R06",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "真实范围再查询",
+      "acceptance": "公开可用空间语义的显式 geometry/hash 引发新来源；源结果与新投影一致，unsupported 不能记 PASS。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-31",
+      "phase": "R06",
+      "track": "REAL_WSGS_INTEGRATION",
+      "title": "真实进程恢复与取消",
+      "acceptance": "本次专有真实 Job 的恢复与取消两个子检查均有独立证据，权威状态/逻辑幂等正确。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-32",
+      "phase": "R07",
+      "track": "DEVELOPMENT",
+      "title": "当前检查入口执行真实断言",
+      "acceptance": "v0.6 专用 development/integration/release 入口执行实际检查，缺配置/失败不无条件返回成功。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-33",
+      "phase": "R07",
+      "track": "DEVELOPMENT",
+      "title": "当前源码和交付证据一致",
+      "acceptance": "当前源回归/浏览器/安全/架构/迁移/许可/build、CI 与报告一致，依赖和许可锁定，旧证据保持不可变。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "FC-34",
+      "phase": "R07",
+      "track": "RELEASE",
+      "title": "当前候选发布资格",
+      "acceptance": "当前候选的真实模型意图、隔离部署/网络、预声明容量/恢复目标、SBOM/运行指南逐项通过；不自动部署或合并。",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "EXT-01",
+      "phase": "N01",
+      "track": "CONDITIONAL_NATIVE",
+      "title": "Native 权威合同预检",
+      "acceptance": "八项公开权威 artifacts、来源/哈希、端点及顺序/幂等/恢复语义完整，实际能力可用。",
+      "required": false,
+      "status": "NOT_RUN",
+      "evidence": [],
+      "activationCondition": "Authoritative public contract and available implementation accepted for N01"
+    },
+    {
+      "id": "EXT-02",
+      "phase": "N01",
+      "track": "CONDITIONAL_NATIVE",
+      "title": "Native 生产适配与真实消费",
+      "acceptance": "隔离 HTTP adapter 消费真实 Plan/Event/Revision/Intervention/Cancel；正常 AG-UI 与恢复通过，Grounding Job 兼容。",
+      "required": false,
+      "status": "NOT_RUN",
+      "evidence": [],
+      "activationCondition": "Authoritative public contract and available implementation accepted for N01"
+    },
+    {
+      "id": "EXT-03",
+      "phase": "E01",
+      "track": "CONDITIONAL_SDAR_GROUNDING",
+      "title": "SDAR 扩展合同与严格组合",
+      "acceptance": "公开 schema/media type/Agent Card/handler/validator 可用；有效引用和授权通过 adapter 组合，无文本降级。",
+      "required": false,
+      "status": "NOT_RUN",
+      "evidence": [],
+      "activationCondition": "Authoritative public contract and available implementation accepted for E01"
+    },
+    {
+      "id": "EXT-04",
+      "phase": "E01",
+      "track": "CONDITIONAL_SDAR_GROUNDING",
+      "title": "SDAR 扩展真实消费",
+      "acceptance": "专有安全授权请求通过官方 A2A；历史候选本身仍不执行，拒绝/缺失合同明确失败。",
+      "required": false,
+      "status": "NOT_RUN",
+      "evidence": [],
+      "activationCondition": "Authoritative public contract and available implementation accepted for E01"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "sacs-v06-functional-plan-validation/1.0",
+  "phase": "R00",
+  "scope": "PLAN_ONLY",
+  "date": "2026-10-13",
+  "timezone": "Asia/Shanghai",
+  "businessSourceBaseline": "30dd9814de93acf7e3e24311b8b477cdbcac16c2",
+  "businessImplementationStatus": "NOT_RUN",
+  "status": "PASS",
+  "checks": [
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        "execplans/EP-06-sacs-v0.6-functional-closure.md",
+        "config/v0.6/functional-closure/acceptance-matrix.json",
+        "reports/v0.6/functional-closure/BASELINE.json",
+        "reports/v0.6/functional-closure/R00-plan.md",
+        "README.md",
+        "PROJECT_STATUS.md"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1219,
+      "outputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "command": "inline Python plan/link/source consistency assertions",
+      "exitCode": 0,
+      "assertions": [
+        "38 unique cases; 34 required and 4 conditional; all NOT_RUN; correct track partition",
+        "10 phase identifiers and acyclic dependencies",
+        "current business baseline and all selected file hashes unchanged",
+        "117-file public contract inventory/hash unchanged",
+        "all local links in new plan/report resolve",
+        "only seven approved plan/report/status files changed"
+      ],
+      "localLinksChecked": 6
+    },
+    {
+      "command": ["git", "diff", "--check"],
+      "exitCode": 0,
+      "elapsedMs": 6,
+      "outputSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "documentHashes": {
+    "execplans/EP-06-sacs-v0.6-functional-closure.md": "sha256:e7d743c82c0d9bf159cc667e0f21bf599ba0a2dbc89eb07045a953731b7f5877",
+    "config/v0.6/functional-closure/acceptance-matrix.json": "sha256:401eb019324507ebc2e119fe249eb3664a8ca14a8d3a870f99655f716a54cd3b",
+    "reports/v0.6/functional-closure/BASELINE.json": "sha256:a4636982b35a6ee27646d6d2c065d673d0b009e7b9de2587c732979945c3165a",
+    "reports/v0.6/functional-closure/R00-plan.md": "sha256:2b0a22e6d712f9dea1eb23d2f84c2653ad9c9a5c5c875d7a711d1a0f732cc514",
+    "README.md": "sha256:d9d06eaaa9a723cd7152f17a5e9bf04517a040ce9c43493fe8d403dc056ce19d",
+    "PROJECT_STATUS.md": "sha256:ef93037b089d8bcd6c7e32ee0dd1446597e2602b9cabe4e006e0059a7a2199bb"
+  }
+}

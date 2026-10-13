@@ -1,5 +1,26 @@
 # Project status
 
+Current branch: `codex/sacs-v0.6-wsgs-full-functional-integration`.
+
+The Grounding presentation track has direct G01–G12 development evidence and
+the marker `SACS_AGUI_V03_GROUNDING_PRESENTATION_DEV_READY`. Its real positive
+result and selection cases R01/R02 remain `BLOCKED_EXTERNAL`; see the
+[current presentation report](reports/v0.6/agui-v03-grounding-presentation/FINAL_REPORT.md).
+
+The current
+[functional repair and acceptance plan](execplans/EP-06-sacs-v0.6-functional-closure.md)
+records three reproduced routing/deployment defects and the remaining browser,
+recovery and real-integration work. R00 delivers the plan; R01–R07 business
+implementation has not started. All 34 required new acceptance rows and four
+conditional extension rows are `NOT_RUN` in the
+[new matrix](config/v0.6/functional-closure/acceptance-matrix.json).
+The development marker does not assert those newly audited requirements pass.
+
+The v0.5 and earlier decisions below retain their historical scope; they are
+not the current v0.6 production-composition decision.
+
+## Historical v0.5 development decision
+
 Status: `SACS_V05_FEATURE_COMPLETE`.
 
 The active v0.5 decision is split into independent tracks on

@@ -32,6 +32,14 @@ Protocol drift fails closed. See [A2A compatibility](docs/a2a-compatibility.md).
 
 ## v0.6 frozen WSGS consumer — source development
 
+The current [functional repair and acceptance plan](execplans/EP-06-sacs-v0.6-functional-closure.md)
+covers the reproduced conversation-routing and default-Compose defects, browser
+presentation, process recovery and remaining real WSGS cases. It is a plan;
+its [38 new acceptance rows](config/v0.6/functional-closure/acceptance-matrix.json)
+remain `NOT_RUN`. Native Analysis and SDAR grounding extensions have separate
+authoritative-contract prerequisites. See [Project status](PROJECT_STATUS.md)
+for the current decision and the historical scope of older reports.
+
 The Grounding Job consumer uses the exact `sacs-wsgs-grounding/1.2` and
 `wsgs-world-analysis-findings/1.0` header pair; wire `schemaVersion` remains
 `1.0`. Normal Chat, AG-UI and Analysis Control share the same consumer path.
