@@ -17,8 +17,10 @@ three rows PASS with 105 focused tests, 13 PostgreSQL tests and five container
 cases. R03 adds the authenticated browser reference client and public geometry,
 timeline, evidence and candidate presentation; its four rows PASS with 12
 browser/identity checks, 71 security/API regressions and four PostgreSQL tests.
+R04 completes explicit browser controls and bounded observer recovery; its four
+rows PASS with four Chromium/PostgreSQL scenarios and 79 impacted regressions.
 The remaining
-21 required and four conditional extension rows are `NOT_RUN` in the
+17 required and four conditional extension rows are `NOT_RUN` in the
 [new matrix](config/v0.6/functional-closure/acceptance-matrix.json).
 The development marker does not assert those newly audited requirements pass.
 

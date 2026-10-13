@@ -233,3 +233,9 @@ footer {
     margin-left: 0;
   }
 }
+
+.draft-preview .geometry {
+  stroke: #d57419;
+  fill: #f6a95444;
+  stroke-dasharray: 5 3;
+}

@@ -52,7 +52,11 @@
       "dependsOn": [
         "R03"
       ],
-      "status": "NOT_RUN"
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R04.md",
+        "reports/v0.6/functional-closure/R04-validation.json"
+      ]
     },
     {
       "id": "R05",
@@ -341,8 +345,12 @@
       "title": "浏览器候选确认闭环",
       "acceptance": "检查零提交，显式确认精确 selector 后生成新 Revision/Grounding，只有权威 Snapshot 更新视图。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R04.md",
+        "reports/v0.6/functional-closure/R04-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:2356bcafdeb5ad992949d16b83ffe6a4e169e0c10bce4cd62e9841976e81da8b"
     },
     {
       "id": "FC-15",
@@ -351,8 +359,12 @@
       "title": "浏览器范围草稿与提交",
       "acceptance": "绘制/重绘/清除不提交；显式 CONTINUE/REPLACE 保留几何/hash，旧草稿 generation 无法提交。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R04.md",
+        "reports/v0.6/functional-closure/R04-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:2356bcafdeb5ad992949d16b83ffe6a4e169e0c10bce4cd62e9841976e81da8b"
     },
     {
       "id": "FC-16",
@@ -361,8 +373,12 @@
       "title": "过期与重复操作",
       "acceptance": "过期 Choice 保持可读且禁用，显式重查可用；双击/同键重放不重复工作，冲突不覆盖新 Revision。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R04.md",
+        "reports/v0.6/functional-closure/R04-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:2356bcafdeb5ad992949d16b83ffe6a4e169e0c10bce4cd62e9841976e81da8b"
     },
     {
       "id": "FC-17",
@@ -371,8 +387,12 @@
       "title": "浏览器重连与取消",
       "acceptance": "断线不 cancel，重连不 START；完整 State/Activity 恢复，CANCEL_REQUESTED 等到权威终态。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R04.md",
+        "reports/v0.6/functional-closure/R04-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:2356bcafdeb5ad992949d16b83ffe6a4e169e0c10bce4cd62e9841976e81da8b"
     },
     {
       "id": "FC-18",

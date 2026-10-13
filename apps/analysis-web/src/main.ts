@@ -5,6 +5,7 @@ import {
 import type { FocusTarget } from "../../../packages/analysis-contract/src/index.js";
 import type { WorldAnalysisViewModel } from "../../../packages/world-explanation-runtime/src/analysis-view.js";
 import { BrowserTransport } from "./transport.js";
+import { BrowserAnalysisInteractions } from "./interactions.js";
 import { SvgMapEngine } from "./map.js";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => {
@@ -56,6 +57,19 @@ let sessionGeneration = 0;
 const view = () =>
   client.state.sharedState?.worldExplanation as unknown as
     WorldAnalysisViewModel | undefined;
+const interactions = new BrowserAnalysisInteractions({
+  client: () => client,
+  engine,
+  transport,
+  observe,
+  detach: async () => {
+    activeStream?.abort();
+    await client.disconnect();
+    $("connection").textContent = "观察已断开，最后视图保留；可恢复观察。";
+  },
+  safe,
+  text: () => $<HTMLTextAreaElement>("query").value.trim() || lastText,
+});
 const showInspection = (value: unknown) => {
   $("inspection").textContent = JSON.stringify(value, null, 2);
 };
@@ -124,6 +138,7 @@ async function refreshDirectory(): Promise<void> {
         activeStream?.abort();
         await client.disconnect();
         client = new HeadlessAnalysisReferenceClient(engine);
+        clearView();
         threadId = entry.threadId;
         await observe(entry.analysisId);
       },
@@ -191,8 +206,22 @@ async function run(
     await observer.finishStream(generation);
     if (session !== sessionGeneration || observer !== client) return;
     render();
-    if (client.state.runStatus === "ERROR")
+    if (client.state.runStatus === "ERROR") {
+      const state = client.state.sharedState;
+      if (view()?.status === "RUNNING") {
+        const cancelling = Object.values(state?.analysis.runsById ?? {}).some(
+          (run) =>
+            run.revisionId === state?.analysis.activeRevisionId &&
+            run.status === "CANCEL_REQUESTED",
+        );
+        $("connection").textContent = cancelling
+          ? "CANCEL_REQUESTED · 等待来源终态；可恢复观察。"
+          : "当前来源仍在运行；观察窗口结束，可恢复观察。";
+        await refreshDirectory();
+        return;
+      }
       throw Error("BROWSER_SOURCE_RUN_ERROR");
+    }
     $("connection").textContent =
       "观察窗口结束，保留最后公开视图；可恢复观察。";
     await refreshDirectory();
@@ -222,6 +251,7 @@ async function inspect(
   showInspection(value);
 }
 function clearView(): void {
+  interactions.reset();
   for (const id of [
     "revision",
     "activity",
@@ -276,7 +306,12 @@ function render(): void {
   for (const warning of v.warnings)
     $("summary").append(make("p", warning, "gap"));
   $("activity").replaceChildren();
-  for (const activity of Object.values(client.state.activitiesByMessageId))
+  for (const activity of Object.values(
+    client.state.activitiesByMessageId,
+  ).filter(
+    (activity) =>
+      activity.content["revisionId"] === state.analysis.activeRevisionId,
+  ))
     $("activity").append(
       make(
         "p",
@@ -417,6 +452,7 @@ function render(): void {
           choice.choice.candidateId,
         );
         showInspection(selected);
+        interactions.update();
       }),
     );
     $("choices").append(node);
@@ -433,6 +469,14 @@ function render(): void {
     );
     $("action-targets").append(node);
   }
+  const currentRun = Object.values(state.analysis.runsById).find(
+    (run) =>
+      run.revisionId === state.analysis.activeRevisionId &&
+      run.status === "CANCEL_REQUESTED",
+  );
+  if (currentRun)
+    $("connection").textContent = "CANCEL_REQUESTED · 等待来源确认终态。";
+  interactions.update();
 }
 $("login-form").addEventListener("submit", (event) => {
   event.preventDefault();
@@ -450,6 +494,7 @@ $("logout").addEventListener("click", () => {
     await transport.json("/analysis/logout", "POST", {});
     await client.disconnect();
     sessionGeneration += 1;
+    client = new HeadlessAnalysisReferenceClient(engine);
     clearView();
     $("directory").replaceChildren();
     $<HTMLTextAreaElement>("query").value = "";

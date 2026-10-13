@@ -33,3 +33,21 @@ corepack pnpm test:v06:browser
 ```
 
 The launcher builds the page, excludes developer `.env` and live service settings, and uses Chromium 141.0.7390.37 associated with the pinned browser library. These are consumer/browser development checks, not real WSGS or device qualification. PostgreSQL-backed directory checks run through the existing isolated PostgreSQL harness.
+
+## Explicit controls and recovery
+
+Inspect a candidate before pressing **确认所选候选**. The server checks the active Revision, persisted intervention, precise selector and expiry again. Expired cards remain readable; fill in the query and explicitly requery. A control receipt triggers observation of the same Analysis, and only its authoritative Snapshot changes the current view.
+
+Draw a point, line, explicitly closed polygon or Circle center/radius on the map, or import exact geometry JSON. Drawing, clearing and editing are local. Review the geometry/hash and CONTINUE/REPLACE mode before confirming submission. A changed/cleared draft invalidates the old confirmation. Circle stays Circle on the wire; its preview is a center marker, and the upstream decides actual spatial support. A local fixture acceptance does not establish real spatial query success.
+
+**断开观察** preserves the last view without canceling. **恢复观察** requests complete State/Activity and never repeats START. **请求取消分析** first submits the intent; `CANCEL_REQUESTED` comes from persisted state, and `CANCELLED` requires the public source terminal status. When the bounded observer ends while the source is still running, keep the view and recover observation explicitly.
+
+Controls disable while pending. If a reply is uncertain, **同键重放上次控制** sends the exact same command bytes/key, without an automatic retry. Switching Analysis or user clears local controls and pending replay. The displayed Activity is scoped to the current Revision; old records retain their history in the client/store.
+
+Run the browser controls against actual local PostgreSQL:
+
+```bash
+corepack pnpm test:v06:browser:postgres
+```
+
+The launcher always rebuilds the browser bundle, excludes real credentials/database settings, creates its own temporary database container, and cleans it up. Ordinary test screenshots go to `.tmp/v06-browser`; phase validation supplies a separate evidence directory, preserving historical receipts. The database fixture uses the allowed 1-second recovery tick for bounded browser tests; the process recovery qualification separately uses the production 30-second tick and 180-second lease.

@@ -38,7 +38,8 @@ presentation, process recovery and remaining real WSGS cases. R01/R02 passed
 their nine acceptance rows: routing has 677 full frozen regressions; deployment
 has 105 focused tests, 13 isolated PostgreSQL tests and five container cases. R03 adds an authenticated same-origin [browser reference client](docs/deployment/analysis-browser.md)
 with 12 browser/identity checks, 71 API/security tests and four PostgreSQL tests.
-Thirteen rows now PASS; the other 25
+R04 adds explicit choice/query/cancel/recovery controls with four Chromium/PostgreSQL
+scenarios and 79 impacted client regressions. Seventeen rows now PASS; the other 21
 [acceptance rows](config/v0.6/functional-closure/acceptance-matrix.json) remain
 `NOT_RUN`. Native Analysis and SDAR grounding extensions have separate
 authoritative-contract prerequisites. See [Project status](PROJECT_STATUS.md)

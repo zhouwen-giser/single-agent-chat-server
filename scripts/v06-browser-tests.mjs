@@ -8,6 +8,8 @@ const environment = Object.fromEntries(
   ),
 );
 Object.assign(environment, {
+  SACS_BROWSER_EVIDENCE_DIR:
+    process.env.SACS_BROWSER_EVIDENCE_DIR ?? ".tmp/v06-browser",
   NODE_ENV: "test",
   DOTENV_CONFIG_PATH: "/dev/null",
   DOTENV_CONFIG_QUIET: "true",
@@ -17,15 +19,21 @@ const build = spawnSync(process.execPath, ["scripts/build-analysis-web.mjs"], {
   stdio: "inherit",
 });
 if (build.status !== 0) process.exit(build.status ?? 1);
+const postgres = process.argv.includes("--postgres");
 const result = spawnSync(
   process.execPath,
-  [
-    "--experimental-vm-modules",
-    "node_modules/jest/bin/jest.js",
-    "--runInBand",
-    "tests/v06-analysis-browser.integration.test.ts",
-    "tests/v06-analysis-web-security.unit.test.ts",
-  ],
+  postgres
+    ? [
+        "scripts/v05-postgres-test-harness.mjs",
+        "tests/v06-analysis-browser.postgres.int.test.ts",
+      ]
+    : [
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "tests/v06-analysis-browser.integration.test.ts",
+        "tests/v06-analysis-web-security.unit.test.ts",
+      ],
   { env: environment, stdio: "inherit" },
 );
 process.exitCode = result.status ?? 1;

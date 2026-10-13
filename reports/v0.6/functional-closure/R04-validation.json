@@ -1,0 +1,167 @@
+{
+  "phase": "R04",
+  "sourceParentSha": "62baac2fa957dd0693f4541171ffbeb5d760efce",
+  "testedSourceManifestSha256": "sha256:2356bcafdeb5ad992949d16b83ffe6a4e169e0c10bce4cd62e9841976e81da8b",
+  "status": "PASS",
+  "checks": [
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:browser"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 21531,
+      "log": "reports/v0.6/functional-closure/R04-browser.txt",
+      "outputSha256": "sha256:da5b6d8326c78296cfdd7dd849f61cdd21408550cef40d3167c4e07c586a6798",
+      "capturedOutputSha256": "sha256:da5b6d8326c78296cfdd7dd849f61cdd21408550cef40d3167c4e07c586a6798",
+      "passedTests": 12,
+      "totalTests": 12
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:browser:postgres"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 80729,
+      "log": "reports/v0.6/functional-closure/R04-browser-postgres.txt",
+      "outputSha256": "sha256:fad3c30122ac03b965fa7b5d15de3c907f92ece234009ef82f50da77748fc0c0",
+      "capturedOutputSha256": "sha256:fad3c30122ac03b965fa7b5d15de3c907f92ece234009ef82f50da77748fc0c0",
+      "passedTests": 4,
+      "totalTests": 4
+    },
+    {
+      "command": [
+        "node",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "tests/v06-frozen-client.unit.test.ts",
+        "tests/v06-frozen-entry.integration.test.ts",
+        "tests/v06-frozen-focus-links.unit.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 222354,
+      "log": "reports/v0.6/functional-closure/R04-focused.txt",
+      "outputSha256": "sha256:7833ecc59816178e3b53ba7496967e2141ee7e3fde886824848ca5e91bdca89f",
+      "capturedOutputSha256": "sha256:7833ecc59816178e3b53ba7496967e2141ee7e3fde886824848ca5e91bdca89f",
+      "passedTests": 79,
+      "totalTests": 79
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 15170,
+      "log": "reports/v0.6/functional-closure/R04-types.txt",
+      "outputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+      "capturedOutputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/verify-architecture.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 171,
+      "log": "reports/v0.6/functional-closure/R04-architecture.txt",
+      "outputSha256": "sha256:40642c679bc4c1e77cc9885e1beee9d6b9150e97ca859528f67c5a89a23faa29",
+      "capturedOutputSha256": "sha256:40642c679bc4c1e77cc9885e1beee9d6b9150e97ca859528f67c5a89a23faa29"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 17844,
+      "log": "reports/v0.6/functional-closure/R04-build.txt",
+      "outputSha256": "sha256:6954cb1a8fac1d77c33eec76681d88f349574b6e75246114a2ab34342112333d",
+      "capturedOutputSha256": "sha256:6954cb1a8fac1d77c33eec76681d88f349574b6e75246114a2ab34342112333d"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "eslint",
+        "apps/analysis-web/src",
+        "tests/helpers/browser-analysis.ts",
+        "tests/helpers/memory-frozen-analysis.ts",
+        "tests/v06-analysis-browser.integration.test.ts",
+        "tests/v06-analysis-browser.postgres.int.test.ts",
+        "scripts/v06-browser-tests.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 6812,
+      "log": "reports/v0.6/functional-closure/R04-lint.txt",
+      "outputSha256": "sha256:8cf5c51dc12d62b6f22a1518b4abccedc0d363cdd6eb4fd087e4b437992859a8",
+      "capturedOutputSha256": "sha256:667a4d9e61f7402bd2fa9c0fcbc822bd1c5f79ea6bd27b7bfd0ce59845deff92"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        "PROJECT_STATUS.md",
+        "README.md",
+        "apps/analysis-web/public/index.html",
+        "apps/analysis-web/public/style.css",
+        "apps/analysis-web/src/main.ts",
+        "apps/analysis-web/src/map.ts",
+        "config/v0.6/functional-closure/acceptance-matrix.json",
+        "docs/deployment/analysis-browser.md",
+        "execplans/EP-06-sacs-v0.6-functional-closure.md",
+        "package.json",
+        "scripts/v06-browser-tests.mjs",
+        "tests/helpers/browser-analysis.ts",
+        "tests/helpers/memory-frozen-analysis.ts",
+        "tests/v06-analysis-browser.integration.test.ts",
+        "apps/analysis-web/src/interactions.ts",
+        "reports/v0.6/functional-closure/R04-validation.json",
+        "reports/v0.6/functional-closure/R04.md",
+        "tests/v06-analysis-browser.postgres.int.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 2421,
+      "log": "reports/v0.6/functional-closure/R04-format.txt",
+      "outputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "capturedOutputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 9,
+      "log": "reports/v0.6/functional-closure/R04-diff.txt",
+      "outputSha256": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "capturedOutputSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "browserScreenshots": [
+    {
+      "path": "reports/v0.6/functional-closure/R04-browser/map.png",
+      "sha256": "sha256:116b55379754fa59f850d9a1ffd0c42f2832b67c71970ad668bfc0f60d9475e7"
+    },
+    {
+      "path": "reports/v0.6/functional-closure/R04-browser/scope.png",
+      "sha256": "sha256:1c4f413b0f02be848165936b56f3e83d5707cb5de7c509308895098d967bcefc"
+    },
+    {
+      "path": "reports/v0.6/functional-closure/R04-browser/trace.png",
+      "sha256": "sha256:26a742bb61a2ff2956b294b558d94d5dfad39587b82680b294f7325769e95962"
+    }
+  ],
+  "browserBuildManifestSha256": "sha256:61612284a9e94380fb9ad52c88894e4025de506a4386899a6fdecebb742700cf"
+}

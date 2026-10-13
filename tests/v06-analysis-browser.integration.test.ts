@@ -11,6 +11,7 @@ import { publicExample } from "./helpers/frozen-wsgs-http.js";
 import type { GroundingResult12 } from "../packages/wsgs-geospatial-consumer/src/frozen-world-analysis.js";
 import { frozenNow } from "./helpers/memory-frozen-analysis.js";
 jest.setTimeout(120000);
+const evidenceDir = process.env.SACS_BROWSER_EVIDENCE_DIR ?? ".tmp/v06-browser";
 let browser: Browser;
 beforeAll(async () => {
   browser = await chromium.launch({ headless: true });
@@ -270,14 +271,14 @@ describe("actual Chromium world reference client", () => {
       expect(fixture.peer.requests).toHaveLength(1);
       expect(fixture.peer.captured).toHaveLength(network);
       expect(errors).toEqual([]);
-      await mkdir("reports/v0.6/functional-closure/R03-browser", {
+      await mkdir(evidenceDir, {
         recursive: true,
       });
       await page.locator("#map").screenshot({
-        path: "reports/v0.6/functional-closure/R03-browser/map.png",
+        path: evidenceDir + "/map.png",
       });
       await page.screenshot({
-        path: "reports/v0.6/functional-closure/R03-browser/trace.png",
+        path: evidenceDir + "/trace.png",
         fullPage: true,
       });
     } finally {

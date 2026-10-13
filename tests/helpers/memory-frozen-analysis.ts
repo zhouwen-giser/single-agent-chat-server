@@ -926,6 +926,7 @@ export async function startFrozenScenarioPeer(
     async?: boolean;
     repeatedRunning?: number;
     rejectSecondPost?: 400 | 406 | 503;
+    deferCancel?: boolean;
     /** Test-only public fixture shaping; always resealed and contract-validated. */
     transformResult?: (result: GroundingResult12) => void;
   } = {},
@@ -940,6 +941,7 @@ export async function startFrozenScenarioPeer(
       polls: number;
       result: GroundingResult12;
       cancelled?: boolean;
+      cancelRequested?: boolean;
     }
   >();
   const peer = await startFrozenWsgsPeer((request) => {
@@ -982,7 +984,10 @@ export async function startFrozenScenarioPeer(
       .replace(/:cancel$/u, "");
     const row = jobs.get(sourceId);
     if (!row) return { status: 404, value: {} };
-    if (request.path.endsWith(":cancel")) row.cancelled = true;
+    if (request.path.endsWith(":cancel")) {
+      row.cancelRequested = true;
+      row.cancelled = !input.deferCancel;
+    }
     if (row.cancelled)
       return {
         value: contract.parse("job", {

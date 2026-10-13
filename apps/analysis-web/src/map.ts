@@ -1,3 +1,4 @@
+import type { QueryScope } from "../../../packages/analysis-contract/src/query-scope.js";
 import type {
   MapEngineAdapter,
   AnalysisClientMapAction,
@@ -25,6 +26,7 @@ export class SvgMapEngine implements MapEngineAdapter {
   private focus?: FocusTarget;
   private positions: Position[] = [];
   private origin: Position = [0, 0];
+  private draft?: QueryScope["geometry"];
   private shapes = 0;
   private unknown = 0;
   constructor(
@@ -59,11 +61,46 @@ export class SvgMapEngine implements MapEngineAdapter {
       this.svg.append(group);
     }
     if (initial && this.positions.length) this.fitAll();
+    this.renderDraft();
     this.updateView();
     this.highlight();
     this.status.textContent = this.shapes
       ? `${this.shapes} 个独立公开几何；${this.unknown} 个无几何或未知表示。`
       : "尚无可绘制的公开几何；位置未知或来源未发布。";
+  }
+  screenPosition(x: number, y: number): Position | undefined {
+    const matrix = this.svg.getScreenCTM();
+    if (!matrix) return undefined;
+    const local = new DOMPoint(x, y).matrixTransform(matrix.inverse());
+    const position: Position = [
+      local.x + this.origin[0],
+      this.origin[1] - local.y,
+    ];
+    return point(position) ? position : undefined;
+  }
+  setDraft(geometry: QueryScope["geometry"] | undefined): void {
+    this.draft = geometry ? structuredClone(geometry) : undefined;
+    this.renderDraft();
+    this.updateView();
+  }
+  private renderDraft(): void {
+    this.svg.querySelector(".draft-preview")?.remove();
+    if (!this.draft) return;
+    const group = document.createElementNS(ns, "g");
+    group.setAttribute("class", "draft-preview");
+    const positions = this.positions,
+      shapes = this.shapes,
+      unknown = this.unknown;
+    this.positions = [];
+    const geometry =
+      this.draft.type === "Circle"
+        ? { type: "Point", coordinates: this.draft.center }
+        : this.draft;
+    this.draw(geometry, group, 0);
+    this.positions = positions;
+    this.shapes = shapes;
+    this.unknown = unknown;
+    this.svg.append(group);
   }
   setInspectionFocus(value: unknown): void {
     this.focus = record(value) ? (value as FocusTarget) : undefined;
@@ -161,7 +198,8 @@ export class SvgMapEngine implements MapEngineAdapter {
       for (const shape of Array.from(group.children))
         shape.classList.toggle(
           "focused",
-          group.dataset["layerId"] === this.focus?.layerId,
+          this.focus?.layerId !== undefined &&
+            group.dataset["layerId"] === this.focus.layerId,
         );
   }
   private collect(value: unknown, depth: number): void {
