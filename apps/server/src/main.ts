@@ -222,6 +222,10 @@ try {
   );
   const server = buildServer({
     config,
+    listBrowserAnalyses: (identity) =>
+      activePersistence.analysisDevelopmentRepository.listBrowserAnalyses(
+        identity,
+      ),
     analysisCapabilities: analysisIntegration.capabilities,
     ...(analysisIntegration.analysisControl
       ? { analysisControl: analysisIntegration.analysisControl }

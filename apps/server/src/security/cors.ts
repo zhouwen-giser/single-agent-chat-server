@@ -15,11 +15,17 @@ const allowedHeaders = new Set([
 export function registerCorsPolicy(
   server: FastifyInstance,
   allowedOrigins: readonly string[],
+  browserOrigin?: string,
 ): void {
   const origins = new Set(allowedOrigins);
   server.addHook("onRequest", async (request, reply) => {
     const origin = request.headers.origin;
     if (origin === undefined) return;
+    if (
+      browserOrigin === origin &&
+      (request.url === "/analysis" || request.url.startsWith("/analysis/"))
+    )
+      return;
     if (!origins.has(origin)) {
       await reply
         .code(403)

@@ -1,0 +1,12 @@
+$ node scripts/v06-browser-tests.mjs
+Browser reference client built with isolated browser hash alias.
+(node:1703162) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-analysis-browser.integration.test.ts (18.555 s)
+PASS tests/v06-analysis-web-security.unit.test.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       12 passed, 12 total
+Snapshots:   0 total
+Time:        19.921 s
+Ran all test suites matching /tests\/v06-analysis-browser.integration.test.ts|tests\/v06-analysis-web-security.unit.test.ts/i.

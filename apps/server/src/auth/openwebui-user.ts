@@ -99,7 +99,7 @@ export function requireOpenWebUiIdentity(
   return request.openWebUiIdentity;
 }
 
-function verifyOpenWebUiUserJwt(input: {
+export function verifyOpenWebUiUserJwt(input: {
   readonly token: string;
   readonly secret: string;
   readonly nowSeconds: number;

@@ -80,7 +80,9 @@ for (const file of files) {
     /\bfetch\s*\(/u.test(content) &&
     !name.startsWith("packages/sdar-a2a-adapter/") &&
     !name.startsWith("packages/wsgs-http-adapter/") &&
-    !name.startsWith("packages/conversation-model/")
+    !name.startsWith("packages/conversation-model/") &&
+    name !== "apps/analysis-web/src/transport.ts" &&
+    name !== "apps/server/src/analysis-web/transport.ts"
   ) {
     violations.push(
       `${name}: network fetch outside an isolated SDAR, WSGS, or conversation-model adapter`,

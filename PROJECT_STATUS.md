@@ -14,8 +14,11 @@ recovery and real-integration work. R00 delivered the plan; R01 repaired source-
 provenance before mutable SDAR dispatch. Its six required rows PASS, with 677
 full frozen regressions, typecheck, architecture and build passing. R02 then connected default Compose settings and bounded WSGS readiness; its
 three rows PASS with 105 focused tests, 13 PostgreSQL tests and five container
-cases. The remaining
-25 required and four conditional extension rows are `NOT_RUN` in the
+cases. R03 adds the authenticated browser reference client and public geometry,
+timeline, evidence and candidate presentation; its four rows PASS with 12
+browser/identity checks, 71 security/API regressions and four PostgreSQL tests.
+The remaining
+21 required and four conditional extension rows are `NOT_RUN` in the
 [new matrix](config/v0.6/functional-closure/acceptance-matrix.json).
 The development marker does not assert those newly audited requirements pass.
 

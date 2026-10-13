@@ -18,8 +18,10 @@ COPY apps ./apps
 COPY packages ./packages
 COPY src ./src
 COPY scripts/copy-runtime-assets.mjs ./scripts/copy-runtime-assets.mjs
+COPY scripts/build-analysis-web.mjs ./scripts/build-analysis-web.mjs
 RUN pnpm exec tsc -p tsconfig.build.json
 RUN node scripts/copy-runtime-assets.mjs
+RUN node scripts/build-analysis-web.mjs
 
 FROM toolchain AS production-dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./

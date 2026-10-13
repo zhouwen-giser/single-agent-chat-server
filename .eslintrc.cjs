@@ -15,7 +15,11 @@ module.exports = {
   ignorePatterns: ["dist", "node_modules", ".tmp"],
   overrides: [
     {
-      files: ["scripts/v06-functional-compose.mjs"],
+      files: [
+        "scripts/v06-functional-compose.mjs",
+        "scripts/build-analysis-web.mjs",
+        "scripts/v06-browser-tests.mjs",
+      ],
       parserOptions: { project: null },
       env: { node: true, es2022: true },
       globals: { fetch: "readonly" },

@@ -34,6 +34,10 @@ import type { ServerConfig } from "./config.js";
 import { SecureTelemetry } from "./observability/telemetry.js";
 import { FixedWindowRateLimiter } from "./operations/rate-limiter.js";
 import { registerCorsPolicy } from "./security/cors.js";
+import {
+  registerAnalysisWebRoutes,
+  type AnalysisWebOptions,
+} from "./analysis-web/routes.js";
 
 export interface BuildServerOptions
   extends
@@ -60,6 +64,7 @@ export interface BuildServerOptions
   readonly analysisControl?: AnalysisRoutesOptions["service"];
   readonly analysisCapabilities?: AnalysisRoutesOptions["capabilities"];
   readonly rateLimiter?: FixedWindowRateLimiter;
+  readonly listBrowserAnalyses?: AnalysisWebOptions["listAnalyses"];
 }
 
 export function buildServer(options: BuildServerOptions): FastifyInstance {
@@ -85,7 +90,21 @@ export function buildServer(options: BuildServerOptions): FastifyInstance {
     },
   });
 
-  registerCorsPolicy(server, options.config.corsAllowedOrigins);
+  registerCorsPolicy(
+    server,
+    options.config.corsAllowedOrigins,
+    options.config.analysisWebEnabled
+      ? options.config.analysisWebOrigin
+      : undefined,
+  );
+  void server.register(registerAnalysisWebRoutes, {
+    config: options.config,
+    rateLimiter,
+    ...(options.now ? { now: options.now } : {}),
+    ...(options.listBrowserAnalyses
+      ? { listAnalyses: options.listBrowserAnalyses }
+      : {}),
+  });
 
   server.addHook("onRequest", async (request, reply) => {
     requestStartedAt.set(request, Date.now());

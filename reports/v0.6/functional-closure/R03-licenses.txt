@@ -1,0 +1,2 @@
+$ node scripts/check-licenses.mjs
+Production license gate passed: 90 entries; (Apache-2.0 AND BSD-3-Clause), Apache-2.0, BSD-3-Clause, ISC, MIT

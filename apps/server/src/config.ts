@@ -10,6 +10,8 @@ const serverConfigSchema = z.object({
     .enum(["authenticated", "development-anonymous"])
     .default("authenticated"),
   SACS_ALLOW_INSECURE_ANONYMOUS: z.enum(["true", "false"]).default("false"),
+  SACS_ANALYSIS_WEB_ENABLED: z.enum(["true", "false"]).default("false"),
+  SACS_ANALYSIS_WEB_ORIGIN: z.string().default(""),
   CHAT_SERVER_SERVICE_KEY: z.string().min(32).max(512),
   AG_UI_SERVICE_KEY: z.string().min(32).max(512),
   OPENWEBUI_USER_JWT_SECRET: z.string().min(32).max(512),
@@ -88,6 +90,8 @@ const analysisAdapterEnvironmentSchema = z
   .strict();
 
 export interface ServerConfig {
+  readonly analysisWebEnabled?: boolean;
+  readonly analysisWebOrigin?: string;
   readonly authMode?: "authenticated" | "development-anonymous";
   readonly serviceKey: string;
   readonly agUiServiceKey: string;
@@ -142,6 +146,22 @@ export function parseServerConfig(
   environment: NodeJS.ProcessEnv,
 ): ServerConfig {
   const parsed = serverConfigSchema.parse(environment);
+  let analysisWebOrigin: string | undefined;
+  if (parsed.SACS_ANALYSIS_WEB_ENABLED === "true") {
+    if (parsed.SACS_AUTH_MODE !== "authenticated")
+      throw Error("SACS_ANALYSIS_WEB_TRUSTED_IDENTITY_REQUIRED");
+    const url = new URL(parsed.SACS_ANALYSIS_WEB_ORIGIN);
+    if (
+      !["http:", "https:"].includes(url.protocol) ||
+      url.username ||
+      url.password ||
+      url.pathname !== "/" ||
+      url.search ||
+      url.hash
+    )
+      throw Error("SACS_ANALYSIS_WEB_ORIGIN_INVALID");
+    analysisWebOrigin = url.origin;
+  }
   if (
     parsed.SACS_AUTH_MODE === "development-anonymous" &&
     parsed.SACS_ALLOW_INSECURE_ANONYMOUS !== "true"
@@ -156,6 +176,8 @@ export function parseServerConfig(
     );
   }
   return {
+    analysisWebEnabled: parsed.SACS_ANALYSIS_WEB_ENABLED === "true",
+    ...(analysisWebOrigin ? { analysisWebOrigin } : {}),
     authMode: parsed.SACS_AUTH_MODE,
     serviceKey: parsed.CHAT_SERVER_SERVICE_KEY,
     agUiServiceKey: parsed.AG_UI_SERVICE_KEY,

@@ -40,7 +40,11 @@
       "dependsOn": [
         "R02"
       ],
-      "status": "NOT_RUN"
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R03.md",
+        "reports/v0.6/functional-closure/R03-validation.json"
+      ]
     },
     {
       "id": "R04",
@@ -281,8 +285,12 @@
       "title": "浏览器身份与密钥隔离",
       "acceptance": "可信短期身份、授权 Analysis 目录及同源会话可用；服务密钥不进入浏览器，跨用户与过期身份被拒绝。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R03.md",
+        "reports/v0.6/functional-closure/R03-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:a20f7d0d802bce32f6c042dacf54d1d3b844028cb3d097b875512ae332ecee6e"
     },
     {
       "id": "FC-11",
@@ -291,8 +299,12 @@
       "title": "真实浏览器地图与时间轴",
       "acceptance": "实际浏览器绘制公开几何/Gap/时间限定；平移缩放 fit 和图层开关保持零后台 mutation。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R03.md",
+        "reports/v0.6/functional-closure/R03-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:a20f7d0d802bce32f6c042dacf54d1d3b844028cb3d097b875512ae332ecee6e"
     },
     {
       "id": "FC-12",
@@ -301,8 +313,12 @@
       "title": "证据和候选稳定关联",
       "acceptance": "文字、feature、timeline、evidence、product 和 choice 保持公开稳定身份；裁剪无悬空导航，候选无执行授权。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R03.md",
+        "reports/v0.6/functional-closure/R03-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:a20f7d0d802bce32f6c042dacf54d1d3b844028cb3d097b875512ae332ecee6e"
     },
     {
       "id": "FC-13",
@@ -311,8 +327,12 @@
       "title": "渲染故障与展示安全",
       "acceptance": "来源不足/未知几何/状态/无数据如实可读；文字注入和任意外部资源被限制；页面可独立构建。",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": []
+      "status": "PASS",
+      "evidence": [
+        "reports/v0.6/functional-closure/R03.md",
+        "reports/v0.6/functional-closure/R03-validation.json"
+      ],
+      "testedSourceManifestSha256": "sha256:a20f7d0d802bce32f6c042dacf54d1d3b844028cb3d097b875512ae332ecee6e"
     },
     {
       "id": "FC-14",
