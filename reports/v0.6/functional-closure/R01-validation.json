@@ -11,28 +11,36 @@
       "log": "reports/v0.6/functional-closure/R01-frozen.txt",
       "outputSha256": "sha256:99d09a1990be06cd72282419e5106dc6abaf3b440e0d47b50daaa1d3592cb87d",
       "passedTests": 677,
-      "totalTests": 677
+      "totalTests": 677,
+      "capturedOutputSha256": "sha256:99d09a1990be06cd72282419e5106dc6abaf3b440e0d47b50daaa1d3592cb87d",
+      "logNormalization": "Trailing LF characters reduced to one; empty logs remain empty."
     },
     {
       "command": ["corepack", "pnpm", "typecheck"],
       "exitCode": 0,
       "elapsedMs": 12553,
       "log": "reports/v0.6/functional-closure/R01-types.txt",
-      "outputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+      "outputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+      "capturedOutputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+      "logNormalization": "Trailing LF characters reduced to one; empty logs remain empty."
     },
     {
       "command": ["node", "scripts/verify-architecture.mjs"],
       "exitCode": 0,
       "elapsedMs": 133,
       "log": "reports/v0.6/functional-closure/R01-architecture.txt",
-      "outputSha256": "sha256:8a2a71b3aa2d50c6ed5153a27c52487aeaf1362fdf288af0fbd522d992f35022"
+      "outputSha256": "sha256:8a2a71b3aa2d50c6ed5153a27c52487aeaf1362fdf288af0fbd522d992f35022",
+      "capturedOutputSha256": "sha256:8a2a71b3aa2d50c6ed5153a27c52487aeaf1362fdf288af0fbd522d992f35022",
+      "logNormalization": "Trailing LF characters reduced to one; empty logs remain empty."
     },
     {
       "command": ["corepack", "pnpm", "build"],
       "exitCode": 0,
       "elapsedMs": 13985,
       "log": "reports/v0.6/functional-closure/R01-build.txt",
-      "outputSha256": "sha256:9ac32db1b695c5626225d4375b635275f33903c7d128a1aa3ee611cef8d8e9fb"
+      "outputSha256": "sha256:9ac32db1b695c5626225d4375b635275f33903c7d128a1aa3ee611cef8d8e9fb",
+      "capturedOutputSha256": "sha256:9ac32db1b695c5626225d4375b635275f33903c7d128a1aa3ee611cef8d8e9fb",
+      "logNormalization": "Trailing LF characters reduced to one; empty logs remain empty."
     },
     {
       "command": [
@@ -50,7 +58,9 @@
       ],
       "exitCode": 0,
       "log": "reports/v0.6/functional-closure/R01-lint.txt",
-      "outputSha256": "sha256:7fc0412de8d3245cfffaedfbdce584483b7048fa0871eee104803a6115965450"
+      "outputSha256": "sha256:f84ac4cf5beb913c45b0cc2e65230fd46ffea797d8469ba720f553500d7df91c",
+      "capturedOutputSha256": "sha256:7fc0412de8d3245cfffaedfbdce584483b7048fa0871eee104803a6115965450",
+      "logNormalization": "Trailing LF characters reduced to one; empty logs remain empty."
     },
     {
       "command": [
@@ -76,13 +86,17 @@
       ],
       "exitCode": 0,
       "log": "reports/v0.6/functional-closure/R01-format.txt",
-      "outputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+      "outputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "capturedOutputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "logNormalization": "Trailing LF characters reduced to one; empty logs remain empty."
     },
     {
       "command": ["git", "diff", "--check"],
       "exitCode": 0,
       "log": "reports/v0.6/functional-closure/R01-diff.txt",
-      "outputSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "outputSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "capturedOutputSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logNormalization": "Trailing LF characters reduced to one; empty logs remain empty."
     }
   ],
   "precedingRedCheck": {

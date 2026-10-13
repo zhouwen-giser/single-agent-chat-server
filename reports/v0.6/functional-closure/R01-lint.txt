@@ -88,4 +88,3 @@
   2030:42  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
 
 ✖ 84 problems (0 errors, 84 warnings)
-
