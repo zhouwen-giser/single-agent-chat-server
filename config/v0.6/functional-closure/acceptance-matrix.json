@@ -635,7 +635,7 @@
         "reports/v0.6/functional-closure/R07.md",
         "reports/v0.6/functional-closure/R07-development/DEVELOPMENT.json"
       ],
-      "reason": "LOCAL_SOURCE_CHECKS_PASS_CURRENT_CANDIDATE_CI_PENDING"
+      "reason": "ASSET_PREREQUISITE_FIX_TARGETED_CHECKS_PASS_NEW_CANDIDATE_CI_PENDING"
     },
     {
       "id": "FC-34",

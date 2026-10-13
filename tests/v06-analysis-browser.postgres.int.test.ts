@@ -20,7 +20,7 @@ afterAll(async () => {
 type Fixture = Awaited<ReturnType<typeof createBrowserAnalysisFixture>>;
 async function login(page: Page, fixture: Fixture) {
   await page.clock.setFixedTime(new Date(fixture.nowMillis()));
-  await page.goto(fixture.baseUrl + "/analysis");
+  expect((await page.goto(fixture.baseUrl + "/analysis"))?.status()).toBe(200);
   await page
     .locator("#jwt")
     .fill(browserJwt("browser-user", fixture.nowMillis()));

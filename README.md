@@ -41,10 +41,16 @@ with 12 browser/identity checks, 71 API/security tests and four PostgreSQL tests
 R04 adds explicit choice/query/cancel/recovery controls with four Chromium/PostgreSQL
 scenarios and 79 impacted client regressions. R05 fixes checkpoint-pool crashes on database restart and proves eight subprocess
 fault cases with the production 180-second lease / 30-second recovery tick.
-Twenty-two rows now PASS; nine real WSGS and four conditional extension rows
-are BLOCKED_EXTERNAL, and the three R07 rows remain NOT_RUN in the
-[acceptance matrix](config/v0.6/functional-closure/acceptance-matrix.json). Native Analysis and SDAR grounding extensions have separate
-authoritative-contract prerequisites. See [Project status](PROJECT_STATUS.md)
+R07 adds actual development/integration/release gates, a source-bound full
+local qualification and a dedicated hosted functional job. The 684 frozen tests
+and browser/database/process checks pass. The first hosted quality job exposed
+a missing browser-build prerequisite in the generic integration command; that
+entry is repaired and the new candidate CI is pending. Twenty-three development
+rows PASS, one development row awaits current CI, and nine real WSGS, one release
+and four conditional extension rows are BLOCKED_EXTERNAL in the
+[acceptance matrix](config/v0.6/functional-closure/acceptance-matrix.json).
+Native Analysis and SDAR grounding extensions have separate authoritative
+contract prerequisites. See the [current run guide](reports/v0.6/functional-closure/SOURCE_RUN.md). See [Project status](PROJECT_STATUS.md)
 for the current decision and the historical scope of older reports.
 
 The Grounding Job consumer uses the exact `sacs-wsgs-grounding/1.2` and
@@ -67,8 +73,10 @@ These commands use controlled persistence/model ports and real loopback HTTP
 peers with the production Grounding adapter. They do not start Docker,
 PostgreSQL, real WSGS/Provider/SDAR/MCP/device services, release gates or a build.
 The test launcher does not load the developer's `.env` or inherit real service
-endpoint/credential settings. **ENV-001 (real PostgreSQL restoration) remains
-NOT_RUN**; memory and SQL-driver boundary tests are not database-restart evidence.
+endpoint/credential settings. The historical frozen ledger retains ENV-001
+NOT_RUN; current independent R05/R07 evidence covers actual private PostgreSQL
+restart, checkpoint readback and process recovery. These dedicated commands
+still have the narrower scope above.
 
 This is consumer development verification, not production deployment or release
 qualification. See the [source run guide](reports/v0.6/frozen-wsgs-consumer/SOURCE_RUN.md)

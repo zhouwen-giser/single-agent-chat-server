@@ -23,7 +23,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --testPathPattern=\\.unit\\.test\\.ts$",
-    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --testPathPattern=\\.int\\.test\\.ts$",
+    "test:integration": "pnpm build:analysis-web && node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --testPathPattern=\\.int\\.test\\.ts$",
     "test:security": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --testPathPattern=\\.security\\.test\\.ts$",
     "test:e2e:fixture": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --testPathPattern=\\.e2e\\.test\\.ts$",
     "test:e2e:real": "node scripts/verify-openwebui.mjs",

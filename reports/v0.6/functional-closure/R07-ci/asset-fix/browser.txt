@@ -1,0 +1,17 @@
+$ node scripts/v06-browser-tests.mjs --postgres
+Browser reference client built with isolated browser hash alias.
+{"event":"v05.postgres.ready","source":"ephemeral-container","image":"postgres:17-alpine"}
+(node:1251456) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-analysis-browser.postgres.int.test.ts (52.677 s)
+  browser explicit controls over actual HTTP and PostgreSQL
+    ✓ inspects locally and confirms one exact selector, with double-click and same-key replay creating one revision (11109 ms)
+    ✓ draws local geometry, invalidates old reviews, and submits exact Point/Line/Polygon/Circle with CONTINUE and REPLACE (21842 ms)
+    ✓ keeps expired choices readable and replays an uncertain committed query with exactly the same command (10029 ms)
+    ✓ detaches and reconnects without START, and shows CANCEL_REQUESTED until a public terminal status (7845 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        53.01 s, estimated 62 s
+Ran all test suites matching /tests\/v06-analysis-browser.postgres.int.test.ts/i.
