@@ -119,7 +119,7 @@ with tempfile.TemporaryDirectory() as folder:
  (root/'current').symlink_to(old)
  m={'image':'sacs:test','imageId':'image-id','postgresImage':'pg:test','postgresImageId':'image-id','migrations':{'0001.sql':'hash'},'sourceSha':'test'}
  d.__file__=str(incoming/'deploy.py');d.verify=lambda p:m
- d.private_configuration=lambda *a:None
+ d.private_configuration=lambda *a,**kw:None
  def run(args,**kw):
   if args[:3]==['docker','image','inspect']:return b'[{"Id":"image-id"}]'
   if args[:2]==['docker','ps']:return b'owned-container'
@@ -172,6 +172,85 @@ with socket.socket() as server:
  try:d.check_port('127.0.0.1',port);raise AssertionError('accepted foreign port owner')
  except OSError:pass
  mapped=port;d.check_port('127.0.0.1',port)
+print('PASS')
+`,
+      ],
+      { encoding: "utf8" },
+    );
+    expect(output.trim()).toBe("PASS");
+  });
+  it("refreshes only the selected WSGS model and explicit connections, preserving SACS credentials", () => {
+    const output = execFileSync(
+      "python3",
+      [
+        "-B",
+        "-c",
+        `
+import importlib.util,tempfile,json
+from pathlib import Path
+from urllib.parse import urlsplit
+spec=importlib.util.spec_from_file_location('deploy','deployment/deploy.py')
+d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)
+calls=[]
+def run(args,**kw):
+ calls.append(args)
+ return json.dumps([{'Config':{'Env':['MODEL_NAME=current-model','MODEL_BASE_URL=https://model.example/v1','MODEL_API_KEY=current-private-test','MODEL_TIMEOUT_MS=120000','MODEL_MAX_RETRIES=1','MODEL_OUTPUT_MODE=CHAT_COMPLETIONS_JSON','UNRELATED_SECRET=excluded']}}]).encode()
+d.run=run
+with tempfile.TemporaryDirectory() as folder:
+ p=Path(folder)
+ old={'DATABASE_URL':'postgresql://sacs:retained-db-secret@postgres:5432/sacs','POSTGRES_USER':'sacs','POSTGRES_DB':'sacs','POSTGRES_PASSWORD':'retained-db-secret','CHAT_SERVER_SERVICE_KEY':'retained-chat','AG_UI_SERVICE_KEY':'retained-agui','OPENWEBUI_USER_JWT_SECRET':'retained-jwt','WSGS_BASE_URL':'http://old-wsgs:8080','SDAR_A2A_BASE_URL':'http://old-sdar:10999','CONVERSATION_MODEL_NAME':'old-model','CONVERSATION_MODEL_API_KEY':'old-key'}
+ (p/'runtime.json').write_text(json.dumps(old))
+ overrides={'WSGS_BASE_URL':'http://current-wsgs:8080','SDAR_A2A_BASE_URL':'http://current-sdar:10999','SDAR_A2A_ENDPOINT_OVERRIDE':'http://current-sdar:10999/a2a','SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS':'5000'}
+ d.private_configuration(p,{'NEW_DEFAULT':'forwarded'},'selected-wsgs',refresh_model=True,overrides=overrides)
+ current=json.loads((p/'runtime.json').read_text())
+ for k in ['POSTGRES_USER','POSTGRES_DB','POSTGRES_PASSWORD','CHAT_SERVER_SERVICE_KEY','AG_UI_SERVICE_KEY','OPENWEBUI_USER_JWT_SECRET']:assert current[k]==old[k]
+ assert current['CONVERSATION_MODEL_NAME']=='current-model' and current['CONVERSATION_MODEL_API_KEY']=='current-private-test'
+ assert current['CONVERSATION_MODEL_RESPONSE_FORMAT']=='json_object' and current['CONVERSATION_MODEL_MAX_RETRIES']=='1'
+ assert current['NEW_DEFAULT']=='forwarded' and 'UNRELATED_SECRET' not in current
+ assert urlsplit(current['DATABASE_URL']).hostname=='sacs-dev-postgres-1' and urlsplit(current['DATABASE_URL']).password=='retained-db-secret'
+ before=(p/'runtime.json').read_bytes()
+ d.private_configuration(p,{},'selected-wsgs')
+ assert (p/'runtime.json').read_bytes()==before and len(calls)==1
+ try:d.private_configuration(p,{},'selected-wsgs',overrides={'SDAR_A2A_ENDPOINT_OVERRIDE':'http://foreign-sdar:10999/a2a'});raise AssertionError('accepted foreign origin')
+ except RuntimeError:pass
+ assert (p/'runtime.json').read_bytes()==before
+ assert (p/'runtime.env').stat().st_mode & 0o777==0o600
+print('PASS')
+`,
+      ],
+      { encoding: "utf8" },
+    );
+    expect(output.trim()).toBe("PASS");
+  });
+  it("joins existing trusted networks only for SACS and keeps the configuration on reinstall", () => {
+    const output = execFileSync(
+      "python3",
+      [
+        "-B",
+        "-c",
+        `
+import importlib.util,tempfile,json,types
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('deploy','deployment/deploy.py')
+d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)
+calls=[]
+d.run=lambda args,**kw:calls.append(args) or b'[]'
+with tempfile.TemporaryDirectory() as folder:
+ p=Path(folder)
+ d.configure_networks(p,['trusted-wsgs','trusted-sdar'])
+ overlay=json.loads((p/'upstreams.compose.json').read_text())
+ assert set(overlay['services'])=={'server'}
+ assert overlay['services']['server']['networks']==['backend','outbound','upstream_0','upstream_1']
+ assert all(n['external'] for n in overlay['networks'].values())
+ assert calls==[['docker','network','inspect','trusted-wsgs'],['docker','network','inspect','trusted-sdar']]
+ before=(p/'upstreams.compose.json').read_bytes()
+ d.configure_networks(p,None);assert (p/'upstreams.compose.json').read_bytes()==before
+ for invalid in [['--bad'],['duplicate','duplicate']]:
+  try:d.configure_networks(p,invalid);raise AssertionError('accepted bad network')
+  except RuntimeError:pass
+ d.compose(p,p,{'image':'sacs:test','postgresImage':'pg:test'},types.SimpleNamespace(bind='127.0.0.1',port=18083))('config','--quiet')
+ assert str(p/'upstreams.compose.json') in calls[-1]
+ assert not any(a[:3]==['docker','network','connect'] for a in calls)
 print('PASS')
 `,
       ],

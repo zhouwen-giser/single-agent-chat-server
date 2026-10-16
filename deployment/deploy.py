@@ -7,12 +7,14 @@ import ipaddress
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import shutil
 import socket
 import subprocess
 import sys
 import time
+from urllib.parse import urlsplit
 
 
 def run(args, *, env=None, timeout=300, data=None):
@@ -75,18 +77,61 @@ def compose(package, shared, manifest, args):
                SACS_BIND_IP=args.bind, SACS_PORT=str(args.port))
     command = ['docker', 'compose', '--project-directory', str(package), '-p', 'sacs-dev',
                '-f', str(package / 'compose.yaml')]
+    upstreams = shared / 'upstreams.compose.json'
+    if upstreams.exists():
+        command += ['-f', str(upstreams)]
     return lambda *argv, **kwargs: run(command + list(argv), env=env, **kwargs)
 
 
-def private_configuration(shared, defaults, model_container):
+def validate_url(value):
+    parsed = urlsplit(value)
+    if parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:
+        raise RuntimeError('Invalid upstream HTTP URL')
+    return parsed.scheme, parsed.hostname.lower(), parsed.port or (443 if parsed.scheme == 'https' else 80)
+
+
+def model_configuration(model_container):
+    inspected = json.loads(run(['docker', 'inspect', model_container]))[0]
+    source = dict(item.split('=', 1) for item in inspected['Config']['Env'])
+    if not all(source.get(key) for key in ['MODEL_NAME', 'MODEL_BASE_URL']):
+        raise RuntimeError('Existing model configuration incomplete')
+    validate_url(source['MODEL_BASE_URL'])
+    mode = source.get('MODEL_OUTPUT_MODE', 'CHAT_COMPLETIONS_STRICT')
+    if mode not in ('CHAT_COMPLETIONS_STRICT', 'CHAT_COMPLETIONS_JSON'):
+        raise RuntimeError('SACS requires a Chat Completions model configuration')
+    timeout = int(source.get('MODEL_TIMEOUT_MS', '120000'))
+    retries = int(source.get('MODEL_MAX_RETRIES', '1'))
+    if not 100 <= timeout <= 120000 or not 0 <= retries <= 2:
+        raise RuntimeError('Model budget outside SACS supported bounds')
+    return {
+        'CONVERSATION_MODEL_BASE_URL': source['MODEL_BASE_URL'],
+        'CONVERSATION_MODEL_NAME': source['MODEL_NAME'],
+        'CONVERSATION_MODEL_API_KEY': source.get('MODEL_API_KEY', ''),
+        'CONVERSATION_MODEL_TIMEOUT_MS': str(timeout),
+        'CONVERSATION_MODEL_MAX_RETRIES': str(retries),
+        'CONVERSATION_MODEL_RESPONSE_FORMAT': 'json_schema' if mode.endswith('STRICT') else 'json_object',
+    }
+
+
+def configure_networks(shared, networks):
+    if networks is None:
+        return
+    if len(networks) > 8 or len(networks) != len(set(networks)):
+        raise RuntimeError('Invalid or duplicate upstream networks')
+    for network in networks:
+        if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}', network):
+            raise RuntimeError('Invalid upstream network name')
+        run(['docker', 'network', 'inspect', network])
+    aliases = {f'upstream_{i}': {'external': True, 'name': name} for i, name in enumerate(networks)}
+    overlay = {'services': {'server': {'networks': ['backend', 'outbound', *aliases]}}, 'networks': aliases}
+    write_private(shared / 'upstreams.compose.json', json.dumps(overlay, indent=2) + '\n')
+
+
+def private_configuration(shared, defaults, model_container, *, overrides=None, refresh_model=False):
     path = shared / 'runtime.json'
     if path.exists():
-        config = json.loads(path.read_text())
+        config = {**defaults, **json.loads(path.read_text())}
     else:
-        inspected = json.loads(run(['docker', 'inspect', model_container]))[0]
-        source = dict(item.split('=', 1) for item in inspected['Config']['Env'])
-        if not all(source.get(key) for key in ['MODEL_NAME', 'MODEL_BASE_URL']):
-            raise RuntimeError('Existing model configuration incomplete')
         config = dict(defaults)
         password = secrets.token_hex(32)
         config.update({
@@ -99,20 +144,35 @@ def private_configuration(shared, defaults, model_container):
             'CHAT_SERVER_REQUEST_TIMEOUT_MS': '120000',
             'CHAT_HTTP_STREAM_BUDGET_MS': '120000',
             'POSTGRES_USER': 'sacs', 'POSTGRES_DB': 'sacs', 'POSTGRES_PASSWORD': password,
-            'DATABASE_URL': 'postgresql://sacs:' + password + '@postgres:5432/sacs',
+            'DATABASE_URL': 'postgresql://sacs:' + password + '@sacs-dev-postgres-1:5432/sacs',
             'WSGS_BASE_URL': 'http://17.26.1.20:18082',
             'WSGS_OPERATION_TIMEOUT_MS': '120000',
             'SACS_WSGS_ANALYSIS_ENABLED': 'true',
             'SACS_WSGS_ANALYSIS_POLL_INTERVAL_MS': '1000',
             'SACS_WSGS_ANALYSIS_MAX_WAIT_MS': '120000',
             'SDAR_A2A_BASE_URL': 'http://17.26.1.20:10999',
-            'CONVERSATION_MODEL_BASE_URL': source['MODEL_BASE_URL'],
-            'CONVERSATION_MODEL_NAME': source['MODEL_NAME'],
-            'CONVERSATION_MODEL_API_KEY': source.get('MODEL_API_KEY', ''),
-            'CONVERSATION_MODEL_TIMEOUT_MS': '120000',
         })
-        write_private(path, json.dumps(config, indent=2) + '\n')
-    # Existing operator settings and credentials always win; no automatic rotation.
+        config.update(model_configuration(model_container))
+    if refresh_model and path.exists():
+        config.update(model_configuration(model_container))
+    changes = overrides or {}
+    if set(changes) - {'WSGS_BASE_URL', 'SDAR_A2A_BASE_URL', 'SDAR_A2A_ENDPOINT_OVERRIDE', 'SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS'}:
+        raise RuntimeError('Unsupported connection override')
+    config.update(changes)
+    # Upstream Compose networks may also advertise a service named postgres.
+    # Qualify our existing default without changing credentials or database.
+    database = urlsplit(config['DATABASE_URL'])
+    if database.hostname == 'postgres':
+        authority = database.netloc.rsplit('@', 1)
+        host = 'sacs-dev-postgres-1:' + str(database.port or 5432)
+        config['DATABASE_URL'] = database._replace(netloc=(authority[0] + '@' if len(authority) == 2 else '') + host).geturl()
+    for key in ('WSGS_BASE_URL', 'SDAR_A2A_BASE_URL'):
+        validate_url(config[key])
+    if config.get('SDAR_A2A_ENDPOINT_OVERRIDE') and validate_url(config['SDAR_A2A_ENDPOINT_OVERRIDE']) != validate_url(config['SDAR_A2A_BASE_URL']):
+        raise RuntimeError('SDAR endpoint must share the discovery origin')
+    # Only explicit model refresh / connection overrides replace operator settings.
+    # SACS identity, database credentials and unrelated settings are retained.
+    write_private(path, json.dumps(config, indent=2) + '\n')
     write_env(shared / 'runtime.env', config)
     write_env(shared / 'postgres.env', {k: config[k] for k in ['POSTGRES_USER', 'POSTGRES_DB', 'POSTGRES_PASSWORD']})
 
@@ -171,6 +231,12 @@ def main():
     parser.add_argument('--bind', default='17.26.1.20')
     parser.add_argument('--port', type=int, default=18083)
     parser.add_argument('--model-container', default='wsgs-dev-grounding-api-1')
+    parser.add_argument('--refresh-model', action='store_true', help='Explicitly reuse current model settings from the selected WSGS container')
+    parser.add_argument('--wsgs-base-url')
+    parser.add_argument('--sdar-base-url')
+    parser.add_argument('--sdar-endpoint-override')
+    parser.add_argument('--wsgs-readiness-timeout-ms', type=int, choices=range(100, 5001), metavar='100..5000')
+    parser.add_argument('--upstream-network', action='append', help='Existing trusted Docker network; attaches only SACS server, repeat for each upstream')
     args = parser.parse_args()
     os.umask(0o077)
     ipaddress.ip_address(args.bind)
@@ -216,7 +282,15 @@ def main():
         check_port(args.bind, args.port)
         if shutil.disk_usage(root).free < (package / 'images.tar').stat().st_size * 2 + 1024**3:
             raise RuntimeError('Insufficient free disk space')
-        private_configuration(shared, json.loads((package / 'runtime.defaults.json').read_text()), args.model_container)
+        overrides = {key: value for key, value in {
+            'WSGS_BASE_URL': args.wsgs_base_url,
+            'SDAR_A2A_BASE_URL': args.sdar_base_url,
+            'SDAR_A2A_ENDPOINT_OVERRIDE': args.sdar_endpoint_override,
+            'SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS': str(args.wsgs_readiness_timeout_ms) if args.wsgs_readiness_timeout_ms is not None else None,
+        }.items() if value is not None}
+        private_configuration(shared, json.loads((package / 'runtime.defaults.json').read_text()), args.model_container,
+                              overrides=overrides, refresh_model=args.refresh_model)
+        configure_networks(shared, args.upstream_network)
         print('Loading verified images (only SACS and its dedicated PostgreSQL).', flush=True)
         run(['docker', 'load', '-i', str(package / 'images.tar')], timeout=600)
         for tag, expected in [(manifest['image'], manifest['imageId']), (manifest['postgresImage'], manifest['postgresImageId'])]:
@@ -237,12 +311,14 @@ def main():
         verify(release)
         comp = compose(release, shared, manifest, args)
         old = current.resolve() if current.is_symlink() else None
+        # A retained release/volume can survive removal of its containers.
+        # Start only our database before taking the pre-migration backup.
+        comp('up', '-d', '--wait', '--wait-timeout', '120', 'postgres')
         if old:
             backup = shared / ('backup-' + str(time.time_ns()) + '.dump')
             write_private(backup.with_suffix('.json'), json.dumps({'release': str(old), 'createdAt': time.time()}))
             with backup.open('wb') as stream:
                 stream.write(comp('exec', '-T', 'postgres', 'pg_dump', '-U', 'sacs', '-d', 'sacs', '-Fc'))
-        comp('up', '-d', '--wait', '--wait-timeout', '120', 'postgres')
         migrate = "import {setupPersistence,parsePersistenceConfig} from './dist/packages/persistence/src/index.js';const p=await setupPersistence(parsePersistenceConfig(process.env));await p.close();"
         comp('run', '--rm', '--no-deps', 'server', 'node', '--input-type=module', '-e', migrate)
         try:

@@ -73,7 +73,7 @@ const defaults = Object.fromEntries(
   Object.entries(
     parseEnv(readFileSync(join(snapshot, ".env.example"), "utf8")),
   ).filter(([key]) =>
-    /^(CHAT_|AG_UI_|OPENWEBUI_|DATABASE_|IDEMPOTENCY_|SDAR_A2A_|SDAR_POLLING_|SACS_AUTH_|SACS_ALLOW_|SACS_WSGS_ANALYSIS_|SACS_ANALYSIS_ADAPTER_MODE$|WSGS_|CONVERSATION_|LOG_LEVEL$|NODE_ENV$)/u.test(
+    /^(CHAT_|AG_UI_|OPENWEBUI_|DATABASE_|IDEMPOTENCY_|SDAR_A2A_|SDAR_POLLING_|SACS_|WSGS_|CONVERSATION_|LOG_LEVEL$|NODE_ENV$)/u.test(
       key,
     ),
   ),

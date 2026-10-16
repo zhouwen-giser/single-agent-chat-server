@@ -41,7 +41,8 @@ databases. Dedicated PostgreSQL has no published port. No upstream containers
 are stopped, recreated, migrated or network-reconfigured.
 
 On first install, model configuration is read locally from
-`wsgs-dev-grounding-api-1` and only MODEL_BASE_URL/NAME/API_KEY are mapped.
+`wsgs-dev-grounding-api-1`. Only the model endpoint, name, key, timeout, retry
+count and Chat Completions response format are mapped.
 Private configuration lives in `/mnt/data/sacs-live/shared/runtime.json`
 (0600), with generated Compose env files also 0600. Update that JSON to change
 configuration, then run install. Existing values and credentials are retained;
@@ -49,6 +50,46 @@ updates do not silently reimport or rotate them. The model must remain
 reachable from the new container. All runtime defaults originate from the
 included `.env.example` and are delivered through env_file (not a partial
 inline Compose environment list).
+
+## Integrating existing local WSGS and SDAR containers
+
+Inspect the current container names, published API ports and trusted Docker
+networks before installation. The package accepts explicit upstream URLs and
+can attach only its own server to existing external networks. PostgreSQL stays
+on the dedicated internal backend. Its connection uses the unique
+`sacs-dev-postgres-1` hostname, avoiding other projects' `postgres` aliases.
+
+For the local WSGS / SDAR deployments verified on 2026-10-15:
+
+```sh
+bash sacs-development/deploy.sh install \
+  --bind 127.0.0.1 --port 18083 \
+  --model-container gowm-analysis-dev-f3dc6f4b8e-wsgs-grounding-api-1 \
+  --refresh-model \
+  --wsgs-base-url http://gowm-analysis-dev-f3dc6f4b8e-wsgs-grounding-api-1:8080 \
+  --sdar-base-url http://sdar-sz-gowm-runtime-1:10999 \
+  --sdar-endpoint-override http://sdar-sz-gowm-runtime-1:10999/a2a \
+  --wsgs-readiness-timeout-ms 5000 \
+  --upstream-network gowm-analysis-dev-f3dc6f4b8e-wsgs_default \
+  --upstream-network sdar-sz-gowm_default
+```
+
+The explicit A2A override is needed when the SDAR Card advertises a host-only
+loopback URL. Discovery and transport keep the same configured origin and the
+frozen HTTP+JSON 1.0 SDK path. No upstream container or listener is changed.
+
+`--refresh-model` deliberately replaces only model endpoint/name/key, timeout,
+retry count and response format with the selected WSGS container's current
+settings. Chat Completions STRICT maps to `json_schema`; JSON maps to
+`json_object`. Unsupported Responses transport or out-of-bounds budgets fail.
+Database and SACS identity credentials remain intact. Without this flag,
+reinstall keeps the saved model. Connection overrides and network settings are
+also saved privately and reused on subsequent installs; the package includes
+no model key or site-specific runtime configuration.
+
+Existing releases and database volumes can be reused after container removal:
+the installer starts the dedicated database before its pre-migration backup.
+No database restore or upstream data access is performed.
 
 `SACS_AUTH_MODE=authenticated` restores existing service-key and signed-user
 requirements. Anonymous requires both `development-anonymous` and
