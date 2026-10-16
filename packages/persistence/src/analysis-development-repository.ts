@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { groundingActivityForState } from "../../analysis-contract/src/grounding-activity.js";
 
 import type { Pool, PoolClient } from "pg";
 
@@ -283,6 +284,43 @@ export class AnalysisDevelopmentRepository implements AnalysisCoordinatorStore {
         ? {}
         : { pendingIntervention: snapshot.openIntervention }),
     };
+  }
+
+  /** Browser directory: signed identity and AG-UI binding, bounded newest first. */
+  async listBrowserAnalyses(identity: { userId: string; userRole: string }) {
+    const result = await this.pool.query<{
+      analysis_id: string;
+      title: string;
+      status: string;
+      active_revision_id: string;
+      latest_revision_number: number;
+      external_thread_id: string;
+    }>(
+      `
+      SELECT session.analysis_id, session.title, session.status,
+             session.active_revision_id, session.latest_revision_number,
+             binding.external_thread_id
+      FROM chat_service.analysis_session session
+      JOIN chat_service.principal principal
+        ON principal.principal_id = session.principal_id
+      JOIN chat_service.client_thread_binding binding
+        ON binding.principal_id = session.principal_id
+       AND binding.internal_thread_id = session.thread_id
+       AND binding.client_type = 'ag_ui'
+      WHERE principal.issuer = 'openwebui-jwt'
+        AND principal.subject = $1 AND principal.role = $2
+      ORDER BY session.updated_at DESC, session.analysis_id LIMIT 100
+    `,
+      [identity.userId, identity.userRole],
+    );
+    return result.rows.map((row) => ({
+      analysisId: row.analysis_id,
+      title: row.title,
+      status: row.status,
+      revisionId: row.active_revision_id,
+      revisionNumber: row.latest_revision_number,
+      threadId: row.external_thread_id,
+    }));
   }
 
   async getSnapshot(
@@ -3166,13 +3204,31 @@ async function mutateProjection(
 ): Promise<AnalysisProjection> {
   const current = await findProjectionForUpdate(client, analysisId);
   const state = cloneState(current.state);
-  const activity = cloneObject(current.activity);
+  let activity = cloneObject(current.activity);
   mutation(state, activity);
+  const revisionId = state.analysis.activeRevisionId;
+  if (
+    revisionId &&
+    state.analysis.revisionsById[revisionId]?.source?.kind ===
+      "WSGS_GROUNDING_JOB"
+  ) {
+    activity = groundingActivityForState(
+      state,
+      activity,
+      current.activityRevision,
+    );
+  }
   state.meta.stateRevision = current.stateRevision + 1;
   state.meta.snapshotHash = calculateAgUiStateSnapshotHash(state);
   const parsed = agUiSharedStateV03Schema.parse(state);
   const activityChanged =
     canonicalJson(activity) !== canonicalJson(current.activity);
+  if (
+    activityChanged &&
+    activity["schemaVersion"] === "io.sacs/grounding-activity/v1"
+  ) {
+    activity["meta"] = { activityRevision: current.activityRevision + 1 };
+  }
   return upsertProjection(client, {
     ...current,
     stateRevision: current.stateRevision + 1,

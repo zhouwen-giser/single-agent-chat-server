@@ -53,6 +53,7 @@ describe("frozen full-source request planning (control integration remains C03)"
   it("AC-019 emits the five exact selection fields and empty reference selection through actual HTTP", async () => {
     const plan = planFrozenGroundingRequest(input());
     if (plan.kind !== "QUERY") throw Error("EXPECTED_QUERY");
+    expect(plan.request.executionPolicy.deadlineMs).toBe(120_000);
     expect(plan.request.analysisSelections).toEqual([selector(context())]);
     expect(plan.request.contextCapsule.priorGroundings).toEqual([
       {

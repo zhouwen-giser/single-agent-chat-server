@@ -1,0 +1,95 @@
+{
+  "status": "FAILED",
+  "leaseMs": 180000,
+  "recoveryTickMs": 30000,
+  "cases": [],
+  "lifecycle": [
+    {
+      "event": "start",
+      "pid": 3533954,
+      "atMs": 5441
+    },
+    {
+      "event": "exit",
+      "pid": 3533954,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 6321
+    },
+    {
+      "event": "start",
+      "pid": 3535286,
+      "atMs": 9132
+    },
+    {
+      "event": "exit",
+      "pid": 3535286,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 10170
+    },
+    {
+      "event": "start",
+      "pid": 3536142,
+      "atMs": 12980
+    },
+    {
+      "event": "exit",
+      "pid": 3536142,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 14436
+    },
+    {
+      "event": "start",
+      "pid": 3537161,
+      "atMs": 17145
+    },
+    {
+      "event": "exit",
+      "pid": 3537161,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 18584
+    },
+    {
+      "event": "start",
+      "pid": 3538032,
+      "atMs": 21496
+    },
+    {
+      "event": "exit",
+      "pid": 3538032,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 23137
+    },
+    {
+      "event": "start",
+      "pid": 3539108,
+      "atMs": 25946
+    },
+    {
+      "event": "exit",
+      "pid": 3539108,
+      "code": null,
+      "signal": "SIGKILL",
+      "atMs": 26877
+    },
+    {
+      "event": "start",
+      "pid": 3540069,
+      "atMs": 29490
+    },
+    {
+      "event": "exit",
+      "pid": 3540069,
+      "code": 0,
+      "signal": null,
+      "atMs": 30988
+    }
+  ],
+  "failure": "non-plain JSON object at $.worldExplanation.linkage",
+  "elapsedMs": 31496,
+  "cleanup": "PASS"
+}

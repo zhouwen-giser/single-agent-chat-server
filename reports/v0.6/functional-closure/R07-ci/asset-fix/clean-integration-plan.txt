@@ -1,0 +1,2 @@
+Browser reference client built with isolated browser hash alias.
+/home/sz/code/single-agent-chat-server/tests/v06-analysis-browser.postgres.int.test.ts

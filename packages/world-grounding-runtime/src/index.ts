@@ -170,6 +170,13 @@ export type WorldGroundingControlTurn = Omit<
   "turnPlan"
 >;
 
+export interface WorldGroundingMutationTurn extends WorldGroundingControlTurn {
+  readonly requestKind: "new_task" | "grounded_task" | "follow_up" | "cancel";
+  readonly taskText?: string;
+  /** Derived from the authorized Task directory, never supplied by a client/model. */
+  readonly explicitTaskReference: boolean;
+}
+
 export type SdarPublishedPlanSnapshot = z.infer<
   typeof sdarPublishedPlanSnapshotSchema
 >;
@@ -193,6 +200,9 @@ export interface WorldGroundingRuntimeOptions {
   ) => Promise<string>;
   readonly continueFrozenWorld?: (
     input: WorldGroundingControlTurn,
+  ) => Promise<string | undefined>;
+  readonly guardFrozenSdarMutation?: (
+    input: WorldGroundingMutationTurn,
   ) => Promise<string | undefined>;
   readonly sourcePolling?: {
     pollIntervalMs: number;
@@ -872,6 +882,12 @@ export class WorldGroundingRuntime {
       explanation: replay.explanation,
       fusion: input.fusion,
     });
+  }
+
+  async guardSdarMutation(
+    input: WorldGroundingMutationTurn,
+  ): Promise<string | undefined> {
+    return this.options.guardFrozenSdarMutation?.(input);
   }
 
   async continuePendingChoice(

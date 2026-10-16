@@ -1,0 +1,111 @@
+{
+  "status": "PASS",
+  "capturedAt": "2026-10-16T01:47:38.440958+00:00",
+  "baselineContainers": 69,
+  "unchangedContainers": 69,
+  "changedContainers": [],
+  "externallyAddedContainers": [],
+  "baselineSha256": "bfff21e354e1460da47542ad4dfbb92eb34fe7858bb36120e344ce166241c89f",
+  "containers": [
+    {
+      "name": "sacs-dev-server-1",
+      "id": "21ef9cd9eece2c356f8cdac5c0d3646b4a4b8226ddffd6aecc957bbd28f3dcf4",
+      "image": "single-agent-chat-server:0.6.0-af36dd001e0d",
+      "imageId": "sha256:8ae751dd9e749bade918d10cecc7d8872576ba98b2ad053ef15c4a0fac737392",
+      "sourceSha": "af36dd001e0db08354c38ef2ebe566ea25a3bdba",
+      "health": "healthy",
+      "user": "node",
+      "readOnly": true,
+      "capDrop": ["ALL"],
+      "securityOpt": ["no-new-privileges:true"],
+      "networks": [
+        "gowm-analysis-dev-f3dc6f4b8e-wsgs_default",
+        "sacs-dev_backend",
+        "sacs-dev_outbound",
+        "sdar-sz-gowm_default"
+      ],
+      "ports": {
+        "3000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "18083"
+          }
+        ]
+      },
+      "mounts": []
+    },
+    {
+      "name": "sacs-dev-postgres-1",
+      "id": "460dd4a6e9852f92d19d6b91e9565f1c108300e768ef529605417171829983bc",
+      "image": "postgres:16.9-alpine",
+      "imageId": "sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7",
+      "sourceSha": null,
+      "health": "healthy",
+      "user": "",
+      "readOnly": false,
+      "capDrop": null,
+      "securityOpt": null,
+      "networks": ["sacs-dev_backend"],
+      "ports": {
+        "5432/tcp": null
+      },
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "sacs-dev_data",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ]
+    }
+  ],
+  "modelName": "qwen3.7-flash-2026-07-15",
+  "modelSettingsMatchWsgs": {
+    "CONVERSATION_MODEL_BASE_URL": true,
+    "CONVERSATION_MODEL_NAME": true,
+    "CONVERSATION_MODEL_API_KEY": true,
+    "CONVERSATION_MODEL_TIMEOUT_MS": true,
+    "CONVERSATION_MODEL_MAX_RETRIES": true,
+    "CONVERSATION_MODEL_RESPONSE_FORMAT": true
+  },
+  "sacsCredentialsAndAuthPreserved": {
+    "CHAT_SERVER_SERVICE_KEY": true,
+    "AG_UI_SERVICE_KEY": true,
+    "OPENWEBUI_USER_JWT_SECRET": true,
+    "POSTGRES_USER": true,
+    "POSTGRES_DB": true,
+    "POSTGRES_PASSWORD": true,
+    "SACS_AUTH_MODE": true,
+    "SACS_ALLOW_INSECURE_ANONYMOUS": true
+  },
+  "privateModes": {
+    "runtime.json": "0o600",
+    "runtime.env": "0o600",
+    "postgres.env": "0o600",
+    "upstreams.compose.json": "0o600"
+  },
+  "wsgsReadinessTimeoutMs": "120000",
+  "currentRelease": "/mnt/data/sacs-live/releases/a4d8c8adc56fa1d2",
+  "receipt": {
+    "status": "READY",
+    "sourceSha": "af36dd001e0db08354c38ef2ebe566ea25a3bdba",
+    "imageId": "sha256:8ae751dd9e749bade918d10cecc7d8872576ba98b2ad053ef15c4a0fac737392",
+    "release": "/mnt/data/sacs-live/releases/a4d8c8adc56fa1d2",
+    "endpoint": "http://127.0.0.1:18083",
+    "businessAcceptance": "NOT_RUN",
+    "timestamp": 1792114697.3883436
+  },
+  "sdarAgentCard": {
+    "status": 200,
+    "sha256": "42a4416043143568042e678431ee521960a0da8d163c3286d8ae32cf5ed0eb49",
+    "skills": 14,
+    "interfaces": [
+      {
+        "url": "http://127.0.0.1:10999/a2a",
+        "protocolBinding": "HTTP+JSON",
+        "tenant": "",
+        "protocolVersion": "1.0"
+      }
+    ],
+    "streaming": true
+  }
+}

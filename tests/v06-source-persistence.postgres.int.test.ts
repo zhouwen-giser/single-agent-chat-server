@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, it, expect } from "@jest/globals";
 import pg from "pg";
 import {
   AnalysisRepository,
+  AnalysisDevelopmentRepository,
   runMigrations,
   type AnalysisScope,
   type AnalysisSession,
@@ -145,6 +146,46 @@ suite("v0.6 source identity empty and v0.5 upgrade PostgreSQL", () => {
         "SELECT row_to_json(e) AS value FROM chat_service.analysis_event e UNION ALL SELECT row_to_json(p) AS value FROM chat_service.analysis_projection p",
       ),
     ).toEqual(legacySnapshot);
+  });
+  it("lists only the signed identity's bounded AG-UI directory", async () => {
+    const f = await seed("browser");
+    await pool.query(
+      "UPDATE chat_service.principal SET issuer='openwebui-jwt',subject='browser-user' WHERE principal_id=$1",
+      [f.scope.principalId],
+    );
+    await pool.query(
+      "INSERT INTO chat_service.client_thread_binding(binding_id,client_type,external_thread_id,principal_id,internal_thread_id) VALUES ('browser-binding','ag_ui','browser-external',$1,$2)",
+      [f.scope.principalId, f.scope.threadId],
+    );
+    await repository.createSessionWithInitialRevision(f);
+    const directory = new AnalysisDevelopmentRepository(pool, repository);
+    expect(
+      await directory.listBrowserAnalyses({
+        userId: "browser-user",
+        userRole: "user",
+      }),
+    ).toEqual([
+      {
+        analysisId: f.scope.analysisId,
+        title: "browser",
+        status: "ACTIVE",
+        revisionId: f.revision.revisionId,
+        revisionNumber: 0,
+        threadId: "browser-external",
+      },
+    ]);
+    expect(
+      await directory.listBrowserAnalyses({
+        userId: "other-user",
+        userRole: "user",
+      }),
+    ).toEqual([]);
+    expect(
+      await directory.listBrowserAnalyses({
+        userId: "browser-user",
+        userRole: "admin",
+      }),
+    ).toEqual([]);
   });
   it("round trips a Grounding identity with NULL Native columns and scope protection", async () => {
     const f = await seed("job");

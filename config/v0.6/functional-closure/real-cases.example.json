@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "sacs-functional-real-cases/1.0",
+  "authorized": false,
+  "authorizedAt": "REPLACE_WITH_CURRENT_UTC_TIMESTAMP",
+  "notAfter": "REPLACE_WITH_AUTHORIZATION_EXPIRY",
+  "wsgsBaseUrl": "https://replace.invalid",
+  "cases": [
+    {
+      "id": "FC-25",
+      "queryText": "替换为当前明确授权的主体/任务、历史区间及预期轨迹查询",
+      "expectedFindingKinds": ["HISTORICAL_TRACE"],
+      "maxSubmissions": 1
+    }
+  ]
+}

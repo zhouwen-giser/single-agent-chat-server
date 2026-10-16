@@ -1,0 +1,9 @@
+
+/home/sz/code/single-agent-chat-server/packages/wsgs-http-adapter/src/index.ts
+  562:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  925:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/scripts/v06-functional-compose.mjs
+  46:20  warning  '_part' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 3 problems (0 errors, 3 warnings)

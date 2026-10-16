@@ -1,0 +1,14 @@
+{"event":"process.postgres.ready","container":"sacs-r05-postgres-574722bd7ae430eb","imageId":"sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24"}
+{"event":"process.postgres.cleanup","container":"sacs-r05-postgres-574722bd7ae430eb","status":"PASS"}
+$ node scripts/v06-process-tests.mjs --checkpoint
+(node:646162) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-checkpoint-recovery.postgres.int.test.ts
+  checkpoint persisted state across actual private PostgreSQL restart
+    ✓ retains saved channels and uses a fresh connection after idle clients die (2245 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        3.19 s, estimated 4 s
+Ran all test suites matching /tests\/v06-checkpoint-recovery.postgres.int.test.ts/i.

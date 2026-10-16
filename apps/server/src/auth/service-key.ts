@@ -11,9 +11,11 @@ export type ServiceKeyAuthenticator = (
 
 export function createServiceKeyAuthenticator(
   expectedServiceKey: string,
+  authMode?: "authenticated" | "development-anonymous",
 ): ServiceKeyAuthenticator {
   const expectedDigest = digest(expectedServiceKey);
   return async (request, reply) => {
+    if (authMode === "development-anonymous") return;
     const authorization = request.headers.authorization;
     const provided = parseBearerToken(authorization);
     if (

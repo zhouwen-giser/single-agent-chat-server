@@ -1,0 +1,15 @@
+(node:1708412) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-frozen-readiness.unit.test.ts
+PASS tests/openai-api.contract.test.ts
+PASS tests/ag-ui-api.contract.test.ts
+PASS tests/development-anonymous.security.test.ts
+PASS tests/adversarial.security.test.ts
+PASS tests/cors-policy.unit.test.ts
+PASS tests/server-config.unit.test.ts
+
+Test Suites: 7 passed, 7 total
+Tests:       71 passed, 71 total
+Snapshots:   0 total
+Time:        10.892 s
+Ran all test suites matching /tests\/server-config.unit.test.ts|tests\/cors-policy.unit.test.ts|tests\/openai-api.contract.test.ts|tests\/ag-ui-api.contract.test.ts|tests\/development-anonymous.security.test.ts|tests\/adversarial.security.test.ts|tests\/v06-frozen-readiness.unit.test.ts/i.

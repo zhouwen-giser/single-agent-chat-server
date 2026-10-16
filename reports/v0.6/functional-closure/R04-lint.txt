@@ -1,0 +1,32 @@
+
+/home/sz/code/single-agent-chat-server/apps/analysis-web/src/main.ts
+  42:45  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/apps/analysis-web/src/map.ts
+  121:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  122:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  123:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  124:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/tests/helpers/browser-analysis.ts
+  203:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/tests/helpers/memory-frozen-analysis.ts
+  877:21  warning  '_meta' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/sz/code/single-agent-chat-server/tests/v06-analysis-browser.integration.test.ts
+  229:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  234:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  296:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  297:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  303:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/tests/v06-analysis-browser.postgres.int.test.ts
+   83:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   84:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   91:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  101:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  175:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  307:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 18 problems (0 errors, 18 warnings)

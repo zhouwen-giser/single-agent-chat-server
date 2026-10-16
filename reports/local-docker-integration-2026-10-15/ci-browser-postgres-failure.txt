@@ -1,0 +1,32 @@
+Browser reference client built with isolated browser hash alias.
+{"event":"v05.postgres.ready","source":"ephemeral-container","image":"postgres:17-alpine"}
+[ELIFECYCLE] Command failed with exit code 1.
+$ node scripts/v06-browser-tests.mjs --postgres
+(node:4039) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/v06-analysis-browser.postgres.int.test.ts (48.73 s)
+  browser explicit controls over actual HTTP and PostgreSQL
+    ✓ inspects locally and confirms one exact selector, with double-click and same-key replay creating one revision (3811 ms)
+    ✓ draws local geometry, invalidates old reviews, and submits exact Point/Line/Polygon/Circle with CONTINUE and REPLACE (7044 ms)
+    ✓ keeps expired choices readable and replays an uncertain committed query with exactly the same command (3374 ms)
+    ✕ detaches and reconnects without START, and shows CANCEL_REQUESTED until a public terminal status (33726 ms)
+
+  ● browser explicit controls over actual HTTP and PostgreSQL › detaches and reconnects without START, and shows CANCEL_REQUESTED until a public terminal status
+
+    page.waitForFunction: Timeout 30000ms exceeded.
+
+    [0m [90m 301 |[39m       [36mfor[39m ([36mconst[39m row [36mof[39m fixture[33m.[39mpeer[33m.[39mjobs[33m.[39mvalues())
+     [90m 302 |[39m         [36mif[39m (row[33m.[39mcancelRequested) row[33m.[39mcancelled [33m=[39m [36mtrue[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 303 |[39m       [36mawait[39m page[33m.[39mwaitForFunction(() [33m=>[39m
+     [90m     |[39m                  [31m[1m^[22m[39m
+     [90m 304 |[39m         document[33m.[39mgetElementById([32m"revision"[39m)[33m?[39m[33m.[39mtextContent[33m?[39m[33m.[39mincludes([32m"CANCELLED"[39m)[33m,[39m
+     [90m 305 |[39m       )[33m;[39m
+     [90m 306 |[39m       expect(fixture[33m.[39mpeer[33m.[39mrequests)[33m.[39mtoHaveLength([35m1[39m)[33m;[39m[0m
+
+      at Object.<anonymous> (tests/v06-analysis-browser.postgres.int.test.ts:303:18)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 3 passed, 4 total
+Snapshots:   0 total
+Time:        48.857 s
+Ran all test suites matching /tests\/v06-analysis-browser.postgres.int.test.ts/i.

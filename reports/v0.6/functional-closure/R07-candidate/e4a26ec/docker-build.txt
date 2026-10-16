@@ -1,0 +1,306 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.09kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1.7
+#2 DONE 0.5s
+
+#3 docker-image://docker.io/docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
+#3 resolve docker.io/docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e 0.0s done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/node:22.14.0-bookworm-slim
+#4 DONE 0.9s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 146B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 57.22kB 0.0s done
+#6 DONE 0.0s
+
+#7 [runtime 1/8] FROM docker.io/library/node:22.14.0-bookworm-slim@sha256:1c18d9ab3af4585870b92e4dbc5cac5a0dc77dd13df1a5905cea89fc720eb05b
+#7 resolve docker.io/library/node:22.14.0-bookworm-slim@sha256:1c18d9ab3af4585870b92e4dbc5cac5a0dc77dd13df1a5905cea89fc720eb05b 0.0s done
+#7 DONE 0.0s
+
+#8 [toolchain 2/3] RUN corepack enable && corepack prepare pnpm@11.13.1 --activate
+#8 CACHED
+
+#9 [toolchain 3/3] WORKDIR /app
+#9 CACHED
+
+#10 [production-dependencies 1/2] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+#10 DONE 1.2s
+
+#11 [dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --frozen-lockfile
+#11 2.113 ? Verifying lockfile against supply-chain policies (787 entries)...
+#11 2.124 Lockfile is up to date, resolution step is skipped
+#11 2.288 Progress: resolved 1, reused 0, downloaded 0, added 0
+#11 2.485 Packages: +715
+#11 2.485 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#11 3.290 Progress: resolved 715, reused 715, downloaded 0, added 2
+#11 4.291 Progress: resolved 715, reused 715, downloaded 0, added 9
+#11 5.483 Progress: resolved 715, reused 715, downloaded 0, added 10
+#11 6.484 Progress: resolved 715, reused 715, downloaded 0, added 19
+#11 8.266 Progress: resolved 715, reused 715, downloaded 0, added 20
+#11 ...
+
+#12 [production-dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --prod --frozen-lockfile
+#12 2.115 ? Verifying lockfile against supply-chain policies (787 entries)...
+#12 2.126 Lockfile is up to date, resolution step is skipped
+#12 2.225 Progress: resolved 1, reused 0, downloaded 0, added 0
+#12 2.264 Packages: +97
+#12 2.264 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#12 3.227 Progress: resolved 97, reused 97, downloaded 0, added 22
+#12 4.227 Progress: resolved 97, reused 97, downloaded 0, added 36
+#12 5.228 Progress: resolved 97, reused 97, downloaded 0, added 46
+#12 6.228 Progress: resolved 97, reused 97, downloaded 0, added 54
+#12 7.229 Progress: resolved 97, reused 97, downloaded 0, added 73
+#12 8.230 Progress: resolved 97, reused 97, downloaded 0, added 76
+#12 9.238 Progress: resolved 97, reused 97, downloaded 0, added 80
+#12 ...
+
+#11 [dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --frozen-lockfile
+#11 9.271 Progress: resolved 715, reused 715, downloaded 0, added 22
+#11 9.891 
+#11 9.891    ╭───────────────────────────────────────────────╮
+#11 9.891    │                                               │
+#11 9.891    │     Update available! 11.13.1 → 12.11.2.      │
+#11 9.891    │     Changelog: https://pnpm.io/v/12.11.2      │
+#11 9.891    │   To update, run: corepack use pnpm@12.11.2   │
+#11 9.891    │                                               │
+#11 9.891    ╰───────────────────────────────────────────────╯
+#11 9.891 
+#11 11.20 Progress: resolved 715, reused 715, downloaded 0, added 23
+#11 12.20 Progress: resolved 715, reused 715, downloaded 0, added 46
+#11 13.21 Progress: resolved 715, reused 715, downloaded 0, added 72
+#11 14.25 Progress: resolved 715, reused 715, downloaded 0, added 105
+#11 15.25 Progress: resolved 715, reused 715, downloaded 0, added 142
+#11 16.25 Progress: resolved 715, reused 715, downloaded 0, added 156
+#11 17.25 Progress: resolved 715, reused 715, downloaded 0, added 176
+#11 18.25 Progress: resolved 715, reused 715, downloaded 0, added 190
+#11 19.25 Progress: resolved 715, reused 715, downloaded 0, added 200
+#11 20.25 Progress: resolved 715, reused 715, downloaded 0, added 224
+#11 ...
+
+#12 [production-dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --prod --frozen-lockfile
+#12 10.24 Progress: resolved 97, reused 97, downloaded 0, added 90
+#12 10.39 
+#12 10.39    ╭───────────────────────────────────────────────╮
+#12 10.39    │                                               │
+#12 10.39    │     Update available! 11.13.1 → 12.11.2.      │
+#12 10.39    │     Changelog: https://pnpm.io/v/12.11.2      │
+#12 10.39    │   To update, run: corepack use pnpm@12.11.2   │
+#12 10.39    │                                               │
+#12 10.39    ╰───────────────────────────────────────────────╯
+#12 10.39 
+#12 11.25 Progress: resolved 97, reused 97, downloaded 0, added 91
+#12 12.25 Progress: resolved 97, reused 97, downloaded 0, added 94
+#12 13.25 Progress: resolved 97, reused 97, downloaded 0, added 95
+#12 14.09 Progress: resolved 97, reused 97, downloaded 0, added 97, done
+#12 15.01 [WARN] GET https://registry.npmjs.org/@colors%2Fcolors error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+#12 ...
+
+#11 [dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --frozen-lockfile
+#11 21.25 Progress: resolved 715, reused 715, downloaded 0, added 264
+#11 22.25 Progress: resolved 715, reused 715, downloaded 0, added 274
+#11 23.25 Progress: resolved 715, reused 715, downloaded 0, added 296
+#11 24.25 Progress: resolved 715, reused 715, downloaded 0, added 324
+#11 25.30 Progress: resolved 715, reused 715, downloaded 0, added 359
+#11 26.30 Progress: resolved 715, reused 715, downloaded 0, added 397
+#11 26.90 [WARN] Request took 14164ms: https://registry.npmjs.org/playwright-core
+#11 27.30 Progress: resolved 715, reused 715, downloaded 0, added 403
+#11 28.30 Progress: resolved 715, reused 715, downloaded 0, added 427
+#11 29.30 Progress: resolved 715, reused 715, downloaded 0, added 485
+#11 30.30 Progress: resolved 715, reused 715, downloaded 0, added 519
+#11 31.30 Progress: resolved 715, reused 715, downloaded 0, added 549
+#11 32.30 Progress: resolved 715, reused 715, downloaded 0, added 556
+#11 33.37 Progress: resolved 715, reused 715, downloaded 0, added 557
+#11 34.37 Progress: resolved 715, reused 715, downloaded 0, added 561
+#11 ...
+
+#12 [production-dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --prod --frozen-lockfile
+#12 25.18 [WARN] Request took 23002ms: https://registry.npmjs.org/@colors%2Fcolors
+#12 26.57 [WARN] Request took 11704ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+#12 28.61 [WARN] Request took 13224ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+#12 33.11 [WARN] Request took 12070ms: https://registry.npmjs.org/typescript
+#12 ...
+
+#11 [dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --frozen-lockfile
+#11 35.37 Progress: resolved 715, reused 715, downloaded 0, added 564
+#11 36.37 Progress: resolved 715, reused 715, downloaded 0, added 573
+#11 37.37 Progress: resolved 715, reused 715, downloaded 0, added 591
+#11 38.37 Progress: resolved 715, reused 715, downloaded 0, added 599
+#11 39.37 Progress: resolved 715, reused 715, downloaded 0, added 623
+#11 40.37 Progress: resolved 715, reused 715, downloaded 0, added 700
+#11 41.40 Progress: resolved 715, reused 715, downloaded 0, added 714
+#11 42.87 Progress: resolved 715, reused 715, downloaded 0, added 715
+#11 42.87 Progress: resolved 715, reused 715, downloaded 0, added 715, done
+#11 ...
+
+#12 [production-dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --prod --frozen-lockfile
+#12 62.15 [WARN] GET https://registry.npmjs.org/@babel%2Fhelper-string-parser error (23). Will retry in 10 seconds. 2 retries left.
+#12 62.16 [WARN] GET https://registry.npmjs.org/@babel%2Fplugin-syntax-json-strings error (23). Will retry in 10 seconds. 2 retries left.
+#12 62.17 [WARN] GET https://registry.npmjs.org/@babel%2Fplugin-syntax-top-level-await error (23). Will retry in 10 seconds. 2 retries left.
+#12 ...
+
+#11 [dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --frozen-lockfile
+#11 62.18 [WARN] GET https://registry.npmjs.org/@clack%2Fcore error (23). Will retry in 10 seconds. 2 retries left.
+#11 ...
+
+#12 [production-dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --prod --frozen-lockfile
+#12 77.90 [WARN] Request took 75748ms: https://registry.npmjs.org/@babel%2Fhelper-string-parser
+#12 77.99 [WARN] Request took 75824ms: https://registry.npmjs.org/@babel%2Fplugin-syntax-top-level-await
+#12 78.23 [WARN] Request took 76068ms: https://registry.npmjs.org/@babel%2Fplugin-syntax-json-strings
+#12 78.23 ✓ Lockfile passes supply-chain policies (787 entries in 1m 16.1s)
+#12 78.28 
+#12 78.28 dependencies:
+#12 78.28 + @a2a-js/sdk 1.0.0-beta.0
+#12 78.28 + @ag-ui/core 0.0.57
+#12 78.28 + @ag-ui/encoder 0.0.57
+#12 78.28 + @langchain/core 1.2.3
+#12 78.28 + @langchain/langgraph 1.4.8
+#12 78.28 + @langchain/langgraph-checkpoint-postgres 1.0.4
+#12 78.28 + @noble/hashes 2.0.1
+#12 78.28 + @opentelemetry/api 1.9.1
+#12 78.28 + ajv 8.20.0
+#12 78.28 + ajv-formats 3.0.1
+#12 78.28 + fastify 5.10.0
+#12 78.28 + pg 8.22.0
+#12 78.28 + zod 4.4.3
+#12 78.28 
+#12 78.28 devDependencies: skipped
+#12 78.28 
+#12 78.43 Done in 1m 17.6s using pnpm v11.13.1
+#12 DONE 85.3s
+
+#11 [dependencies 2/2] RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store     pnpm install --frozen-lockfile
+#11 78.04 [WARN] Request took 75866ms: https://registry.npmjs.org/@clack%2Fcore
+#11 78.05 ✓ Lockfile passes supply-chain policies (787 entries in 1m 15.9s)
+#11 78.34 
+#11 78.34 dependencies:
+#11 78.34 + @a2a-js/sdk 1.0.0-beta.0
+#11 78.34 + @ag-ui/core 0.0.57
+#11 78.34 + @ag-ui/encoder 0.0.57
+#11 78.34 + @langchain/core 1.2.3
+#11 78.34 + @langchain/langgraph 1.4.8
+#11 78.34 + @langchain/langgraph-checkpoint-postgres 1.0.4
+#11 78.34 + @noble/hashes 2.0.1
+#11 78.34 + @opentelemetry/api 1.9.1
+#11 78.34 + ajv 8.20.0
+#11 78.34 + ajv-formats 3.0.1
+#11 78.34 + fastify 5.10.0
+#11 78.34 + pg 8.22.0
+#11 78.34 + zod 4.4.3
+#11 78.34 
+#11 78.34 devDependencies:
+#11 78.34 + @ag-ui/client 0.0.57
+#11 78.34 + @jest/globals 29.7.0
+#11 78.34 + @langchain/langgraph-cli 1.4.3
+#11 78.34 + @tsconfig/recommended 1.0.13
+#11 78.34 + @types/jest 29.5.14
+#11 78.34 + @types/node 22.19.11
+#11 78.34 + @types/pg 8.20.0
+#11 78.34 + @typescript-eslint/eslint-plugin 5.59.8
+#11 78.34 + @typescript-eslint/parser 5.59.8
+#11 78.34 + dotenv 17.4.2
+#11 78.34 + esbuild 0.25.11
+#11 78.34 + eslint 8.57.1
+#11 78.34 + eslint-config-prettier 10.1.8
+#11 78.34 + eslint-plugin-import 2.32.0
+#11 78.34 + eslint-plugin-no-instanceof 1.0.1
+#11 78.34 + eslint-plugin-prettier 5.5.6
+#11 78.34 + jest 29.7.0
+#11 78.34 + playwright-core 1.56.1
+#11 78.34 + prettier 3.9.5
+#11 78.34 + ts-jest 29.4.6
+#11 78.34 + tsx 4.23.0
+#11 78.34 + typescript 5.9.3
+#11 78.34 
+#11 78.63 Done in 1m 17.8s using pnpm v11.13.1
+#11 DONE 85.3s
+
+#13 [build  1/10] COPY tsconfig.json tsconfig.build.json ./
+#13 ...
+
+#14 [runtime 2/8] WORKDIR /app
+#14 CACHED
+
+#15 [runtime 3/8] COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
+#15 ...
+
+#13 [build  1/10] COPY tsconfig.json tsconfig.build.json ./
+#13 DONE 3.7s
+
+#16 [build  2/10] COPY dependencies ./dependencies
+#16 DONE 1.5s
+
+#15 [runtime 3/8] COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
+#15 ...
+
+#17 [build  3/10] COPY apps ./apps
+#17 DONE 2.1s
+
+#15 [runtime 3/8] COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
+#15 ...
+
+#18 [build  4/10] COPY packages ./packages
+#18 ...
+
+#15 [runtime 3/8] COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
+#15 DONE 6.7s
+
+#18 [build  4/10] COPY packages ./packages
+#18 DONE 0.8s
+
+#19 [build  5/10] COPY src ./src
+#19 DONE 0.9s
+
+#20 [build  6/10] COPY scripts/copy-runtime-assets.mjs ./scripts/copy-runtime-assets.mjs
+#20 DONE 0.6s
+
+#21 [build  7/10] COPY scripts/build-analysis-web.mjs ./scripts/build-analysis-web.mjs
+#21 DONE 0.9s
+
+#22 [build  8/10] RUN pnpm exec tsc -p tsconfig.build.json
+#22 DONE 15.6s
+
+#23 [build  9/10] RUN node scripts/copy-runtime-assets.mjs
+#23 DONE 1.9s
+
+#24 [build 10/10] RUN node scripts/build-analysis-web.mjs
+#24 0.627 Browser reference client built with isolated browser hash alias.
+#24 DONE 1.4s
+
+#25 [runtime 4/8] COPY --from=build --chown=node:node /app/dist ./dist
+#25 DONE 1.9s
+
+#26 [runtime 5/8] COPY --chown=node:node dependencies/wsgs-v06 ./dependencies/wsgs-v06
+#26 DONE 1.1s
+
+#27 [runtime 6/8] COPY --chown=node:node dependencies/wsgs-world-analysis-v1/public ./dependencies/wsgs-world-analysis-v1/public
+#27 DONE 0.6s
+
+#28 [runtime 7/8] COPY --chown=node:node package.json LICENSE ./
+#28 DONE 0.9s
+
+#29 [runtime 8/8] COPY --chown=node:node migrations ./migrations
+#29 DONE 0.9s
+
+#30 exporting to image
+#30 exporting layers
+#30 exporting layers 4.6s done
+#30 exporting manifest sha256:7247c20297e0b4e672123c54c61f252344f66e184d486604c900c8d41435717a 0.0s done
+#30 exporting config sha256:64eb84701c893c2c436e9850bcb5948f4e6ccaa09a6c65d105d1003bcff929d5
+#30 exporting config sha256:64eb84701c893c2c436e9850bcb5948f4e6ccaa09a6c65d105d1003bcff929d5 0.2s done
+#30 exporting attestation manifest sha256:9a99c100c86423e5cd7523113a2c3d03a63651682fd96176a6a86ab2951a9c71
+#30 exporting attestation manifest sha256:9a99c100c86423e5cd7523113a2c3d03a63651682fd96176a6a86ab2951a9c71 0.3s done
+#30 exporting manifest list sha256:b79f60464a6ecf59bad7d1d87bb4b137467aee0914035df2cf3bbbe62000fa51
+#30 exporting manifest list sha256:b79f60464a6ecf59bad7d1d87bb4b137467aee0914035df2cf3bbbe62000fa51 0.0s done
+#30 naming to docker.io/library/single-agent-chat-server:sacs-functional-e4a26ec done
+#30 unpacking to docker.io/library/single-agent-chat-server:sacs-functional-e4a26ec
+#30 unpacking to docker.io/library/single-agent-chat-server:sacs-functional-e4a26ec 3.3s done
+#30 DONE 8.5s

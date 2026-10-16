@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "sacs-functional-real-preflight/1.0",
+  "sourceSha": "fa5e26ac664d43564cc3d612edfb9d0ed90190fd",
+  "status": "BLOCKED_EXTERNAL",
+  "businessSubmissions": 0,
+  "cases": [
+    {
+      "id": "FC-23",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "AUTHORIZED_CURRENT_CASE_FILE_REQUIRED"
+    },
+    {
+      "id": "FC-24",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "AUTHORIZED_CURRENT_CASE_FILE_REQUIRED"
+    },
+    {
+      "id": "FC-25",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "AUTHORIZED_CURRENT_CASE_FILE_REQUIRED"
+    },
+    {
+      "id": "FC-26",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "AUTHORIZED_CURRENT_CASE_FILE_REQUIRED"
+    },
+    {
+      "id": "FC-27",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "AUTHORIZED_CURRENT_CASE_FILE_REQUIRED"
+    },
+    {
+      "id": "FC-28",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "AUTHORIZED_CURRENT_CASE_FILE_REQUIRED"
+    },
+    {
+      "id": "FC-29",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "AUTHORIZED_CURRENT_CASE_FILE_REQUIRED"
+    },
+    {
+      "id": "FC-30",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "AUTHORIZED_CURRENT_CASE_FILE_REQUIRED"
+    },
+    {
+      "id": "FC-31",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "AUTHORIZED_CURRENT_CASE_FILE_REQUIRED"
+    }
+  ]
+}

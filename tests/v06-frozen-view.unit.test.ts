@@ -238,7 +238,9 @@ describe("frozen public five-finding projection through normal mapper C02", () =
       view.map.layers.map((l) =>
         l.access.kind === "INLINE_GEOJSON" ? l.access.data : null,
       ),
-    ).toEqual(points);
+    ).toEqual([
+      { type: "MultiPoint", coordinates: points.map((p) => p.coordinates) },
+    ]);
     expect(view.map.layers.every((l) => l.title.includes("非导航路线"))).toBe(
       true,
     );

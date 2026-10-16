@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "sacs-v06-real-integration/1.0",
+  "startedAt": "2026-09-09T04:37:52.363Z",
+  "sourceSha": "60fc8580ff835352f8dbd49e021969e6440e351a",
+  "sourceDiffHash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "entrypointHash": "sha256:d11b9f9030a389af41817f5d7802288b0f40beee98b31c3519512ce76fde0abf",
+  "endpointOrigin": "http://17.26.1.20:18082",
+  "mode": "REAL",
+  "readiness": [
+    {
+      "version": "1.0",
+      "status": "BLOCKED_EXTERNAL",
+      "errorType": "TimeoutError"
+    },
+    {
+      "version": "1.1",
+      "status": "BLOCKED_EXTERNAL",
+      "errorType": "TimeoutError"
+    },
+    {
+      "version": "1.2",
+      "status": "BLOCKED_EXTERNAL",
+      "errorType": "TimeoutError"
+    }
+  ],
+  "exchanges": [],
+  "cases": [],
+  "status": "FAIL",
+  "nonClaims": [
+    "DEVICE_EXECUTION",
+    "PRODUCTION_RELEASE",
+    "MODEL_QUALITY"
+  ],
+  "frozenFileCount": 115,
+  "finishedAt": "2026-09-09T04:40:08.049Z",
+  "errorType": "AssertionError"
+}

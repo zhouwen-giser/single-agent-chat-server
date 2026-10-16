@@ -1,0 +1,24 @@
+{
+  "sourceSha": "ed7a774d7e5676f9883c53bfb3e612d53919d5fe",
+  "runId": 35109932491,
+  "url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/35109932491",
+  "status": "completed",
+  "conclusion": "success",
+  "inspectionCommand": "gh run view 35109932491 --json status,conclusion,headSha,jobs,url",
+  "inspectionExitCode": 0,
+  "jobs": [
+    {
+      "name": "quality",
+      "id": 104840687297,
+      "conclusion": "success",
+      "completedAt": "2026-09-16T14:43:29Z"
+    },
+    {
+      "name": "container",
+      "id": 104842590900,
+      "conclusion": "success",
+      "completedAt": "2026-09-16T14:44:55Z"
+    }
+  ],
+  "scope": "S03 CI regression correction only; does not certify S04/S05 or real WSGS acceptance."
+}

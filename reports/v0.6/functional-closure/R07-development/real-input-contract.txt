@@ -1,0 +1,19 @@
+(node:658872) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-functional-real-cases.unit.test.ts
+  real source input and assertion gates
+    ✓ accepts fresh scoped authorization without requiring unrelated case material (5 ms)
+    ✓ rejects absent/stale/future/unbounded or duplicate scope (17 ms)
+    ✓ rejects absent/stale/future/unbounded or duplicate scope (2 ms)
+    ✓ rejects absent/stale/future/unbounded or duplicate scope (1 ms)
+    ✓ rejects absent/stale/future/unbounded or duplicate scope (1 ms)
+    ✓ rejects absent/stale/future/unbounded or duplicate scope (1 ms)
+    ✓ rejects absent/stale/future/unbounded or duplicate scope (2 ms)
+    ✓ requires exact finding identity and explicit choice/scope/owned-cancel budgets (4 ms)
+    ✓ does not promote empty/UNRESOLVED/HTTP-success results into positive or another finding type (5 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        0.843 s, estimated 1 s
+Ran all test suites matching /tests\/v06-functional-real-cases.unit.test.ts/i.

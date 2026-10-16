@@ -70,12 +70,156 @@ const contextOf = (view = viewOf(result("ranking"))) => ({
   now,
 });
 const command = {
+  confirmed: true,
   commandId: "selection-command-2",
   idempotencyKey: "selection-command-2",
   originalText: "使用此候选",
 };
 
+function choiceState() {
+  const body = analysisStateBody();
+  return {
+    ...body,
+    worldExplanation: JSON.parse(JSON.stringify(viewOf(result("ranking")))),
+    pendingIntervention: {
+      schemaVersion: "sacs-analysis-intervention/1.0" as const,
+      interventionId: "saved-choice-intervention",
+      analysisId: "analysis-1",
+      revisionId: "revision-1",
+      runId: "run-1",
+      interruptId: "interrupt-1",
+      reason: "AMBIGUITY" as const,
+      status: "OPEN" as const,
+      requestPayload: {},
+      createdAt: "2026-09-06T02:00:30.000Z",
+    },
+  };
+}
+async function feedChoiceState(
+  client: HeadlessAnalysisReferenceClient,
+  state: ReturnType<typeof choiceState>,
+  stateRevision = 1,
+) {
+  await client.acceptSseChunk(
+    new EventEncoder({ accept: "text/event-stream" }).encodeSSE(
+      projectAnalysisStateSnapshot({ stateRevision, state }),
+    ),
+  );
+}
+
 describe("frozen world consumer existing headless interaction C04", () => {
+  it("S05 draft generation survives clear/redraw and HTTP failure does not mutate shared state or retry", async () => {
+    const client = new HeadlessAnalysisReferenceClient(
+      new HeadlessMapEngineAdapter(),
+      now,
+    );
+    await feedChoiceState(client, choiceState());
+    const send = jest.fn(async () => {
+      throw Error("TRANSPORT_UNCERTAIN");
+    });
+    const control = new AnalysisControlClient({ send });
+    const query = {
+      ...command,
+      expectedDraftRevision: 1,
+      contextMode: "REPLACE" as const,
+    };
+    await expect(client.submitNewQuery(control, query)).rejects.toThrow(
+      "QUERY_SCOPE_REQUIRED",
+    );
+    await client.dispatchMapAction({
+      type: "DRAW_POINT",
+      coordinates: [120, 30],
+    });
+    await client.dispatchMapAction({ type: "CLEAR_QUERY_SCOPE" });
+    await client.dispatchMapAction({
+      type: "DRAW_POINT",
+      coordinates: [121, 31],
+    });
+    await expect(client.submitNewQuery(control, query)).rejects.toThrow(
+      "QUERY_DRAFT_CONFLICT",
+    );
+    expect(send).not.toHaveBeenCalled();
+    const before = client.state,
+      map = client.mapPresentation;
+    await expect(
+      client.submitNewQuery(control, { ...query, expectedDraftRevision: 3 }),
+    ).rejects.toThrow("TRANSPORT_UNCERTAIN");
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(client.state).toEqual(before);
+    expect(client.mapPresentation).toEqual(map);
+  });
+  it.each([
+    "analysis",
+    "revision",
+    "intervention-analysis",
+    "intervention-revision",
+    "awaiting-snapshot",
+  ])("S04 inspected selection cannot cross %s context", async (changed) => {
+    const client = new HeadlessAnalysisReferenceClient(
+      new HeadlessMapEngineAdapter(),
+      now,
+    );
+    const body = choiceState();
+    await feedChoiceState(client, body);
+    const choice = viewOf(result("ranking")).choices[0] as FrozenChoiceView;
+    await client.inspectFrozenChoice(choice.choiceId, choice.candidateId);
+    if (changed === "analysis")
+      body.worldExplanation.analysisId = "foreign-analysis";
+    if (changed === "revision")
+      body.worldExplanation.revisionId = "old-revision";
+    if (changed === "intervention-analysis")
+      body.pendingIntervention.analysisId = "foreign-analysis";
+    if (changed === "intervention-revision")
+      body.pendingIntervention.revisionId = "old-revision";
+    await feedChoiceState(client, body, 2);
+    if (changed === "awaiting-snapshot") client.reconnect();
+    const send = jest.fn(async () => ({ status: 200, body: {} }));
+    await expect(
+      client.resolveSelection(new AnalysisControlClient({ send }), command),
+    ).rejects.toThrow(
+      changed === "revision"
+        ? "ANALYSIS_REVISION_CONFLICT"
+        : "SELECTION_UNAVAILABLE",
+    );
+    expect(send).not.toHaveBeenCalled();
+  });
+  it("S04 inspection uses exact candidate identity and exposes an isolated draft", async () => {
+    const client = new HeadlessAnalysisReferenceClient(
+      new HeadlessMapEngineAdapter(),
+      now,
+    );
+    await feedChoiceState(client, choiceState());
+    const choice = viewOf(result("ranking")).choices[0] as FrozenChoiceView;
+    await expect(
+      client.inspectFrozenChoice(choice.choiceId, "unknown-candidate"),
+    ).rejects.toThrow("SELECTION_UNAVAILABLE");
+    expect(client.selectedChoice).toBeUndefined();
+    await client.inspectFrozenChoice(choice.choiceId, choice.candidateId);
+    const copy = client.selectedChoice!;
+    copy.analysisId = "foreign-analysis";
+    expect(client.selectedChoice?.analysisId).toBe("analysis-1");
+    const before = client.state;
+    const send = jest.fn(async () => ({ status: 200, body: {} }));
+    await client.resolveSelection(new AnalysisControlClient({ send }), command);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(client.state).toEqual(before);
+  });
+  it.each([false, undefined, "true"])(
+    "S04 rejects confirmation %s before any control transport",
+    (confirmed) => {
+      const context = contextOf();
+      const send = jest.fn(async () => ({ status: 200, body: {} }));
+      expect(() =>
+        new AnalysisControlClient({ send }).resolveFrozenChoice({
+          ...command,
+          confirmed: confirmed as boolean,
+          context,
+          choices: [context.view.choices[0] as FrozenChoiceView],
+        }),
+      ).toThrow("SELECTION_CONFIRMATION_REQUIRED");
+      expect(send).not.toHaveBeenCalled();
+    },
+  );
   it("AC-034 official SSE keeps text, map, timeline and Choice on the same validated source", async () => {
     const source = result("ranking");
     const view = viewOf(source);
@@ -424,6 +568,18 @@ describe("frozen world consumer existing headless interaction C04", () => {
     expect(view.summary.primaryText).toContain("不跨 Gap 插值连线");
     expect(view.source.resultHash).toBe(source.resultHash);
     expect(JSON.stringify(source)).toBe(original);
+    const beforeIds = view.linkage?.features
+      .map((f) => [f.relationKey, f.layerId, f.featureId])
+      .sort();
+    geo.findings[0]?.findingKind === "SPATIAL_FEATURE_COLLECTION" &&
+      geo.findings[0].features.reverse();
+    geo.findingSetHash = publicCanonicalHash(geo.findings);
+    source.resultHash = publicResultHash(source);
+    expect(
+      viewOf(source)
+        .linkage?.features.map((f) => [f.relationKey, f.layerId, f.featureId])
+        .sort(),
+    ).toEqual(beforeIds);
   });
 
   it("AC-036 view byte clipping removes dependent action/geometry/timeline when finding closure is gone", () => {

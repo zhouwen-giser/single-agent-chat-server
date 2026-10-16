@@ -473,7 +473,10 @@ export function parseWsgsHttpConfig(
 ): WsgsHttpAdapterConfig {
   const parsed = z
     .object({
-      WSGS_BASE_URL: z.string().url().default("http://127.0.0.1:8080"),
+      WSGS_BASE_URL: z.preprocess(
+        (value) => (value === "" ? undefined : value),
+        z.string().url().default("http://127.0.0.1:8080"),
+      ),
       WSGS_OPERATION_TIMEOUT_MS: z.coerce
         .number()
         .int()

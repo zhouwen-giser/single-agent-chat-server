@@ -1,0 +1,2 @@
+Architecture gate passed across 153 production source files.
+$ node scripts/verify-architecture.mjs

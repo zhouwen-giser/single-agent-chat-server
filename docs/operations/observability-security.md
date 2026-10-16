@@ -53,6 +53,17 @@ error codes, never raw exception text.
 
 ## Limits and dependency health
 
+Grounding Job readiness is reported separately in `/ready` as
+`checks.wsgsGrounding`. The value distinguishes disabled analysis, a valid
+ready public contract and an unavailable/invalid dependency. Readiness GETs
+only WSGS capabilities with a default 1500 ms limit and 10000 ms shared cache;
+failed checks can recover after the cache expires. `/health` remains liveness.
+Optional operations are reported by `/api/v1/analysis-capabilities`; support
+advertising alone is not availability. Cancellation uncertainty remains in
+published source Activity/State, and deferred source recovery emits only the
+stable `ANALYSIS_SOURCE_RECOVERY_FAILED` warning code. None of these checks
+submits a WSGS Grounding or SDAR Task.
+
 Authenticated `/v1/*` requests use a bounded per-user fixed window. Request
 body, message count, message content, HTTP timeout, A2A operation timeout,
 stream duration, polling duration, and published Artifact rendering are all
@@ -76,3 +87,17 @@ chat-operation failure, not a reason to withdraw HTTP readiness.
 
 SIGINT and SIGTERM use the idempotent shutdown path introduced in Phase 8;
 Fastify stops accepting work and its close hook drains both PostgreSQL pools.
+
+The SACS persistence pool and LangGraph checkpoint pool both discard dead idle
+connections without letting an unhandled `error` terminate the process. Active
+queries still fail normally, and checkpoint operations share the configured
+connection/query timeout and pool ceiling. Readiness reports database failure;
+it does not silently substitute memory state. The next operation reconnects.
+
+The isolated v0.6 process harness keeps the actual 180-second source lease and
+30-second recovery tick. Recovery bounds also include startup and poll latency;
+restart is not instantaneous. Check `last_source_status`, `cancel_requested`,
+source identity/hash, recovery errors and projection lineage before treating an
+observation as settled. A stored cancellation intent remains pending until a
+public terminal status confirms it. See the R05 functional-closure report for
+actual PID/DB restart evidence; that test is not PostgreSQL HA qualification.

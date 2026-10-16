@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "sacs-agui-grounding-real/1.0",
+  "status": "BLOCKED_EXTERNAL",
+  "sourceSha": "e6b76bbb942d54fe8ad6a6dbc37485903ec67475",
+  "cases": [
+    {
+      "id": "R01",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "Real lifecycle and projection verified, but the authorized query returned UNRESOLVED with zero Findings.",
+      "evidence": [
+        "real/fb09aedd-9b2a-4b7e-aea4-c677174122c6/EVIDENCE.json",
+        "REAL_OBSERVATION.md"
+      ]
+    },
+    {
+      "id": "R02",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "No public unexpired Choice in this query; not a global capability/data absence claim.",
+      "evidence": [
+        "real/fb09aedd-9b2a-4b7e-aea4-c677174122c6/EVIDENCE.json",
+        "REAL_OBSERVATION.md"
+      ]
+    }
+  ],
+  "completionMarkers": [],
+  "latestReadOnlyPreflight": {
+    "observedAt": "2026-09-16T14:55:03.408Z",
+    "request": "GET http://17.26.1.20:18082/v1/capabilities",
+    "requestHeaders": {
+      "wsgs-contract-version": "sacs-wsgs-grounding/1.2",
+      "wsgs-result-profile": "wsgs-world-analysis-findings/1.0"
+    },
+    "timeoutMs": 120000,
+    "redirectPolicy": "error",
+    "commandExitCode": 0,
+    "httpStatus": 200,
+    "elapsedMs": 11655,
+    "exactContractNegotiation": true,
+    "requiredCapabilitiesReady": true,
+    "availableCapabilities": [
+      "HISTORICAL_TRACE",
+      "ROAD_ASSOCIATION",
+      "TEMPORAL_EVENT",
+      "CROSS",
+      "METRIC_RANKING",
+      "ACTION_TARGET_CANDIDATE"
+    ],
+    "responseHash": "sha256:58ee9c33b7fe169a0af6a92102eb86c3273d5fc6d8ca8c41fa2a8210430fa9b0",
+    "businessRequestsSubmitted": 0,
+    "acceptanceClaim": false
+  },
+  "latestAttempt": {
+    "evidence": "real/fb09aedd-9b2a-4b7e-aea4-c677174122c6/EVIDENCE.json",
+    "businessSubmissions": 1,
+    "submissionHttpStatus": 202,
+    "aguiHttpStatuses": [200, 200],
+    "businessStatus": "UNRESOLVED",
+    "findingCount": 0,
+    "choiceCount": 0,
+    "presentationAssertions": "PASS",
+    "terminalPersistenceReopen": "PASS",
+    "additionalUpstreamRequestsOnReconnect": 0,
+    "cleanup": "PASS",
+    "commandExitCode": 2
+  },
+  "note": "One real request verified truthful unresolved handling, not positive business or selection acceptance. Earlier local-runner failures with zero submissions are preserved separately in REAL_RUNNER_PREFLIGHT.md."
+}

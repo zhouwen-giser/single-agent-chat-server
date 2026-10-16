@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "sacs-functional-targeted-validation/1.0",
+  "sourceParentSha": "4166089d340c69f472de028c40192613c2629199",
+  "sourceManifestSha256": "sha256:61905dd3158c56256e495fa3a45f3a141caf256434f0518ace5a88232b5892e9",
+  "status": "TARGETED_CHECKS_PASS_CURRENT_CI_PENDING",
+  "checks": [
+    {
+      "command": "pnpm test:integration --listTests --runTestsByPath tests/v06-analysis-browser.postgres.int.test.ts",
+      "exitCode": 0,
+      "purpose": "After moving generated assets away, the actual generic integration command rebuilt them and selected the intended suite; list-only does not claim test execution.",
+      "output": "clean-integration-plan.txt",
+      "outputSha256": "sha256:e024110fbbf5d19938ab75c22298e35ba7da35663ed5e242786fff5ed13b1a5f"
+    },
+    {
+      "command": "pnpm test:v06:browser:postgres",
+      "exitCode": 0,
+      "testsPassed": 4,
+      "elapsedSeconds": 53.01,
+      "output": "browser.txt",
+      "outputSha256": "sha256:dd9d9110af0809188cb102e9c1185b463e8200b86b98e4e2e5757408bdcfab62"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "evidence": "Console completion recorded; no fabricated raw-output hash"
+    },
+    {
+      "command": "pnpm exec eslint tests/v06-analysis-browser.postgres.int.test.ts",
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 6,
+      "evidence": "Console completion recorded"
+    },
+    {
+      "command": "pnpm exec prettier --check package.json tests/v06-analysis-browser.postgres.int.test.ts reports/v0.6/functional-closure/R07.md reports/v0.6/functional-closure/SOURCE_RUN.md reports/v0.6/functional-closure/R07-ci/4166089/CI.json",
+      "exitCode": 0,
+      "evidence": "Console completion recorded"
+    }
+  ],
+  "supportingChecks": {
+    "sourceParentSha": "4166089d340c69f472de028c40192613c2629199",
+    "unitTests": 645,
+    "contractTests": 396,
+    "integrationTests": 153,
+    "integrationDedicatedFaultChecksSkipped": 2,
+    "note": "Correct isolated DB name is single_agent_chat_phase4. Earlier local attempts used an unpinned nested pnpm, then the wrong DB name; those were stopped, not counted as full verify:ci PASS. Broad integration began before this small test-entry fix; current-source qualification is the targeted batch and subsequent hosted CI."
+  }
+}

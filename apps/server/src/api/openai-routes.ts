@@ -101,11 +101,15 @@ export const registerOpenAiRoutes: FastifyPluginAsync<
 
   server.addHook(
     "preHandler",
-    createServiceKeyAuthenticator(options.config.serviceKey),
+    createServiceKeyAuthenticator(
+      options.config.serviceKey,
+      options.config.authMode,
+    ),
   );
   server.addHook(
     "preHandler",
     createOpenWebUiUserAuthenticator({
+      authMode: options.config.authMode,
       secret: options.config.openWebUiUserJwtSecret,
       now,
     }),

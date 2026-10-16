@@ -32,6 +32,28 @@ Protocol drift fails closed. See [A2A compatibility](docs/a2a-compatibility.md).
 
 ## v0.6 frozen WSGS consumer — source development
 
+The current [functional repair and acceptance plan](execplans/EP-06-sacs-v0.6-functional-closure.md)
+covers the reproduced conversation-routing and default-Compose defects, browser
+presentation, process recovery and remaining real WSGS cases. R01/R02 passed
+their nine acceptance rows: routing has 677 full frozen regressions; deployment
+has 105 focused tests, 13 isolated PostgreSQL tests and five container cases. R03 adds an authenticated same-origin [browser reference client](docs/deployment/analysis-browser.md)
+with 12 browser/identity checks, 71 API/security tests and four PostgreSQL tests.
+R04 adds explicit choice/query/cancel/recovery controls with four Chromium/PostgreSQL
+scenarios and 79 impacted client regressions. R05 fixes checkpoint-pool crashes on database restart and proves eight subprocess
+fault cases with the production 180-second lease / 30-second recovery tick.
+R07 adds actual development/integration/release gates and source-bound delivery
+proof. Candidate e4a26ec passed hosted quality, functional-v06 and container CI;
+the downloaded fifteen-step functional evidence matches the local source hash.
+All 24 development rows PASS with the marker
+`SACS_V06_FUNCTIONAL_DEVELOPMENT_READY`. Nine real WSGS, one release and four
+conditional extension rows remain BLOCKED_EXTERNAL in the
+[acceptance matrix](config/v0.6/functional-closure/acceptance-matrix.json).
+Advanced real runner extensions/execution await current authorized material.
+Native Analysis and SDAR grounding extensions require authoritative public
+contracts. See the [repair report](reports/v0.6/functional-closure/FINAL_REPORT.md)
+and [run guide](reports/v0.6/functional-closure/SOURCE_RUN.md). See [Project status](PROJECT_STATUS.md)
+for the current decision and the historical scope of older reports.
+
 The Grounding Job consumer uses the exact `sacs-wsgs-grounding/1.2` and
 `wsgs-world-analysis-findings/1.0` header pair; wire `schemaVersion` remains
 `1.0`. Normal Chat, AG-UI and Analysis Control share the same consumer path.
@@ -52,8 +74,10 @@ These commands use controlled persistence/model ports and real loopback HTTP
 peers with the production Grounding adapter. They do not start Docker,
 PostgreSQL, real WSGS/Provider/SDAR/MCP/device services, release gates or a build.
 The test launcher does not load the developer's `.env` or inherit real service
-endpoint/credential settings. **ENV-001 (real PostgreSQL restoration) remains
-NOT_RUN**; memory and SQL-driver boundary tests are not database-restart evidence.
+endpoint/credential settings. The historical frozen ledger retains ENV-001
+NOT_RUN; current independent R05/R07 evidence covers actual private PostgreSQL
+restart, checkpoint readback and process recovery. These dedicated commands
+still have the narrower scope above.
 
 This is consumer development verification, not production deployment or release
 qualification. See the [source run guide](reports/v0.6/frozen-wsgs-consumer/SOURCE_RUN.md)

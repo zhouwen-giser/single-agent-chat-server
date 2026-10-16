@@ -1,0 +1,4 @@
+Loading verified images (only SACS and its dedicated PostgreSQL).
+Configuration, WSGS 1.2 and SDAR Agent Card preflight PASS.
+SACS readiness: {"configuration": "ok", "postgres": "ok", "conversationModel": "ok", "wsgsGrounding": "ready"}
+SACS READY: http://127.0.0.1:18083; shared anonymous development access.

@@ -1,0 +1,159 @@
+{
+  "phase": "R02",
+  "sourceParentSha": "667fea91b90e9f239944c5d5bb0ccb3e44bea334",
+  "testedSourceManifestSha256": "sha256:4865ea7141fba82e6532313be489a7b45850e3aaa494acd4d95d8a5f6066daef",
+  "status": "PASS",
+  "checks": [
+    {
+      "command": [
+        "node",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "tests/v06-frozen-readiness.unit.test.ts",
+        "tests/v06-analysis-config.unit.test.ts",
+        "tests/wsgs-http-adapter.contract.test.ts",
+        "tests/server-config.unit.test.ts",
+        "tests/openai-api.contract.test.ts",
+        "tests/deployment-tooling.contract.test.ts",
+        "tests/v06-frozen-http.contract.test.ts",
+        "tests/v06-frozen-factory-compat.unit.test.ts",
+        "tests/v06-grounding-job.contract.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 27032,
+      "log": "reports/v0.6/functional-closure/R02-focused.txt",
+      "outputSha256": "sha256:0de8939342ab04707f78e527559bec6c8fa46e246ce028a91d6fa5ad9037528e",
+      "capturedOutputSha256": "sha256:0de8939342ab04707f78e527559bec6c8fa46e246ce028a91d6fa5ad9037528e",
+      "passedTests": 105,
+      "totalTests": 105
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 13385,
+      "log": "reports/v0.6/functional-closure/R02-types.txt",
+      "outputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+      "capturedOutputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/verify-architecture.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 146,
+      "log": "reports/v0.6/functional-closure/R02-architecture.txt",
+      "outputSha256": "sha256:8a2a71b3aa2d50c6ed5153a27c52487aeaf1362fdf288af0fbd522d992f35022",
+      "capturedOutputSha256": "sha256:8a2a71b3aa2d50c6ed5153a27c52487aeaf1362fdf288af0fbd522d992f35022"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v05-postgres-test-harness.mjs",
+        "tests/v06-source-persistence.postgres.int.test.ts",
+        "tests/v06-grounding-lifecycle.postgres.int.test.ts",
+        "tests/v06-analysis-local.e2e.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 22516,
+      "log": "reports/v0.6/functional-closure/R02-postgres.txt",
+      "outputSha256": "sha256:bfc34c2ddd9fe6e5baba124cc06c40aae1ac6ed58a3d872eab97b7564da5ce7b",
+      "capturedOutputSha256": "sha256:bfc34c2ddd9fe6e5baba124cc06c40aae1ac6ed58a3d872eab97b7564da5ce7b",
+      "passedTests": 13,
+      "totalTests": 13
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 16011,
+      "log": "reports/v0.6/functional-closure/R02-build.txt",
+      "outputSha256": "sha256:9ac32db1b695c5626225d4375b635275f33903c7d128a1aa3ee611cef8d8e9fb",
+      "capturedOutputSha256": "sha256:9ac32db1b695c5626225d4375b635275f33903c7d128a1aa3ee611cef8d8e9fb"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "eslint",
+        "apps/server/src/api/health-routes.ts",
+        "apps/server/src/bootstrap.ts",
+        "apps/server/src/main.ts",
+        "apps/server/src/v06-grounding-analysis.ts",
+        "packages/wsgs-analysis-adapter/src/config.ts",
+        "packages/wsgs-http-adapter/src/index.ts",
+        "tests/v06-analysis-config.unit.test.ts",
+        "tests/v06-frozen-readiness.unit.test.ts",
+        "scripts/v06-functional-compose.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 6804,
+      "log": "reports/v0.6/functional-closure/R02-lint.txt",
+      "outputSha256": "sha256:4b860572546fb60a9ded26ae709dd99ef92c28dd7f78c56bfd18ed6f3c42d35b",
+      "capturedOutputSha256": "sha256:b1c9da03990dfec1d26b3718c5b7cee33725fac68e00f7487e87c31922ca0cb0"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        ".eslintrc.cjs",
+        "PROJECT_STATUS.md",
+        "README.md",
+        "apps/server/src/api/health-routes.ts",
+        "apps/server/src/bootstrap.ts",
+        "apps/server/src/main.ts",
+        "apps/server/src/v06-grounding-analysis.ts",
+        "compose.yaml",
+        "config/v0.6/functional-closure/acceptance-matrix.json",
+        "deployment/preflight.mjs",
+        "docs/deployment/containers.md",
+        "docs/operations/observability-security.md",
+        "execplans/EP-06-sacs-v0.6-functional-closure.md",
+        "packages/wsgs-analysis-adapter/src/config.ts",
+        "packages/wsgs-http-adapter/src/index.ts",
+        "tests/v06-analysis-config.unit.test.ts",
+        "reports/v0.6/functional-closure/R02-compose-config.json",
+        "reports/v0.6/functional-closure/R02-compose/0e772769-bc59-41b1-9df7-8eaa2ead7be6/EVIDENCE.json",
+        "reports/v0.6/functional-closure/R02-compose/92518c5f-62d9-461d-be31-dbe8844e1a81/EVIDENCE.json",
+        "reports/v0.6/functional-closure/R02-validation.json",
+        "reports/v0.6/functional-closure/R02.md",
+        "scripts/v06-functional-compose.mjs",
+        "tests/v06-frozen-readiness.unit.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 2359,
+      "log": "reports/v0.6/functional-closure/R02-format.txt",
+      "outputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "capturedOutputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 10,
+      "log": "reports/v0.6/functional-closure/R02-diff.txt",
+      "outputSha256": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "capturedOutputSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "composeEvidence": "reports/v0.6/functional-closure/R02-compose/92518c5f-62d9-461d-be31-dbe8844e1a81/EVIDENCE.json",
+  "earlierAttempts": [
+    "reports/v0.6/functional-closure/R02-compose/0e772769-bc59-41b1-9df7-8eaa2ead7be6/EVIDENCE.json"
+  ],
+  "composeConfigEvidence": "reports/v0.6/functional-closure/R02-compose-config.json"
+}

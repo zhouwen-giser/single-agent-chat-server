@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "sacs-agui-grounding-real-attempt/1.0",
+  "sourceSha": "aaceef1844901decbebbd4031e3bc5f694b3a964",
+  "entrypointHash": "sha256:62936c69d00c4d737988d2d9093bbb703c25599e6125f3c99a0f7aa3b13df3c9",
+  "startedAt": "2026-09-16T15:46:08.785Z",
+  "mode": "LOCAL_STARTUP_CHECK",
+  "endpointOrigin": "http://17.26.1.20:18082",
+  "operationTimeoutMs": 120000,
+  "queryHash": "sha256:d7430ec3024189becba3524ec456c5f25464d282b0f29366074562028b18dd7f",
+  "exchanges": [],
+  "observations": [],
+  "cases": [
+    {
+      "id": "R01",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R02",
+      "status": "NOT_RUN"
+    }
+  ],
+  "status": "LOCAL_STARTUP_PASS",
+  "nonClaims": [
+    "DEVICE_EXECUTION",
+    "PRODUCTION_READINESS",
+    "UPSTREAM_DATABASE_ACCESS",
+    "PROCESS_CRASH_RECOVERY"
+  ],
+  "stage": "FINISHED",
+  "frozenFileCount": 115,
+  "frozenManifestHash": "sha256:45f027673834f3d9e654a889eea25eaf81522f594af8dddf6939b91a0dd4c41a",
+  "database": {
+    "isolated": true,
+    "image": "postgres:17.10-alpine3.23",
+    "migrations": "PASS"
+  },
+  "cleanup": "PASS",
+  "businessSubmissions": 0,
+  "exitCode": 0,
+  "updatedAt": "2026-09-16T15:46:13.352Z"
+}

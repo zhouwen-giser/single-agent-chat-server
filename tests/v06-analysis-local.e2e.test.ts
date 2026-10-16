@@ -242,6 +242,20 @@ suite("v06 normal composition local HTTP / PostgreSQL E2E", () => {
     expect(state.analysis.nodesById).toEqual({});
     expect(state.worldExplanation).toMatchObject({ status: "COMPLETED" });
     expect(events.some((e) => e.type.startsWith("TOOL_CALL"))).toBe(false);
+    const activities = events.filter((e) => e.type === "ACTIVITY_SNAPSHOT");
+    expect(activities.length).toBeGreaterThan(0);
+    for (const event of activities) {
+      expect(event.activityType).toBe("grounding.job");
+      expect(event.content).toMatchObject({
+        schemaVersion: "io.sacs/grounding-activity/v1",
+        groundingId: remote.groundingId,
+        analysisId: state.analysis.session.analysisId,
+        revisionId: revision.revisionId,
+      });
+      expect(event.content.phase).toBeUndefined();
+      expect(event.content.progress).toBeUndefined();
+    }
+    expect(activities.at(-1).content.status).toBe("COMPLETED");
     expect(creates).toBe(1);
     expect(polls).toBe(1);
     const count = paths.length;
@@ -255,6 +269,9 @@ suite("v06 normal composition local HTTP / PostgreSQL E2E", () => {
       },
     });
     expect(replay.at(-1)?.type).toBe("RUN_FINISHED");
+    expect(replay.filter((e) => e.type === "ACTIVITY_SNAPSHOT").at(-1)).toEqual(
+      activities.at(-1),
+    );
     expect(paths).toHaveLength(count);
     const foreign = await fetch(
       baseUrl +

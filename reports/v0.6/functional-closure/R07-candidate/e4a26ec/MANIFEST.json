@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "sacs-functional-candidate-artifacts/1.0",
+  "sourceSha": "e4a26ec3d268b5cc055a9a33b4393c3fecac0f86",
+  "sourceManifestSha256": "sha256:61905dd3158c56256e495fa3a45f3a141caf256434f0518ace5a88232b5892e9",
+  "qualification": "LOCAL_CANDIDATE_ARTIFACTS_ONLY",
+  "imageTag": "single-agent-chat-server:sacs-functional-e4a26ec",
+  "imageVersionAlias": "single-agent-chat-server:0.6.0",
+  "imageId": "sha256:b79f60464a6ecf59bad7d1d87bb4b137467aee0914035df2cf3bbbe62000fa51",
+  "imageOciRevision": "e4a26ec3d268b5cc055a9a33b4393c3fecac0f86",
+  "imageUser": "node",
+  "metadataGateExitCode": 0,
+  "runtimeProbe": {
+    "node": "v22.14.0",
+    "uiBundleIncluded": true,
+    "uiInputs": 134,
+    "uiNodeBuiltins": []
+  },
+  "sbom": {
+    "path": "/home/sz/code/single-agent-chat-server/.tmp/r07-candidate-e4a26ec-sbom.cdx.json",
+    "sha256": "sha256:637676261c1dbbb51dfcab5b57dc968e279acae0c5a21b63c122b063e47aee6f",
+    "format": "CycloneDX",
+    "specVersion": "1.7",
+    "components": 3720
+  },
+  "executedChecks": [
+    {
+      "command": "docker build --target runtime --build-arg SOURCE_REVISION=e4a26ec3d268b5cc055a9a33b4393c3fecac0f86 -t single-agent-chat-server:sacs-functional-e4a26ec .",
+      "exitCode": 0,
+      "output": "docker-build.txt",
+      "outputSha256": "sha256:a69daa51c2f06ccc33c334921a4c494cb43717a9060199831661b345e2b24872"
+    },
+    {
+      "command": "P13_SBOM_OUTPUT_FILE=.tmp/r07-candidate-e4a26ec-sbom.cdx.json node scripts/generate-sbom.mjs",
+      "exitCode": 0,
+      "output": "sbom.txt",
+      "outputSha256": "sha256:471745452092fce8ba876cbc8fc0c7be74c400341d3129ca5b85889b20b0407c"
+    },
+    {
+      "command": "docker run --rm --network none single-agent-chat-server:sacs-functional-e4a26ec node --input-type=module -e <recorded runtime asset probe>",
+      "exitCode": 0,
+      "output": "runtime-probe.txt",
+      "outputSha256": "sha256:3a2a2eee1b57331b415101262ff3ea43572cd22fda7f5e4125bc7a656d0580f1"
+    }
+  ],
+  "nonClaims": [
+    "SHARED_DEPLOYMENT",
+    "MERGE",
+    "REAL_MODEL_QUALITY",
+    "REAL_WSGS_ACCEPTANCE",
+    "CAPACITY_QUALIFICATION"
+  ]
+}

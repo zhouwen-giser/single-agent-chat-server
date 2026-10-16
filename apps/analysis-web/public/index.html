@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SACS 世界分析</title>
+    <link rel="stylesheet" href="/analysis/style.css" />
+    <script type="module" src="/analysis/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <div>
+        <span class="eyebrow">SACS · WORLD OBSERVER</span>
+        <h1>世界分析</h1>
+      </div>
+      <div id="identity">尚未认证</div>
+      <button id="logout" hidden>退出</button>
+    </header>
+    <main>
+      <section id="login-panel" class="panel">
+        <h2>建立可信会话</h2>
+        <p>
+          使用受信任入口签发的短期 Open WebUI 用户身份。会话到期后需要重新认证。
+        </p>
+        <form id="login-form">
+          <label for="jwt">签名身份</label
+          ><input
+            id="jwt"
+            type="password"
+            autocomplete="off"
+            required
+            maxlength="4096"
+          /><button type="submit">登录</button>
+        </form>
+      </section>
+      <p id="error" role="alert" hidden></p>
+      <div id="workspace" hidden>
+        <section class="panel query-panel">
+          <form id="query-form">
+            <label for="query">只读世界查询</label
+            ><textarea
+              id="query"
+              rows="2"
+              maxlength="32768"
+              required
+              placeholder="输入对象、历史时段或空间条件"
+            ></textarea
+            ><button id="start" type="submit">新建分析</button>
+          </form>
+          <button id="refresh-directory">刷新目录</button
+          ><button id="reconnect" disabled>恢复观察</button
+          ><button id="detach" disabled>断开观察</button
+          ><button id="cancel" disabled>请求取消分析</button
+          ><button id="refresh-source" disabled>重查当前条件</button
+          ><button id="retry-command" disabled>同键重放上次控制</button>
+          <p id="connection" role="status">等待查询</p>
+        </section>
+        <div class="layout">
+          <aside class="panel">
+            <h2>分析目录</h2>
+            <div id="directory"><p>暂无分析</p></div>
+          </aside>
+          <div class="content">
+            <section class="panel">
+              <div id="revision"><h2>当前分析</h2></div>
+              <div id="activity"></div>
+              <div id="summary"></div>
+            </section>
+            <section class="panel">
+              <h2>公开几何</h2>
+              <p class="muted">
+                经纬度示意图 · 只显示来源公开的坐标 · 缺口保持断开
+              </p>
+              <div class="toolbar">
+                <button id="fit">适配全部</button
+                ><button id="zoom-in">放大</button
+                ><button id="zoom-out">缩小</button
+                ><button id="pan-left">向左</button
+                ><button id="pan-right">向右</button>
+              </div>
+              <svg
+                id="map"
+                role="img"
+                aria-label="公开世界几何"
+                viewBox="-180 -90 360 180"
+              ></svg>
+              <p id="map-status" role="status">尚无公开几何</p>
+              <div id="layers"></div>
+            </section>
+            <section class="panel">
+              <h2>时间轴</h2>
+              <div id="timeline"></div>
+            </section>
+            <section class="panel">
+              <h2>Finding 与证据</h2>
+              <div id="findings"></div>
+              <div id="evidence"></div>
+              <div id="products"></div>
+            </section>
+            <section class="panel">
+              <h2>候选与历史行动</h2>
+              <div id="choices"></div>
+              <p id="selected-choice" role="status">先检查候选，再显式确认。</p>
+              <button id="confirm-choice" disabled>确认所选候选</button>
+              <div id="action-targets"></div>
+            </section>
+            <section class="panel">
+              <h2>只读范围草稿</h2>
+              <label for="draw-mode">地图绘制</label
+              ><select id="draw-mode">
+                <option value="NONE">仅检查</option>
+                <option value="Point">点</option>
+                <option value="LineString">线</option>
+                <option value="Polygon">闭合面</option>
+                <option value="Circle">圆形中心与半径</option>
+              </select>
+              <label for="radius">圆形半径（米）</label
+              ><input
+                id="radius"
+                type="number"
+                min="1"
+                max="1000000"
+                value="100"
+              />
+              <button id="finish-draw">结束线/面绘制</button
+              ><button id="clear-draft">清除草稿</button>
+              <p>
+                点击地图绘制，或输入确切的 Point / LineString / Polygon / Circle
+                几何。绘制与检查均不提交。圆形仅显示中心标记，其空间语义由来源确认。
+              </p>
+              <label for="draft-geometry">几何草稿</label
+              ><textarea
+                id="draft-geometry"
+                rows="4"
+                maxlength="262144"
+                placeholder='{"type":"Point","coordinates":[116.3913,39.9075]}'
+              ></textarea>
+              <button id="apply-draft">读取本地草稿</button>
+              <label for="context-mode">查询上下文</label
+              ><select id="context-mode">
+                <option value="CONTINUE">CONTINUE · 保留当前上下文</option>
+                <option value="REPLACE">REPLACE · 替换查询上下文</option>
+              </select>
+              <p id="draft-status" role="status">尚无草稿。</p>
+              <button id="review-query" disabled>检查范围与查询</button>
+              <pre id="query-review" hidden></pre>
+              <button id="confirm-query" disabled>确认提交范围查询</button>
+            </section>
+            <section class="panel">
+              <h2>本地检查</h2>
+              <pre id="inspection">点击 Finding、时间项或候选查看关联。</pre>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      历史行动候选未授权执行；当前环境验证、路线规划与执行确认仍须由 SDAR 完成。
+    </footer>
+  </body>
+</html>

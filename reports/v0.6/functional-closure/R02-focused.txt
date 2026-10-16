@@ -1,0 +1,17 @@
+(node:73485) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-frozen-http.contract.test.ts (10.46 s)
+PASS tests/v06-grounding-job.contract.test.ts
+PASS tests/v06-frozen-readiness.unit.test.ts
+PASS tests/v06-frozen-factory-compat.unit.test.ts
+PASS tests/openai-api.contract.test.ts
+PASS tests/deployment-tooling.contract.test.ts
+PASS tests/wsgs-http-adapter.contract.test.ts
+PASS tests/v06-analysis-config.unit.test.ts
+PASS tests/server-config.unit.test.ts
+
+Test Suites: 9 passed, 9 total
+Tests:       105 passed, 105 total
+Snapshots:   0 total
+Time:        26.408 s
+Ran all test suites matching /tests\/v06-frozen-readiness.unit.test.ts|tests\/v06-analysis-config.unit.test.ts|tests\/wsgs-http-adapter.contract.test.ts|tests\/server-config.unit.test.ts|tests\/openai-api.contract.test.ts|tests\/deployment-tooling.contract.test.ts|tests\/v06-frozen-http.contract.test.ts|tests\/v06-frozen-factory-compat.unit.test.ts|tests\/v06-grounding-job.contract.test.ts/i.

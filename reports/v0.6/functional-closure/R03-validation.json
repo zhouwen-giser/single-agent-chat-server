@@ -1,0 +1,244 @@
+{
+  "phase": "R03",
+  "sourceParentSha": "b5547c25c9652ff821472713ce72e9032bb0ab56",
+  "testedSourceManifestSha256": "sha256:a20f7d0d802bce32f6c042dacf54d1d3b844028cb3d097b875512ae332ecee6e",
+  "status": "PASS",
+  "checks": [
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:browser"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 21629,
+      "log": "reports/v0.6/functional-closure/R03-browser.txt",
+      "outputSha256": "sha256:33b149f846c09578c1b931dcc2ff8207cc358d0a0535fbf4b5557fee30a4473f",
+      "capturedOutputSha256": "sha256:33b149f846c09578c1b931dcc2ff8207cc358d0a0535fbf4b5557fee30a4473f",
+      "passedTests": 12,
+      "totalTests": 12
+    },
+    {
+      "command": [
+        "node",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "tests/server-config.unit.test.ts",
+        "tests/cors-policy.unit.test.ts",
+        "tests/openai-api.contract.test.ts",
+        "tests/ag-ui-api.contract.test.ts",
+        "tests/development-anonymous.security.test.ts",
+        "tests/adversarial.security.test.ts",
+        "tests/v06-frozen-readiness.unit.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 11557,
+      "log": "reports/v0.6/functional-closure/R03-focused.txt",
+      "outputSha256": "sha256:4306a33f4975a62cd3434bdfebd1fec7ff3b9425581f632355c58d19c6cc12ce",
+      "capturedOutputSha256": "sha256:4306a33f4975a62cd3434bdfebd1fec7ff3b9425581f632355c58d19c6cc12ce",
+      "passedTests": 71,
+      "totalTests": 71
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v05-postgres-test-harness.mjs",
+        "tests/v06-source-persistence.postgres.int.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 18096,
+      "log": "reports/v0.6/functional-closure/R03-postgres.txt",
+      "outputSha256": "sha256:ba7499346a847d222715e878bea1ff99bedb8f33de76c89e1d6e04e85bc3e463",
+      "capturedOutputSha256": "sha256:ba7499346a847d222715e878bea1ff99bedb8f33de76c89e1d6e04e85bc3e463",
+      "passedTests": 4,
+      "totalTests": 4
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 16773,
+      "log": "reports/v0.6/functional-closure/R03-types.txt",
+      "outputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+      "capturedOutputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/verify-architecture.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 189,
+      "log": "reports/v0.6/functional-closure/R03-architecture.txt",
+      "outputSha256": "sha256:ab0604b6a44d6ca2b967acca1012c6adf19bc253ba4b52320df51542b0180f1a",
+      "capturedOutputSha256": "sha256:ab0604b6a44d6ca2b967acca1012c6adf19bc253ba4b52320df51542b0180f1a"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "verify:licenses"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1913,
+      "log": "reports/v0.6/functional-closure/R03-licenses.txt",
+      "outputSha256": "sha256:3e3d9f755d89f2227a7f1cb81194d63ee0741a697fb06558cee40a36ab7c5b8e",
+      "capturedOutputSha256": "sha256:3e3d9f755d89f2227a7f1cb81194d63ee0741a697fb06558cee40a36ab7c5b8e"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 18582,
+      "log": "reports/v0.6/functional-closure/R03-build.txt",
+      "outputSha256": "sha256:6954cb1a8fac1d77c33eec76681d88f349574b6e75246114a2ab34342112333d",
+      "capturedOutputSha256": "sha256:6954cb1a8fac1d77c33eec76681d88f349574b6e75246114a2ab34342112333d"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "eslint",
+        "apps/server/src/auth/openwebui-user.ts",
+        "apps/server/src/bootstrap.ts",
+        "apps/server/src/config.ts",
+        "apps/server/src/main.ts",
+        "apps/server/src/security/cors.ts",
+        "packages/persistence/src/analysis-development-repository.ts",
+        "tests/server-config.unit.test.ts",
+        "tests/v06-source-persistence.postgres.int.test.ts",
+        "apps/analysis-web/src/browser-buffer.ts",
+        "apps/analysis-web/src/browser-crypto.ts",
+        "apps/analysis-web/src/main.ts",
+        "apps/analysis-web/src/map.ts",
+        "apps/analysis-web/src/transport.ts",
+        "apps/server/src/analysis-web/routes.ts",
+        "apps/server/src/analysis-web/transport.ts",
+        "tests/helpers/browser-analysis.ts",
+        "tests/v06-analysis-browser.integration.test.ts",
+        "tests/v06-analysis-web-security.unit.test.ts",
+        "scripts/build-analysis-web.mjs",
+        "scripts/v06-browser-tests.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 7514,
+      "log": "reports/v0.6/functional-closure/R03-lint.txt",
+      "outputSha256": "sha256:2d4262e574c0fafb646948e9defad98f22b9bb45fed9b64ab5edeebe3e5ce373",
+      "capturedOutputSha256": "sha256:9d19fd19cb6ccf1cfeb0eb721d8a3d85d3435900367d3d4c3ad6e1b01e1180b2"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        ".eslintrc.cjs",
+        "PROJECT_STATUS.md",
+        "README.md",
+        "apps/server/src/auth/openwebui-user.ts",
+        "apps/server/src/bootstrap.ts",
+        "apps/server/src/config.ts",
+        "apps/server/src/main.ts",
+        "apps/server/src/security/cors.ts",
+        "compose.yaml",
+        "config/v0.6/functional-closure/acceptance-matrix.json",
+        "execplans/EP-06-sacs-v0.6-functional-closure.md",
+        "package.json",
+        "packages/persistence/src/analysis-development-repository.ts",
+        "pnpm-lock.yaml",
+        "scripts/verify-architecture.mjs",
+        "tests/server-config.unit.test.ts",
+        "tests/v06-source-persistence.postgres.int.test.ts",
+        "apps/analysis-web/public/index.html",
+        "apps/analysis-web/public/style.css",
+        "apps/analysis-web/src/browser-buffer.ts",
+        "apps/analysis-web/src/browser-crypto.ts",
+        "apps/analysis-web/src/main.ts",
+        "apps/analysis-web/src/map.ts",
+        "apps/analysis-web/src/transport.ts",
+        "apps/server/src/analysis-web/routes.ts",
+        "apps/server/src/analysis-web/transport.ts",
+        "docs/deployment/analysis-browser.md",
+        "docs/licenses/v0.6-analysis-browser.md",
+        "reports/v0.6/functional-closure/R03-validation.json",
+        "reports/v0.6/functional-closure/R03.md",
+        "scripts/build-analysis-web.mjs",
+        "scripts/v06-browser-tests.mjs",
+        "tests/helpers/browser-analysis.ts",
+        "tests/v06-analysis-browser.integration.test.ts",
+        "tests/v06-analysis-web-security.unit.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 4074,
+      "log": "reports/v0.6/functional-closure/R03-format.txt",
+      "outputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "capturedOutputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 22,
+      "log": "reports/v0.6/functional-closure/R03-diff.txt",
+      "outputSha256": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "capturedOutputSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "dependencyLock": {
+    "preExistingPackagesUnchanged": true,
+    "newPackages": [
+      "@esbuild/aix-ppc64@0.25.11",
+      "@esbuild/android-arm64@0.25.11",
+      "@esbuild/android-arm@0.25.11",
+      "@esbuild/android-x64@0.25.11",
+      "@esbuild/darwin-arm64@0.25.11",
+      "@esbuild/darwin-x64@0.25.11",
+      "@esbuild/freebsd-arm64@0.25.11",
+      "@esbuild/freebsd-x64@0.25.11",
+      "@esbuild/linux-arm64@0.25.11",
+      "@esbuild/linux-arm@0.25.11",
+      "@esbuild/linux-ia32@0.25.11",
+      "@esbuild/linux-loong64@0.25.11",
+      "@esbuild/linux-mips64el@0.25.11",
+      "@esbuild/linux-ppc64@0.25.11",
+      "@esbuild/linux-riscv64@0.25.11",
+      "@esbuild/linux-s390x@0.25.11",
+      "@esbuild/linux-x64@0.25.11",
+      "@esbuild/netbsd-arm64@0.25.11",
+      "@esbuild/netbsd-x64@0.25.11",
+      "@esbuild/openbsd-arm64@0.25.11",
+      "@esbuild/openbsd-x64@0.25.11",
+      "@esbuild/openharmony-arm64@0.25.11",
+      "@esbuild/sunos-x64@0.25.11",
+      "@esbuild/win32-arm64@0.25.11",
+      "@esbuild/win32-ia32@0.25.11",
+      "@esbuild/win32-x64@0.25.11",
+      "@noble/hashes@2.0.1",
+      "esbuild@0.25.11",
+      "playwright-core@1.56.1"
+    ]
+  },
+  "browserBuildManifestSha256": "sha256:6c62f13c0faecdfa7f41dd1090be1258fca70dd24d00d3f3ef6029f0bb84b765",
+  "browserScreenshots": [
+    {
+      "path": "reports/v0.6/functional-closure/R03-browser/map.png",
+      "sha256": "sha256:116b55379754fa59f850d9a1ffd0c42f2832b67c71970ad668bfc0f60d9475e7"
+    },
+    {
+      "path": "reports/v0.6/functional-closure/R03-browser/trace.png",
+      "sha256": "sha256:adb040b4cc2275adf7e66da487eb7f0eea8007bcbe2dc7db0f905399a4a41d66"
+    }
+  ]
+}

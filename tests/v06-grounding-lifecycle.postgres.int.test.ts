@@ -180,6 +180,19 @@ suite("v06 durable Grounding lifecycle", () => {
     expect(answers[1]).toEqual(answers[0]);
     expect(polls).toBe(2);
     const projection = await source.getProjection(analysisScope);
+    expect(projection?.activity).toMatchObject({
+      schemaVersion: "io.sacs/grounding-activity/v1",
+      groundingId: job(input).groundingId,
+      analysisId: input.analysisId,
+      revisionId: input.revisionId,
+      status: "COMPLETED",
+      sourceStatus: "COMPLETED",
+      meta: { activityRevision: projection?.activityRevision },
+    });
+    expect(
+      (await new AnalysisRepository(pool).getProjection(analysisScope))
+        ?.activity,
+    ).toEqual(projection?.activity);
     expect(projection?.state["worldExplanation"]).toMatchObject({
       status: "COMPLETED",
     });
@@ -292,6 +305,15 @@ suite("v06 durable Grounding lifecycle", () => {
         status: "CANCEL_REQUESTED",
       });
       expect(cancels).toBe(1);
+      const pendingActivity = await new AnalysisRepository(pool).getProjection({
+        analysisId: input.analysisId,
+        principalId: input.principalId,
+        threadId: input.threadId,
+      });
+      expect(pendingActivity?.activity).toMatchObject({
+        status: "CANCEL_REQUESTED",
+        meta: { activityRevision: pendingActivity?.activityRevision },
+      });
       await expect(
         control.getSnapshot({ ...requestScope, userId: "foreign" }),
       ).rejects.toMatchObject({ statusCode: 404 });
@@ -301,6 +323,19 @@ suite("v06 durable Grounding lifecycle", () => {
     await expect(world.completeWorldGrounding(input)).rejects.toThrow(
       "WSGS_CANCELLED",
     );
+    await source.pump.settle();
+    const confirmed = await new AnalysisRepository(pool).getProjection({
+      analysisId: input.analysisId,
+      principalId: input.principalId,
+      threadId: input.threadId,
+    });
+    expect(confirmed?.activity).toMatchObject({
+      status: "CANCELLED",
+      sourceStatus: "CANCELLED",
+      groundingId: job(input).groundingId,
+      revisionId: input.revisionId,
+    });
+    expect(cancels).toBe(1);
   });
   it("persists exact intent before network, returns ACCEPTED and replays without resubmission", async () => {
     const input = await seed();
