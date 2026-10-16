@@ -65,6 +65,8 @@ bash /mnt/data/sacs-live/current/deploy.sh status \
 
 早期 `ee87217`、`a2279b3`、`34f7419` 的包及诊断保留在本机，最终交付以本报告的 `af36dd0` 包为准。源码冻结后追加的报告 / 测试提交不改变已部署应用代码。
 
+报告提交 `4d319fa` 的两份新证据 JSON 曾使 CI 在格式检查阶段提前失败。现已按 Prettier 规范格式化，并按最终字节重算证据清单；应用源码和离线包身份保持不变，完整 CI 再次触发。
+
 ## 验收范围
 
 本轮完成部署与连接、真实模型普通对话、持久化和协议 smoke。没有提交真实历史正样本或设备任务验收；`businessAcceptance=NOT_RUN`，`nativeReady=false`。先前 v0.6 真实用例 / release 门禁仍按其独立台账处理，不以能力广告代替历史结果。[Draft PR #25](https://github.com/zhouwen-giser/single-agent-chat-server/pull/25) 保留 Draft，main 合并由用户控制。

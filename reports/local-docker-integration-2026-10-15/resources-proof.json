@@ -16,12 +16,8 @@
       "health": "healthy",
       "user": "node",
       "readOnly": true,
-      "capDrop": [
-        "ALL"
-      ],
-      "securityOpt": [
-        "no-new-privileges:true"
-      ],
+      "capDrop": ["ALL"],
+      "securityOpt": ["no-new-privileges:true"],
       "networks": [
         "gowm-analysis-dev-f3dc6f4b8e-wsgs_default",
         "sacs-dev_backend",
@@ -49,9 +45,7 @@
       "readOnly": false,
       "capDrop": null,
       "securityOpt": null,
-      "networks": [
-        "sacs-dev_backend"
-      ],
+      "networks": ["sacs-dev_backend"],
       "ports": {
         "5432/tcp": null
       },

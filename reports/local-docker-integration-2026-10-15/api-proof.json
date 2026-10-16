@@ -63,10 +63,7 @@
         },
         "output": {
           "structuredOutput": true,
-          "supportedMimeTypes": [
-            "text/plain",
-            "application/json"
-          ]
+          "supportedMimeTypes": ["text/plain", "application/json"]
         },
         "state": {
           "snapshots": true,
@@ -137,57 +134,43 @@
             "EVENT_SELECTION"
           ],
           "structuredSelection": true,
-          "supportedActionSources": [
-            "HISTORICAL_METRIC_CANDIDATE"
-          ],
+          "supportedActionSources": ["HISTORICAL_METRIC_CANDIDATE"],
           "capabilities": [
             {
               "capability": "HISTORICAL_TRACE",
               "supported": true,
               "available": true,
-              "reasonCodes": [
-                "AVAILABLE"
-              ]
+              "reasonCodes": ["AVAILABLE"]
             },
             {
               "capability": "ROAD_ASSOCIATION",
               "supported": true,
               "available": true,
-              "reasonCodes": [
-                "AVAILABLE"
-              ]
+              "reasonCodes": ["AVAILABLE"]
             },
             {
               "capability": "TEMPORAL_EVENT",
               "supported": true,
               "available": true,
-              "reasonCodes": [
-                "AVAILABLE"
-              ]
+              "reasonCodes": ["AVAILABLE"]
             },
             {
               "capability": "CROSS",
               "supported": true,
               "available": true,
-              "reasonCodes": [
-                "AVAILABLE"
-              ]
+              "reasonCodes": ["AVAILABLE"]
             },
             {
               "capability": "METRIC_RANKING",
               "supported": true,
               "available": true,
-              "reasonCodes": [
-                "AVAILABLE"
-              ]
+              "reasonCodes": ["AVAILABLE"]
             },
             {
               "capability": "ACTION_TARGET_CANDIDATE",
               "supported": true,
               "available": true,
-              "reasonCodes": [
-                "AVAILABLE"
-              ]
+              "reasonCodes": ["AVAILABLE"]
             }
           ],
           "checkedAt": "2026-10-16T01:38:36.002Z",
