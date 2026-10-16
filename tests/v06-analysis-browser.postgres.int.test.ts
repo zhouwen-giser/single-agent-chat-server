@@ -298,8 +298,15 @@ suite("browser explicit controls over actual HTTP and PostgreSQL", () => {
       expect(
         [...fixture.peer.jobs.values()].every((row) => row.cancelled !== true),
       ).toBe(true);
-      for (const row of fixture.peer.jobs.values())
-        if (row.cancelRequested) row.cancelled = true;
+      // The durable browser intent can appear before the upstream POST arrives.
+      const jobs = [...fixture.peer.jobs.values()];
+      expect(jobs).toHaveLength(1);
+      const cancelDeadline = Date.now() + 10000;
+      while (!jobs.every((row) => row.cancelRequested === true)) {
+        expect(Date.now()).toBeLessThan(cancelDeadline);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      for (const row of jobs) row.cancelled = true;
       await page.waitForFunction(() =>
         document.getElementById("revision")?.textContent?.includes("CANCELLED"),
       );

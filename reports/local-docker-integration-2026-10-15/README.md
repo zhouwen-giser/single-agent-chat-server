@@ -1,63 +1,72 @@
-# 本机 Docker 集成部署记录
+# SACS 本机 Docker 集成部署 — PASS
 
-开始：2026-10-15；安装器阶段确认：2026-10-16（Asia/Shanghai）。
+部署完成：2026-10-16T09:38:17.388344+08:00（Asia/Shanghai）。已部署冻结源码 `af36dd001e0db08354c38ef2ebe566ea25a3bdba`，复用 WSGS 正在运行的 `qwen3.7-flash-2026-07-15` 模型配置。真实普通对话、独立数据库持久化与两个上游连接验证通过。
 
-用户授权生成 SACS 部署包、完成本机集成部署，并复用 `wsgs-session` 已部署的模型配置。执行计划为 [EP-07](../../execplans/EP-07-local-docker-integration.md)。本报告随后补充冻结包身份与现场部署结果。
+## 交付与运行身份
 
-## 安装器适配 — PASS
-
-- 显式支持 WSGS / SDAR 地址和同源 A2A endpoint override，适配 Card 公告主机回环地址的本机容器部署。
-- 只将 SACS server 加入已有可信网络，独立 PostgreSQL 仍仅在 SACS backend；数据库默认地址限定为 `sacs-dev-postgres-1`，避免上游网络的同名 `postgres` 别名。
-- `--refresh-model` 只刷新所选 WSGS 容器的六项模型配置，保留 SACS 身份和数据库凭据；严格验证 Chat Completions 模式及预算。默认重装继续使用保存的私有配置。
-- 离线包携带全部 `SACS_` 模板默认值；不携带运行中的 `.env` 或模型密钥。
-- 当保留的 release 存在而容器已移除时，先启动本项目数据库，再执行本项目的迁移前备份。没有卷的数据不宣称恢复为历史状态。
-
-## 验证
-
-| 检查 | 结果 |
+| 项目 | 实际结果 |
 | --- | --- |
-| deployment-tooling.contract + development-anonymous.security | 2 suites / 11 tests PASS |
-| TypeScript typecheck | PASS |
-| 完整应用与 analysis web build | PASS |
-| architecture | PASS，153 production files |
-| Python 安装器语法 / 两个 MJS 语法 | PASS |
-| 本次 TypeScript 与 MJS 作用域 lint | PASS，TypeScript 保留一项既有 non-null warning |
-| format:check | PASS |
+| 本机 API | `http://127.0.0.1:18083`；OpenAI base URL 为 `http://127.0.0.1:18083/v1` |
+| 对外模型 ID | `sdar-single-agent` |
+| 离线部署包 | `/mnt/data/sacs-live/packages/0.6.0-af36dd001e0d/sacs-development.tar.gz` |
+| 包大小 / SHA-256 | 205816430 bytes / `6f144abaa234399340abd38b962156e06fbe2a1ab27bd0d5d804bfd825f0ca5b` |
+| 校验侧文件 | `/mnt/data/sacs-live/packages/0.6.0-af36dd001e0d/sacs-development.tar.gz.sha256` |
+| SACS 镜像 | `single-agent-chat-server:0.6.0-af36dd001e0d` / `sha256:8ae751dd9e749bade918d10cecc7d8872576ba98b2ad053ef15c4a0fac737392` |
+| 独立 PostgreSQL | `postgres:16.9-alpine` / `sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7` |
+| 当前 release | `/mnt/data/sacs-live/releases/a4d8c8adc56fa1d2` |
+| previous release | `/mnt/data/sacs-live/releases/0f92d8ca4a9933ea`（源码 `34f741995b6e1b1ad8bfacd962368420f15ed729`） |
+| 运行状态 | `sacs-dev-server-1`、`sacs-dev-postgres-1` 均 healthy |
 
-检查使用固定 `pnpm@11.13.1` 与 Node 22。本轮变更未改业务协议、依赖或上游服务。MJS 使用独立 ESLint 配置检查，因为现有 TypeScript ESLint project 不包含这些文件。
+离线包包含预构建镜像、安装器、环境模板、运行默认值及校验清单。私有模型密钥、SACS 身份密钥与数据库口令在 `/mnt/data/sacs-live/shared` 中，四个配置文件均为 0600；部署包中只有环境模板占位值。包内迁移文件与运行数据库的 20 项版本、校验和完全一致。
 
-## 现场部署 — 待执行
+## 实际验证
 
-### 首个冻结包的现场发现
+| 验证 | 结果 |
+| --- | --- |
+| 模型、agent、部署、安全、配置与就绪测试 | 6 suites / 43 tests PASS |
+| TypeScript 类型、应用 / analysis web 构建、作用域 lint、格式、Python / MJS 语法 | PASS；部署测试文件保留一项既有 lint warning |
+| 架构检查 | PASS，153 production files |
+| 包外 SHA-256、内清单、镜像身份、迁移清单 | PASS |
+| `/health`、`/ready`、`/v1/models`、`/ag-ui/capabilities`、`/api/v1/analysis-capabilities` | 均 HTTP 200 |
+| `/ready` 分项 | configuration=ok，postgres=ok，conversationModel=ok，wsgsGrounding=ready；本次耗时 3.592 秒 |
+| WSGS 公开能力 | 1.2 / world-analysis profile ready；六项可选能力 AVAILABLE |
+| SDAR 发现 | 官方隔离 SDK 的 HTTP+JSON 1.0 发现通过；现场 Card 为 14 skills |
+| 真实普通对话 | HTTP 200，13.687 秒；当前对话的 user / assistant 两条消息已落库 |
+| Open WebUI utility / SSE | 确定性标题 `Single SDAR chat`；SSE `[DONE]` 通过 |
+| SACS SDAR Task 绑定 | 测试前后 0 → 0 |
+| 上游资源 | 部署前的 69 个容器 ID、镜像、启动时间、网络 ID、挂载内容均保持一致；挂载按目标路径比较，不依赖 Docker 返回顺序 |
 
-`ee87217d0a3d5bd08af00da9e07510cb59009281` 离线包的内外 SHA-256、两个镜像身份及 20 个迁移文件均校验通过，包内没有站点私有 runtime。两个早期安装尝试停在预检前，输出不足以归因；增加本机诊断后，WSGS 1.2 / SDAR 发现均通过，专属 PostgreSQL 与 SACS 容器启动，随后 `/ready` 返回 503：`postgres=ok`、`conversationModel=ok`、`wsgsGrounding=unavailable`。
+真实回答：
 
-公开 capabilities 的独立只读实测为容器内 3.747 秒、本机端口 5.220 秒，超过旧 5 秒上限。现场适配保持默认 1500 ms，将可显式配置的有界上限改为 30000 ms，本机使用 15000 ms；仍执行公开能力、数据库与真实模型检查。
+> 你好，我是SACS流程中的通用对话助手，很高兴能陪你进行轻松自然的日常交流。
 
-现场此前没有 SACS 容器和数据卷，仅有旧 release / private 配置。旧 release 的镜像已不存在，原安装器的自动应用回退尝试 registry，96.896 秒后失败；本轮补充 `--pull never`，使安装及回退符合离线包约束。成功标记未被失败尝试替换，专属新卷保留，未执行数据库恢复。新增安全的就绪分项输出，避免将来只看到通用失败。
+运行配置的模型 endpoint、name、key、timeout、retries、response format 六项均与当前 WSGS 容器一致；仅记录比较结果，不记录密钥。既有 SACS 身份、PostgreSQL 凭据及认证模式保持一致。现场原本没有 SACS 容器或数据卷，本次使用专属新卷，未宣称恢复旧聊天数据。
 
-修复后 deployment tooling、anonymous security、analysis config、frozen readiness 共 4 suites / 26 tests PASS，包括部分就绪阻止发布、输出脱敏、有界配置及离线回退策略。TypeScript 类型、构建、Python 语法及本次 lint 另行复核。首个包作为失败尝试的证据保留，不作为最终交付包。
+## 连接和操作
 
-### 冷能力探针的最终预算
+SACS server 加入既有 WSGS / SDAR 可信 Docker 网络，连接 WSGS 容器端口 8080 和 SDAR 10999。SDAR Card 公告主机回环地址，SACS 使用同源显式 `/a2a` endpoint override。独立 PostgreSQL 仅在 SACS internal backend、没有公开端口，连接名限定为 `sacs-dev-postgres-1`。
 
-`a2279b3` 的 15000 ms 本机预算仍发生预检失败，单独诊断随后通过。进一步只读测量表明 DNS 为 0–7 ms、SDAR Card 为 21 ms，而 WSGS capabilities 的冷调用超过 45000 ms。读取 WSGS 的公开路由实现确认：capabilities 先等待 readiness，readiness 在 60000 ms 模型成功缓存过期后执行真实模型探针，再获取调用者范围的发现快照。SACS 的请求取消不会取消已开始的上游模型探针。
+本站保留既有共享匿名开发模式，固定监听回环；OpenAI 请求使用 `sdar-single-agent`。本站操作带上固定入口参数：
 
-最终将 SACS 可显式配置的预算上限与原有 `WSGS_OPERATION_TIMEOUT_MS` 的 120000 ms 上限对齐，本机配置 120000 ms；默认 1500 ms 不变，安装器预检总限 180 秒、模型就绪总限 150 秒不变。没有更改上游缓存、模型、容器或安全条件，也没有用过期能力声明成功。两个早期包均保留为诊断证据，最终包另行记录。
+```sh
+bash /mnt/data/sacs-live/current/deploy.sh status \
+  --root /mnt/data/sacs-live --bind 127.0.0.1 --port 18083
+```
 
-最终预算修改后重新执行 4 suites / 26 tests、TypeScript 类型、应用构建及 Python 语法检查，均 PASS。
+新机器安装和模型刷新命令见 [部署说明](../../deployment/README.md)。`--refresh-model` 才重新导入模型；普通重装继续使用保存的私有设置。没有安装 Open WebUI 前端或启用需要独立认证配置的 browser reference client。
 
-### 实际对话的语义校验发现
+## 已修复的现场问题与 CI
 
-`34f7419` 安装已通过公开预检、独立数据库、真实模型及 WSGS 就绪，首次现场 API / utility 检查和 20 项迁移校验通过。普通对话检查拒绝了安全兜底文本，未将 HTTP 200 直接当作模型业务成功。
+1. 现有容器网络、Card 回环地址、旧模型配置与多个项目的 `postgres` 别名需要明确适配。安装器增加显式网络 / 连接 / 模型刷新，只操作 SACS 资源；先启动独立数据库再备份，支持保留 release 而容器已移除的现场。
+2. WSGS capabilities 在模型成功缓存过期后会等待真实模型探针。实测冷模型约 36–43 秒，能力请求曾超过 45 秒。最终显式配置 120000 ms 的有界预算，与既有上游 operation 上限一致，默认 1500 ms 保留；能力、真实模型和数据库的失败仍阻止发布。
+3. 首次真实普通对话的模型分类多填了 `clarification`，被本地语义校验正确拒绝。分类提示现明确路由相关字段的省略规则及合法普通对话示例。保留本地严格语义校验，没有删除不合法字段后放行任务。
+4. 早期旧应用镜像不存在时的回退曾尝试 registry。安装 / 回退现使用 `--pull never`；已保留旧 release、迁移前备份及私有配置备份，未执行数据库恢复。没有现场执行应用回滚演练。
+5. [已部署源码的 CI](https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/38835344991) 的 quality / container 通过，functional-v06 在 browser-postgres 的取消场景失败。夹具在持久化取消意图展示后过早模拟终态，可能尚未收到真实上游取消 POST。修复测试同步后，4 个浏览器 / HTTP / PostgreSQL 场景本地复测通过，类型与 lint 通过。后续提交仅涉及测试与报告，完整 CI 重新触发；本报告不将尚未完成的新 CI 记为通过。
 
-对原用户文本执行只分类、不派发的模型诊断得到 HTTP 200 / `GENERAL_CHAT`，但模型额外填充了字符串 `clarification`；本地正确返回 `CONVERSATION_MODEL_OUTPUT_INVALID`，没有派发 SDAR Task。原 JSON Schema 无法表示 Zod superRefine 的路由间语义约束，提示中缺少对非适用字段必须省略的明确规则。
+早期 `ee87217`、`a2279b3`、`34f7419` 的包及诊断保留在本机，最终交付以本报告的 `af36dd0` 包为准。源码冻结后追加的报告 / 测试提交不改变已部署应用代码。
 
-本轮只完善分类提示：明确 `clarification`、`taskDirective` 的适用路由、禁止空占位值，并给出省略可选字段的合法普通对话示例。本地严格语义校验、任务派发和模型六项配置均不放宽。重新冻结、打包和验证真实普通对话后才形成最终交付。
+## 验收范围
 
-相同用户文本使用修正提示的真实只分类探针为 HTTP 200 / `GENERAL_CHAT`，3.551 秒完成，并正确省略两个非适用字段；未派发任务。模型 / agent / deployment / security / config / readiness 共 6 suites / 43 tests PASS，类型、构建、本次 lint 与格式检查 PASS。
+本轮完成部署与连接、真实模型普通对话、持久化和协议 smoke。没有提交真实历史正样本或设备任务验收；`businessAcceptance=NOT_RUN`，`nativeReady=false`。先前 v0.6 真实用例 / release 门禁仍按其独立台账处理，不以能力广告代替历史结果。[Draft PR #25](https://github.com/zhouwen-giser/single-agent-chat-server/pull/25) 保留 Draft，main 合并由用户控制。
 
-冻结源码提交后生成包含 SACS 与 `postgres:16.9-alpine` 镜像的离线包，部署入口为 `127.0.0.1:18083`。安装器将核对 WSGS 1.2 能力、SDAR HTTP+JSON 1.0 Card，执行 SACS 迁移与真实模型 readiness。
-
-已核实 WSGS 本机公开端口为 28080、容器端口为 8080；SDAR 本机与容器端口为 10999。当前 WSGS 模型名称为 `qwen3.7-flash-2026-07-15`，密钥仅在本机私有配置中保存。
-
-部署验证不代表真实历史业务正样本、设备执行、生产容量或发布门禁验收。先前真实用例台账保持原状态，Draft PR #25 保持 Draft，main 合并由用户控制。
+证据：[包身份](package-proof.json)、[API / 对话 / SSE](api-proof.json)、[资源 / 模型比较](resources-proof.json)、[安装](install.txt)、[43 项检查](tests.txt)、[浏览器复测](browser-tests.txt)、[CI 原失败](ci-browser-postgres-failure.txt)。
