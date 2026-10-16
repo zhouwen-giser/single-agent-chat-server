@@ -61,8 +61,10 @@ Analysis remains separately unavailable and is not needed for Grounding Job.
 configured conversation model and enabled Grounding capability readiness,
 returning `checks.wsgsGrounding` as `disabled`, `ready` or `unavailable`. An
 unavailable enabled Source returns HTTP 503 while liveness remains HTTP 200.
-The WSGS probe only GETs public capabilities, uses a short timeout and shares a
-cached check among concurrent probes. Optional advanced capability absence does
+The WSGS probe only GETs public capabilities and shares a cached check among
+concurrent probes. Its timeout defaults to 1500 ms and accepts an explicit
+100–30000 ms budget; the verified local stack uses 15000 ms because its public
+capability response exceeded 5 seconds. Optional advanced capability absence does
 not fail basic readiness; its actual availability remains visible through the
 authenticated analysis-capabilities endpoint.
 

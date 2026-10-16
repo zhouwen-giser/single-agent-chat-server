@@ -28,6 +28,16 @@
 
 ## 现场部署 — 待执行
 
+### 首个冻结包的现场发现
+
+`ee87217d0a3d5bd08af00da9e07510cb59009281` 离线包的内外 SHA-256、两个镜像身份及 20 个迁移文件均校验通过，包内没有站点私有 runtime。两个早期安装尝试停在预检前，输出不足以归因；增加本机诊断后，WSGS 1.2 / SDAR 发现均通过，专属 PostgreSQL 与 SACS 容器启动，随后 `/ready` 返回 503：`postgres=ok`、`conversationModel=ok`、`wsgsGrounding=unavailable`。
+
+公开 capabilities 的独立只读实测为容器内 3.747 秒、本机端口 5.220 秒，超过旧 5 秒上限。现场适配保持默认 1500 ms，将可显式配置的有界上限改为 30000 ms，本机使用 15000 ms；仍执行公开能力、数据库与真实模型检查。
+
+现场此前没有 SACS 容器和数据卷，仅有旧 release / private 配置。旧 release 的镜像已不存在，原安装器的自动应用回退尝试 registry，96.896 秒后失败；本轮补充 `--pull never`，使安装及回退符合离线包约束。成功标记未被失败尝试替换，专属新卷保留，未执行数据库恢复。新增安全的就绪分项输出，避免将来只看到通用失败。
+
+修复后 deployment tooling、anonymous security、analysis config、frozen readiness 共 4 suites / 26 tests PASS，包括部分就绪阻止发布、输出脱敏、有界配置及离线回退策略。TypeScript 类型、构建、Python 语法及本次 lint 另行复核。首个包作为失败尝试的证据保留，不作为最终交付包。
+
 冻结源码提交后生成包含 SACS 与 `postgres:16.9-alpine` 镜像的离线包，部署入口为 `127.0.0.1:18083`。安装器将核对 WSGS 1.2 能力、SDAR HTTP+JSON 1.0 Card，执行 SACS 迁移与真实模型 readiness。
 
 已核实 WSGS 本机公开端口为 28080、容器端口为 8080；SDAR 本机与容器端口为 10999。当前 WSGS 模型名称为 `qwen3.7-flash-2026-07-15`，密钥仅在本机私有配置中保存。

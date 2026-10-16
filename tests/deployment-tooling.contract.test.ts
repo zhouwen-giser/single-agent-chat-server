@@ -145,12 +145,39 @@ with tempfile.TemporaryDirectory() as folder:
  sys.argv=['deploy.py','rollback','--root',str(root)];d.main()
  assert (root/'current').resolve()==old
  assert all(not any(x in a for x in ['down','pg_restore']) for p,a in calls)
+ assert all('--pull' in a and a[a.index('--pull')+1]=='never' for p,a in calls if a[0] in ['up','run'])
 print('PASS')
 `,
       ],
       { encoding: "utf8" },
     );
     expect(output.trim().endsWith("PASS")).toBe(true);
+  });
+  it("keeps partial readiness blocked and prints only known check states", () => {
+    const output = execFileSync(
+      "python3",
+      [
+        "-B",
+        "-c",
+        `
+import importlib.util,json,io,contextlib
+spec=importlib.util.spec_from_file_location('deploy','deployment/deploy.py')
+d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)
+state={'ok':False,'body':{'status':'not_ready','checks':{'configuration':'ok','postgres':'ok','conversationModel':'private-error-value','wsgsGrounding':'unavailable'}}}
+comp=lambda *a,**kw:json.dumps(state).encode()
+out=io.StringIO()
+with contextlib.redirect_stdout(out):
+ try:d.ready(comp);raise AssertionError('accepted partial readiness')
+ except RuntimeError:pass
+assert 'private-error-value' not in out.getvalue() and 'unavailable' in out.getvalue() and 'unknown' in out.getvalue()
+state={'ok':True,'body':{'status':'ready','checks':dict.fromkeys(['configuration','postgres','conversationModel'],'ok')}}
+with contextlib.redirect_stdout(out):d.ready(comp)
+print('PASS')
+`,
+      ],
+      { encoding: "utf8" },
+    );
+    expect(output.trim()).toBe("PASS");
   });
   it("rejects occupied targets even when SACS already exists on another port", () => {
     const output = execFileSync(

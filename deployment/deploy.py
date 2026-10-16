@@ -185,8 +185,14 @@ def db_versions(comp):
 
 def ready(comp):
     # /ready performs a real model probe. Do it once, not every health interval.
-    check = "const r=await fetch('http://127.0.0.1:3000/ready',{signal:AbortSignal.timeout(150000)});if(!r.ok)process.exit(1);console.log('readiness PASS');"
-    comp('exec', '-T', 'server', 'node', '--input-type=module', '-e', check, timeout=180)
+    check = "const r=await fetch('http://127.0.0.1:3000/ready',{signal:AbortSignal.timeout(150000)});console.log(JSON.stringify({ok:r.ok,body:await r.json()}));"
+    result = json.loads(comp('exec', '-T', 'server', 'node', '--input-type=module', '-e', check, timeout=180))
+    checks = result.get('body', {}).get('checks', {})
+    safe = {key: checks.get(key) if checks.get(key) in ('ok', 'ready', 'unavailable', 'disabled') else 'unknown'
+            for key in ('configuration', 'postgres', 'conversationModel', 'wsgsGrounding')}
+    print('SACS readiness: ' + json.dumps(safe), flush=True)
+    if not result.get('ok') or result.get('body', {}).get('status') != 'ready':
+        raise RuntimeError('SACS readiness unavailable')
 
 
 def assert_rollback_compatible(current, target, applied):
@@ -235,7 +241,7 @@ def main():
     parser.add_argument('--wsgs-base-url')
     parser.add_argument('--sdar-base-url')
     parser.add_argument('--sdar-endpoint-override')
-    parser.add_argument('--wsgs-readiness-timeout-ms', type=int, choices=range(100, 5001), metavar='100..5000')
+    parser.add_argument('--wsgs-readiness-timeout-ms', type=int, choices=range(100, 30001), metavar='100..30000')
     parser.add_argument('--upstream-network', action='append', help='Existing trusted Docker network; attaches only SACS server, repeat for each upstream')
     args = parser.parse_args()
     os.umask(0o077)
@@ -271,7 +277,7 @@ def main():
             target_manifest = verify(target)
             assert_rollback_compatible(manifest, target_manifest, db_versions(comp))
             old_comp = compose(target, shared, target_manifest, args)
-            old_comp('up', '-d', '--no-deps', '--wait', '--wait-timeout', '240', 'server')
+            old_comp('up', '-d', '--no-deps', '--pull', 'never', '--wait', '--wait-timeout', '240', 'server')
             ready(old_comp)
             point(previous, package)
             point(current, target)
@@ -300,7 +306,7 @@ def main():
         comp = compose(package, shared, manifest, args)
         comp('config', '--quiet')
         # Candidate config, contract and upstream checks without starting a database/task.
-        comp('run', '--rm', '--no-deps', '-v', str(package / 'preflight.mjs') + ':/app/preflight.mjs:ro',
+        comp('run', '--rm', '--no-deps', '--pull', 'never', '-v', str(package / 'preflight.mjs') + ':/app/preflight.mjs:ro',
              'server', 'node', '/app/preflight.mjs', timeout=180)
         print('Configuration, WSGS 1.2 and SDAR Agent Card preflight PASS.', flush=True)
         if args.action == 'preflight':
@@ -313,22 +319,22 @@ def main():
         old = current.resolve() if current.is_symlink() else None
         # A retained release/volume can survive removal of its containers.
         # Start only our database before taking the pre-migration backup.
-        comp('up', '-d', '--wait', '--wait-timeout', '120', 'postgres')
+        comp('up', '-d', '--pull', 'never', '--wait', '--wait-timeout', '120', 'postgres')
         if old:
             backup = shared / ('backup-' + str(time.time_ns()) + '.dump')
             write_private(backup.with_suffix('.json'), json.dumps({'release': str(old), 'createdAt': time.time()}))
             with backup.open('wb') as stream:
                 stream.write(comp('exec', '-T', 'postgres', 'pg_dump', '-U', 'sacs', '-d', 'sacs', '-Fc'))
         migrate = "import {setupPersistence,parsePersistenceConfig} from './dist/packages/persistence/src/index.js';const p=await setupPersistence(parsePersistenceConfig(process.env));await p.close();"
-        comp('run', '--rm', '--no-deps', 'server', 'node', '--input-type=module', '-e', migrate)
+        comp('run', '--rm', '--no-deps', '--pull', 'never', 'server', 'node', '--input-type=module', '-e', migrate)
         try:
-            comp('up', '-d', '--no-deps', '--wait', '--wait-timeout', '240', 'server', timeout=300)
+            comp('up', '-d', '--no-deps', '--pull', 'never', '--wait', '--wait-timeout', '240', 'server', timeout=300)
             ready(comp)
         except Exception:
             if old:
                 old_manifest = verify(old)
                 assert_rollback_compatible(manifest, old_manifest, db_versions(comp))
-                compose(old, shared, old_manifest, args)('up', '-d', '--no-deps', '--wait', '--wait-timeout', '240', 'server')
+                compose(old, shared, old_manifest, args)('up', '-d', '--no-deps', '--pull', 'never', '--wait', '--wait-timeout', '240', 'server')
             raise
         if old and old != release:
             point(root / 'previous', old)

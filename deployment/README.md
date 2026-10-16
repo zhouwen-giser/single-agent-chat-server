@@ -69,7 +69,7 @@ bash sacs-development/deploy.sh install \
   --wsgs-base-url http://gowm-analysis-dev-f3dc6f4b8e-wsgs-grounding-api-1:8080 \
   --sdar-base-url http://sdar-sz-gowm-runtime-1:10999 \
   --sdar-endpoint-override http://sdar-sz-gowm-runtime-1:10999/a2a \
-  --wsgs-readiness-timeout-ms 5000 \
+  --wsgs-readiness-timeout-ms 15000 \
   --upstream-network gowm-analysis-dev-f3dc6f4b8e-wsgs_default \
   --upstream-network sdar-sz-gowm_default
 ```
@@ -86,6 +86,11 @@ Database and SACS identity credentials remain intact. Without this flag,
 reinstall keeps the saved model. Connection overrides and network settings are
 also saved privately and reused on subsequent installs; the package includes
 no model key or site-specific runtime configuration.
+
+The explicit capability-readiness budget accepts 100–30000 ms and defaults to
+1500 ms. This local deployment uses 15000 ms because measured upstream
+capability responses exceeded 5 seconds. Unavailable capabilities still fail
+readiness; database and real model checks are required as well.
 
 Existing releases and database volumes can be reused after container removal:
 the installer starts the dedicated database before its pre-migration backup.
@@ -158,6 +163,8 @@ Releases are retained under `releases/<content-manifest-digest>/`; `current`
 changes only after readiness succeeds, with the preceding release in
 `previous`. Upgrades back up only the dedicated SACS database. No `down -v`,
 shared-data deletion or automatic database restore is performed.
+Installation and application rollback use only loaded local images; a missing
+previous image fails immediately without attempting a registry pull.
 
 ```sh
 bash /mnt/data/sacs-live/current/deploy.sh rollback
