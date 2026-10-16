@@ -46,6 +46,16 @@
 
 最终预算修改后重新执行 4 suites / 26 tests、TypeScript 类型、应用构建及 Python 语法检查，均 PASS。
 
+### 实际对话的语义校验发现
+
+`34f7419` 安装已通过公开预检、独立数据库、真实模型及 WSGS 就绪，首次现场 API / utility 检查和 20 项迁移校验通过。普通对话检查拒绝了安全兜底文本，未将 HTTP 200 直接当作模型业务成功。
+
+对原用户文本执行只分类、不派发的模型诊断得到 HTTP 200 / `GENERAL_CHAT`，但模型额外填充了字符串 `clarification`；本地正确返回 `CONVERSATION_MODEL_OUTPUT_INVALID`，没有派发 SDAR Task。原 JSON Schema 无法表示 Zod superRefine 的路由间语义约束，提示中缺少对非适用字段必须省略的明确规则。
+
+本轮只完善分类提示：明确 `clarification`、`taskDirective` 的适用路由、禁止空占位值，并给出省略可选字段的合法普通对话示例。本地严格语义校验、任务派发和模型六项配置均不放宽。重新冻结、打包和验证真实普通对话后才形成最终交付。
+
+相同用户文本使用修正提示的真实只分类探针为 HTTP 200 / `GENERAL_CHAT`，3.551 秒完成，并正确省略两个非适用字段；未派发任务。模型 / agent / deployment / security / config / readiness 共 6 suites / 43 tests PASS，类型、构建、本次 lint 与格式检查 PASS。
+
 冻结源码提交后生成包含 SACS 与 `postgres:16.9-alpine` 镜像的离线包，部署入口为 `127.0.0.1:18083`。安装器将核对 WSGS 1.2 能力、SDAR HTTP+JSON 1.0 Card，执行 SACS 迁移与真实模型 readiness。
 
 已核实 WSGS 本机公开端口为 28080、容器端口为 8080；SDAR 本机与容器端口为 10999。当前 WSGS 模型名称为 `qwen3.7-flash-2026-07-15`，密钥仅在本机私有配置中保存。
