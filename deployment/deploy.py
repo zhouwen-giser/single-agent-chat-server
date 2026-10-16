@@ -241,7 +241,7 @@ def main():
     parser.add_argument('--wsgs-base-url')
     parser.add_argument('--sdar-base-url')
     parser.add_argument('--sdar-endpoint-override')
-    parser.add_argument('--wsgs-readiness-timeout-ms', type=int, choices=range(100, 30001), metavar='100..30000')
+    parser.add_argument('--wsgs-readiness-timeout-ms', type=int, choices=range(100, 120001), metavar='100..120000')
     parser.add_argument('--upstream-network', action='append', help='Existing trusted Docker network; attaches only SACS server, repeat for each upstream')
     args = parser.parse_args()
     os.umask(0o077)

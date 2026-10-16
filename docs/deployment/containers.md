@@ -63,8 +63,9 @@ returning `checks.wsgsGrounding` as `disabled`, `ready` or `unavailable`. An
 unavailable enabled Source returns HTTP 503 while liveness remains HTTP 200.
 The WSGS probe only GETs public capabilities and shares a cached check among
 concurrent probes. Its timeout defaults to 1500 ms and accepts an explicit
-100–30000 ms budget; the verified local stack uses 15000 ms because its public
-capability response exceeded 5 seconds. Optional advanced capability absence does
+100–120000 ms budget. The local stack uses 120000 ms because WSGS capabilities
+await a real model probe when the upstream model-readiness cache expires;
+a cold response exceeded 45 seconds. Optional advanced capability absence does
 not fail basic readiness; its actual availability remains visible through the
 authenticated analysis-capabilities endpoint.
 

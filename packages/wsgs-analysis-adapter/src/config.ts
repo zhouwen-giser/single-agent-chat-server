@@ -23,7 +23,7 @@ export const groundingAnalysisConfigSchema = z.strictObject({
   maxSafePayloadBytes: integer(262144, 1024, 262144),
   maxActivePumps: integer(128, 1, 256),
   allowLegacy10: z.boolean(),
-  readinessTimeoutMs: integer(1500, 100, 30000),
+  readinessTimeoutMs: integer(1500, 100, 120000),
   readinessCacheMs: integer(10000, 100, 30000),
 });
 export type GroundingAnalysisConfig = z.infer<

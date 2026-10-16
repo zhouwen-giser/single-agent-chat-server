@@ -38,6 +38,14 @@
 
 修复后 deployment tooling、anonymous security、analysis config、frozen readiness 共 4 suites / 26 tests PASS，包括部分就绪阻止发布、输出脱敏、有界配置及离线回退策略。TypeScript 类型、构建、Python 语法及本次 lint 另行复核。首个包作为失败尝试的证据保留，不作为最终交付包。
 
+### 冷能力探针的最终预算
+
+`a2279b3` 的 15000 ms 本机预算仍发生预检失败，单独诊断随后通过。进一步只读测量表明 DNS 为 0–7 ms、SDAR Card 为 21 ms，而 WSGS capabilities 的冷调用超过 45000 ms。读取 WSGS 的公开路由实现确认：capabilities 先等待 readiness，readiness 在 60000 ms 模型成功缓存过期后执行真实模型探针，再获取调用者范围的发现快照。SACS 的请求取消不会取消已开始的上游模型探针。
+
+最终将 SACS 可显式配置的预算上限与原有 `WSGS_OPERATION_TIMEOUT_MS` 的 120000 ms 上限对齐，本机配置 120000 ms；默认 1500 ms 不变，安装器预检总限 180 秒、模型就绪总限 150 秒不变。没有更改上游缓存、模型、容器或安全条件，也没有用过期能力声明成功。两个早期包均保留为诊断证据，最终包另行记录。
+
+最终预算修改后重新执行 4 suites / 26 tests、TypeScript 类型、应用构建及 Python 语法检查，均 PASS。
+
 冻结源码提交后生成包含 SACS 与 `postgres:16.9-alpine` 镜像的离线包，部署入口为 `127.0.0.1:18083`。安装器将核对 WSGS 1.2 能力、SDAR HTTP+JSON 1.0 Card，执行 SACS 迁移与真实模型 readiness。
 
 已核实 WSGS 本机公开端口为 28080、容器端口为 8080；SDAR 本机与容器端口为 10999。当前 WSGS 模型名称为 `qwen3.7-flash-2026-07-15`，密钥仅在本机私有配置中保存。

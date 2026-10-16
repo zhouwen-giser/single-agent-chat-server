@@ -38,9 +38,9 @@ describe("v06 fail-closed production configuration", () => {
   it("allows an explicit bounded readiness budget for slower live capabilities", () => {
     expect(
       parseGroundingAnalysisConfig({
-        SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS: "15000",
+        SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS: "120000",
       }).readinessTimeoutMs,
-    ).toBe(15000);
+    ).toBe(120000);
   });
   it("rejects version drift and unbounded pumps/polling/outputs", () => {
     for (const [key, value] of Object.entries({
@@ -50,7 +50,7 @@ describe("v06 fail-closed production configuration", () => {
       SACS_WSGS_ANALYSIS_MAX_TIMELINE_ITEMS: "1001",
       SACS_WSGS_ANALYSIS_MAX_MAP_LAYERS: "129",
       SACS_WSGS_ANALYSIS_MAX_SAFE_PAYLOAD_BYTES: "999999",
-      SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS: "30001",
+      SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS: "120001",
       SACS_WSGS_ANALYSIS_READINESS_CACHE_MS: "30001",
     }))
       expect(() => parseGroundingAnalysisConfig({ [key]: value })).toThrow();
