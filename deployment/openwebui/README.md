@@ -1,7 +1,11 @@
 # Open WebUI connected to SACS
 
 The independent `openwebui-sacs` Compose project publishes
-`http://17.26.1.20:18084`. Login is enabled and self-registration is disabled by
+`http://127.0.0.1:18084` for browsers on this machine and
+`http://17.26.1.20:18084` for clients that can directly reach its network address.
+Use the loopback address in Codex's local browser: the existing machine proxy
+returns 502 for the network address, and that browser rejected its navigation.
+Login is enabled and self-registration is disabled by
 default. A new installation bootstraps `admin@sacs.local` with a random password
 in `/mnt/data/openwebui-sacs-live/shared/admin-credentials.json` (mode 0600).
 Existing users keep their passwords; the official bootstrap only creates the
@@ -46,10 +50,15 @@ header remains configured. Extra WebUI web search, code execution and image
 generation are disabled. This entrance serves text chat through SACS; the
 existing SDAR action and confirmation rules still apply.
 
+The installer checks both bindings independently, including when upgrading a
+container that already owns the network address port. Only the two explicit UI
+origins are allowed for CORS and websocket connections; wildcard origins and
+listening on all host interfaces are not enabled.
+
 The IP endpoint is reachable on networks with a route to this machine. Internet
 DNS, HTTPS and router forwarding require an existing external domain/ingress;
 the installer does not provision those resources. CORS is limited to the
-published origin.
+two published origins.
 
 Official references:
 

@@ -4,6 +4,7 @@ services:
     env_file: ${OPENWEBUI_ENV_FILE:?required}
     ports:
       - "17.26.1.20:18084:8080"
+      - "127.0.0.1:18084:8080"
     volumes:
       - data:/app/backend/data
     networks:

@@ -104,7 +104,8 @@ identity headers do not grant another identity or administrator rights.
 Browser CORS stays denied unless exact origins are configured; command-line
 clients do not need CORS. The SACS package does not install a frontend or public
 TLS. The independent [Open WebUI deployment](openwebui/README.md) provides the
-login-enabled text chat entrance at `http://17.26.1.20:18084`.
+login-enabled text chat entrance at `http://127.0.0.1:18084` on this machine and
+`http://17.26.1.20:18084` for clients with a direct route to the server.
 
 ## APIs and safe examples
 

@@ -1,0 +1,54 @@
+{
+  "reason": {
+    "directNetworkAddress": 200,
+    "networkAddressThroughExistingProxy": 502,
+    "inAppBrowserNetworkAddressError": "net::ERR_BLOCKED_BY_CLIENT",
+    "loopbackBeforeFix": "connection refused; no published loopback port"
+  },
+  "localEndpoint": "http://127.0.0.1:18084",
+  "http": {
+    "page": 200,
+    "health": 200,
+    "unauthenticatedModels": 401,
+    "existingAdminLogin": 200,
+    "modelDiscovery": 200,
+    "models": ["sdar-single-agent"]
+  },
+  "inAppBrowser": {
+    "url": "http://127.0.0.1:18084/auth?redirect=%2F",
+    "visibleText": ["登录 Open WebUI", "电子邮箱", "密码", "登录"],
+    "screenshot": "login-fixed.jpg"
+  },
+  "websocketOriginStatus": {
+    "http://127.0.0.1:18084": 101,
+    "http://17.26.1.20:18084": 101,
+    "http://untrusted.invalid": 403
+  },
+  "retention": {
+    "image": true,
+    "signingSecret": true,
+    "adminCredentials": true,
+    "volume": true,
+    "previousChat": "91df994f-f037-497e-a65f-fbb3651694bf",
+    "previousMessageCount": 2
+  },
+  "unchangedContainers": ["sacs-dev-server-1", "sacs-dev-postgres-1"],
+  "publishedPorts": [
+    {
+      "HostIp": "17.26.1.20",
+      "HostPort": "18084"
+    },
+    {
+      "HostIp": "127.0.0.1",
+      "HostPort": "18084"
+    }
+  ],
+  "checks": {
+    "deploymentContracts": {
+      "suites": 1,
+      "tests": 6,
+      "passed": 6
+    },
+    "scopedEslint": "PASS"
+  }
+}

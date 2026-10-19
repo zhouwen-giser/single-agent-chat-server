@@ -12,6 +12,8 @@ import subprocess
 ROOT = Path('/mnt/data/openwebui-sacs-live')
 TAG = 'ghcr.io/open-webui/open-webui:v0.11.3-slim'
 ENDPOINT = 'http://17.26.1.20:18084'
+LOCAL_ENDPOINT = 'http://127.0.0.1:18084'
+BINDINGS = [('17.26.1.20', 18084), ('127.0.0.1', 18084)]
 SACS_CONTAINER = 'sacs-dev-server-1'
 SACS_NETWORK = 'sacs-dev_outbound'
 SACS_URL = 'http://' + SACS_CONTAINER + ':3000/v1'
@@ -60,14 +62,15 @@ def main():
         if SACS_NETWORK not in backend.get('NetworkSettings', {}).get('Networks', {}):
             raise RuntimeError('SACS is not connected to its entrance network')
         ids = run(['docker', 'ps', '-q', '--filter', 'label=com.docker.compose.project=openwebui-sacs', '--filter', 'label=com.docker.compose.service=openwebui']).split()
-        owns_port = False
+        owned_bindings = set()
         if ids:
             for container in json.loads(run(['docker', 'inspect', *ids])):
                 ports = container.get('NetworkSettings', {}).get('Ports', {}).get('8080/tcp') or []
-                owns_port |= any(p['HostIp']=='17.26.1.20' and p['HostPort']=='18084' for p in ports)
-        if not owns_port:
-            with socket.socket() as probe:
-                probe.bind(('17.26.1.20', 18084))
+                owned_bindings.update((p['HostIp'], int(p['HostPort'])) for p in ports)
+        for address in BINDINGS:
+            if address not in owned_bindings:
+                with socket.socket() as probe:
+                    probe.bind(address)
         credentials_path = shared / 'admin-credentials.json'
         credentials = None
         if not args.allow_anonymous:
@@ -89,7 +92,7 @@ def main():
             'ENABLE_SIGNUP': 'false',
             'WEBUI_SECRET_KEY': settings['secret'],
             'WEBUI_URL': ENDPOINT,
-            'CORS_ALLOW_ORIGIN': ENDPOINT,
+            'CORS_ALLOW_ORIGIN': ';'.join([ENDPOINT, LOCAL_ENDPOINT]),
             'ENABLE_OLLAMA_API': 'false', 'ENABLE_OPENAI_API': 'true',
             'OPENAI_API_BASE_URLS': SACS_URL,
             'OPENAI_API_KEYS': 'sacs-development-anonymous',
@@ -113,7 +116,7 @@ def main():
         private(shared/'runtime.env', '\n'.join(k+"='"+v.replace("'", "\\'")+"'" for k,v in config.items())+'\n')
         subprocess.run(command+['config', '--quiet'], env=env, check=True)
         subprocess.run(command+['up', '-d', '--pull', 'never', '--wait', '--wait-timeout', '300'], env=env, check=True)
-        print(json.dumps({'status':'READY','endpoint':ENDPOINT,'image':settings['image'],
+        print(json.dumps({'status':'READY','endpoint':ENDPOINT,'localEndpoint':LOCAL_ENDPOINT,'image':settings['image'],
                           'mode':'shared-anonymous' if args.allow_anonymous else 'authenticated',
                           'upstream':SACS_URL,
                           'bootstrapCredentialsFile':str(credentials_path) if credentials else None}))

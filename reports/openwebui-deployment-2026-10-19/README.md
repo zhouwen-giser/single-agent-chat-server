@@ -1,5 +1,9 @@
 # Open WebUI 连接 SACS 部署 — PASS
 
+后续访问修复：本机内置浏览器请使用 <http://127.0.0.1:18084>。
+原 IP 地址经既有代理会返回 502，内置浏览器也拒绝该地址。
+原因、修复和实际浏览器验证见 [访问修复记录](access-fix.md)。
+
 2026-10-19（Asia/Shanghai）已新增独立 Open WebUI Docker 前端，连接现有
 SACS 实例，浏览器登录、真实普通对话、刷新后聊天保留、代理 SSE 与 utility
 隔离验证通过。
