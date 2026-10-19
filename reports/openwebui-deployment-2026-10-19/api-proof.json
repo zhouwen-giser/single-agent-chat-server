@@ -1,0 +1,39 @@
+{
+  "modelDiscovery": {
+    "status": 200,
+    "models": ["sdar-single-agent"]
+  },
+  "stream": {
+    "status": 200,
+    "contentType": "text/event-stream; charset=utf-8",
+    "done": true,
+    "chunkCount": 3,
+    "content": "你好！很高兴与你交流，祝你今天一切顺利。",
+    "chatId": "owui-stream-fae9fc0c-1a6e-410c-9e3b-09a8aa1d16df",
+    "userMessageId": "e24d0e41-2d70-4394-aecc-fd8af0feba1e",
+    "assistantMessageId": "621e15ab-8726-40d8-a182-663581e45ad4",
+    "elapsedSeconds": 30.893
+  },
+  "utility": {
+    "status": 200,
+    "task": "title_generation",
+    "noWrites": true
+  },
+  "sacsCounts": {
+    "beforeStream": {
+      "taskBindings": 0,
+      "messages": 6,
+      "threads": 6
+    },
+    "afterStream": {
+      "taskBindings": 0,
+      "messages": 8,
+      "threads": 7
+    },
+    "afterUtility": {
+      "taskBindings": 0,
+      "messages": 8,
+      "threads": 7
+    }
+  }
+}

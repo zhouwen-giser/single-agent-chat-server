@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install only the explicitly anonymous openwebui-sacs development project."""
+"""Install the independent Open WebUI entrance for the running SACS instance."""
 import argparse
 import fcntl
 import json
@@ -11,6 +11,10 @@ import subprocess
 
 ROOT = Path('/mnt/data/openwebui-sacs-live')
 TAG = 'ghcr.io/open-webui/open-webui:v0.11.3-slim'
+ENDPOINT = 'http://17.26.1.20:18084'
+SACS_CONTAINER = 'sacs-dev-server-1'
+SACS_NETWORK = 'sacs-dev_outbound'
+SACS_URL = 'http://' + SACS_CONTAINER + ':3000/v1'
 
 
 def run(args):
@@ -30,8 +34,6 @@ def main():
     parser.add_argument('action', choices=['install', 'status'])
     parser.add_argument('--allow-anonymous', action='store_true')
     args = parser.parse_args()
-    if args.action == 'install' and not args.allow_anonymous:
-        raise RuntimeError('Explicit --allow-anonymous is required')
     os.umask(0o077)
     ROOT.mkdir(exist_ok=True, parents=True, mode=0o700)
     shared = ROOT / 'shared'
@@ -52,6 +54,11 @@ def main():
         if args.action == 'status':
             print(subprocess.check_output(command+['ps'], env=env, text=True))
             return
+        backend = json.loads(run(['docker', 'inspect', SACS_CONTAINER]))[0]
+        if not backend.get('State', {}).get('Running'):
+            raise RuntimeError('SACS must be running before deploying its UI')
+        if SACS_NETWORK not in backend.get('NetworkSettings', {}).get('Networks', {}):
+            raise RuntimeError('SACS is not connected to its entrance network')
         ids = run(['docker', 'ps', '-q', '--filter', 'label=com.docker.compose.project=openwebui-sacs', '--filter', 'label=com.docker.compose.service=openwebui']).split()
         owns_port = False
         if ids:
@@ -61,6 +68,15 @@ def main():
         if not owns_port:
             with socket.socket() as probe:
                 probe.bind(('17.26.1.20', 18084))
+        credentials_path = shared / 'admin-credentials.json'
+        credentials = None
+        if not args.allow_anonymous:
+            if not credentials_path.exists():
+                private(credentials_path, json.dumps({
+                    'url': ENDPOINT, 'email': 'admin@sacs.local',
+                    'password': secrets.token_urlsafe(32),
+                }, indent=2)+'\n')
+            credentials = json.loads(credentials_path.read_text())
         headers = {
             'X-OpenWebUI-Chat-Id': '{{CHAT_ID}}',
             'X-OpenWebUI-Message-Id': '{{MESSAGE_ID}}',
@@ -69,12 +85,13 @@ def main():
             'X-OpenWebUI-Task': '{{TASK}}',
         }
         config = {
-            'WEBUI_AUTH': 'false', 'ENABLE_SIGNUP': 'false',
+            'WEBUI_AUTH': 'false' if args.allow_anonymous else 'true',
+            'ENABLE_SIGNUP': 'false',
             'WEBUI_SECRET_KEY': settings['secret'],
-            'WEBUI_URL': 'http://17.26.1.20:18084',
-            'CORS_ALLOW_ORIGIN': 'http://17.26.1.20:18084',
+            'WEBUI_URL': ENDPOINT,
+            'CORS_ALLOW_ORIGIN': ENDPOINT,
             'ENABLE_OLLAMA_API': 'false', 'ENABLE_OPENAI_API': 'true',
-            'OPENAI_API_BASE_URLS': 'http://17.26.1.20:18083/v1',
+            'OPENAI_API_BASE_URLS': SACS_URL,
             'OPENAI_API_KEYS': 'sacs-development-anonymous',
             'OPENAI_API_CONFIGS': json.dumps({'0': {'enable': True, 'headers': headers}}, separators=(',', ':')),
             'DEFAULT_MODELS': 'sdar-single-agent',
@@ -89,10 +106,17 @@ def main():
             'RAG_EMBEDDING_MODEL_AUTO_UPDATE': 'false', 'WHISPER_MODEL_AUTO_UPDATE': 'false',
             'DO_NOT_TRACK': 'true', 'SCARF_NO_ANALYTICS': 'true',
         }
+        if credentials:
+            config.update(WEBUI_ADMIN_EMAIL=credentials['email'],
+                          WEBUI_ADMIN_PASSWORD=credentials['password'],
+                          WEBUI_ADMIN_NAME='SACS Admin')
         private(shared/'runtime.env', '\n'.join(k+"='"+v.replace("'", "\\'")+"'" for k,v in config.items())+'\n')
         subprocess.run(command+['config', '--quiet'], env=env, check=True)
-        subprocess.run(command+['up', '-d', '--wait', '--wait-timeout', '300'], env=env, check=True)
-        print(json.dumps({'status':'READY','endpoint':'http://17.26.1.20:18084','image':settings['image'],'mode':'shared-anonymous','upstream':'http://17.26.1.20:18083/v1'}))
+        subprocess.run(command+['up', '-d', '--pull', 'never', '--wait', '--wait-timeout', '300'], env=env, check=True)
+        print(json.dumps({'status':'READY','endpoint':ENDPOINT,'image':settings['image'],
+                          'mode':'shared-anonymous' if args.allow_anonymous else 'authenticated',
+                          'upstream':SACS_URL,
+                          'bootstrapCredentialsFile':str(credentials_path) if credentials else None}))
 
 
 if __name__ == '__main__':

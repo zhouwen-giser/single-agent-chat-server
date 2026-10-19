@@ -6,6 +6,9 @@ services:
       - "17.26.1.20:18084:8080"
     volumes:
       - data:/app/backend/data
+    networks:
+      - default
+      - sacs-entrance
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     healthcheck:
@@ -22,3 +25,7 @@ services:
       start_period: 60s
 volumes:
   data:
+networks:
+  sacs-entrance:
+    external: true
+    name: sacs-dev_outbound

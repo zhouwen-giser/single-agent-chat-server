@@ -1,43 +1,58 @@
-# Open WebUI for the shared SACS development service
+# Open WebUI connected to SACS
 
-User-approved anonymous mode: everyone who reaches the UI shares its account,
-chats and administrative capability. SACS also retains its existing shared
-identity. Do not expose either service to untrusted networks.
+The independent `openwebui-sacs` Compose project publishes
+`http://17.26.1.20:18084`. Login is enabled and self-registration is disabled by
+default. A new installation bootstraps `admin@sacs.local` with a random password
+in `/mnt/data/openwebui-sacs-live/shared/admin-credentials.json` (mode 0600).
+Existing users keep their passwords; the official bootstrap only creates the
+admin when there are no users. If a password is changed in the UI, the bootstrap
+file is no longer its current password.
 
-Official image `ghcr.io/open-webui/open-webui:v0.11.3-slim` is resolved to an
-immutable digest on first installation. This does not change Open WebUI source,
-SACS, WSGS, SDAR, or upstream databases. The independent Compose project is
-`openwebui-sacs`; only `17.26.1.20:18084` is published. Its persistent data volume
-is `openwebui-sacs_data`. No Docker socket, devices or upstream data are mounted.
-Browser CORS is limited to the published UI origin, not wildcard access.
+The official `ghcr.io/open-webui/open-webui:v0.11.3-slim` image resolves to an
+immutable digest on first installation. Reinstall preserves the digest, signing
+secret, bootstrap credentials and `openwebui-sacs_data` volume. The installer
+uses the already pulled image. It does not reset persistent UI settings.
+
+The UI reaches `http://sacs-dev-server-1:3000/v1` through the existing external
+Docker network `sacs-dev_outbound`, and selects `sdar-single-agent`. The SACS
+container must already be running on that network. Its host port can remain
+bound to loopback. Open WebUI does not join the PostgreSQL, WSGS or SDAR networks
+and mounts only its own data volume. No Docker socket or device is mounted.
 
 On sz-gowm, copy these files to `/mnt/data/openwebui-sacs-live/deployment/`, then:
 
 ```sh
 docker pull ghcr.io/open-webui/open-webui:v0.11.3-slim
-python3 /mnt/data/openwebui-sacs-live/deployment/deploy.py install --allow-anonymous
+python3 /mnt/data/openwebui-sacs-live/deployment/deploy.py install
 python3 /mnt/data/openwebui-sacs-live/deployment/deploy.py status
 ```
 
-The generated settings/secret and runtime environment are kept under
-`/mnt/data/openwebui-sacs-live/shared/`, mode 0600. Reinstall preserves the
-secret, pinned image and data. Existing Open WebUI persistent settings are not
-reset; edit a previously saved connection in its admin UI if needed.
+On reinstall, pull the digest from `shared/settings.json` if it is absent
+locally; keep that private file out of version control. Settings, the runtime
+environment and credentials live under `shared/`, with mode 0600. The root and
+shared directories use mode 0700. `install --allow-anonymous` explicitly selects
+the previous shared anonymous UI mode for a trusted development network; omit
+that flag for the published login-enabled entrance.
 
-Connection: `http://17.26.1.20:18083/v1`, model `sdar-single-agent`.
 The connection includes all five SACS Chat/Message/parent/utility header
-templates. User JWT forwarding is unnecessary for this explicitly anonymous
-SACS instance. The API-key placeholder is not a secret or authentication grant.
-The proxy waits up to 180 seconds for SACS's existing 120-second business budget.
+templates. This SACS instance retains its existing shared anonymous development
+identity. WebUI login controls entrance access; it does not introduce SACS user
+isolation. JWT forwarding is disabled. The API-key placeholder is not a secret
+or an authentication grant. The proxy timeout is 180 seconds for SACS's existing
+120-second business budget.
 
-Background title/tag/follow-up generation is disabled to avoid unsolicited
-requests. The utility-task header remains configured. Extra WebUI web search,
-code execution and image generation are disabled; this deployment validates
-text chat through SACS, not WebUI RAG, attachments or direct device execution.
-SACS's existing SDAR action and confirmation rules remain in force.
+Background title, tag and follow-up generation is disabled. The utility-task
+header remains configured. Extra WebUI web search, code execution and image
+generation are disabled. This entrance serves text chat through SACS; the
+existing SDAR action and confirmation rules still apply.
+
+The IP endpoint is reachable on networks with a route to this machine. Internet
+DNS, HTTPS and router forwarding require an existing external domain/ingress;
+the installer does not provision those resources. CORS is limited to the
+published origin.
 
 Official references:
 
 - [Release v0.11.3](https://github.com/open-webui/open-webui/releases/tag/v0.11.3)
-- [Docker and single-user mode](https://docs.openwebui.com/getting-started/quick-start/)
-- [Environment and custom header configuration](https://docs.openwebui.com/reference/env-configuration/)
+- [Docker installation](https://docs.openwebui.com/getting-started/quick-start/)
+- [Bootstrap, environment and custom headers](https://docs.openwebui.com/reference/env-configuration/)

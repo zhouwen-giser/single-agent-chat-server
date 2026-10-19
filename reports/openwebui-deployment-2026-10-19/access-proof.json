@@ -1,0 +1,16 @@
+{
+  "endpoint": "http://17.26.1.20:18084",
+  "health": 200,
+  "version": "0.11.3",
+  "unauthenticatedModels": 401,
+  "login": 200,
+  "authEnabled": true,
+  "signupEnabled": false,
+  "reinstall": {
+    "loginStillValid": true,
+    "browserChatRetained": true,
+    "chatId": "91df994f-f037-497e-a65f-fbb3651694bf",
+    "messageCount": 2
+  },
+  "browserNetwork": "direct host route; test browser bypasses its local proxy for 17.26.1.20"
+}

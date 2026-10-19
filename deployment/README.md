@@ -102,7 +102,9 @@ requirements. Anonymous requires both `development-anonymous` and
 `SACS_ALLOW_INSECURE_ANONYMOUS=true`. The shared role is always user; client
 identity headers do not grant another identity or administrator rights.
 Browser CORS stays denied unless exact origins are configured; command-line
-clients do not need CORS. No Open WebUI frontend or public TLS is installed.
+clients do not need CORS. The SACS package does not install a frontend or public
+TLS. The independent [Open WebUI deployment](openwebui/README.md) provides the
+login-enabled text chat entrance at `http://17.26.1.20:18084`.
 
 ## APIs and safe examples
 
