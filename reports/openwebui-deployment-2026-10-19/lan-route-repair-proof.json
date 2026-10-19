@@ -1,0 +1,191 @@
+{
+  "client": "192.168.1.210",
+  "persistentConnectionUuid": "5c4bd62e-d23d-3af6-b735-4aeb965556b3",
+  "profileBefore": {
+    "connection.id": "Wired connection 4",
+    "connection.uuid": "5c4bd62e-d23d-3af6-b735-4aeb965556b3",
+    "connection.interface-name": "eno4np3",
+    "ipv4.method": "manual",
+    "ipv4.addresses": "17.26.1.20/24",
+    "ipv4.gateway": "17.26.1.1",
+    "ipv4.routes": "",
+    "ipv4.route-table": "0",
+    "ipv4.routing-rules": ""
+  },
+  "profileAfter": {
+    "connection.id": "Wired connection 4",
+    "connection.uuid": "5c4bd62e-d23d-3af6-b735-4aeb965556b3",
+    "connection.interface-name": "eno4np3",
+    "ipv4.method": "manual",
+    "ipv4.addresses": "17.26.1.20/24",
+    "ipv4.gateway": "17.26.1.1",
+    "ipv4.routes": "192.168.1.210/32 17.26.1.1 100",
+    "ipv4.route-table": "0",
+    "ipv4.routing-rules": ""
+  },
+  "rulesUnchanged": true,
+  "beforeReplyRoute": [
+    {
+      "dst": "192.168.1.210",
+      "from": "172.29.0.2",
+      "gateway": "198.18.0.2",
+      "dev": "CordC",
+      "table": "2022",
+      "flags": [],
+      "cache": [],
+      "iif": "br-11ed9abdc36d"
+    }
+  ],
+  "afterRouteQueries": {
+    "192.168.1.210": {
+      "dst": "192.168.1.210",
+      "from": "172.29.0.2",
+      "gateway": "17.26.1.1",
+      "dev": "eno4np3",
+      "flags": [],
+      "cache": [],
+      "iif": "br-11ed9abdc36d"
+    },
+    "192.168.1.211": {
+      "dst": "192.168.1.211",
+      "from": "172.29.0.2",
+      "gateway": "198.18.0.2",
+      "dev": "CordC",
+      "table": "2022",
+      "flags": [],
+      "cache": [],
+      "iif": "br-11ed9abdc36d"
+    },
+    "17.26.1.10": {
+      "dst": "17.26.1.10",
+      "from": "172.29.0.2",
+      "dev": "eno4np3",
+      "flags": [],
+      "cache": [],
+      "iif": "br-11ed9abdc36d"
+    },
+    "203.0.113.1": {
+      "dst": "203.0.113.1",
+      "from": "172.29.0.2",
+      "gateway": "198.18.0.2",
+      "dev": "CordC",
+      "table": "2022",
+      "flags": [],
+      "cache": [],
+      "iif": "br-11ed9abdc36d"
+    }
+  },
+  "containersUnchanged": [
+    "openwebui-sacs-openwebui-1",
+    "sacs-dev-server-1",
+    "sacs-dev-postgres-1"
+  ],
+  "allThreeContainersHealthy": true,
+  "http": {
+    "http://17.26.1.20:18084/": 200,
+    "http://17.26.1.20:18084/health": 200,
+    "http://127.0.0.1:18084/health": 200
+  },
+  "unauthenticatedModels": 401,
+  "rebootTestPerformed": false,
+  "profileUnsaved": "b false",
+  "profileFlags": "u 0",
+  "physicalCapture": {
+    "capture": "finished",
+    "seconds": 90,
+    "peers": {
+      "192.168.1.210": {
+        "synToServer": 4,
+        "synAckFromServer": 4,
+        "ackToServer": 37,
+        "serverPackets": 41
+      }
+    },
+    "distinctHeaders": 35,
+    "packets": 85
+  },
+  "realClientHttp": {
+    "sinceUtc": "2026-10-19T06:54:58.351541+00:00",
+    "client": "192.168.1.210",
+    "observedHttpStatusCounts": {
+      "200": 46,
+      "304": 162,
+      "401": 2,
+      "302": 2
+    },
+    "selectedPageAndApiResponses": [
+      {
+        "timeUtc": "2026-10-19 06:55:04.920",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/",
+        "status": 200
+      },
+      {
+        "timeUtc": "2026-10-19 06:55:05.513",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/manifest.json",
+        "status": 200
+      },
+      {
+        "timeUtc": "2026-10-19 06:55:05.566",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/api/config",
+        "status": 200
+      },
+      {
+        "timeUtc": "2026-10-19 06:55:05.616",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/api/version",
+        "status": 200
+      },
+      {
+        "timeUtc": "2026-10-19 06:56:05.003",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/_app/version.json",
+        "status": 200
+      },
+      {
+        "timeUtc": "2026-10-19 06:57:05.000",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/_app/version.json",
+        "status": 200
+      },
+      {
+        "timeUtc": "2026-10-19 06:57:25.339",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/manifest.json",
+        "status": 200
+      },
+      {
+        "timeUtc": "2026-10-19 06:57:25.378",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/api/config",
+        "status": 200
+      },
+      {
+        "timeUtc": "2026-10-19 06:57:25.407",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/api/version",
+        "status": 200
+      },
+      {
+        "timeUtc": "2026-10-19 06:57:51.861",
+        "client": "192.168.1.210",
+        "method": "GET",
+        "path": "/api/config",
+        "status": 200
+      }
+    ]
+  },
+  "status": "REAL_LAN_ACCESS_VERIFIED",
+  "verifiedAtUtc": "2026-10-19T07:00:12.732968+00:00"
+}

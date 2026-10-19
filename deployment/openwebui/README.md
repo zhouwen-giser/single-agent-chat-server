@@ -72,6 +72,13 @@ Use `curl.exe` in Windows PowerShell. A successful response is
 settings. Server-local and Docker bridge checks do not prove another physical
 device can reach the host; see the [LAN diagnostic record](../../reports/openwebui-deployment-2026-10-19/lan-diagnostics.md).
 
+This machine now has a persisted NetworkManager route for client
+`192.168.1.210/32` through `17.26.1.1` on `eno4np3`. It keeps forwarded replies
+to that client out of the existing CordC proxy tunnel. Real TCP handshakes and
+HTTP page/API responses from that device are verified. The route is site
+configuration outside Compose; reproduction and rollback commands are in the
+LAN record. Recheck routing if the client's IP changes.
+
 Official references:
 
 - [Release v0.11.3](https://github.com/open-webui/open-webui/releases/tag/v0.11.3)
