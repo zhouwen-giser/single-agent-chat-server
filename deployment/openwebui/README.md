@@ -60,6 +60,18 @@ DNS, HTTPS and router forwarding require an existing external domain/ingress;
 the installer does not provision those resources. CORS is limited to the
 two published origins.
 
+For another LAN device, use the network IP address, not `127.0.0.1`. If it
+cannot connect, run this on that device and provide its IP and the exact error:
+
+```sh
+curl --noproxy "*" --connect-timeout 5 http://17.26.1.20:18084/health
+```
+
+Use `curl.exe` in Windows PowerShell. A successful response is
+`{"status":true}`. This isolates client proxy routing without changing system
+settings. Server-local and Docker bridge checks do not prove another physical
+device can reach the host; see the [LAN diagnostic record](../../reports/openwebui-deployment-2026-10-19/lan-diagnostics.md).
+
 Official references:
 
 - [Release v0.11.3](https://github.com/open-webui/open-webui/releases/tag/v0.11.3)
