@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "sourceSha": "af36dd001e0db08354c38ef2ebe566ea25a3bdba",
+  "archive": "/home/sz/code/single-agent-chat-server/.tmp/deployment/0.6.0-af36dd001e0d/sacs-development.tar.gz",
+  "archiveSha256": "6f144abaa234399340abd38b962156e06fbe2a1ab27bd0d5d804bfd825f0ca5b",
+  "archiveBytes": 205816430,
+  "package": "/home/sz/code/single-agent-chat-server/.tmp/local-integration-20261015/extracted-af36dd001e0d/sacs-development",
+  "image": "single-agent-chat-server:0.6.0-af36dd001e0d",
+  "imageId": "sha256:8ae751dd9e749bade918d10cecc7d8872576ba98b2ad053ef15c4a0fac737392",
+  "postgresImage": "postgres:16.9-alpine",
+  "postgresImageId": "sha256:7c688148e5e156d0e86df7ba8ae5a05a2386aaec1e2ad8e6d11bdf10504b1fb7",
+  "migrationCount": 20,
+  "analysisWebDefaultIncluded": true,
+  "privateRuntimeIncluded": false,
+  "templateSecretPlaceholdersOnly": true,
+  "deliveryArchive": "/mnt/data/sacs-live/packages/0.6.0-af36dd001e0d/sacs-development.tar.gz",
+  "deliveryChecksum": "/mnt/data/sacs-live/packages/0.6.0-af36dd001e0d/sacs-development.tar.gz.sha256"
+}

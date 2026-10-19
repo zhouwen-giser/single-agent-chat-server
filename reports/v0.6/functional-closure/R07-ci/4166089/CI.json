@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "sacs-functional-hosted-ci/1.0",
+  "headSha": "4166089d340c69f472de028c40192613c2629199",
+  "runId": 38435821933,
+  "url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/38435821933",
+  "status": "FAILED",
+  "jobs": [
+    {
+      "id": 115429377085,
+      "name": "quality",
+      "head_sha": "4166089d340c69f472de028c40192613c2629199",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-13T17:05:30Z",
+      "completed_at": "2026-10-13T17:12:31Z",
+      "html_url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/38435821933/job/115429377085",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run corepack enable && corepack prepare pnpm@11.13.1 --activate",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright-core install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm peers check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm verify:ci",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 115429377355,
+      "name": "functional-v06",
+      "head_sha": "4166089d340c69f472de028c40192613c2629199",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-13T17:05:30Z",
+      "completed_at": "2026-10-13T17:15:47Z",
+      "html_url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/38435821933/job/115429377355",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run corepack enable && corepack prepare pnpm@11.13.1 --activate",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright-core install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run docker pull postgres:17-alpine",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm verify:v06:development",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 115432734374,
+      "name": "container",
+      "head_sha": "4166089d340c69f472de028c40192613c2629199",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-13T17:12:31Z",
+      "completed_at": "2026-10-13T17:12:31Z",
+      "html_url": "https://github.com/zhouwen-giser/single-agent-chat-server/actions/runs/38435821933/job/115432734374",
+      "steps": []
+    }
+  ],
+  "nonClaims": ["CURRENT_DEVELOPMENT_COMPLETE", "RELEASE_READY"],
+  "qualityFailure": {
+    "stage": "test:integration before normal build",
+    "test": "tests/v06-analysis-browser.postgres.int.test.ts",
+    "reason": "Browser page assets were not built; locator #jwt timed out in all four browser cases",
+    "logSha256": "sha256:93392551662eefbb84ba2627924975f5a9a9f08dfa59f7f64ea89f12837c2b63",
+    "fix": "The general integration command now builds browser assets first; login checks the page HTTP status immediately."
+  }
+}

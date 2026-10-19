@@ -51,7 +51,10 @@ export async function setupPersistence(
   let checkpointer: PostgresSaver | undefined;
   try {
     await runMigrations(pool);
-    checkpointer = await createPostgresCheckpointer(config.connectionString);
+    checkpointer = await createPostgresCheckpointer(config.connectionString, {
+      poolMax: config.poolMax,
+      operationTimeoutMs: config.operationTimeoutMs,
+    });
     const activeCheckpointer = checkpointer;
     const analysisRepository = new AnalysisRepository(pool);
     return {

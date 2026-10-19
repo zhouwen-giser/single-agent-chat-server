@@ -1,0 +1,24 @@
+{
+  "sourceParentSha": "fa5e26ac664d43564cc3d612edfb9d0ed90190fd",
+  "qualification": "LOCAL_CANDIDATE_ARTIFACTS_ONLY",
+  "imageTag": "single-agent-chat-server:sacs-functional-r07-local",
+  "imageId": "sha256:f27900204175aaf3b6013cb53981d1418eb5c8dd26b0240d491ff6bdc8b2350f",
+  "nodeVersion": "22.14.0",
+  "uiBundleIncluded": true,
+  "uiNodeBuiltins": [],
+  "metadataGateExitCode": 0,
+  "sbom": {
+    "path": "/home/sz/code/single-agent-chat-server/.tmp/r07-candidate-sbom.cdx.json",
+    "sha256": "42ae9c234ee49934edd4d338a8a1a1a2bba4bcae3f74c6a84694ed34f4a25074",
+    "format": "CycloneDX",
+    "specVersion": "1.7",
+    "components": 3720
+  },
+  "nonClaims": [
+    "SHARED_DEPLOYMENT",
+    "MERGE",
+    "REAL_MODEL_QUALITY",
+    "REAL_WSGS_ACCEPTANCE",
+    "CAPACITY_QUALIFICATION"
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "sacs-agui-grounding-real-attempt/1.0",
+  "sourceSha": "7d30b31d3c9e44f29d27bfc59cfa646c7dd4c4a5",
+  "entrypointHash": "sha256:5ab0ba80d5ebec0f6392553703e958ce6506dc393e697697773335f5b6f194ef",
+  "startedAt": "2026-09-16T15:47:07.324Z",
+  "mode": "REAL",
+  "endpointOrigin": "http://17.26.1.20:18082",
+  "operationTimeoutMs": 120000,
+  "queryHash": "sha256:d7430ec3024189becba3524ec456c5f25464d282b0f29366074562028b18dd7f",
+  "exchanges": [
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:dfb8d7cb600c02156c9d36859dddbb520425070621354afdc7c14b7dfe228069",
+      "httpStatus": 200,
+      "elapsedMs": 10948,
+      "responseHash": "sha256:b4d46d76f38a1298000c8f9e36011b3d1403d905567cbf2fcb05812c469c1ee4"
+    }
+  ],
+  "observations": [],
+  "cases": [
+    {
+      "id": "R01",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R02",
+      "status": "NOT_RUN"
+    }
+  ],
+  "status": "FAILED",
+  "nonClaims": [
+    "DEVICE_EXECUTION",
+    "PRODUCTION_READINESS",
+    "UPSTREAM_DATABASE_ACCESS",
+    "PROCESS_CRASH_RECOVERY"
+  ],
+  "stage": "INITIAL_OBSERVATION",
+  "frozenFileCount": 115,
+  "frozenManifestHash": "sha256:45f027673834f3d9e654a889eea25eaf81522f594af8dddf6939b91a0dd4c41a",
+  "preflight": {
+    "httpStatus": 200,
+    "exactNegotiation": true,
+    "requiredCapabilitiesReady": true,
+    "capabilities": [
+      {
+        "capability": "HISTORICAL_TRACE",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "ROAD_ASSOCIATION",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "TEMPORAL_EVENT",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "CROSS",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "METRIC_RANKING",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "ACTION_TARGET_CANDIDATE",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      }
+    ]
+  },
+  "database": {
+    "isolated": true,
+    "image": "postgres:17.10-alpine3.23",
+    "migrations": "PASS"
+  },
+  "errorType": "AssertionError",
+  "errorCode": "ERR_ASSERTION",
+  "errorFrames": [
+    "///home/zhouwen/web-download/single-agent-chat-server/scripts/agui-grounding-real.mjs:375:14"
+  ],
+  "cleanup": "PASS",
+  "businessSubmissions": 0,
+  "exitCode": 1,
+  "updatedAt": "2026-09-16T15:47:22.793Z"
+}

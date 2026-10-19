@@ -64,12 +64,15 @@ export async function createSdarA2aClient(
     parsed.baseUrl,
     parsed.endpointOverride,
   );
+  const acceptedOutputModes = resolved.card.defaultOutputModes.filter(
+    (mode) => mode === "text/plain" || mode === "application/json",
+  );
   const factory = new ClientFactory({
     transports: [new RestTransportFactory({ fetchImpl })],
     preferredTransports: ["HTTP+JSON"],
     clientConfig: {
       polling: true,
-      acceptedOutputModes: ["text/plain", "application/json"],
+      acceptedOutputModes,
     },
     cardResolver: resolver,
   });
@@ -85,6 +88,7 @@ export async function createSdarA2aClient(
     resolved.endpoint,
     normalizeAgentCard(resolved.card),
     parsed.operationTimeoutMs,
+    acceptedOutputModes,
   );
 }
 
@@ -118,8 +122,9 @@ function selectHttpJsonInterface(
     throw new Error("Agent Card does not accept required text/plain input");
   }
   if (
-    !card.defaultOutputModes.includes("text/plain") ||
-    !card.defaultOutputModes.includes("application/json")
+    !card.defaultOutputModes.some(
+      (mode) => mode === "text/plain" || mode === "application/json",
+    )
   ) {
     throw new Error("Agent Card does not advertise required output modes");
   }
@@ -149,6 +154,7 @@ class OfficialSdarA2aClient implements SdarA2aClient {
     readonly endpoint: string,
     readonly agentCard: NormalizedAgentCard,
     private readonly operationTimeoutMs: number,
+    private readonly acceptedOutputModes: string[],
   ) {}
 
   async *submitTaskStream(
@@ -156,7 +162,7 @@ class OfficialSdarA2aClient implements SdarA2aClient {
     options: OperationOptions = {},
   ) {
     const parsed = submitTaskInputSchema.parse(input);
-    const request = createSubmitRequest(parsed);
+    const request = createSubmitRequest(parsed, this.acceptedOutputModes);
     const signal = operationSignal(this.operationTimeoutMs, options.signal);
     let eventCount = 0;
     for await (const event of this.client.sendMessageStream(request, {
@@ -175,7 +181,7 @@ class OfficialSdarA2aClient implements SdarA2aClient {
   async sendFollowUp(input: FollowUpInput, options: OperationOptions = {}) {
     const parsed = followUpInputSchema.parse(input);
     const result = await this.client.sendMessage(
-      createFollowUpRequest(parsed),
+      createFollowUpRequest(parsed, this.acceptedOutputModes),
       { signal: operationSignal(this.operationTimeoutMs, options.signal) },
     );
     return normalizeSendResult(result);
@@ -219,6 +225,7 @@ class OfficialSdarA2aClient implements SdarA2aClient {
 
 function createSubmitRequest(
   input: ReturnType<typeof submitTaskInputSchema.parse>,
+  acceptedOutputModes: string[],
 ): SendMessageRequest {
   const metadata: Record<string, unknown> = {};
   if (input.userId !== undefined) metadata.user_id = input.userId;
@@ -233,7 +240,7 @@ function createSubmitRequest(
       metadata: Object.keys(metadata).length === 0 ? undefined : metadata,
     }),
     configuration: {
-      acceptedOutputModes: ["text/plain", "application/json"],
+      acceptedOutputModes,
       taskPushNotificationConfig: undefined,
       returnImmediately: false,
     },
@@ -243,6 +250,7 @@ function createSubmitRequest(
 
 function createFollowUpRequest(
   input: ReturnType<typeof followUpInputSchema.parse>,
+  acceptedOutputModes: string[],
 ): SendMessageRequest {
   const metadata: Record<string, unknown> = { sdar_action: input.action };
   if (input.inputRequestId !== undefined) {
@@ -272,7 +280,7 @@ function createFollowUpRequest(
       referenceTaskIds: [],
     },
     configuration: {
-      acceptedOutputModes: ["text/plain", "application/json"],
+      acceptedOutputModes,
       taskPushNotificationConfig: undefined,
       returnImmediately: false,
     },

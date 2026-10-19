@@ -1,0 +1,60 @@
+{
+  "mode": "ISOLATED_COMPOSE",
+  "project": "sacs-functional-r02-229b0a6e0ff9",
+  "cases": [
+    {
+      "name": "disabled",
+      "httpStatus": 200,
+      "wsgsGrounding": "disabled",
+      "capabilityGets": 0,
+      "businessPosts": 0
+    },
+    {
+      "name": "enabled",
+      "httpStatus": 200,
+      "wsgsGrounding": "ready"
+    },
+    {
+      "name": "required_unavailable",
+      "httpStatus": 503,
+      "healthStatus": 200
+    },
+    {
+      "name": "negotiation_drift",
+      "httpStatus": 503
+    },
+    {
+      "name": "dependency_recovered",
+      "httpStatus": 200
+    }
+  ],
+  "status": "PASS",
+  "imageId": "sha256:cb33e4059cd500a75b617a3401d170d54bccd6029bc278016584ba7ae3551553",
+  "postgresImageId": "sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24",
+  "forwardedSettingNames": [
+    "SACS_WSGS_ANALYSIS_ALLOW_LEGACY_1_0",
+    "SACS_WSGS_ANALYSIS_CONTRACT_VERSION",
+    "SACS_WSGS_ANALYSIS_ENABLED",
+    "SACS_WSGS_ANALYSIS_MAX_ACTIVE_PUMPS",
+    "SACS_WSGS_ANALYSIS_MAX_CONSECUTIVE_POLL_FAILURES",
+    "SACS_WSGS_ANALYSIS_MAX_MAP_LAYERS",
+    "SACS_WSGS_ANALYSIS_MAX_RESULT_CANDIDATES",
+    "SACS_WSGS_ANALYSIS_MAX_SAFE_PAYLOAD_BYTES",
+    "SACS_WSGS_ANALYSIS_MAX_TIMELINE_ITEMS",
+    "SACS_WSGS_ANALYSIS_MAX_WAIT_MS",
+    "SACS_WSGS_ANALYSIS_POLL_INTERVAL_MS",
+    "SACS_WSGS_ANALYSIS_READINESS_CACHE_MS",
+    "SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS",
+    "SACS_WSGS_ANALYSIS_RESULT_PROFILE",
+    "SACS_WSGS_ANALYSIS_TRANSPORT",
+    "WSGS_BASE_URL",
+    "WSGS_BEARER_TOKEN",
+    "WSGS_MAX_POLL_ATTEMPTS",
+    "WSGS_MAX_RESPONSE_BYTES",
+    "WSGS_OPERATION_TIMEOUT_MS",
+    "WSGS_POLL_INTERVAL_MS"
+  ],
+  "capabilityGets": 3,
+  "businessPosts": 0,
+  "cleanup": "PASS"
+}

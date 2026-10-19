@@ -1,0 +1,63 @@
+{
+  "baselineContainers": 79,
+  "originalContainersUnchanged": true,
+  "changes": [],
+  "comparedFields": [
+    "container ID",
+    "image ID",
+    "startedAt",
+    "network IDs",
+    "mount type/source/destination sorted by destination"
+  ],
+  "openWebUI": {
+    "name": "openwebui-sacs-openwebui-1",
+    "id": "77b24b6a95fbebafd7ec05a0a5d451c77074960c3e89bd0074d4e077ce171dd4",
+    "image": "ghcr.io/open-webui/open-webui@sha256:bb3633af77b35d97783affc9cd8097d8a6dc89fedd5a410ce9a50d85556a870c",
+    "imageId": "sha256:bb3633af77b35d97783affc9cd8097d8a6dc89fedd5a410ce9a50d85556a870c",
+    "revision": "2a960a59fe1dbbd35282f0556b3666d81102e781",
+    "version": "0.11.3-slim",
+    "health": "healthy",
+    "networks": ["openwebui-sacs_default", "sacs-dev_outbound"],
+    "ports": {
+      "8080/tcp": [
+        {
+          "HostIp": "17.26.1.20",
+          "HostPort": "18084"
+        }
+      ]
+    },
+    "mounts": [
+      {
+        "Type": "volume",
+        "Name": "openwebui-sacs_data",
+        "Source": "/mnt/data/docker/volumes/openwebui-sacs_data/_data",
+        "Destination": "/app/backend/data",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ]
+  },
+  "retainedSettings": {
+    "image": true,
+    "secret": true
+  },
+  "privateFileModes": {
+    "settings.json": "0o600",
+    "runtime.env": "0o600",
+    "admin-credentials.json": "0o600"
+  },
+  "sacsHostPorts": {
+    "3000/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "18083"
+      }
+    ]
+  },
+  "endpoint": "http://17.26.1.20:18084",
+  "publicInternetVerified": false,
+  "httpsConfigured": false,
+  "userIsolation": "existing shared development SACS identity"
+}

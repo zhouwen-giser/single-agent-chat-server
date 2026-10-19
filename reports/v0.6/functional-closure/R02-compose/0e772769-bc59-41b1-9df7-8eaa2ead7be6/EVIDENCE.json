@@ -1,0 +1,11 @@
+{
+  "mode": "ISOLATED_COMPOSE",
+  "project": "sacs-functional-r02-cf51c0f56ffb",
+  "cases": [],
+  "status": "FAILED",
+  "failure": {
+    "stage": "build",
+    "type": "Error"
+  },
+  "cleanup": "PASS"
+}

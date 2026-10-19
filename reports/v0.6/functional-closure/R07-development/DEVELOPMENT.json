@@ -1,0 +1,221 @@
+{
+  "schemaVersion": "sacs-functional-gate/1.0",
+  "mode": "development",
+  "sourceSha": "fa5e26ac664d43564cc3d612edfb9d0ed90190fd",
+  "sourceManifestSha256": "sha256:2147868cc101568e0758bd13df44dbc43a4b6126ef5b33d47313858e029ffac4",
+  "status": "DEVELOPMENT_CHECKS_PASS",
+  "checks": [
+    {
+      "id": "format",
+      "command": [
+        "corepack",
+        "pnpm",
+        "format:check"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 17566,
+      "log": "reports/v0.6/functional-closure/R07-development/format.txt",
+      "outputSha256": "sha256:09711dd0b8bf4fe5d492ddab225ef424be4e0848d33a9eeda9684f4da3e0a16f"
+    },
+    {
+      "id": "lint",
+      "command": [
+        "corepack",
+        "pnpm",
+        "lint"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 13121,
+      "log": "reports/v0.6/functional-closure/R07-development/lint.txt",
+      "outputSha256": "sha256:24f23663df2fea1f567193f202f32a5f5e8390eaf43a069651de16e4c5ac08c8"
+    },
+    {
+      "id": "types",
+      "command": [
+        "corepack",
+        "pnpm",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 14690,
+      "log": "reports/v0.6/functional-closure/R07-development/types.txt",
+      "outputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "id": "architecture",
+      "command": [
+        "corepack",
+        "pnpm",
+        "verify:architecture"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 875,
+      "log": "reports/v0.6/functional-closure/R07-development/architecture.txt",
+      "outputSha256": "sha256:bd9ebca699e5e15a94c6cd00c81a85a86a2478b73c36c917cdfe52736e23c994"
+    },
+    {
+      "id": "migrations",
+      "command": [
+        "corepack",
+        "pnpm",
+        "verify:migrations"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 798,
+      "log": "reports/v0.6/functional-closure/R07-development/migrations.txt",
+      "outputSha256": "sha256:15cbf7fc21b48526482cf7ebe9f82cd071adbadbb769e88ab7544faf37d5689c"
+    },
+    {
+      "id": "licenses",
+      "command": [
+        "corepack",
+        "pnpm",
+        "verify:licenses"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1689,
+      "log": "reports/v0.6/functional-closure/R07-development/licenses.txt",
+      "outputSha256": "sha256:7eef6b9e0c6624755ee90f82c8f5e684a85b8cc72aed9db136fc4a3bdfa1211f"
+    },
+    {
+      "id": "secrets",
+      "command": [
+        "corepack",
+        "pnpm",
+        "verify:secrets"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1062,
+      "log": "reports/v0.6/functional-closure/R07-development/secrets.txt",
+      "outputSha256": "sha256:9b24d43e656c01746dcb4e445017e289f6f46a777c15af921ead7fabe4098416"
+    },
+    {
+      "id": "build",
+      "command": [
+        "corepack",
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 16139,
+      "log": "reports/v0.6/functional-closure/R07-development/build.txt",
+      "outputSha256": "sha256:55a0526da187f8e3ba26a6ac340487a3cb6ace5a6a51ffd76c8d516d29deb709"
+    },
+    {
+      "id": "frozen",
+      "command": [
+        "node",
+        "scripts/v06-frozen-tests.mjs",
+        "all"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 290140,
+      "log": "reports/v0.6/functional-closure/R07-development/frozen.txt",
+      "outputSha256": "sha256:070bb3640cbd6c059d4354ce61c168c7cfc16926cca6b81de1d11e8b2c256b6c"
+    },
+    {
+      "id": "browser",
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:browser"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 20243,
+      "log": "reports/v0.6/functional-closure/R07-development/browser.txt",
+      "outputSha256": "sha256:342e11e9147ea7d8fcdeab1a34ad3a58f20f7b56508c5e54fd7a5f1697341c87"
+    },
+    {
+      "id": "browser-postgres",
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:browser:postgres"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 72446,
+      "log": "reports/v0.6/functional-closure/R07-development/browser-postgres.txt",
+      "outputSha256": "sha256:799f281097a1c8a526fb4ac2cf8b4df4fc53986dacefdffb2ee184f1448a6926"
+    },
+    {
+      "id": "process",
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:process"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 243839,
+      "log": "reports/v0.6/functional-closure/R07-development/process.txt",
+      "outputSha256": "sha256:a95de9084915024247d48a47256b8b1041880e034e1e3348337b52495b80a955"
+    },
+    {
+      "id": "checkpoint",
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:checkpoint"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 13755,
+      "log": "reports/v0.6/functional-closure/R07-development/checkpoint.txt",
+      "outputSha256": "sha256:22da87dd2f6cd037f1555287d3bc0d0231d447c34f00eb072b8f72166d96d4b0"
+    },
+    {
+      "id": "postgres",
+      "command": [
+        "node",
+        "scripts/v05-postgres-test-harness.mjs",
+        "tests/v06-source-persistence.postgres.int.test.ts",
+        "tests/v06-grounding-lifecycle.postgres.int.test.ts",
+        "tests/v06-analysis-local.e2e.test.ts",
+        "tests/persistence.postgres.int.test.ts",
+        "tests/analysis-development-persistence.postgres.int.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 38730,
+      "log": "reports/v0.6/functional-closure/R07-development/postgres.txt",
+      "outputSha256": "sha256:bf9f73367b1a7e5c639466351ef5ba0d657ff63fc4e4c878ba4da42366069c87"
+    },
+    {
+      "id": "real-input-contract",
+      "command": [
+        "node",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "tests/v06-functional-real-cases.unit.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1353,
+      "log": "reports/v0.6/functional-closure/R07-development/real-input-contract.txt",
+      "outputSha256": "sha256:292f2afb29f9a831e9bba83304b52a8580041341ef5bd9f5d3b3cdb4fb017ed3"
+    }
+  ],
+  "requiredRows": [
+    "FC-01",
+    "FC-02",
+    "FC-03",
+    "FC-04",
+    "FC-05",
+    "FC-06",
+    "FC-07",
+    "FC-08",
+    "FC-09",
+    "FC-10",
+    "FC-11",
+    "FC-12",
+    "FC-13",
+    "FC-14",
+    "FC-15",
+    "FC-16",
+    "FC-17",
+    "FC-18",
+    "FC-19",
+    "FC-20",
+    "FC-21",
+    "FC-22",
+    "FC-32",
+    "FC-33"
+  ]
+}

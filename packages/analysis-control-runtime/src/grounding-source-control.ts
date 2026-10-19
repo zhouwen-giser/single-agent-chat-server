@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
+import { queryScopeSchema } from "../../analysis-contract/src/query-scope.js";
 import {
   AnalysisServiceError,
   type AnalysisControlService,
@@ -60,6 +61,7 @@ const sourceProposal = z
     originalText: z.string().min(1).max(32768),
     contextMode: z.enum(["CONTINUE", "REPLACE"]),
     analysisSelections: z.array(z.unknown()).max(8).optional(),
+    queryScope: queryScopeSchema.optional(),
   })
   .strict();
 const selectionResponse = z
@@ -267,6 +269,7 @@ export function createGroundingSourceAnalysisControl(options: {
           text: command.originalText,
           createdAt: now.toISOString(),
           contextMode: command.contextMode,
+          ...(command.queryScope ? { queryScope: command.queryScope } : {}),
           ...(command.analysisSelections
             ? { selections: command.analysisSelections }
             : {}),

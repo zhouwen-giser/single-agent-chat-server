@@ -1,0 +1,1 @@
+{"status":"PASSED","output":".tmp/r07-candidate-e4a26ec-sbom.cdx.json","specVersion":"1.7","components":3720,"sha256":"637676261c1dbbb51dfcab5b57dc968e279acae0c5a21b63c122b063e47aee6f"}

@@ -1,0 +1,19 @@
+
+/home/sz/code/single-agent-chat-server/tests/harness/v06-source-process.ts
+  22:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  80:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/tests/v06-checkpoint-recovery.postgres.int.test.ts
+  19:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  45:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/tests/v06-source-process.postgres.int.test.ts
+   84:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  435:33  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  450:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  468:55  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  484:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  491:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  556:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 11 problems (0 errors, 11 warnings)

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "sacs-v06-functional-closure-baseline/1.0",
+  "businessSourceSha": "30dd9814de93acf7e3e24311b8b477cdbcac16c2",
+  "branch": "codex/sacs-v0.6-wsgs-full-functional-integration",
+  "recordedDate": "2026-10-13",
+  "timezone": "Asia/Shanghai",
+  "scope": "SACS plan and acceptance inventory; business implementation has not started.",
+  "fileHashes": {
+    "AGENTS.md": "sha256:f701186017e45800996971e0d17e960ae2cb080914e134131d0ccbd3d466f956",
+    "package.json": "sha256:0cd6a885ebb55182ca4b7db4f8b3c6ccb02ae279c49a86eaa4be3168627a0c7a",
+    "pnpm-lock.yaml": "sha256:904af36e80f0329c9fecccd86b4a42161668f35193176096d3a1f67a1c86b9b6",
+    "compose.yaml": "sha256:37ced08da7f3dc8380a96b38f172b066534894823d9a4f9ce35148850926fc4f",
+    "deployment/compose.yaml": "sha256:b5464f3ddd13035e536cae495ea643da767069351f5eb141a418e4d12cddea0c",
+    "apps/server/src/v06-grounding-analysis.ts": "sha256:1f9130c5f518c231b9b0baf80a1401ad2436a1533ce20a5a6988fdbc35215bd0",
+    "apps/server/src/chat/conversation-application-service.ts": "sha256:eb6646c71c8cda99bdce22f9565d3c75c54f797123d0a1a85b037b58e7c12606",
+    "packages/analysis-runtime/src/grounding-source-runtime.ts": "sha256:54ebbd62907648d0719bdbbde996e309ebc5248efd28cf674803e50187e9792c",
+    "dependencies/wsgs-world-analysis-v1/public/contract-release-lock.json": "sha256:45f027673834f3d9e654a889eea25eaf81522f594af8dddf6939b91a0dd4c41a",
+    "dependencies/wsgs-analysis-handoff-status.json": "sha256:5c59f902c0d93d38be81467744bf32888cce676641e451776c2d0771ab110ac7",
+    "dependencies/sdar-grounding-extension-compatibility-lock.json": "sha256:8fb132d22f6c8de70508a8cdf6cf38df270d7c9565fb3f4a21b6ac1ea44c5bb7"
+  },
+  "publicContractInventory": {
+    "fileCount": 117,
+    "manifestSha256": "sha256:857f88dfe5bb88742ceb12a7d7558fd74df40e47ac074ceaf09d21191400de7c"
+  },
+  "precedingAudit": {
+    "provenance": "Read-only audit in this chat against the same businessSourceSha; temporary controlled reproducers were removed. Counts below are not a new execution in this planning phase.",
+    "typecheck": "PASS",
+    "frozenRegression": {
+      "suites": 48,
+      "passed": 629,
+      "failed": 0
+    },
+    "postgresAndLocalHttp": {
+      "suites": 5,
+      "passed": 17,
+      "failed": 0
+    },
+    "additionalWordingCases": {
+      "total": 10,
+      "passed": 3,
+      "failed": 7
+    },
+    "productionSideEffects": false
+  },
+  "latestPresentationLedger": "reports/v0.6/agui-v03-grounding-presentation/ACCEPTANCE_LEDGER.json",
+  "dependencyFacts": {
+    "native": "Current SACS factory/config explicitly unavailable; future upstream availability requires public handoff verification.",
+    "sdarGrounding": "Repository compatibility lock is UNAVAILABLE at its recorded SDAR SHA; it does not establish current upstream availability.",
+    "realWsgsContext": "R01/R02 positive/selection evidence is incomplete; fresh private inputs are needed for a meaningful new run."
+  }
+}

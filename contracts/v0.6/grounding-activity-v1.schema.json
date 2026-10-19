@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "io.sacs/grounding-activity/v1",
+  "title": "GroundingJobActivityV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "groundingId",
+    "analysisId",
+    "revisionId",
+    "status",
+    "sourceStatus",
+    "meta"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "io.sacs/grounding-activity/v1" },
+    "groundingId": { "$ref": "#/definitions/identifier" },
+    "analysisId": { "$ref": "#/definitions/identifier" },
+    "revisionId": { "$ref": "#/definitions/identifier" },
+    "status": {
+      "enum": [
+        "QUEUED",
+        "RUNNING",
+        "WAITING_SELECTION",
+        "COMPLETED",
+        "PARTIAL",
+        "FAILED",
+        "CANCEL_REQUESTED",
+        "CANCELLED"
+      ]
+    },
+    "sourceStatus": {
+      "enum": [
+        "ACCEPTED",
+        "RUNNING",
+        "COMPLETED",
+        "PARTIAL",
+        "AMBIGUOUS",
+        "UNRESOLVED",
+        "FAILED",
+        "CANCELLED"
+      ]
+    },
+    "phase": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "message": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "progress": {
+      "description": "Only authoritative public progress. Runtime also requires completed <= total.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completed", "total"],
+      "properties": {
+        "completed": { "$ref": "#/definitions/counter" },
+        "total": { "$ref": "#/definitions/counter" }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["activityRevision"],
+      "properties": { "activityRevision": { "$ref": "#/definitions/counter" } }
+    }
+  },
+  "definitions": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "counter": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+  }
+}

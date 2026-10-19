@@ -1,0 +1,80 @@
+{
+  "status": "CLIENT_IP_REQUIRED",
+  "policyChangeApplied": false,
+  "routes": [
+    {
+      "illustrativeDestinationNotVerifiedClient": "17.26.1.10",
+      "route": [
+        {
+          "dst": "17.26.1.10",
+          "from": "172.29.0.2",
+          "dev": "eno4np3",
+          "flags": [],
+          "cache": [],
+          "iif": "br-11ed9abdc36d"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "illustrativeDestinationNotVerifiedClient": "17.26.2.10",
+      "route": [
+        {
+          "dst": "17.26.2.10",
+          "from": "172.29.0.2",
+          "gateway": "198.18.0.2",
+          "dev": "CordC",
+          "table": "2022",
+          "flags": [],
+          "cache": [],
+          "iif": "br-11ed9abdc36d"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "illustrativeDestinationNotVerifiedClient": "192.168.1.10",
+      "route": [
+        {
+          "dst": "192.168.1.10",
+          "from": "172.29.0.2",
+          "gateway": "198.18.0.2",
+          "dev": "CordC",
+          "table": "2022",
+          "flags": [],
+          "cache": [],
+          "iif": "br-11ed9abdc36d"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "illustrativeDestinationNotVerifiedClient": "10.0.0.10",
+      "route": [
+        {
+          "dst": "10.0.0.10",
+          "from": "172.29.0.2",
+          "gateway": "198.18.0.2",
+          "dev": "CordC",
+          "table": "2022",
+          "flags": [],
+          "cache": [],
+          "iif": "br-11ed9abdc36d"
+        }
+      ],
+      "error": ""
+    }
+  ],
+  "capture": {
+    "durationSeconds": 80,
+    "summary": {
+      "capture": "finished",
+      "distinctHeaders": 78,
+      "packets": 348
+    },
+    "physicalInterfaceHeaders": 0,
+    "proxyTunnelHeaders": 0,
+    "clientRetryConfirmed": false,
+    "payloadStored": false
+  }
+}

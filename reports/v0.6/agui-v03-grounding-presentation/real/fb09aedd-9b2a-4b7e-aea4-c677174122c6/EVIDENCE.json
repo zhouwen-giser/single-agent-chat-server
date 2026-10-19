@@ -1,0 +1,400 @@
+{
+  "schemaVersion": "sacs-agui-grounding-real-attempt/1.0",
+  "sourceSha": "e6b76bbb942d54fe8ad6a6dbc37485903ec67475",
+  "entrypointHash": "sha256:a4eda82547593569349f7bc791f62a387fc991ed0ac730c75e8d02d37155b834",
+  "startedAt": "2026-09-16T15:50:31.726Z",
+  "mode": "REAL",
+  "endpointOrigin": "http://17.26.1.20:18082",
+  "operationTimeoutMs": 120000,
+  "queryHash": "sha256:d7430ec3024189becba3524ec456c5f25464d282b0f29366074562028b18dd7f",
+  "exchanges": [
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:dfb8d7cb600c02156c9d36859dddbb520425070621354afdc7c14b7dfe228069",
+      "httpStatus": 200,
+      "elapsedMs": 11502,
+      "responseHash": "sha256:b5d0e78b91f9ab07c405a269dd1018b724d1416d2779c41ad9a2202d373d095e"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:dfb8d7cb600c02156c9d36859dddbb520425070621354afdc7c14b7dfe228069",
+      "httpStatus": 200,
+      "elapsedMs": 3393,
+      "responseHash": "sha256:1b9d3877dd92f0329f32db28753661e8895f534dc6a25afc7c89886dd49f2dcc"
+    },
+    {
+      "method": "POST",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:60d6885288b306890cb544ef8f4f90f21d32b166f9976a85f32d38ed8f42f71b",
+      "httpStatus": 202,
+      "elapsedMs": 1796,
+      "responseHash": "sha256:4f061aa8569094a19a77b779cb6950002cf9427bec5d535ea47bf4737a30e621"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:f6d2499b201d701496ff95fbee65e0fad87db935c1cba91aeec0535eeb0bd0e3"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:1578d98a4a12b81f86c0401c70e1fc7d7ae3305719501a60712b76c451e5b9b3"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:1578d98a4a12b81f86c0401c70e1fc7d7ae3305719501a60712b76c451e5b9b3"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 12,
+      "responseHash": "sha256:1578d98a4a12b81f86c0401c70e1fc7d7ae3305719501a60712b76c451e5b9b3"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:1578d98a4a12b81f86c0401c70e1fc7d7ae3305719501a60712b76c451e5b9b3"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:13a38936c6f32ee2744990050eda01a9a420886bfc5f8442273b7a2dfb2ee0a6"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:13a38936c6f32ee2744990050eda01a9a420886bfc5f8442273b7a2dfb2ee0a6"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 14,
+      "responseHash": "sha256:13a38936c6f32ee2744990050eda01a9a420886bfc5f8442273b7a2dfb2ee0a6"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 10,
+      "responseHash": "sha256:13a38936c6f32ee2744990050eda01a9a420886bfc5f8442273b7a2dfb2ee0a6"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 10,
+      "responseHash": "sha256:13a38936c6f32ee2744990050eda01a9a420886bfc5f8442273b7a2dfb2ee0a6"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:0fdf6c34a05ad4b41733c699187e4b84514bd2ae60188f9a686c054de16af9a9"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 10,
+      "responseHash": "sha256:0fdf6c34a05ad4b41733c699187e4b84514bd2ae60188f9a686c054de16af9a9"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 7,
+      "responseHash": "sha256:0fdf6c34a05ad4b41733c699187e4b84514bd2ae60188f9a686c054de16af9a9"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:0fdf6c34a05ad4b41733c699187e4b84514bd2ae60188f9a686c054de16af9a9"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:0fdf6c34a05ad4b41733c699187e4b84514bd2ae60188f9a686c054de16af9a9"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:56e2cbab53cf598ef811fc47cf97f38be338635c98b80cdc6302b44051c2a5a7"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:56e2cbab53cf598ef811fc47cf97f38be338635c98b80cdc6302b44051c2a5a7"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:56e2cbab53cf598ef811fc47cf97f38be338635c98b80cdc6302b44051c2a5a7"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:56e2cbab53cf598ef811fc47cf97f38be338635c98b80cdc6302b44051c2a5a7"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:56e2cbab53cf598ef811fc47cf97f38be338635c98b80cdc6302b44051c2a5a7"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:5cceee8f848e8b763b7401eba9a17f4b81896abc7e77a67474d073a35e551e92"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:5cceee8f848e8b763b7401eba9a17f4b81896abc7e77a67474d073a35e551e92"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 7,
+      "responseHash": "sha256:5cceee8f848e8b763b7401eba9a17f4b81896abc7e77a67474d073a35e551e92"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:5cceee8f848e8b763b7401eba9a17f4b81896abc7e77a67474d073a35e551e92"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:5cceee8f848e8b763b7401eba9a17f4b81896abc7e77a67474d073a35e551e92"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:f152450af0993e1acfb44cb580081e77f7d21c81eac5296cb01c1e25c805738c",
+      "httpStatus": 200,
+      "elapsedMs": 10,
+      "responseHash": "sha256:2959bddd22d1bfa4ff1cef03f96dd9f33d4ecce3f2fe95c6fe6c8438c11a7059"
+    }
+  ],
+  "observations": [
+    {
+      "httpStatus": 200,
+      "sourceStatus": "UNRESOLVED",
+      "businessStatus": "UNRESOLVED",
+      "findingCount": 0,
+      "gapCount": 1,
+      "choiceCount": 0,
+      "resultHash": "sha256:5f881cb98b7ef17c10f6f95e638cbd84d63466c47ae46be36f0f5542191d58ef",
+      "projectionHash": "sha256:5269ae2e97c26b2fd6e7253d3af6c0e75a22ccc0f3f5ed4851b54d757cbdd97a",
+      "wireHash": "sha256:9f6a44ea86031a9613d40445729d6da837765baea793201d4639f3cab169fa0f",
+      "groundingIdHash": "sha256:9592960eafcc5f12a473ceea61f444e26cb0decc02122081f490b979e557a957",
+      "revisionIdHash": "sha256:bad6fa8a31389a8c1186464be15f3839dbccb091194f71d3f2b16732ad5f087d",
+      "assertions": [
+        "source-result-identity",
+        "finding-gap-fidelity",
+        "map-timeline-fidelity",
+        "headless-hydration",
+        "text-summary-fidelity",
+        "truthful-activity",
+        "no-tool-or-device-authorization"
+      ]
+    },
+    {
+      "httpStatus": 200,
+      "sourceStatus": "UNRESOLVED",
+      "businessStatus": "UNRESOLVED",
+      "findingCount": 0,
+      "gapCount": 1,
+      "choiceCount": 0,
+      "resultHash": "sha256:5f881cb98b7ef17c10f6f95e638cbd84d63466c47ae46be36f0f5542191d58ef",
+      "projectionHash": "sha256:5269ae2e97c26b2fd6e7253d3af6c0e75a22ccc0f3f5ed4851b54d757cbdd97a",
+      "wireHash": "sha256:a748adb017c761d8550ac325c27084bb258e20a97460cfaed72d24d30a9b769a",
+      "groundingIdHash": "sha256:9592960eafcc5f12a473ceea61f444e26cb0decc02122081f490b979e557a957",
+      "revisionIdHash": "sha256:bad6fa8a31389a8c1186464be15f3839dbccb091194f71d3f2b16732ad5f087d",
+      "assertions": [
+        "source-result-identity",
+        "finding-gap-fidelity",
+        "map-timeline-fidelity",
+        "headless-hydration",
+        "text-summary-fidelity",
+        "truthful-activity",
+        "no-tool-or-device-authorization"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "R01",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "NO_POSITIVE_FINDING_YET",
+      "observation": 0
+    },
+    {
+      "id": "R02",
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "NO_UNEXPIRED_PUBLIC_CHOICE_IN_THIS_AUTHORIZED_QUERY",
+      "choiceCount": 0,
+      "scope": "This request only; not a claim that WSGS selection is globally unavailable."
+    }
+  ],
+  "status": "INCOMPLETE",
+  "nonClaims": [
+    "DEVICE_EXECUTION",
+    "PRODUCTION_READINESS",
+    "UPSTREAM_DATABASE_ACCESS",
+    "PROCESS_CRASH_RECOVERY"
+  ],
+  "stage": "FINISHED",
+  "frozenFileCount": 115,
+  "frozenManifestHash": "sha256:45f027673834f3d9e654a889eea25eaf81522f594af8dddf6939b91a0dd4c41a",
+  "preflight": {
+    "httpStatus": 200,
+    "exactNegotiation": true,
+    "requiredCapabilitiesReady": true,
+    "capabilities": [
+      {
+        "capability": "HISTORICAL_TRACE",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "ROAD_ASSOCIATION",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "TEMPORAL_EVENT",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "CROSS",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "METRIC_RANKING",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      },
+      {
+        "capability": "ACTION_TARGET_CANDIDATE",
+        "available": true,
+        "reasonCodes": [
+          "AVAILABLE"
+        ]
+      }
+    ]
+  },
+  "database": {
+    "isolated": true,
+    "image": "postgres:17.10-alpine3.23",
+    "migrations": "PASS"
+  },
+  "localAuthenticationHttpStatus": 200,
+  "aguiHttpStatuses": [
+    200,
+    200
+  ],
+  "lastStream": {
+    "wireHash": "sha256:a748adb017c761d8550ac325c27084bb258e20a97460cfaed72d24d30a9b769a",
+    "eventTypes": [
+      "RUN_STARTED",
+      "STEP_STARTED",
+      "STATE_SNAPSHOT",
+      "ACTIVITY_SNAPSHOT",
+      "STEP_FINISHED",
+      "TEXT_MESSAGE_START",
+      "TEXT_MESSAGE_CONTENT",
+      "TEXT_MESSAGE_END",
+      "RUN_FINISHED"
+    ],
+    "runErrorCodes": []
+  },
+  "recovery": {
+    "status": "PASS",
+    "kind": "repository-composition-reopen",
+    "sameRevision": true,
+    "sameGrounding": true,
+    "additionalUpstreamRequests": 0
+  },
+  "cleanup": "PASS",
+  "businessSubmissions": 1,
+  "exitCode": 2,
+  "updatedAt": "2026-09-16T15:51:19.957Z"
+}

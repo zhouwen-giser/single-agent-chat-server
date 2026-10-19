@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "sacs-functional-gate/1.0",
+  "mode": "integration",
+  "sourceSha": "fa5e26ac664d43564cc3d612edfb9d0ed90190fd",
+  "sourceManifestSha256": "sha256:2147868cc101568e0758bd13df44dbc43a4b6126ef5b33d47313858e029ffac4",
+  "status": "REAL_WSGS_PENDING",
+  "checks": [
+    {
+      "id": "real-input-preflight",
+      "exitCode": 2
+    }
+  ],
+  "requiredRows": [
+    "FC-23",
+    "FC-24",
+    "FC-25",
+    "FC-26",
+    "FC-27",
+    "FC-28",
+    "FC-29",
+    "FC-30",
+    "FC-31"
+  ],
+  "pending": [
+    {
+      "id": "FC-23",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-24",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-25",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-26",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-27",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-28",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-29",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-30",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "FC-31",
+      "status": "BLOCKED_EXTERNAL"
+    }
+  ]
+}

@@ -32,6 +32,53 @@ Only the chat server is published, and only on loopback by default. PostgreSQL
 is isolated on the internal backend network. Migrations and LangGraph
 checkpoint setup run before the server starts listening.
 
+## Enable Grounding Job analysis
+
+Both root Compose and the dedicated `deployment/compose.yaml` can pass the
+normal Grounding settings. Root Compose forwards the WSGS and
+`SACS_WSGS_ANALYSIS_*` settings explicitly; the dedicated package loads its
+private runtime environment file.
+
+```dotenv
+SACS_WSGS_ANALYSIS_ENABLED=true
+SACS_WSGS_ANALYSIS_TRANSPORT=GROUNDING_JOB
+WSGS_BASE_URL=http://wsgs-on-your-trusted-network:8080
+WSGS_BEARER_TOKEN=
+WSGS_OPERATION_TIMEOUT_MS=120000
+SACS_WSGS_ANALYSIS_CONTRACT_VERSION=sacs-wsgs-grounding/1.2
+SACS_WSGS_ANALYSIS_RESULT_PROFILE=wsgs-world-analysis-findings/1.0
+SACS_WSGS_ANALYSIS_READINESS_TIMEOUT_MS=1500
+SACS_WSGS_ANALYSIS_READINESS_CACHE_MS=10000
+```
+
+Replace the endpoint with your authorized northbound service and supply its
+transport token if required. An empty endpoint in the disabled environment
+template resolves to the legacy loopback placeholder; it does not provide a
+usable WSGS. Keep analysis disabled until its endpoint is configured. Native
+Analysis remains separately unavailable and is not needed for Grounding Job.
+
+`GET /health` reports process liveness. `GET /ready` checks PostgreSQL, the
+configured conversation model and enabled Grounding capability readiness,
+returning `checks.wsgsGrounding` as `disabled`, `ready` or `unavailable`. An
+unavailable enabled Source returns HTTP 503 while liveness remains HTTP 200.
+The WSGS probe only GETs public capabilities and shares a cached check among
+concurrent probes. Its timeout defaults to 1500 ms and accepts an explicit
+100–120000 ms budget. The local stack uses 120000 ms because WSGS capabilities
+await a real model probe when the upstream model-readiness cache expires;
+a cold response exceeded 45 seconds. Optional advanced capability absence does
+not fail basic readiness; its actual availability remains visible through the
+authenticated analysis-capabilities endpoint.
+
+The deployment preflight uses the same isolated WSGS adapter, transport
+authentication and configured contract. It skips the WSGS probe when analysis
+is disabled, and still verifies the SDAR Agent Card without submitting a Task.
+
+For an isolated development check with synthetic endpoints and an immutable
+cached PostgreSQL test image, run `node scripts/v06-functional-compose.mjs`.
+It builds its own candidate image, verifies disabled/enabled/unavailable/drift
+and recovered states, and removes only its uniquely named Compose resources.
+It never uses a developer `.env` or deployed business endpoints.
+
 ## Connect external pip Open WebUI
 
 The installed host Open WebUI should use `http://127.0.0.1:3000/v1`. A

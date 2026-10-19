@@ -1,0 +1,9 @@
+{
+  "status": "FAILED",
+  "exitCode": 1,
+  "elapsedTestMs": 67542,
+  "observedFailure": "Recorded loopback PostgreSQL port was unavailable after restart; database-drop cleanup also failed.",
+  "fixtureCorrection": "Bind a fixed private loopback host port; persist failure evidence even when database drop fails.",
+  "containerCleanup": "PASS",
+  "coverage": "Recovery assertions did not complete; no PASS claimed."
+}

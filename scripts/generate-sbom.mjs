@@ -18,7 +18,11 @@ if (configuredOutput) {
 const outputDirectory = dirname(outputPath);
 const outputName = basename(outputPath);
 mkdirSync(outputDirectory, { recursive: true });
-const image = process.env.CHAT_SERVER_IMAGE ?? "single-agent-chat-server:0.5.0";
+const packageVersion = JSON.parse(
+  readFileSync(join(root, "package.json"), "utf8"),
+).version;
+const image =
+  process.env.CHAT_SERVER_IMAGE ?? `single-agent-chat-server:${packageVersion}`;
 const result = spawnSync(
   "docker",
   [
@@ -48,7 +52,7 @@ const sbom = JSON.parse(bytes.toString("utf8"));
 assert.equal(sbom.bomFormat, "CycloneDX");
 assert.equal(sbom.specVersion, "1.7");
 assert.equal(sbom.metadata?.component?.name, "single-agent-chat-server");
-assert.equal(sbom.metadata?.component?.version, "0.5.0");
+assert.equal(sbom.metadata?.component?.version, packageVersion);
 assert.ok(
   sbom.components?.some(
     (component) =>

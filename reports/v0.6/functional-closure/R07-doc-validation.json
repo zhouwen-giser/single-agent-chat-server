@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "sacs-functional-doc-closure-validation/1.0",
+  "testedCodeCandidate": "e4a26ec3d268b5cc055a9a33b4393c3fecac0f86",
+  "sourceManifestSha256": "sha256:61905dd3158c56256e495fa3a45f3a141caf256434f0518ace5a88232b5892e9",
+  "scope": "Documentation, evidence and ledger only; runnable source unchanged",
+  "status": "PASS",
+  "checks": [
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "evidence": "Console completion recorded; raw transcript not invented"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/verify-v06-functional.mjs status",
+      "exitCode": 0,
+      "status": "PARTIAL",
+      "pendingCases": 14
+    },
+    {
+      "command": "Python matrix/relative-links/current CI raw report and 15 log hash assertions",
+      "exitCode": 0,
+      "developmentRowsPass": 24,
+      "blockedExternal": 14,
+      "localLinksPass": true,
+      "ciEvidenceHashesPass": true
+    }
+  ],
+  "overallFunctionalClosure": false,
+  "releaseQualified": false
+}

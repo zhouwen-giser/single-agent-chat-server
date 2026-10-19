@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "sacs-agui-grounding-ledger/1.0",
+  "requirements": "config/v0.6/SACS_AGUI_V03_GROUNDING_CODEX_GOAL/acceptance/acceptance-matrix.json",
+  "cases": [
+    {
+      "id": "G01",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: G01 G11 G12 normal result fidelity"
+      ]
+    },
+    {
+      "id": "G02",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: G02 G12 PARTIAL Finding and gap preservation"
+      ]
+    },
+    {
+      "id": "G03",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: G03 source gap HTTP and headless projection",
+        "tests/v06-frozen-view.unit.test.ts: AC-013 no gap lines; AC-014 sparse preview"
+      ]
+    },
+    {
+      "id": "G04",
+      "status": "PASS",
+      "sourceSha": "445a1116e6b342031659c0abc0b2bc1d213dec4d",
+      "evidence": [
+        "receipts/S04-86e4a0c7-6233-44e0-8287-c2e52c47b3e8.json",
+        "tests/v06-frozen-entry.integration.test.ts: G04 inspect -> explicit confirmation -> Control -> new Revision/Grounding -> authoritative Snapshot"
+      ]
+    },
+    {
+      "id": "G05",
+      "status": "PASS",
+      "sourceSha": "445a1116e6b342031659c0abc0b2bc1d213dec4d",
+      "evidence": [
+        "receipts/S04-86e4a0c7-6233-44e0-8287-c2e52c47b3e8.json",
+        "tests/v06-frozen-entry.integration.test.ts: G05 and AC-025",
+        "tests/v06-frozen-client.unit.test.ts: AC-025 AC-036 expiry and requery"
+      ]
+    },
+    {
+      "id": "G06",
+      "status": "PASS",
+      "sourceSha": "43b0785fca7264dc7b8be1c2e6d2a2fa5cd9cf05",
+      "evidence": [
+        "receipts/S05-71ed2f7f-a951-4f3c-a38f-663d18f67351.json",
+        "tests/v06-frozen-entry.integration.test.ts: G06 CONTINUE/REPLACE and S05 malformed scope",
+        "tests/v06-frozen-map-query.unit.test.ts"
+      ]
+    },
+    {
+      "id": "G07",
+      "status": "PASS",
+      "sourceSha": "82e46be97e8090862f3320ed706165ffdbe75d61",
+      "evidence": [
+        "receipts/S03-148a6909-1324-4b39-8dff-082ea7aca7e9.json",
+        "tests/v06-frozen-local-map.unit.test.ts: local action matrix and snapshot visibility tests"
+      ]
+    },
+    {
+      "id": "G08",
+      "status": "PASS",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "evidence": [
+        "receipts/S06-f7350b6d-a42e-4875-b440-05c0ea6c9a6c.json",
+        "tests/v06-frozen-recovery.unit.test.ts: stale Revision, State and Activity rejection",
+        "tests/v06-frozen-entry.integration.test.ts: G04 stale selection rejection"
+      ]
+    },
+    {
+      "id": "G09",
+      "status": "PASS",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "evidence": [
+        "receipts/S06-f7350b6d-a42e-4875-b440-05c0ea6c9a6c.json",
+        "tests/v06-frozen-entry.integration.test.ts: G09 nonterminal disconnect and composition reconnect",
+        "tests/v06-frozen-recovery.unit.test.ts: G09 stale transport generation"
+      ]
+    },
+    {
+      "id": "G10",
+      "status": "PASS",
+      "sourceSha": "1c627ee634b843beab5140d4c719b317a81e2331",
+      "evidence": [
+        "receipts/S06-f7350b6d-a42e-4875-b440-05c0ea6c9a6c.json",
+        "tests/v06-grounding-lifecycle.postgres.int.test.ts: cancellation uncertainty then authoritative CANCELLED",
+        "tests/v06-frozen-recovery.unit.test.ts: G10 pending cancellation and terminal guard"
+      ]
+    },
+    {
+      "id": "G11",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: G01 G11 G12 historical action safety and AC-038 execution interception"
+      ]
+    },
+    {
+      "id": "G12",
+      "status": "PASS",
+      "sourceSha": "6ec97bd7ffc6a49cb6e61a5a842fbd65cbc9f6ba",
+      "evidence": [
+        "receipts/S07-459f81d5-5654-49f5-baf8-9d2f40227699.json",
+        "tests/v06-frozen-entry.integration.test.ts: normal and PARTIAL paths have no tool events or fabricated phases/progress"
+      ]
+    },
+    {
+      "id": "R01",
+      "status": "BLOCKED_EXTERNAL",
+      "sourceSha": "e6b76bbb942d54fe8ad6a6dbc37485903ec67475",
+      "reason": "Real lifecycle/presentation passed; no positive Finding from the authorized query.",
+      "evidence": [
+        "real/fb09aedd-9b2a-4b7e-aea4-c677174122c6/EVIDENCE.json",
+        "REAL_OBSERVATION.md"
+      ]
+    },
+    {
+      "id": "R02",
+      "status": "BLOCKED_EXTERNAL",
+      "sourceSha": "e6b76bbb942d54fe8ad6a6dbc37485903ec67475",
+      "reason": "The authorized query returned zero Choices; this does not prove global unavailability.",
+      "evidence": [
+        "real/fb09aedd-9b2a-4b7e-aea4-c677174122c6/EVIDENCE.json",
+        "REAL_OBSERVATION.md"
+      ]
+    }
+  ]
+}

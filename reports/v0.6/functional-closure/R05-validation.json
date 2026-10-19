@@ -1,0 +1,155 @@
+{
+  "phase": "R05",
+  "sourceParentSha": "da92cee8e868dcd6448766eeb0ed4e27b105b471",
+  "testedBusinessSourceManifestSha256": "sha256:69755f1634ee72282fb6f8641a530c027e0e61654ea263e96d39197ab27799f3",
+  "status": "PASS",
+  "checks": [
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "test:v06:process"
+      ],
+      "exitCode": 0,
+      "evidence": "reports/v0.6/functional-closure/R05-process/attempt-5/EVIDENCE.json",
+      "evidenceSha256": "sha256:bb04aaadeef134d1ca039e5a92dbaad042ae8f2a4e264fa7aacf6ad19d71b4de",
+      "testElapsedMs": 224348,
+      "batchTests": 1,
+      "faultCases": 8,
+      "consoleCapture": "Tool console; assertions and PID/DB timing are preserved in the evidence file.",
+      "capturedEvidenceSha256": "sha256:bb04aaadeef134d1ca039e5a92dbaad042ae8f2a4e264fa7aacf6ad19d71b4de"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v06-process-tests.mjs",
+        "--checkpoint"
+      ],
+      "exitCode": 0,
+      "passedTests": 1,
+      "testElapsedMs": 2645,
+      "assertion": "Exact saved checkpoint channels/id retained after actual private PostgreSQL restart."
+    },
+    {
+      "command": [
+        "node",
+        "scripts/v05-postgres-test-harness.mjs",
+        "tests/persistence.postgres.int.test.ts",
+        "tests/analysis-development-persistence.postgres.int.test.ts",
+        "tests/v06-grounding-lifecycle.postgres.int.test.ts",
+        "tests/v06-analysis-browser.postgres.int.test.ts"
+      ],
+      "exitCode": 0,
+      "passedTests": 32,
+      "totalTests": 32,
+      "testElapsedMs": 79782,
+      "consoleCapture": "Tool console; four suites passed against an ephemeral private PostgreSQL."
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 15127,
+      "log": "reports/v0.6/functional-closure/R05-types.txt",
+      "outputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+      "capturedOutputSha256": "sha256:38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/verify-architecture.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 153,
+      "log": "reports/v0.6/functional-closure/R05-architecture.txt",
+      "outputSha256": "sha256:40642c679bc4c1e77cc9885e1beee9d6b9150e97ca859528f67c5a89a23faa29",
+      "capturedOutputSha256": "sha256:40642c679bc4c1e77cc9885e1beee9d6b9150e97ca859528f67c5a89a23faa29"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 15931,
+      "log": "reports/v0.6/functional-closure/R05-build.txt",
+      "outputSha256": "sha256:6954cb1a8fac1d77c33eec76681d88f349574b6e75246114a2ab34342112333d",
+      "capturedOutputSha256": "sha256:6954cb1a8fac1d77c33eec76681d88f349574b6e75246114a2ab34342112333d"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "eslint",
+        "tests/harness/v06-source-process.ts",
+        "tests/v06-source-process.postgres.int.test.ts",
+        "tests/v06-checkpoint-recovery.postgres.int.test.ts",
+        "scripts/v06-process-tests.mjs",
+        "packages/persistence/src/checkpoint.ts",
+        "packages/persistence/src/runtime.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 6079,
+      "log": "reports/v0.6/functional-closure/R05-lint.txt",
+      "outputSha256": "sha256:a398bae756d204be911a4d2fa5a02a20e01125129e5f47f344f2a3258b6be54d",
+      "capturedOutputSha256": "sha256:e98a25905484eab440640ef5158d1786699e16b0a20086bae674ddbccadf4c14"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        ".eslintrc.cjs",
+        "PROJECT_STATUS.md",
+        "README.md",
+        "config/v0.6/functional-closure/acceptance-matrix.json",
+        "docs/operations/observability-security.md",
+        "execplans/EP-06-sacs-v0.6-functional-closure.md",
+        "package.json",
+        "packages/persistence/src/checkpoint.ts",
+        "packages/persistence/src/runtime.ts",
+        "reports/v0.6/functional-closure/R05-process/attempt-1/EVIDENCE.json",
+        "reports/v0.6/functional-closure/R05-process/attempt-2/EVIDENCE.json",
+        "reports/v0.6/functional-closure/R05-process/attempt-3/FAILURE.json",
+        "reports/v0.6/functional-closure/R05-process/attempt-4/EVIDENCE.json",
+        "reports/v0.6/functional-closure/R05-process/attempt-5/EVIDENCE.json",
+        "reports/v0.6/functional-closure/R05-validation.json",
+        "reports/v0.6/functional-closure/R05.md",
+        "scripts/v06-process-tests.mjs",
+        "tests/harness/v06-source-process.ts",
+        "tests/v06-checkpoint-recovery.postgres.int.test.ts",
+        "tests/v06-source-process.postgres.int.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1886,
+      "log": "reports/v0.6/functional-closure/R05-format.txt",
+      "outputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "capturedOutputSha256": "sha256:17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 7,
+      "log": "reports/v0.6/functional-closure/R05-diff.txt",
+      "outputSha256": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "capturedOutputSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "earlierAttempts": [
+    "reports/v0.6/functional-closure/R05-process/attempt-1/EVIDENCE.json",
+    "reports/v0.6/functional-closure/R05-process/attempt-2/EVIDENCE.json",
+    "reports/v0.6/functional-closure/R05-process/attempt-3/FAILURE.json",
+    "reports/v0.6/functional-closure/R05-process/attempt-4/EVIDENCE.json"
+  ]
+}

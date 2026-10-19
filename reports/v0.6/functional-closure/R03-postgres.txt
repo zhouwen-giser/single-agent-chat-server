@@ -1,0 +1,15 @@
+{"event":"v05.postgres.ready","source":"ephemeral-container","image":"postgres:17-alpine"}
+(node:1713793) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-source-persistence.postgres.int.test.ts
+  v0.6 source identity empty and v0.5 upgrade PostgreSQL
+    ✓ preserves existing Native fields while marking only existing rows read-only (65 ms)
+    ✓ lists only the signed identity's bounded AG-UI directory (49 ms)
+    ✓ round trips a Grounding identity with NULL Native columns and scope protection (34 ms)
+    ✓ rejects new LEGACY_PLAN through both repository and SQL (59 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        2.965 s, estimated 3 s
+Ran all test suites matching /tests\/v06-source-persistence.postgres.int.test.ts/i.

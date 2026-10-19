@@ -1,0 +1,235 @@
+{
+  "capturedAt": "2026-10-16T01:38:30.961809+00:00",
+  "endpoint": "http://127.0.0.1:18083",
+  "apis": {
+    "/health": {
+      "status": 200,
+      "seconds": 0.016,
+      "body": {
+        "status": "ok"
+      }
+    },
+    "/ready": {
+      "status": 200,
+      "seconds": 3.592,
+      "body": {
+        "status": "ready",
+        "checks": {
+          "configuration": "ok",
+          "wsgsGrounding": "ready",
+          "postgres": "ok",
+          "conversationModel": "ok"
+        }
+      }
+    },
+    "/v1/models": {
+      "status": 200,
+      "seconds": 0.015,
+      "body": {
+        "object": "list",
+        "data": [
+          {
+            "id": "sdar-single-agent",
+            "object": "model",
+            "created": 1792114710,
+            "owned_by": "single-agent-chat-server"
+          }
+        ]
+      }
+    },
+    "/ag-ui/capabilities": {
+      "status": 200,
+      "seconds": 0.009,
+      "body": {
+        "identity": {
+          "name": "single-agent-chat-server",
+          "type": "langgraph",
+          "description": "Single-SDAR interaction gateway",
+          "version": "0.2.0",
+          "provider": "single-agent-chat-server"
+        },
+        "transport": {
+          "streaming": true,
+          "websocket": false,
+          "httpBinary": false,
+          "pushNotifications": false,
+          "resumable": false
+        },
+        "tools": {
+          "supported": false,
+          "items": [],
+          "parallelCalls": false,
+          "clientProvided": false
+        },
+        "output": {
+          "structuredOutput": true,
+          "supportedMimeTypes": ["text/plain", "application/json"]
+        },
+        "state": {
+          "snapshots": true,
+          "deltas": true,
+          "memory": false,
+          "persistentState": true
+        },
+        "multiAgent": {
+          "supported": false,
+          "delegation": false,
+          "handoffs": false,
+          "subAgents": []
+        },
+        "reasoning": {
+          "supported": false,
+          "streaming": false,
+          "encrypted": false
+        },
+        "humanInTheLoop": {
+          "supported": true,
+          "approvals": true,
+          "interventions": true,
+          "feedback": false,
+          "interrupts": true,
+          "approveWithEdits": false
+        },
+        "custom": {
+          "sacsProfile": "sacs-ag-ui-v0.2",
+          "rawEvents": false,
+          "inferredToolCalls": false,
+          "runIsTask": false,
+          "taskResubscription": false,
+          "eventCursor": false
+        }
+      }
+    },
+    "/api/v1/analysis-capabilities": {
+      "status": 200,
+      "seconds": 5.045,
+      "body": {
+        "enabled": true,
+        "transport": "GROUNDING_JOB",
+        "groundingContractReady": true,
+        "resultProfileReady": true,
+        "requiredReady": true,
+        "optionalAvailable": [
+          "HISTORICAL_TRACE",
+          "ROAD_ASSOCIATION",
+          "TEMPORAL_EVENT",
+          "CROSS",
+          "METRIC_RANKING",
+          "ACTION_TARGET_CANDIDATE"
+        ],
+        "optionalUnavailable": [],
+        "worldAnalysis": {
+          "supportedFindingKinds": [
+            "HISTORICAL_TRACE",
+            "ROAD_ASSOCIATION",
+            "TEMPORAL_EVENT",
+            "METRIC_RANKING",
+            "ACTION_TARGET_CANDIDATE"
+          ],
+          "supportedChoiceKinds": [
+            "REFERENCE_SELECTION",
+            "TASK_SELECTION",
+            "METRIC_SERIES_SELECTION",
+            "RANKED_LOCATION_SELECTION",
+            "EVENT_SELECTION"
+          ],
+          "structuredSelection": true,
+          "supportedActionSources": ["HISTORICAL_METRIC_CANDIDATE"],
+          "capabilities": [
+            {
+              "capability": "HISTORICAL_TRACE",
+              "supported": true,
+              "available": true,
+              "reasonCodes": ["AVAILABLE"]
+            },
+            {
+              "capability": "ROAD_ASSOCIATION",
+              "supported": true,
+              "available": true,
+              "reasonCodes": ["AVAILABLE"]
+            },
+            {
+              "capability": "TEMPORAL_EVENT",
+              "supported": true,
+              "available": true,
+              "reasonCodes": ["AVAILABLE"]
+            },
+            {
+              "capability": "CROSS",
+              "supported": true,
+              "available": true,
+              "reasonCodes": ["AVAILABLE"]
+            },
+            {
+              "capability": "METRIC_RANKING",
+              "supported": true,
+              "available": true,
+              "reasonCodes": ["AVAILABLE"]
+            },
+            {
+              "capability": "ACTION_TARGET_CANDIDATE",
+              "supported": true,
+              "available": true,
+              "reasonCodes": ["AVAILABLE"]
+            }
+          ],
+          "checkedAt": "2026-10-16T01:38:36.002Z",
+          "validUntil": "2026-10-16T01:38:39.989Z"
+        },
+        "nativeReady": false,
+        "nativeReasonCode": "SACS_WSGS_NATIVE_ANALYSIS_CONTROL_DEFERRED",
+        "lastSuccessfulCapabilityCheck": "2026-10-16T01:38:36.010Z"
+      }
+    }
+  },
+  "taskBindingsBefore": 0,
+  "migrations": {
+    "0001_initial_persistence.sql": "7345a7b5778b6f6c2d888263b84849a78b8f4facd68bca5eca8fba3d5a95a975",
+    "0002_events_and_recovery.sql": "179af2eec27f5ef27b66e6b57ce01742e986790682c7690962a2226d0414439d",
+    "0003_submission_lease.sql": "54d793c4c64c0c8b17d9a42e4444c68aad55d01ad89ce89548c33b2264064485",
+    "0004_interaction_gateway.sql": "0f1f6a66b0d1910acf612f0eceaaed6f7ba061b94499c788c067b570989b45ca",
+    "0005_interrupt_resume.sql": "debdedf869186e39aa73c096b88dab49f60708563ff539f39556aa6065ac8ac7",
+    "0006_durable_agui_runs.sql": "fba6c71d73bee278be5a6ed6dc7bcc651626d84208078b9fe3f28dfbee13b77a",
+    "0007_conversation_history.sql": "dcb052c107810b4b9ec8d6d03e6ef84a3d0670e730a36f1b53f45a8e4bf4d91f",
+    "0008_multi_task_directory.sql": "459e14c7b1bbe62911a7d7fd8fb662722285f01e78fad581bd0909317d5274d9",
+    "0009_request_result_union.sql": "2b2eec946e2be640ad701158cd6b77db0a184c81ed9d75ee8d34bf0ef950bda6",
+    "0010_grounding_lifecycle.sql": "6ecc7c09c6abfe34db8bcefb96d83636dc6909fc19c4b82c0787e65c5553b291",
+    "0011_conversation_world_focus.sql": "2a59afcb2cc80e1775ccad1bf2978491e7b25a2bdeaf5de96ccc3dc6204cb1f7",
+    "0012_authority_fusion.sql": "c8adc925dd47f28fce5cc1d284aaa92f0e35f3fe74f24018149d2f4caa8d139d",
+    "0013_world_explanation.sql": "c0a09e9907c9632cdf9781a84119efae5646b3c1fe47c9b658fe6c59db8a843a",
+    "0014_structured_world_selection.sql": "d713a881ac3c4136d3c46958b0719efc2927d1c8d1241f08d49237762a0ec90e",
+    "0015_interactive_analysis.sql": "ddeb49f042d1be8cbc8c0da71e7a7dd220ed6a49f38ac1da9f7e43e9f9847039",
+    "0016_analysis_development_control.sql": "80d3ab3f6231920371d331788356fefa4800382208dbc9114a74ae743793eadc",
+    "0017_analysis_source_identity.sql": "809793cc8823d0593c394efc8c95c16d756b0a89ff5dfa12c0e964fad4067c35",
+    "0018_grounding_source_intent.sql": "b299d644228ccaef0002cb375c00cf03e21d7473397ccd78e165151031ab7765",
+    "0019_grounding_source_completion_lease.sql": "43a4c1b169c563542c4cb628f1e37a57bea86e5ed3dddfef56092ee098ab3054",
+    "0020_grounding_source_revision_control.sql": "14ea7b289dbf7d5852f0de7804b2515de9fe1504e2bf2511956442540334e332"
+  },
+  "utilityRequest": {
+    "status": 200,
+    "seconds": 0.119,
+    "chatId": "deployment-4bb3f2ca87bd416eae486bf5a302d511",
+    "response": "Single SDAR chat",
+    "responseSha256": "aa1402ab6cc4187ece906f1ea3f80cc947215dd7c463d5934734b10a9b07f0d6"
+  },
+  "modelConversation": {
+    "status": 200,
+    "seconds": 13.687,
+    "chatId": "deployment-349e0c468a624321ade5913b8c252d72",
+    "response": "你好，我是SACS流程中的通用对话助手，很高兴能陪你进行轻松自然的日常交流。",
+    "responseSha256": "c8d04717fe9557d83b0e5151442cc88aedb8dc67c25003e30d0ea248f236883a"
+  },
+  "taskBindingsAfter": 0,
+  "persistedConversationMessages": 4,
+  "currentChatPersistedMessages": 2,
+  "sourceSha": "af36dd001e0db08354c38ef2ebe566ea25a3bdba",
+  "businessAcceptance": "NOT_RUN",
+  "status": "PASS",
+  "utilityStream": {
+    "status": 200,
+    "seconds": 0.081,
+    "contentType": "text/event-stream; charset=utf-8",
+    "done": true,
+    "content": "Single SDAR chat"
+  }
+}

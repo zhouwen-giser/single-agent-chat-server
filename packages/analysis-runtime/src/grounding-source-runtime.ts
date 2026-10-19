@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { groundingActivityForState } from "../../analysis-contract/src/grounding-activity.js";
 import {
   agUiSharedStateV03Schema,
   analysisProjectionSchema,
@@ -103,7 +104,14 @@ export class GroundingSourceAnalysisRuntime {
     scope: AnalysisScope,
   ): Promise<AnalysisProjection | undefined> {
     const projection = await this.options.analysis.getProjection(scope);
-    return projection ? analysisProjectionSchema.parse(projection) : undefined;
+    if (!projection) return undefined;
+    const parsed = analysisProjectionSchema.parse(projection);
+    const activity = groundingActivityForState(
+      agUiSharedStateV03Schema.parse(parsed.state),
+      parsed.activity,
+      parsed.activityRevision,
+    );
+    return { ...parsed, activity, activityHash: hashCanonicalJson(activity) };
   }
   async complete(input: {
     groundingExecutionId: string;

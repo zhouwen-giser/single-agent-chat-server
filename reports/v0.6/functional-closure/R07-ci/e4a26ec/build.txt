@@ -1,0 +1,2 @@
+Browser reference client built with isolated browser hash alias.
+$ tsc -p tsconfig.json && node scripts/copy-runtime-assets.mjs && node scripts/build-analysis-web.mjs

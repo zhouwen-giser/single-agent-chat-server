@@ -1,0 +1,625 @@
+{
+  "schemaVersion": "sacs-v06-real-integration/1.0",
+  "startedAt": "2026-09-09T06:14:06.467Z",
+  "sourceSha": "60fc8580ff835352f8dbd49e021969e6440e351a",
+  "sourceDiffHash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "entrypointHash": "sha256:67c90f1dc270a17d0b4f3b2e649b0d56104f2b500609771669b7a4b35f9c92ba",
+  "endpointOrigin": "http://17.26.1.20:18082",
+  "mode": "REAL",
+  "operationTimeoutMs": 120000,
+  "preflightTimeoutMs": 120000,
+  "preflightVersions": [
+    "1.2"
+  ],
+  "clientObservationTimeoutMs": 270000,
+  "readiness": [
+    {
+      "version": "1.2",
+      "httpStatus": 200,
+      "exactNegotiation": true,
+      "status": "PASS",
+      "body": {
+        "service": "world-semantic-grounding-service",
+        "version": "0.2.1",
+        "contractVersion": "sacs-wsgs-grounding/1.2",
+        "resultProfile": "wsgs-world-analysis-findings/1.0",
+        "supportedOperations": [
+          "GROUND_REFERENCES",
+          "COMPILE_WORLD_QUERY",
+          "EXECUTE_WORLD_QUERY",
+          "VALIDATE_REFERENCES"
+        ],
+        "supportedResultProfiles": [
+          "wsgs-world-analysis-findings/1.0",
+          "sacs-wsgs-geospatial-findings/1.0"
+        ],
+        "resultComponents": {
+          "worldAnalysisFindings": "REQUIRED",
+          "geospatialFindings": "OPTIONAL"
+        },
+        "worldAnalysis": {
+          "supportedFindingKinds": [
+            "HISTORICAL_TRACE",
+            "ROAD_ASSOCIATION",
+            "TEMPORAL_EVENT",
+            "METRIC_RANKING",
+            "ACTION_TARGET_CANDIDATE"
+          ],
+          "supportedChoiceKinds": [
+            "REFERENCE_SELECTION",
+            "TASK_SELECTION",
+            "METRIC_SERIES_SELECTION",
+            "RANKED_LOCATION_SELECTION",
+            "EVENT_SELECTION"
+          ],
+          "structuredSelection": true,
+          "supportedActionSources": [
+            "HISTORICAL_METRIC_CANDIDATE"
+          ],
+          "capabilities": [
+            {
+              "capability": "HISTORICAL_TRACE",
+              "supported": true,
+              "available": true,
+              "reasonCodes": [
+                "AVAILABLE"
+              ]
+            },
+            {
+              "capability": "ROAD_ASSOCIATION",
+              "supported": true,
+              "available": true,
+              "reasonCodes": [
+                "AVAILABLE"
+              ]
+            },
+            {
+              "capability": "TEMPORAL_EVENT",
+              "supported": true,
+              "available": true,
+              "reasonCodes": [
+                "AVAILABLE"
+              ]
+            },
+            {
+              "capability": "CROSS",
+              "supported": true,
+              "available": true,
+              "reasonCodes": [
+                "AVAILABLE"
+              ]
+            },
+            {
+              "capability": "METRIC_RANKING",
+              "supported": true,
+              "available": true,
+              "reasonCodes": [
+                "AVAILABLE"
+              ]
+            },
+            {
+              "capability": "ACTION_TARGET_CANDIDATE",
+              "supported": true,
+              "available": true,
+              "reasonCodes": [
+                "AVAILABLE"
+              ]
+            }
+          ],
+          "checkedAt": "2026-09-09T06:14:23.777Z",
+          "validUntil": "2026-09-09T06:14:28.243Z"
+        },
+        "limits": {
+          "maximumFindings": 32,
+          "maximumChoices": 32,
+          "maximumCandidatesPerChoice": 100,
+          "maximumEvents": 100,
+          "maximumRankedLocations": 100,
+          "maximumRoadVisits": 100,
+          "maximumPeriods": 100,
+          "maximumLinePositions": 256,
+          "maximumGaps": 64,
+          "maximumSourceIds": 32,
+          "maximumWarnings": 100,
+          "maximumIdLength": 256,
+          "maximumLabelLength": 512,
+          "maximumSelections": 8,
+          "maximumPublicResultBytes": 1048576,
+          "choiceTtlMs": 60000
+        },
+        "requiredCapabilitiesReady": true
+      }
+    }
+  ],
+  "exchanges": [
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:dfb8d7cb600c02156c9d36859dddbb520425070621354afdc7c14b7dfe228069",
+      "httpStatus": 200,
+      "elapsedMs": 16859,
+      "responseHash": "sha256:00ae466dee3e715048256e2c2e96fe3ee2fc08cfb25a9a47f8a8d10c5828959e",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:dfb8d7cb600c02156c9d36859dddbb520425070621354afdc7c14b7dfe228069",
+      "httpStatus": 200,
+      "elapsedMs": 3416,
+      "responseHash": "sha256:243849f8f1da7c716c0663e37be4b529343aab51d61560f1808546a3a8900549",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "ACCEPTED",
+      "requestDeadlineMs": 120000,
+      "method": "POST",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:60d6885288b306890cb544ef8f4f90f21d32b166f9976a85f32d38ed8f42f71b",
+      "httpStatus": 202,
+      "elapsedMs": 1640,
+      "responseHash": "sha256:d7e5e5c23e30a03dda0772668cbbd648d4bf6f43ac182019a4c9d3e76496163d",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:01536e995501dae465efbed48de9a4f1e0d7cdefffbea9fc2c8d794942b06271",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:01536e995501dae465efbed48de9a4f1e0d7cdefffbea9fc2c8d794942b06271",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:01536e995501dae465efbed48de9a4f1e0d7cdefffbea9fc2c8d794942b06271",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:01536e995501dae465efbed48de9a4f1e0d7cdefffbea9fc2c8d794942b06271",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:01536e995501dae465efbed48de9a4f1e0d7cdefffbea9fc2c8d794942b06271",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 10,
+      "responseHash": "sha256:5208f9dc513770be28da786cfd090f314f220dc1d0f76d31cc700a5004ae30e5",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 10,
+      "responseHash": "sha256:5208f9dc513770be28da786cfd090f314f220dc1d0f76d31cc700a5004ae30e5",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 7,
+      "responseHash": "sha256:5208f9dc513770be28da786cfd090f314f220dc1d0f76d31cc700a5004ae30e5",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:5208f9dc513770be28da786cfd090f314f220dc1d0f76d31cc700a5004ae30e5",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 13,
+      "responseHash": "sha256:5208f9dc513770be28da786cfd090f314f220dc1d0f76d31cc700a5004ae30e5",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:6d817845a27c319c4676921c7e9b042eccb5186be92e9edb5533adbcd75cf6eb",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:6d817845a27c319c4676921c7e9b042eccb5186be92e9edb5533adbcd75cf6eb",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 19,
+      "responseHash": "sha256:6d817845a27c319c4676921c7e9b042eccb5186be92e9edb5533adbcd75cf6eb",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:6d817845a27c319c4676921c7e9b042eccb5186be92e9edb5533adbcd75cf6eb",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 16,
+      "responseHash": "sha256:6d817845a27c319c4676921c7e9b042eccb5186be92e9edb5533adbcd75cf6eb",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 10,
+      "responseHash": "sha256:0ea5d38443486a309ada85834998d48e2060600bf691a09f1e297018e62b5316",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 10,
+      "responseHash": "sha256:0ea5d38443486a309ada85834998d48e2060600bf691a09f1e297018e62b5316",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:0ea5d38443486a309ada85834998d48e2060600bf691a09f1e297018e62b5316",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 14,
+      "responseHash": "sha256:0ea5d38443486a309ada85834998d48e2060600bf691a09f1e297018e62b5316",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 15,
+      "responseHash": "sha256:0ea5d38443486a309ada85834998d48e2060600bf691a09f1e297018e62b5316",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 12,
+      "responseHash": "sha256:f60c77a2ef35aa275e3dfa3cd1a51627d0f0c96f7d1c105b299c27e283c80013",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:f60c77a2ef35aa275e3dfa3cd1a51627d0f0c96f7d1c105b299c27e283c80013",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:f60c77a2ef35aa275e3dfa3cd1a51627d0f0c96f7d1c105b299c27e283c80013",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 7,
+      "responseHash": "sha256:f60c77a2ef35aa275e3dfa3cd1a51627d0f0c96f7d1c105b299c27e283c80013",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:f60c77a2ef35aa275e3dfa3cd1a51627d0f0c96f7d1c105b299c27e283c80013",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:96670400388555ff4461fbeccb9a8b5eab147376d4aff4bb117a4bd022c55e68",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:96670400388555ff4461fbeccb9a8b5eab147376d4aff4bb117a4bd022c55e68",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 12,
+      "responseHash": "sha256:96670400388555ff4461fbeccb9a8b5eab147376d4aff4bb117a4bd022c55e68",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:96670400388555ff4461fbeccb9a8b5eab147376d4aff4bb117a4bd022c55e68",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 8,
+      "responseHash": "sha256:96670400388555ff4461fbeccb9a8b5eab147376d4aff4bb117a4bd022c55e68",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 11,
+      "responseHash": "sha256:0a421e12d02f6e06042ca68ea805090ce9781cb9d21beaf4e6b22f4643b4e958",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:0a421e12d02f6e06042ca68ea805090ce9781cb9d21beaf4e6b22f4643b4e958",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "RUNNING",
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 9,
+      "responseHash": "sha256:0a421e12d02f6e06042ca68ea805090ce9781cb9d21beaf4e6b22f4643b4e958",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    },
+    {
+      "groundingIdHash": "sha256:3b16a208601d5125cd540645b7d29b2660e3c72c029586be19da5fed4b2a43f0",
+      "businessStatus": "PARTIAL",
+      "resultHash": "sha256:734d330fc98e8bd0aa7b539b700b1e709e7ecc6e846ca90f23c1fb265665eb8f",
+      "findingCount": 0,
+      "choiceCount": 0,
+      "referenceProductCount": 1,
+      "referenceProductHashes": [
+        "sha256:c38032e823627094c31db5c20050a2a05b892dfddde13b2107b070256806ed88"
+      ],
+      "unresolvedMentionCount": 0,
+      "gapKinds": [
+        "REFERENCE_AMBIGUOUS"
+      ],
+      "method": "GET",
+      "destination": "http://17.26.1.20:18082",
+      "pathHash": "sha256:bb74de9d46bcea519a7fb502d4066e41d00c01ad6d5d1a34c786ae11b09e4b3d",
+      "httpStatus": 200,
+      "elapsedMs": 13,
+      "responseHash": "sha256:d2a9798608875573f6ce6f349fbf5c0b5078ffa0589ef44c074d9490355da33a",
+      "contractVersion": "sacs-wsgs-grounding/1.2",
+      "resultProfile": "wsgs-world-analysis-findings/1.0"
+    }
+  ],
+  "cases": [
+    {
+      "id": "BASIC",
+      "status": "OBSERVED",
+      "httpStatus": 200,
+      "wireHash": "sha256:cd898f68dbebe5f2618dcfc6f3a5d9bf549551fa4fa2fc4695fff9a9d78329e6",
+      "eventTypes": [
+        "RUN_STARTED",
+        "STEP_STARTED",
+        "STATE_SNAPSHOT",
+        "ACTIVITY_SNAPSHOT",
+        "STEP_FINISHED",
+        "TEXT_MESSAGE_START",
+        "TEXT_MESSAGE_CONTENT",
+        "TEXT_MESSAGE_END",
+        "RUN_FINISHED"
+      ],
+      "projectionHash": "sha256:b5c10226c44e8f243770b0a66ee7f669190ebfd16d7ce1e74ee4901a61643f29",
+      "businessStatus": "PARTIAL",
+      "runErrors": [],
+      "note": "Transport/projection observation only; semantic acceptance requires source result and case-specific assertions."
+    }
+  ],
+  "status": "INCOMPLETE",
+  "nonClaims": [
+    "DEVICE_EXECUTION",
+    "PRODUCTION_RELEASE",
+    "MODEL_QUALITY"
+  ],
+  "frozenFileCount": 115,
+  "finishedAt": "2026-09-09T06:15:10.539Z",
+  "database": {
+    "image": "postgres:16.9-alpine",
+    "isolated": true,
+    "migrationStatus": "PASS"
+  },
+  "cleanup": "PASS"
+}

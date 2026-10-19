@@ -1,0 +1,46 @@
+{
+  "chatId": "91df994f-f037-497e-a65f-fbb3651694bf",
+  "url": "http://17.26.1.20:18084/c/91df994f-f037-497e-a65f-fbb3651694bf",
+  "responses": [
+    {
+      "path": "/api/chat/completions",
+      "status": 200,
+      "contentType": "application/json"
+    }
+  ],
+  "messages": [
+    {
+      "id": "c19ba242-a22b-40ff-9737-4ee990553754",
+      "parentId": null,
+      "role": "user",
+      "content": "你好，请用一句话简单介绍你自己，仅进行普通对话。"
+    },
+    {
+      "id": "fdc56c1f-6232-47fb-8c53-3ebd0f5a9657",
+      "parentId": "c19ba242-a22b-40ff-9737-4ee990553754",
+      "role": "assistant",
+      "content": "你好！我是专为SACS流程服务的通用对话层，随时准备陪你轻松聊天或解答日常问题。",
+      "done": true
+    }
+  ],
+  "reloadPreserved": true,
+  "sacsPersistence": {
+    "messageIdsMatchBrowser": true,
+    "messages": [
+      {
+        "externalChatId": "91df994f-f037-497e-a65f-fbb3651694bf",
+        "role": "user",
+        "externalMessageId": "c19ba242-a22b-40ff-9737-4ee990553754",
+        "content": "你好，请用一句话简单介绍你自己，仅进行普通对话。",
+        "taskId": null
+      },
+      {
+        "externalChatId": "91df994f-f037-497e-a65f-fbb3651694bf",
+        "role": "assistant",
+        "externalMessageId": "fdc56c1f-6232-47fb-8c53-3ebd0f5a9657",
+        "content": "你好！我是专为SACS流程服务的通用对话层，随时准备陪你轻松聊天或解答日常问题。",
+        "taskId": null
+      }
+    ]
+  }
+}

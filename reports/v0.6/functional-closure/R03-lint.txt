@@ -1,0 +1,32 @@
+
+/home/sz/code/single-agent-chat-server/apps/analysis-web/src/main.ts
+  41:45  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/apps/analysis-web/src/map.ts
+  84:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  85:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  86:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  87:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/apps/server/src/analysis-web/routes.ts
+  134:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  136:50  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  138:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/packages/persistence/src/analysis-development-repository.ts
+  1365:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/tests/helpers/browser-analysis.ts
+  133:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/tests/v06-analysis-browser.integration.test.ts
+  228:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  233:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  295:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  296:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  302:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/code/single-agent-chat-server/tests/v06-source-persistence.postgres.int.test.ts
+  20:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 16 problems (0 errors, 16 warnings)

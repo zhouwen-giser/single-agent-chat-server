@@ -1,0 +1,15 @@
+{"event":"process.postgres.ready","container":"sacs-r05-postgres-14693f18370afeb8","imageId":"sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24"}
+{"event":"faults.staged","count":8,"leaseMs":180000,"recoveryTickMs":30000}
+{"event":"process.postgres.cleanup","container":"sacs-r05-postgres-14693f18370afeb8","status":"PASS"}
+$ node scripts/v06-process-tests.mjs
+(node:581851) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/v06-source-process.postgres.int.test.ts (224.064 s)
+  actual consumer subprocess crash and database recovery
+    ✓ preserves all fault windows, cancellation, dual-worker fencing and late history with production lease/tick (223612 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        224.401 s, estimated 225 s
+Ran all test suites matching /tests\/v06-source-process.postgres.int.test.ts/i.

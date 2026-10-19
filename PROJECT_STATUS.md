@@ -1,5 +1,50 @@
 # Project status
 
+Current branch: `codex/sacs-v0.6-wsgs-full-functional-integration`.
+
+The Grounding presentation track has direct G01–G12 development evidence and
+the marker `SACS_AGUI_V03_GROUNDING_PRESENTATION_DEV_READY`. Its real positive
+result and selection cases R01/R02 remain `BLOCKED_EXTERNAL`; see the
+[current presentation report](reports/v0.6/agui-v03-grounding-presentation/FINAL_REPORT.md).
+
+The current
+[functional repair and acceptance plan](execplans/EP-06-sacs-v0.6-functional-closure.md)
+records three reproduced routing/deployment defects and the remaining browser,
+recovery and real-integration work. R00 delivered the plan; R01 repaired source-bound continuation and enforced
+provenance before mutable SDAR dispatch. Its six required rows PASS, with 677
+full frozen regressions, typecheck, architecture and build passing. R02 then connected default Compose settings and bounded WSGS readiness; its
+three rows PASS with 105 focused tests, 13 PostgreSQL tests and five container
+cases. R03 adds the authenticated browser reference client and public geometry,
+timeline, evidence and candidate presentation; its four rows PASS with 12
+browser/identity checks, 71 security/API regressions and four PostgreSQL tests.
+R04 completes explicit browser controls and bounded observer recovery; its four
+rows PASS with four Chromium/PostgreSQL scenarios and 79 impacted regressions.
+R05 fixes an actual checkpoint-pool crash on DB restart and passes eight
+subprocess fault cases, checkpoint channel restoration and 32 PostgreSQL
+regressions. Its five rows PASS with the actual 180-second lease / 30-second tick.
+R06 validates fresh authorized case material but has no current case file, so
+nine real rows and four conditional extension rows are `BLOCKED_EXTERNAL`, with
+zero real business submissions. R07 completes development qualification with
+actual development/integration/release entrypoints, a source-bound candidate
+image/SBOM and a [run guide](reports/v0.6/functional-closure/SOURCE_RUN.md).
+Candidate e4a26ec passed all three hosted jobs: quality, functional-v06 and
+container. Its downloaded fifteen-check evidence matches the current runnable
+source manifest, including every output hash. The generic integration command
+now prepares browser assets before its tests.
+
+Current decision: `SACS_V06_FUNCTIONAL_DEVELOPMENT_READY`. All 24 development
+rows PASS in the [new matrix](config/v0.6/functional-closure/acceptance-matrix.json).
+Nine real WSGS rows, FC-34 release and four conditional extension rows remain
+BLOCKED_EXTERNAL. Advanced real runner extensions/execution await current
+authorized material; Native/SDAR adapters await authoritative public contracts.
+Overall main-track functional and release completion remain pending. See the
+[current repair report](reports/v0.6/functional-closure/FINAL_REPORT.md).
+
+The v0.5 and earlier decisions below retain their historical scope; they are
+not the current v0.6 production-composition decision.
+
+## Historical v0.5 development decision
+
 Status: `SACS_V05_FEATURE_COMPLETE`.
 
 The active v0.5 decision is split into independent tracks on
